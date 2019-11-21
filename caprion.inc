@@ -204,7 +204,7 @@ ae_ais_test <- function()
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
 }
 
-ae_caprion <- function()
+ae_caprion <- function(hidden.layers=c(987,197,987))
 {
 # autoencoder in keras
   suppressPackageStartupMessages(library(keras))
@@ -225,9 +225,9 @@ ae_caprion <- function()
 # set model
   model <- keras_model_sequential()
   model %>%
-    layer_dense(units = 987, activation = "tanh", input_shape = ncol(x_train)) %>%
-    layer_dense(units = 197, activation = "tanh", name = "bottleneck") %>%
-    layer_dense(units = 987, activation = "tanh") %>%
+    layer_dense(units = hidden.layers[1], activation = "tanh", input_shape = ncol(x_train)) %>%
+    layer_dense(units = hidden.layers[2], activation = "tanh", name = "bottleneck") %>%
+    layer_dense(units = hideen.layers[3], activation = "tanh") %>%
     layer_dense(units = ncol(x_train))
 # view model layers
   summary(model)
@@ -257,7 +257,7 @@ ae_caprion <- function()
     mse <- mean((recon - x)^2)
     return(list(x = recon, mse = mse))
   }
-  K <- 197
+  K <- hidden.layers[2]
   xhat <- rep(NA, K)
   for(k in 1:K){
     xhat[k] <- pca.recon(pca, x_train, k)$mse

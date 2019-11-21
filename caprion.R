@@ -1,9 +1,8 @@
 # 21-11-2019 JHZ
 
 source("caprion.inc")
-ae_caprion()
-# ae_ais_test()
-# ae(pheno_protein[,-c(1:9)],hidden.layers=c(987,197,987))
+ae_caprion(pheno_protein[,-(1:9)])
+# ae(pheno_protein[,-(1:9)],hidden.layers=c(987,197,987))
 
 # UMAP
 library(uwot)

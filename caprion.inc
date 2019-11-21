@@ -105,20 +105,18 @@ ae <- function(X,hidden.layers=c(10,2,10),pdf="ae.pdf")
    save(AE,recX,file="ae.rda")
 }
 
+minmax <- function(x) (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+
 ae_ais_test <- function()
 {
 # https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/
-
 # autoencoder in keras
   suppressPackageStartupMessages(library(keras))
   library(ggplot2)
   library(plotly)
   library(DAAG)
-
 # standardise
-  minmax <- function(x) (x - min(x))/(max(x) - min(x))
   x_train <- apply(ais[,1:11], 2, minmax)
-# x_train <- apply(pheno_protein[,-(1:8)], 2, minmax)
 # PCA
   pca <- prcomp(x_train)
 # plot cumulative plot
@@ -126,10 +124,8 @@ ae_ais_test <- function()
   ggplot(as.data.frame(pca$x), aes(x = PC1, y = PC2, col = ais$sex)) + geom_point()
   pca_plotly <- plot_ly(as.data.frame(pca$x), x = ~PC1, y = ~PC2, z = ~PC3, color = ~ais$sex) %>% add_markers()
   suppressPackageStartupMessages(library(keras))
-
 # set training data
   x_train <- as.matrix(x_train)
-
 # set model
   model <- keras_model_sequential()
   model %>%
@@ -137,31 +133,18 @@ ae_ais_test <- function()
     layer_dense(units = 2, activation = "tanh", name = "bottleneck") %>%
     layer_dense(units = 6, activation = "tanh") %>%
     layer_dense(units = ncol(x_train))
-
 # view model layers
   summary(model)
 # compile model
-  model %>% compile(
-    loss = "mean_squared_error", 
-    optimizer = "adam"
-  )
-
+  model %>% compile(loss = "mean_squared_error", optimizer = "adam")
 # fit model
-  model %>% fit(
-    x = x_train, 
-    y = x_train, 
-    epochs = 2000,
-    verbose = 0
-  )
-
+  model %>% fit(x = x_train, y = x_train, epochs = 2000, verbose = 0)
 # evaluate the performance of the model
   mse.ae2 <- evaluate(model, x_train, x_train)
   mse.ae2
-
 # extract the bottleneck layer
   intermediate_layer_model <- keras_model(inputs = model$input, outputs = get_layer(model, "bottleneck")$output)
   intermediate_output <- predict(intermediate_layer_model, x_train)
-
   ggplot(data.frame(PC1 = intermediate_output[,1], PC2 = intermediate_output[,2]), aes(x = PC1, y = PC2, col = ais$sex)) + geom_point()
 # PCA reconstruction
   pca.recon <- function(pca, x, k){
@@ -170,89 +153,53 @@ ae_ais_test <- function()
     mse <- mean((recon - x)^2)
     return(list(x = recon, mse = mse))
   }
-
   xhat <- rep(NA, 10)
-  for(k in 1:10){
-    xhat[k] <- pca.recon(pca, x_train, k)$mse
-  }
-
+  for(k in 1:10) xhat[k] <- pca.recon(pca, x_train, k)$mse
   ae.mse <- rep(NA, 5)
-  for(k in 1:5){
-  modelk <- keras_model_sequential()
+  for(k in 1:5) {
+    modelk <- keras_model_sequential()
     modelk %>%
       layer_dense(units = 987, activation = "tanh", input_shape = ncol(x_train)) %>%
       layer_dense(units = k, activation = "tanh", name = "bottleneck") %>%
       layer_dense(units = 987, activation = "tanh") %>%
       layer_dense(units = ncol(x_train))
-
-    modelk %>% compile(
-      loss = "mean_squared_error", 
-      optimizer = "adam"
-    )
-
-    modelk %>% fit(
-      x = x_train, 
-      y = x_train, 
-      epochs = 5000,
-      verbose = 0
-    )
-
+    modelk %>% compile(loss = "mean_squared_error", optimizer = "adam")
+    modelk %>% fit(x = x_train, y = x_train, epochs = 5000, verbose = 0)
     ae.mse[k] <- unname(evaluate(modelk, x_train, x_train))
   }
-
   df <- data.frame(k = c(1:10, 1:5), mse = c(xhat, ae.mse), method = c(rep("pca", 10), rep("autoencoder", 5)))
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
 }
 
-ae_caprion <- function(hidden.layers=c(987,197,987))
+ae_caprion <- function(x,hidden.layers=c(987,197,987))
 {
 # autoencoder in keras
   suppressPackageStartupMessages(library(keras))
   library(ggplot2)
   library(plotly)
-# standardise
-  minmax <- function(x) (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
-  x_train <- apply(pheno_protein[,-(1:9)], 2, minmax)
-# PCA
+  x_train <- apply(x, 2, minmax)
   pca <- prcomp(x_train)
   pdf("ae.pdf")
-# plot cumulative plot
   qplot(x = 1:11, y = cumsum(pca$sdev)/sum(pca$sdev), geom = "line")
   ggplot(as.data.frame(pca$x), aes(x = PC1, y = PC2)) + geom_point()
   pca_plotly <- plot_ly(as.data.frame(pca$x), x = ~PC1, y = ~PC2, z = ~PC3) %>% add_markers()
   suppressPackageStartupMessages(library(keras))
-# set training data
   x_train <- as.matrix(x_train)
-# set model
   model <- keras_model_sequential()
   model %>%
     layer_dense(units = hidden.layers[1], activation = "tanh", input_shape = ncol(x_train)) %>%
     layer_dense(units = hidden.layers[2], activation = "tanh", name = "bottleneck") %>%
     layer_dense(units = hidden.layers[3], activation = "tanh") %>%
     layer_dense(units = ncol(x_train))
-# view model layers
   summary(model)
-# compile model
-  model %>% compile(
-    loss = "mean_squared_error",
-    optimizer = "adam"
-  )
-# fit model
-  model %>% fit(
-    x = x_train,
-    y = x_train,
-    epochs = 2000,
-    verbose = 0
-  )
-# evaluate the performance of the model
+  model %>% compile(loss = "mean_squared_error", optimizer = "adam")
+  model %>% fit(x = x_train, y = x_train, epochs = 2000, verbose = 0)
   mse.ae2 <- evaluate(model, x_train, x_train)
   print(mse.ae2)
-# extract the bottleneck layer
   intermediate_layer_model <- keras_model(inputs = model$input, outputs = get_layer(model, "bottleneck")$output)
   intermediate_output <- predict(intermediate_layer_model, x_train)
   ggplot(data.frame(PC1 = intermediate_output[,1], PC2 = intermediate_output[,2]), aes(x = PC1, y = PC2)) + geom_point()
-# PCA reconstruction
-  pca.recon <- function(pca, x, k){
+  pca.recon <- function(pca, x, k) {
     mu <- matrix(rep(pca$center, nrow(pca$x)), nrow = nrow(pca$x), byrow = TRUE)
     recon <- pca$x[,1:k] %*% t(pca$rotation[,1:k]) + mu
     mse <- mean((recon - x)^2)
@@ -265,20 +212,12 @@ ae_caprion <- function(hidden.layers=c(987,197,987))
   for(k in 1:K) {
     modelk <- keras_model_sequential()
     modelk %>%
-      layer_dense(units = 987, activation = "tanh", input_shape = ncol(x_train)) %>%
+      layer_dense(units = hidden.layers[1], activation = "tanh", input_shape = ncol(x_train)) %>%
       layer_dense(units = k, activation = "tanh", name = "bottleneck") %>%
-      layer_dense(units = 987, activation = "tanh") %>%
+      layer_dense(units = hidden.layers[3], activation = "tanh") %>%
       layer_dense(units = ncol(x_train))
-    modelk %>% compile(
-      loss = "mean_squared_error",
-      optimizer = "adam"
-    )
-    modelk %>% fit(
-      x = x_train,
-      y = x_train,
-      epochs = 5000,
-      verbose = 0
-    )
+    modelk %>% compile(loss = "mean_squared_error", optimizer = "adam")
+    modelk %>% fit(x = x_train, y = x_train, epochs = 5000, verbose = 0)
     ae.mse[k] <- unname(evaluate(modelk, x_train, x_train))
   }
   df <- data.frame(k = c(1:K, 1:K), mse = c(xhat, ae.mse), method = c(rep("pca", K), rep("autoencoder", K)))

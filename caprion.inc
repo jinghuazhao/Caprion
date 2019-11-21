@@ -257,13 +257,14 @@ ae_caprion <- function()
     mse <- mean((recon - x)^2)
     return(list(x = recon, mse = mse))
   }
-  xhat <- rep(NA, 10)
-  for(k in 1:10){
+  K <- 197
+  xhat <- rep(NA, K)
+  for(k in 1:K){
     xhat[k] <- pca.recon(pca, x_train, k)$mse
   }
-  ae.mse <- rep(NA, 5)
-  for(k in 1:5) {
-  modelk <- keras_model_sequential()
+  ae.mse <- rep(NA, K)
+  for(k in 1:K) {
+    modelk <- keras_model_sequential()
     modelk %>%
       layer_dense(units = 987, activation = "tanh", input_shape = ncol(x_train)) %>%
       layer_dense(units = k, activation = "tanh", name = "bottleneck") %>%
@@ -281,7 +282,7 @@ ae_caprion <- function()
     )
     ae.mse[k] <- unname(evaluate(modelk, x_train, x_train))
   }
-  df <- data.frame(k = c(1:10, 1:5), mse = c(xhat, ae.mse), method = c(rep("pca", 10), rep("autoencoder", 5)))
+  df <- data.frame(k = c(1:K, 1:K), mse = c(xhat, ae.mse), method = c(rep("pca", K), rep("autoencoder", K)))
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
   df
 }

@@ -215,6 +215,7 @@ ae_caprion <- function(hidden.layers=c(987,197,987))
   x_train <- apply(pheno_protein[,-(1:9)], 2, minmax)
 # PCA
   pca <- prcomp(x_train)
+  pdf("ae.pdf")
 # plot cumulative plot
   qplot(x = 1:11, y = cumsum(pca$sdev)/sum(pca$sdev), geom = "line")
   ggplot(as.data.frame(pca$x), aes(x = PC1, y = PC2)) + geom_point()
@@ -245,7 +246,7 @@ ae_caprion <- function(hidden.layers=c(987,197,987))
   )
 # evaluate the performance of the model
   mse.ae2 <- evaluate(model, x_train, x_train)
-  mse.ae2
+  print(mse.ae2)
 # extract the bottleneck layer
   intermediate_layer_model <- keras_model(inputs = model$input, outputs = get_layer(model, "bottleneck")$output)
   intermediate_output <- predict(intermediate_layer_model, x_train)
@@ -259,9 +260,7 @@ ae_caprion <- function(hidden.layers=c(987,197,987))
   }
   K <- hidden.layers[2]
   xhat <- rep(NA, K)
-  for(k in 1:K){
-    xhat[k] <- pca.recon(pca, x_train, k)$mse
-  }
+  for(k in 1:K) xhat[k] <- pca.recon(pca, x_train, k)$mse
   ae.mse <- rep(NA, K)
   for(k in 1:K) {
     modelk <- keras_model_sequential()
@@ -284,6 +283,8 @@ ae_caprion <- function(hidden.layers=c(987,197,987))
   }
   df <- data.frame(k = c(1:K, 1:K), mse = c(xhat, ae.mse), method = c(rep("pca", K), rep("autoencoder", K)))
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
+  save(df,file="ae.rda")
+  dev.off()
   df
 }
 

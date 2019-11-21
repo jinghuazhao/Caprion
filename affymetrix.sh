@@ -102,10 +102,17 @@ R --no-save -q <<END
 END
 
 (
+  echo $(head -1 SomaLogic.gene | sed 's/chrom/geneChr/;s/chromStart/geneStart/;s/chromEnd/geneEnd/') \
+       $(head -1 affymetrix.results | sed 's/chrom/snpChr/;s/chromStart/geneStart/;s/chromEnd/snpEnd/') | \
+  sed 's/ /\t/g'
+  bedtools intersect -a SomaLogic.gene -b affymetrix.results -wo
+) > SomaLogic.tsv
+
+(
   echo chrom chromStart chromEnd gene
   cut -f2 affymetrix.tsv | \
   sed '1d' | \
   grep -w -f - glist-hg19 | \
   awk -v OFS="\t" '{print "chr" $1,$2,$3,$4}'
 ) | \
-bedtools intersect -header -a - -b affymetrix.results -wo 
+bedtools intersect -a - -b affymetrix.results -wo 

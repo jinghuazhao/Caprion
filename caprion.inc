@@ -210,8 +210,6 @@ ae_caprion <- function()
   suppressPackageStartupMessages(library(keras))
   library(ggplot2)
   library(plotly)
-  library(DAAG)
-
 # standardise
   minmax <- function(x) (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
   x_train <- apply(pheno_protein[,-(1:9)], 2, minmax)
@@ -222,10 +220,8 @@ ae_caprion <- function()
   ggplot(as.data.frame(pca$x), aes(x = PC1, y = PC2)) + geom_point()
   pca_plotly <- plot_ly(as.data.frame(pca$x), x = ~PC1, y = ~PC2, z = ~PC3) %>% add_markers()
   suppressPackageStartupMessages(library(keras))
-
 # set training data
   x_train <- as.matrix(x_train)
-
 # set model
   model <- keras_model_sequential()
   model %>%
@@ -233,7 +229,6 @@ ae_caprion <- function()
     layer_dense(units = 197, activation = "tanh", name = "bottleneck") %>%
     layer_dense(units = 987, activation = "tanh") %>%
     layer_dense(units = ncol(x_train))
-
 # view model layers
   summary(model)
 # compile model
@@ -241,7 +236,6 @@ ae_caprion <- function()
     loss = "mean_squared_error",
     optimizer = "adam"
   )
-
 # fit model
   model %>% fit(
     x = x_train,
@@ -249,55 +243,47 @@ ae_caprion <- function()
     epochs = 2000,
     verbose = 0
   )
-
 # evaluate the performance of the model
   mse.ae2 <- evaluate(model, x_train, x_train)
   mse.ae2
-
 # extract the bottleneck layer
   intermediate_layer_model <- keras_model(inputs = model$input, outputs = get_layer(model, "bottleneck")$output)
   intermediate_output <- predict(intermediate_layer_model, x_train)
-
   ggplot(data.frame(PC1 = intermediate_output[,1], PC2 = intermediate_output[,2]), aes(x = PC1, y = PC2)) + geom_point()
 # PCA reconstruction
   pca.recon <- function(pca, x, k){
-    mu <- matrix(rep(pca$center, nrow(pca$x)), nrow = nrow(pca$x), byrow = T)
+    mu <- matrix(rep(pca$center, nrow(pca$x)), nrow = nrow(pca$x), byrow = TRUE)
     recon <- pca$x[,1:k] %*% t(pca$rotation[,1:k]) + mu
     mse <- mean((recon - x)^2)
     return(list(x = recon, mse = mse))
   }
-
   xhat <- rep(NA, 10)
   for(k in 1:10){
     xhat[k] <- pca.recon(pca, x_train, k)$mse
   }
-
   ae.mse <- rep(NA, 5)
-  for(k in 1:5){
+  for(k in 1:5) {
   modelk <- keras_model_sequential()
     modelk %>%
-      layer_dense(units = 6, activation = "tanh", input_shape = ncol(x_train)) %>%
+      layer_dense(units = 987, activation = "tanh", input_shape = ncol(x_train)) %>%
       layer_dense(units = k, activation = "tanh", name = "bottleneck") %>%
-      layer_dense(units = 6, activation = "tanh") %>%
+      layer_dense(units = 987, activation = "tanh") %>%
       layer_dense(units = ncol(x_train))
-
     modelk %>% compile(
       loss = "mean_squared_error",
       optimizer = "adam"
     )
-
     modelk %>% fit(
       x = x_train,
       y = x_train,
       epochs = 5000,
       verbose = 0
     )
-
     ae.mse[k] <- unname(evaluate(modelk, x_train, x_train))
   }
-
   df <- data.frame(k = c(1:10, 1:5), mse = c(xhat, ae.mse), method = c(rep("pca", 10), rep("autoencoder", 5)))
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
+  df
 }
 
 load("caprion.rda")

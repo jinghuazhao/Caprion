@@ -227,7 +227,7 @@ ae_caprion <- function(hidden.layers=c(987,197,987))
   model %>%
     layer_dense(units = hidden.layers[1], activation = "tanh", input_shape = ncol(x_train)) %>%
     layer_dense(units = hidden.layers[2], activation = "tanh", name = "bottleneck") %>%
-    layer_dense(units = hideen.layers[3], activation = "tanh") %>%
+    layer_dense(units = hidden.layers[3], activation = "tanh") %>%
     layer_dense(units = ncol(x_train))
 # view model layers
   summary(model)

@@ -103,10 +103,11 @@ END
 
 (
   echo $(head -1 SomaLogic.gene | sed 's/chrom/geneChr/;s/chromStart/geneStart/;s/chromEnd/geneEnd/') \
-       $(head -1 affymetrix.results | sed 's/chrom/snpChr/;s/chromStart/geneStart/;s/chromEnd/snpEnd/') | \
+       $(head -1 affymetrix.results | sed 's/chrom/snpChr/;s/chromStart/snpStart/;s/chromEnd/snpEnd/') | \
   sed 's/ /\t/g'
   bedtools intersect -a SomaLogic.gene -b affymetrix.results -wo
-) > SomaLogic.tsv
+) | \
+cut -f1-18 > SomaLogic.tsv
 
 (
   echo chrom chromStart chromEnd gene

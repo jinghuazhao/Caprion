@@ -1,4 +1,4 @@
-# 20-11-2019 JHZ
+# 21-11-2019 JHZ
 
 export uniprot=(P12318 P12318 P05362 Q6P179 P0DJI8 P04004 O75347 P51888 P35247)
 export protein=(FCGR2A FCGR2A ICAM1 ERAP2 SAA1 VTN TBCA PRELP SFTPD)
@@ -85,3 +85,27 @@ done
     awk -v uniprot=${uniprot[i]} -v protein=${protein[i]} -v OFS="\t" '{print uniprot, protein, $0}'
   done
 ) > affymetrix.tsv
+
+R --no-save -q < ps.R
+
+(
+  head -1 SOMALOGIC_Master_Table_160410_1129info.tsv
+  cut -f1 affymetrix.tsv | sed '1d' | grep -w -f - SOMALOGIC_Master_Table_160410_1129info.tsv
+) > SomaLogic.info
+
+R --no-save -q <<END
+  s <- read.delim("SomaLogic.info",as.is=T)
+  v <- c("chromosome_number","start_position","end_position","ensembl_gene_id","external_gene_name","UniProt","Target")
+  s <- within(s[v],{chromosome_number <- paste0("chr",chromosome_number)})
+  names(s) <- c("chrom","chromStart","chromEnd","ENSEMBL","HGNC","uniprot","Protein")
+  write.table(s,file="SomaLogic.gene",row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
+END
+
+(
+  echo chrom chromStart chromEnd gene
+  cut -f2 affymetrix.tsv | \
+  sed '1d' | \
+  grep -w -f - glist-hg19 | \
+  awk -v OFS="\t" '{print "chr" $1,$2,$3,$4}'
+) | \
+bedtools intersect -header -a - -b affymetrix.results -wo 

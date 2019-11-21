@@ -204,7 +204,7 @@ ae_ais_test <- function()
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
 }
 
-caprion_test <- function()
+ae_caprion <- function()
 {
 # autoencoder in keras
   suppressPackageStartupMessages(library(keras))
@@ -213,8 +213,8 @@ caprion_test <- function()
   library(DAAG)
 
 # standardise
-  minmax <- function(x) (x - min(x))/(max(x) - min(x))
-  x_train <- apply(pheno_protein[,-(1:8)], 2, minmax)
+  minmax <- function(x) (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+  x_train <- apply(pheno_protein[,-(1:9)], 2, minmax)
 # PCA
   pca <- prcomp(x_train)
 # plot cumulative plot
@@ -229,9 +229,9 @@ caprion_test <- function()
 # set model
   model <- keras_model_sequential()
   model %>%
-    layer_dense(units = 6, activation = "tanh", input_shape = ncol(x_train)) %>%
-    layer_dense(units = 2, activation = "tanh", name = "bottleneck") %>%
-    layer_dense(units = 6, activation = "tanh") %>%
+    layer_dense(units = 987, activation = "tanh", input_shape = ncol(x_train)) %>%
+    layer_dense(units = 197, activation = "tanh", name = "bottleneck") %>%
+    layer_dense(units = 987, activation = "tanh") %>%
     layer_dense(units = ncol(x_train))
 
 # view model layers

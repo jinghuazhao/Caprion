@@ -2,7 +2,7 @@
 
 git add README.md
 git commit -m "README"
-git add caprion.inc caprion.R affymetrix.sh
+git add caprion.inc caprion.R makeRLEboxplot.R affymetrix.sh
 git commit -m "Code"
 git add st.sh
 git commit -m "st.sh"

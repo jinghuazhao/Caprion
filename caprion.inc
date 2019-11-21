@@ -180,9 +180,9 @@ ae_ais_test <- function()
   for(k in 1:5){
   modelk <- keras_model_sequential()
     modelk %>%
-      layer_dense(units = 6, activation = "tanh", input_shape = ncol(x_train)) %>%
+      layer_dense(units = 987, activation = "tanh", input_shape = ncol(x_train)) %>%
       layer_dense(units = k, activation = "tanh", name = "bottleneck") %>%
-      layer_dense(units = 6, activation = "tanh") %>%
+      layer_dense(units = 987, activation = "tanh") %>%
       layer_dense(units = ncol(x_train))
 
     modelk %>% compile(

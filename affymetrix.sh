@@ -1,4 +1,4 @@
-# 21-11-2019 JHZ
+# 22-11-2019 JHZ
 
 export uniprot=(P12318 P12318 P05362 Q6P179 P0DJI8 P04004 O75347 P51888 P35247)
 export protein=(FCGR2A FCGR2A ICAM1 ERAP2 SAA1 VTN TBCA PRELP SFTPD)
@@ -93,6 +93,19 @@ R --no-save -q < ps.R
   cut -f1 affymetrix.tsv | sed '1d' | grep -w -f - SOMALOGIC_Master_Table_160410_1129info.tsv
 ) > SomaLogic.info
 
+join -j2 <(cut -f2,10 SomaLogic.info | sed '1d'| sort | uniq) \
+         <(cut -f10 SomaLogic.info | sed '1d'| sort | uniq | grep -f - -w glist-hg19 | cut -d' ' -f1,4) | \
+cut -d' ' -f2,3 | \
+parallel -j1 -C' ' 'cd SomaLogic;unzip {1}.zip {1}/{1}_chrom_{2}_meta_final_v1.tsv.gz;cd -'
+
+(
+  echo "SOMAS_ID_round1 chr pos rsid protein VARIANT_ID chromosome position Allele1 Allele2 Effect StdErr logP"
+  join -j2 <(cut -f2,10 SomaLogic.info | sed '1d'| sort | uniq) \
+           <(cut -f10 SomaLogic.info | sed '1d'| sort | uniq | grep -f - -w glist-hg19 | cut -d' ' -f1,4) | \
+  join - <(cut -f2,3,6 affymetrix.tsv | sed '1d' | sort -k1,1) | cut -d' ' -f1-5 | \
+  parallel -j1 -C' ' 'echo {2} {3} {5} {4} {1} $(zgrep -w {5} SomaLogic/{2}/{2}_chrom_{3}_meta_final_v1.tsv.gz)'
+) > SomaLogic.box
+
 R --no-save -q <<END
   s <- read.delim("SomaLogic.info",as.is=T)
   v <- c("chromosome_number","start_position","end_position","ensembl_gene_id","external_gene_name","UniProt","Target")
@@ -107,7 +120,7 @@ END
   sed 's/ /\t/g'
   bedtools intersect -a SomaLogic.gene -b affymetrix.results -wo
 ) | \
-cut -f1-18 > SomaLogic.tsv
+cut -f1-20 > SomaLogic.tsv
 
 (
   echo chrom chromStart chromEnd gene

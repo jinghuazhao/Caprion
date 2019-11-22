@@ -21,6 +21,6 @@ results <- within(results,
   chromEnd <- pos_hg19
 })
 snps_vars <- c("chrom","chromStart","chromEnd","snp","a1","a2","eur","ensembl","hgnc")
-result_vars <- c("chrom","chromStart","chromEnd","pmid","beta","se","p","n","efo","snp","trait")
+result_vars <- c("chrom","chromStart","chromEnd","pmid","beta","se","p","n","efo","snp","a1","a2","trait")
 write.table(snps[snps_vars],file="affymetrix.snps",row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")
 write.table(results[result_vars],file="affymetrix.results",row.names=FALSE,col.names=TRUE,quote=FALSE,sep="\t")

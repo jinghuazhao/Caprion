@@ -21,6 +21,6 @@ bar <- function(data, title)
 
 library(ggplot2)
 pdf("bar.pdf")
-bar("affymetrix.tsv","Effect size by protein and platform (untransformed)")
-bar("affymetrix_invn.tsv","Effect size by protein and platform (invnorm)")
+bar("affymetrix.tsv","Effect size by protein and platform (Caprion untransformed)")
+bar("affymetrix_invn.tsv","Effect size by protein and platform (Caprion invnorm)")
 dev.off()

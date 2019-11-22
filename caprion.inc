@@ -1,4 +1,4 @@
-# 21-11-2019 JHZ
+# 22-11-2019 JHZ
 
 caprion_xlsx <- function()
 {
@@ -79,10 +79,13 @@ affymetrix <- function()
   samples <- merge(interval,protein,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all=TRUE)
   eigenvec <- read.delim("merged_imputation.eigenvec")
   covariates <- merge(pheno_protein[c("affymetrix_gwasqc_bl","sex","age","bmi")],eigenvec[,-1],by.x="affymetrix_gwasqc_bl",by.y="IID")
-  cat("ID_1 ID_2 missing",names(covariates)[-1], pnames,"\n0 0 0 D C C", rep("C",20), "P P P P P P P P\n",file="SomaLogic.sample")
-  write.table(merge(merge(interval,covariates,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all.x=TRUE),
-                    protein[,-1],by.x="ID_1",by.y="affymetrix_gwasqc_bl",all.x=TRUE),
-              file="SomaLogic.sample",append=TRUE,row.names=FALSE,col.names=FALSE,quote=FALSE)
+  cat("ID_1 ID_2 missing",names(covariates)[-1], pnames, paste0(pnames,"_invn"),"\n0 0 0 D C C", rep("C",20), "P P P P P P P P P P P P P P P P\n",file="SomaLogic.sample")
+  p <- protein[,-1]
+  SomaLogic.sample <- merge(merge(interval,covariates,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all.x=TRUE),
+                      p,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all.x=TRUE)
+  p1 <- SomaLogic.sample[names(p[,-1])]
+  SomaLogic.sample <- within(SomaLogic.sample, {for(i in 1:ncol(p1)) assign(paste0(names(p1)[i],"_invn"), gap::invnormal(p1[,i]))})
+  write.table(SomaLogic.sample[,-ncol(SomaLogic.sample)], file="SomaLogic.sample",append=TRUE,row.names=FALSE,col.names=FALSE,quote=FALSE)
 }
 
 ae <- function(X,hidden.layers=c(10,2,10),pdf="ae.pdf")

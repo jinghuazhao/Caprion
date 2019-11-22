@@ -1,4 +1,4 @@
-# 21-11-2019 JHZ
+# 22-11-2019 JHZ
 
 source("caprion.inc")
 ae(pheno_protein[,-(1:9)],hidden.layers=c(987,50,987))

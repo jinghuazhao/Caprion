@@ -70,6 +70,13 @@ function assoc_snptest()
           -method score \
           -pheno ${uniprot[i]} -printids \
           -o ${uniprot[i]}-${rsid[i]}.out
+  snptest \
+          -data ${rsid[i]}.bgen ${rsid[i]}.sample -log ${uniprot[i]}_invn-${rsid[i]}-snptest.log -cov_all \
+          -filetype bgen \
+          -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
+          -method score \
+          -pheno ${uniprot[i]}_invn -printids \
+          -o ${uniprot[i]}_invn-${rsid[i]}.out
 }
 
 for i in `seq 0 8`
@@ -85,6 +92,14 @@ done
     awk -v uniprot=${uniprot[i]} -v protein=${protein[i]} -v OFS="\t" '{print uniprot, protein, $0}'
   done
 ) > affymetrix.tsv
+(
+  cat *out | head -19 | sed 's/allele//g;s/frequentist_//g' | tail -n 1 | awk -v OFS="\t" '{print "uniprot", "protein", $0}'
+  for i in `seq 0 8`
+  do
+    awk 'NR==20' ${uniprot[i]}_invn-${rsid[i]}.out | \
+    awk -v uniprot=${uniprot[i]} -v protein=${protein[i]}_invn -v OFS="\t" '{print uniprot, protein, $0}'
+  done
+) > affymetrix_invn.tsv
 
 R --no-save -q < ps.R
 

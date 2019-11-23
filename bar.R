@@ -1,4 +1,4 @@
-# 22-11-2019 JHZ
+# 23-11-2019 JHZ
 
 bar <- function(data, title)
 {
@@ -16,7 +16,7 @@ bar <- function(data, title)
   tabbedData <- within(rbind(SomaLogic,caprion),{protein <- paste(protein,rsid,sep="-")})
   limits <- with(tabbedData, aes(ymax = Effect + StdErr, ymin = Effect - StdErr))
   p <- ggplot(data = tabbedData, aes(x = factor(protein), y = Effect, fill = factor(platform)))
-  p + geom_bar(stat = "identity", position = position_dodge(0.9)) + geom_errorbar(limits, position = position_dodge(0.9), width = 0.25) + labs(x = "Protein-SMP pair", y = "Effect size", srt=90) + ggtitle(title) + scale_fill_discrete(name = "platform") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  p + geom_bar(stat = "identity", position = position_dodge(0.9)) + geom_errorbar(limits, position = position_dodge(0.9), width = 0.25) + labs(x = "Protein-SMP pair", y = "Effect size") + ggtitle(title) + scale_fill_discrete(name = "platform") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 
 library(ggplot2)

@@ -1,6 +1,6 @@
 # 23-11-2019 JHZ
 
-source("caprion.inc")
+source("caprion.ini")
 # ae(pheno_protein[,-(1:9)],hidden.layers=c(100,20,30))
 ae_caprion(pheno_protein[,-(1:9)],hidden.layers=c(100,20,30))
 

@@ -1,8 +1,11 @@
-# 23-11-2019 JHZ
+# 9-12-2019 JHZ
 
 source("caprion.ini")
 # ae(pheno_protein[,-(1:9)],hidden.layers=c(100,20,30))
-ae_caprion(pheno_protein[,-(1:9)],hidden.layers=c(100,20,30))
+r <- ae_caprion(pheno_protein[,-(1:9)],hidden.layers=c(100,20,30))
+idr <- cbind(pheno_protein[,1],mse=with(r,as.mse))
+ord <- with(idr, order(mse,decreasing=TRUE))
+idr[ord,]
 
 # UMAP
 library(uwot)

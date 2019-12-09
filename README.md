@@ -1,7 +1,7 @@
 # Caprion pilot study
 
 
-**Variatinoal AutoEncoder REFERENCES**
+**REFERENCES (Variatinoal AutoEncoder)**
 
 Hofert M, Prasad A, Zhu M (2019). Quasi-Monte Carlo for multivariate distributions viagenerative neural networks. https://arxiv.org/abs/1811.00683, https://CRAN.R-project.org/package=gnn.
 

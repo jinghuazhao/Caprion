@@ -5,20 +5,18 @@ source("caprion.ini")
 peptides_sample <- function()
 # analysis on peptides
 {
-  protein <- merge(phenotypes[c("caprion_id","affymetrix_gwasqc_bl")],d1,by="caprion_id")
-  d2 <- read.table("interval.samples",skip=2,col.names=c("ID_1","ID_2","missing"))
+  id1_id2_0 <- read.table("interval.samples",skip=2,col.names=c("ID_1","ID_2","missing"))
   missing <- read.table("merged_imputation.missing",col.names=c("affymetrix_gwasqc_bl","missing"))
-  interval <- merge(d2[,-3],missing,by.x="ID_1",by.y="affymetrix_gwasqc_bl")
-  samples <- merge(interval,protein,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all=TRUE)
+  id1_id2_missing <- merge(id1_id2_0[,-3],missing,by.x="ID_1",by.y="affymetrix_gwasqc_bl")
   eigenvec <- read.delim("merged_imputation.eigenvec")
   covariates <- merge(pheno_protein[c("affymetrix_gwasqc_bl","sex","age","bmi")],eigenvec[,-1],by.x="affymetrix_gwasqc_bl",by.y="IID")
   p <- "ERAP2"
   d <- extract_peptide("ERAP2")
   id <- pheno_protein[,1:2]
   peptides <- merge(id,d,by="caprion_id")
-  write.table(peptides[,-1],file=paste0(p,"_peptide.dat"),row.names=FALSE,quote=FALSE)
-  d  <- cbind(ID_1=peptides[,2],ID_2=peptides[,2],missing=0,peptides[,-(1:2)])
-  snptest_sample(d,paste0(p,".sample"),P=names(peptides)[-(1:2)])
+  id1_id2_missing_covariates <- merge(id1_id2_missing,covariates,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all=TRUE)
+  id1_id2_missing_covariates_phenotypes <- merge(id1_id2_missing_covariates_,peptides,by=affymetrix_gwasqc_bl,all=TRUE)
+  snptest_sample(id1_id2_missing_covariates_phenotypes,,paste0(p,".sample"),P=names(peptides)[-(1:2)])
 }
 
 # outliers by AE

@@ -1,6 +1,14 @@
 # 10-12-2019 JHZ
 
+# analysis on peptides
 source("caprion.ini")
+p <- "ERAP2"
+d <- extract_peptide("ERAP2")
+id <- pheno_protein[,1:2]
+peptides <- merge(id,d,by="caprion_id")
+write.table(peptides[,-1],file=paste0(p,"_peptide.dat"),row.names=FALSE,quote=FALSE)
+
+# outliers by AE
 prot <- pheno_protein[,-(1:9)]
 # ae(prot,hidden.layers=c(100,20,30))
 r <- ae_caprion(prot,hidden.layers=c(100,20,30))

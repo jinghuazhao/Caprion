@@ -1,6 +1,6 @@
 ## PCA-autoencoder (AE) comparison
 
-A comparion of PCA and AE for dimension reduction is illustrated from  <a>https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/<img src="https://i0.wp.com/gradientdescending.com/wp-content/uploads/2018/07/reconstruction-1.png" width="560" height="400" align="right"></a>, so that
+A comparion of PCA and AE for dimension reduction is illustrated from  <a href="https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/">R-bloggers<img src="https://i0.wp.com/gradientdescending.com/wp-content/uploads/2018/07/reconstruction-1.png" width="560" height="400" align="right"></a>, so that
 
 > the autoencoder is better at reconstructing the original data set than PCA when k is small, 
 > however the error converges as k increases. For very large data sets this difference will be

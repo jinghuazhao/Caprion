@@ -9,7 +9,9 @@ As shown at <a href="https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensio
 
 where `k` corresponds to the number of principal components in PCA or bottleneck dimension in AE.
 
-## REFERENCES (Variatinoal autoencoder)
+Additional work will be on variatinoal autoencoder (VAE) as indicated in the references below.
+
+## REFERENCES
 
 Hofert M, Prasad A, Zhu M (2019). Quasi-Monte Carlo for multivariate distributions viagenerative neural networks. https://arxiv.org/abs/1811.00683, https://CRAN.R-project.org/package=gnn.
 

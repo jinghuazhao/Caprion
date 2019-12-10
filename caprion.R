@@ -1,12 +1,13 @@
-# 9-12-2019 JHZ
+# 10-12-2019 JHZ
 
 source("caprion.ini")
 prot <- pheno_protein[,-(1:9)]
 # ae(prot,hidden.layers=c(100,20,30))
 r <- ae_caprion(prot,hidden.layers=c(100,20,30))
-idr <- cbind(pheno_protein["caprion_id"],mse=rowSums(r)/ncol(prot))
+idr <- cbind(pheno_protein[c("caprion_id","affymetrix_gwasqc_bl")],mse=rowSums(r)/ncol(prot))
 ord <- with(idr, order(mse,decreasing=TRUE))
-idr[ord,]
+head(idr[ord,],14)
+plot(idr[ord,3],cex=0.4)
 
 # UMAP
 library(uwot)

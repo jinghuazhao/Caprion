@@ -1,3 +1,4 @@
+PCA-AE comparison
 ```{r include=FALSE, message=FALSE}
 minmax <- function(x) (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
 
@@ -63,9 +64,6 @@ ae_ais_test <- function()
   df <- data.frame(k = c(1:10, 1:5), mse = c(xhat, ae.mse), method = c(rep("pca", 10), rep("autoencoder", 5)))
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
 }
-```
 
-PCA-AE comparison
-```{r include=FALSE}
 ae_ais_test()
 ```

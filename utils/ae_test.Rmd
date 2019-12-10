@@ -57,7 +57,10 @@
     modelk %>% fit(x = x_train, y = x_train, epochs = 5000, verbose = 0)
     ae.mse[k] <- unname(evaluate(modelk, x_train, x_train))
   }
+}
+```
+
+```{r include=FALSE}
   df <- data.frame(k = c(1:10, 1:5), mse = c(xhat, ae.mse), method = c(rep("pca", 10), rep("autoencoder", 5)))
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
-}
 ```

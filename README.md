@@ -1,4 +1,4 @@
-## PCA vs autoencoder (AE)
+Autoencoder (AE) relative to PCA
 
 As shown at <a href="https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/">R-bloggers<img src="https://i0.wp.com/gradientdescending.com/wp-content/uploads/2018/07/reconstruction-1.png" width="560" height="400" align="right"></a>,
 

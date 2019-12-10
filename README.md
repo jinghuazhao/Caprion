@@ -1,5 +1,10 @@
 # Caprion pilot study
 
+The example compares performances of PCA and autoencoder for dimension reduction, as adapted from 
+https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/ and shown 
+in[pca_ae_test.html](pca_ae_test.html), so that `the autoencoder is better at reconstructing the original data set than PCA 
+when k is small, however the error converges as k increases. For very large data sets this difference will be larger and 
+means a smaller data set could be used for the same error as PCA. When dealing with big data this is an important property`.
 
 **REFERENCES (Variatinoal AutoEncoder)**
 

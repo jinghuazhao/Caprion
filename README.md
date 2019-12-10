@@ -1,6 +1,6 @@
 ## PCA-autoencoder (AE) comparison
 
-The example compares performances of PCA and AE for dimension reduction, which is adapted from 
+The example compares performances of PCA and AE for dimension reduction, as adapted from 
 https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/ and shown in [pca_ae_test.pdf](pca_ae_test.pdf) and 
 [pca_ae_test.html](pca_ae_test.html), so that
 

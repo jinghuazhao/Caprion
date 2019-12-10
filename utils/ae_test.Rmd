@@ -1,8 +1,7 @@
-PCA-AE comparison
 ```{r include=FALSE, message=FALSE}
 minmax <- function(x) (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
 
-ae_ais_test <- function()
+ae_test <- function()
 {
 # autoencoder in keras
   suppressPackageStartupMessages(library(keras))
@@ -65,5 +64,5 @@ ae_ais_test <- function()
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
 }
 
-ae_ais_test()
+ae_test()
 ```

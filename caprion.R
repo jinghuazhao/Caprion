@@ -2,6 +2,12 @@
 
 source("caprion.ini")
 
+d <- tromso_xlsx()
+pp <- names(table(with(d,sheet3["Protein.Name"])))
+overlap <- colnames(t1)[colnames(t1)%in%pp]
+selected <- with(d, sheet3[["Protein.Name"]] %in% overlap)
+s <- with(d, sheet3)[selected,c("Protein.Name","Ensembl.ID","Sentinel.Variant")]
+
 peptides_sample <- function()
 # analysis on peptides
 {

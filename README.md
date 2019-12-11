@@ -9,6 +9,8 @@ As shown at <a href="https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensio
 
 where `k` corresponds to the number of principal components in PCA or bottleneck dimension in AE.
 
+The local adoption is [ae_test.Rmd](utils/ae_test.Rmd) which produces [ae_test.html](utils/ae_test.html) and [ae_test.pdf](utils/ae_test.pdf).
+
 Additional work will be on variatinoal autoencoder (VAE) as indicated in the references below.
 
 ## REFERENCES

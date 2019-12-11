@@ -9,14 +9,19 @@ peptides_sample <- function()
   missing <- read.table("merged_imputation.missing",col.names=c("affymetrix_gwasqc_bl","missing"))
   id1_id2_missing <- merge(id1_id2_0[,-3],missing,by.x="ID_1",by.y="affymetrix_gwasqc_bl")
   eigenvec <- read.delim("merged_imputation.eigenvec")
-  covariates <- merge(pheno_protein[c("affymetrix_gwasqc_bl","sex","age","bmi")],eigenvec[,-1],by.x="affymetrix_gwasqc_bl",by.y="IID")
+  covariates <- merge(pheno_protein[c("affymetrix_gwasqc_bl","sex","age","bmi")],eigenvec[,-1],
+                      by.x="affymetrix_gwasqc_bl",by.y="IID")
   p <- "ERAP2"
   d <- extract_peptide("ERAP2")
   id <- pheno_protein[,1:2]
   peptides <- merge(id,d,by="caprion_id")
-  id1_id2_missing_covariates <- merge(id1_id2_missing,covariates,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all=TRUE)
-  id1_id2_missing_covariates_phenotypes <- merge(id1_id2_missing_covariates_,peptides,by=affymetrix_gwasqc_bl,all=TRUE)
-  snptest_sample(id1_id2_missing_covariates_phenotypes,,paste0(p,".sample"),P=names(peptides)[-(1:2)])
+  id1_id2_missing_covariates <- merge(id1_id2_missing,covariates,by.x="ID_1",by.y="affymetrix_gwasqc_bl")
+  id1_id2_missing_covariates_phenotypes <- merge(id1_id2_missing_covariates,peptides[,-1],
+                                                 by.x="ID_1",by.y="affymetrix_gwasqc_bl")
+  snptest_sample(id1_id2_missing_covariates_phenotypes,paste0(p,".sample"),
+                 C=c("age","bmi",paste0("PC",1:20)),
+                 D="sex",
+                 P=names(peptides)[-(1:2)])
 }
 
 # outliers by AE

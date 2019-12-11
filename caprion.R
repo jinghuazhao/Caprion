@@ -15,6 +15,8 @@ peptides_sample <- function()
   d <- extract_peptide("ERAP2")
   id <- pheno_protein[,1:2]
   peptides <- merge(id,d,by="caprion_id")
+  peptides <- within(peptides,{for(i in names(peptides[,-(1:2)])) assign(paste0(i,"_invn"),gap::invnormal(peptides[,i]))})
+  peptides <- peptides[,-ncol(peptides)]
   id1_id2_missing_covariates <- merge(id1_id2_missing,covariates,by.x="ID_1",by.y="affymetrix_gwasqc_bl")
   id1_id2_missing_covariates_phenotypes <- merge(id1_id2_missing_covariates,peptides[,-1],
                                                  by.x="ID_1",by.y="affymetrix_gwasqc_bl")

@@ -1,4 +1,4 @@
-```{r include=FALSE}
+```{r echo=FALSE}
 ae_test <- function()
 {
 # https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/

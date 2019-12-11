@@ -158,3 +158,12 @@ do
           -pheno ${peptides} -printids \
           -o ERAP2-${peptides}-${rsid}-snptest.out
 done
+
+(
+  awk 'NR==19' ERAP2-*-${rsid}-snptest.out | head -1 | awk '{print "peptides_Isotope.Group", $0}'
+  for peptides in $(head -1 ERAP2.sample | sed 's/ /\n/g' | awk 'NR>26')
+  do
+     awk -v peptides=${peptides} 'NR==20 {print peptides, $0}' ERAP2-${peptides}-${rsid}-snptest.out
+  done
+) | \
+sed 's/ /\t/g;s/frequentist_//g' > ERAP2.tsv

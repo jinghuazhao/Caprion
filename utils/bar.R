@@ -1,4 +1,4 @@
-# 10-12-2019 JHZ
+# 11-12-2019 JHZ
 
 bar <- function(data, title)
 {
@@ -8,7 +8,7 @@ bar <- function(data, title)
   box <- within(box,{Allele1=toupper(Allele1);Allele2=toupper(Allele2)})
   box_vars <- c("chr","pos","Effect","StdErr","logP","protein","SOMAS_ID_round1","rsid","Allele1","Allele2")
   affybox <- merge(box[box_vars],affy[affy_vars],by.x=c("chr","pos"),by.y=c("chromosome","position"))
-  affybox <- within(affybox[-5,],{switch <-A!=Allele1;add_beta_1[switch] <- -add_beta_1[switch]})
+  affybox <- within(affybox[-5,],{switch <- B!=Allele1;add_beta_1[switch] <- -add_beta_1[switch]})
   SomaLogic <- data.frame(affybox[c("Effect","StdErr","logP","protein","uniprot","rsid")],platform="SomaLogic")
   caprion <- data.frame(affybox[c("add_beta_1","add_se_1","add_pvalue","protein","uniprot","rsid")],platform="Caprion")
   names(caprion)[1:3] <- c("Effect","StdErr","logP")

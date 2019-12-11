@@ -7,6 +7,11 @@ pp <- names(table(with(d,sheet3["Protein.Name"])))
 overlap <- colnames(t1)[colnames(t1)%in%pp]
 selected <- with(d, sheet3[["Protein.Name"]] %in% overlap)
 s <- with(d, sheet3)[selected,c("Protein.Name","Ensembl.ID","Sentinel.Variant")]
+write.table(s,file="tromso.txt",col.names=FALSE,row.names=FALSE,quote=FALSE)
+rsid <- names(table(with(s,Sentinel.Variant)))
+ps <- phenoscanner::phenoscanner(snpquery=rsid, catalogue="pQTL")
+snps <- with(ps,snps)
+snps
 
 peptides_sample <- function()
 # analysis on peptides

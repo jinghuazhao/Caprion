@@ -1,14 +1,10 @@
-# 10-12-2019 JHZ
+# 11-12-2019 JHZ
 
 export uniprot=(P12318 P12318 P05362 Q6P179 P0DJI8 P04004 O75347 P51888 P35247)
 export protein=(FCGR2A FCGR2A ICAM1 ERAP2 SAA1 VTN TBCA PRELP SFTPD)
 export rsid=(rs1801274 rs148396952 rs5498 rs2927608 rs35179000 rs704 rs429358 rs1138545 rs62143206)
 export snpid=(1:161479745 1:161569951 19:10395683 5:96252432 11:18290903 17:26694861 19:45411941 9:117835899 19:54326212)
 export mi=merged_imputation
-
-function peptides()
-{
-}
 
 function samples()
 {
@@ -149,3 +145,16 @@ cut -f1-20 > SomaLogic.tsv
   awk -v OFS="\t" '{print "chr" $1,$2,$3,$4}'
 ) | \
 bedtools intersect -a - -b affymetrix.results -wo 
+
+# ERAP2 peptides and rs2927608
+export rsid=rs2927608
+for peptides in $(head -1 ERAP2.sample | sed 's/ /\n/g' | awk 'NR>26')
+do
+  snptest \
+          -data ${rsid}.bgen ERAP2.sample -log ERAP2-${peptides}-${rsid}-snptest.log -cov_all \
+          -filetype bgen \
+          -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
+          -method score \
+          -pheno ${peptides} -printids \
+          -o ERAP2-${peptides}-${rsid}-snptest.out
+done

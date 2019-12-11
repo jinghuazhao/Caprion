@@ -1,7 +1,9 @@
-```{r include=FALSE, message=FALSE}
+```{r include=FALSE}
+ae_test <- function()
 {
+# https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/
 # autoencoder in keras
-  library(keras)
+  suppressPackageStartupMessages(library(keras))
   library(ggplot2)
   library(plotly)
   library(DAAG)
@@ -14,6 +16,7 @@
   qplot(x = 1:11, y = cumsum(pca$sdev)/sum(pca$sdev), geom = "line")
   ggplot(as.data.frame(pca$x), aes(x = PC1, y = PC2, col = ais$sex)) + geom_point()
   pca_plotly <- plot_ly(as.data.frame(pca$x), x = ~PC1, y = ~PC2, z = ~PC3, color = ~ais$sex) %>% add_markers()
+  suppressPackageStartupMessages(library(keras))
 # set training data
   x_train <- as.matrix(x_train)
 # set model
@@ -57,11 +60,9 @@
     modelk %>% fit(x = x_train, y = x_train, epochs = 5000, verbose = 0)
     ae.mse[k] <- unname(evaluate(modelk, x_train, x_train))
   }
-}
-```
-
-AE vs PCA by number of principal components
-```{r include=FALSE}
   df <- data.frame(k = c(1:10, 1:5), mse = c(xhat, ae.mse), method = c(rep("pca", 10), rep("autoencoder", 5)))
   ggplot(df, aes(x = k, y = mse, col = method)) + geom_line()
+}
+
+ae_test()
 ```

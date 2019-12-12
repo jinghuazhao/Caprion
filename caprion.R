@@ -11,7 +11,7 @@ tromso_sample <- function()
   selected <- with(d, sheet3[["Protein.Name"]] %in% overlap)
   s <- with(d, sheet3)[selected,c("Protein.Name","Ensembl.ID","Sentinel.Variant")]
   write.table(s,file="tromso.txt",col.names=FALSE,row.names=FALSE,quote=FALSE)
-  rsid <- names(table(with(s,Sentinel.Variant)))
+  rsid <- levels(as.factor(s$Sentinel.Variant))
   ps <- phenoscanner::phenoscanner(snpquery=rsid, catalogue="pQTL")
   snps <- with(ps,snps)
   sort(as.numeric(levels(with(snps,chr))))

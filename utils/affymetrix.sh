@@ -1,4 +1,4 @@
-# 11-12-2019 JHZ
+# 12-12-2019 JHZ
 
 export uniprot=(P12318 P12318 P05362 Q6P179 P0DJI8 P04004 O75347 P51888 P35247)
 export protein=(FCGR2A FCGR2A ICAM1 ERAP2 SAA1 VTN TBCA PRELP SFTPD)
@@ -16,10 +16,6 @@ function samples()
   qctool -g ${mi}.bed -s ${mi}.sample -sample-stats -osample ${mi}.sample-stats
   awk 'NR>10 && !/success/' ${mi}.sample-stats | cut -f1,3 > ${mi}.missing
   plink2 --bfile merged_imputation --pca 20 --threads 4 --out merged_imputation
-  (
-    cut -d ' ' -f1-2,4-36 SomaLogic.sample | \
-    sed 's/ID_1/FID/g;s/ID_2/IID/g;2d'| grep -v "NA NA NA"
-  ) > SomaLogic.covar.pheno
   cut -d' ' -f1,2 SomaLogic.sample | \
   sed '1,2d' | \
   grep -v -f affymetrix.id - > affymetrix.id2
@@ -45,9 +41,9 @@ function assoc_bolt()
       --remove=affymetrix.id2 \
       --bgenFile=${rsid[i]}.bgen \
       --sampleFile=${rsid[i]}.sample \
-      --phenoFile=SomaLogic.covar.pheno \
+      --phenoFile=SomaLogic.sample \
       --phenoCol=${uniprot[i]} \
-      --covarFile=SomaLogic.covar.pheno \
+      --covarFile=SomaLogic.sample \
       --covarCol=sex \
       --qCovarCol=age \
       --qCovarCol=bmi \

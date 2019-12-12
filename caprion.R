@@ -16,7 +16,7 @@ tromso_sample <- function()
   snps <- with(ps,snps)
   sort(as.numeric(levels(with(snps,chr))))
   prot <- pheno_protein[c("caprion_id","affymetrix_gwasqc_bl",overlap)]
-  prot <- within(prot,{for(i in names(prot[,-(1:2)])) assign(paste0(i,"_invn"),gap::invnormal(prot[,i]))})
+  prot <- within(prot,{for(i in names(prot[,-(1:2)])) assign(paste0(i,"_invn"),gap::invnormal(prot[i]))})
   prot <- prot[,-ncol(prot)]
   id1_id2_missing_covariates_phenotypes <- merge(id1_id2_missing_covariates,prot[,-1],
                                                  by.x="ID_1",by.y="affymetrix_gwasqc_bl")
@@ -33,7 +33,7 @@ peptides_sample <- function()
   d <- extract_peptide("ERAP2")
   id <- pheno_protein[,1:2]
   peptides <- merge(id,d,by="caprion_id")
-  peptides <- within(peptides,{for(i in names(peptides[,-(1:2)])) assign(paste0(i,"_invn"),gap::invnormal(peptides[,i]))})
+  peptides <- within(peptides,{for(i in names(peptides[,-(1:2)])) assign(paste0(i,"_invn"),gap::invnormal(peptides[i]))})
   peptides <- peptides[,-ncol(peptides)]
   id1_id2_missing_covariates_phenotypes <- merge(id1_id2_missing_covariates,peptides[,-1],
                                                  by.x="ID_1",by.y="affymetrix_gwasqc_bl")
@@ -50,20 +50,17 @@ affymetrix <- function()
   uniprot <- scan("SomaLogic.uniprot",what="")
   SomaLogic <- subset(pap,Accession%in%uniprot)
   d1 <- t(SomaLogic[,-c(1:3)])
-  pnames <- colnames(d1) <- with(SomaLogic,Accession)
   d1 <- data.frame(caprion_id=rownames(d1),round(d1,3))
   protein <- merge(phenotypes[c("caprion_id","affymetrix_gwasqc_bl")],d1,by="caprion_id")
-  d2 <- read.table("interval.samples",skip=2,col.names=c("ID_1","ID_2","missing"))
-  interval <- merge(d2[,-3],missing,by.x="ID_1",by.y="affymetrix_gwasqc_bl")
-  samples <- merge(interval,protein,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all=TRUE)
-  cat("ID_1 ID_2 missing",names(covariates)[-1], pnames, paste0(pnames,"_invn"),"\n0 0 0 D C C", rep("C",20), 
-      "P P P P P P P P P P P P P P P P\n",file="SomaLogic.sample")
   p <- protein[,-1]
-  SomaLogic.sample <- merge(merge(interval,covariates,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all.x=TRUE),
-                      p,by.x="ID_1",by.y="affymetrix_gwasqc_bl",all.x=TRUE)
-  p1 <- SomaLogic.sample[names(p[,-1])]
-  SomaLogic.sample <- within(SomaLogic.sample, {for(i in 1:ncol(p1)) assign(paste0(names(p1)[i],"_invn"), gap::invnormal(p1[,i]))})
-  write.table(SomaLogic.sample[,-ncol(SomaLogic.sample)], file="SomaLogic.sample",append=TRUE,row.names=FALSE,col.names=FALSE,quote=FALSE)
+  p <- within(p,{for(i in names(p)[-1]) assign(paste0(i,"_invn"), gap::invnormal(p[i]))})
+  p <- p[,-ncol(p)]
+  id1_id2_missing_covariates_phenotypes <- merge(id1_id2_missing_covariates,p,
+                                                 by.x="ID_1",by.y="affymetrix_gwasqc_bl")
+  snptest_sample(id1_id2_missing_covariates_phenotypes,"SomaLogic.sample",
+                 C=c("age","bmi",paste0("PC",1:20)),
+                 D="sex",
+                 P=names(p)[-1])
 }
 
 # outliers by AE

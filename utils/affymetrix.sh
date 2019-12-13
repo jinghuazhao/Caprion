@@ -197,20 +197,20 @@ EOF
 
 awk '!a[$0]++' tromso.txt | parallel -C' ' '
   snptest \
-          -data impute_{3}_interval.bgen tromso.sample -log tromso-${2}-${1}-snptest.log -cov_all \
+          -data impute_{3}_interval.bgen tromso.sample -log tromso-{2}-{1}-snptest.log -cov_all \
           -filetype bgen \
           -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
           -method score \
-          -pheno ${2} -printids \
-          -snpid {1} \
+          -pheno {2} -printids \
+          -snpid {1} -include_samples affymetrix.id \
           -o tromso-{2}-{1}-snptest.out;\
   snptest \
-          -data impute_{3}_interval.bgen tromso.sample -log tromso-${2}-${1}-snptest.log -cov_all \
+          -data impute_{3}_interval.bgen tromso.sample -log tromso-{2}-{1}-snptest.log -cov_all \
           -filetype bgen \
           -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
           -method score \
-          -pheno ${2}_invn -printids \
-          -snpid {1} \
+          -pheno {2}_invn -printids \
+          -snpid {1} -include_samples affymetrix.id \
           -o tromso-{2}_invn-{1}-snptest.out;
 '
 

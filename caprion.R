@@ -1,4 +1,4 @@
-# 12-12-2019 JHZ
+# 13-12-2019 JHZ
 
 source("caprion.ini")
 
@@ -10,11 +10,13 @@ tromso_sample <- function()
   overlap <- colnames(t1)[colnames(t1)%in%pp]
   selected <- with(d, sheet3[["Protein.Name"]] %in% overlap)
   s <- with(d, sheet3)[selected,c("Protein.Name","Ensembl.ID","Sentinel.Variant")]
-  write.table(s,file="tromso.txt",col.names=FALSE,row.names=FALSE,quote=FALSE)
   rsid <- levels(as.factor(s$Sentinel.Variant))
   ps <- phenoscanner::phenoscanner(snpquery=rsid, catalogue="pQTL")
   snps <- with(ps,snps)
-  sort(as.numeric(levels(with(snps,chr))))
+  print(sort(as.numeric(levels(with(snps,chr)))))
+  tromso <- merge(s,snps,by.x="Sentinel.Variant",by.y="snp")
+  write.table(tromso[c("Sentinel.Variant","Protein.Name","chr")],
+              file="tromso.txt",col.names=FALSE,row.names=FALSE,quote=FALSE)
   prot <- pheno_protein[c("caprion_id","affymetrix_gwasqc_bl",overlap)]
   prot <- within(prot,{for(i in names(prot[,-(1:2)])) assign(paste0(i,"_invn"),gap::invnormal(prot[i]))})
   prot <- prot[,-ncol(prot)]

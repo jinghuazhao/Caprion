@@ -22,7 +22,8 @@ tromso_sample <- function()
   prot <- prot[,-ncol(prot)]
   id1_id2_missing_covariates_phenotypes <- merge(id1_id2_missing_covariates,prot[,-1],
                                                  by.x="ID_1",by.y="affymetrix_gwasqc_bl")
-  snptest_sample(id1_id2_missing_covariates_phenotypes,"tromso.sample",
+  m <- merge(id1_id2_missing[,-3],id1_id2_missing_covariates_phenotypes,by=c("ID_1","ID_2"),all.x=TRUE)
+  snptest_sample(m,"tromso.sample",
                  C=c("age","bmi",paste0("PC",1:20)),
                  D="sex",
                  P=names(prot[,-(1:2)]))

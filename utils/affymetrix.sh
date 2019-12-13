@@ -215,7 +215,7 @@ awk '!a[$0]++' tromso.txt | parallel -C' ' '
 '
 
 (
-  awk 'NR==19' tromso-*-*-snptest.out | head -1 | awk '{print "Protein", $0}'
-  awk '!a[$0]++' tromso.txt | parallel -C'' 'awk -v protein={2} 'NR==20 {print protein, \$0}' tromso-{2}-{1}-snptest.out'
+  awk 'NR==21' tromso-*-*-snptest.out | head -1 | awk '{print "Protein", $0}'
+  awk '!a[$0]++' tromso.txt | parallel -C' ' 'awk -vprotein={2} "NR==22 {print protein, \$0}" tromso-{2}-{1}-snptest.out'
 ) | \
 sed 's/ /\t/g;s/frequentist_//g' > tromso.tsv

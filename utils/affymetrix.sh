@@ -1,4 +1,4 @@
-# 12-12-2019 JHZ
+# 13-12-2019 JHZ
 
 export uniprot=(P12318 P12318 P05362 Q6P179 P0DJI8 P04004 O75347 P51888 P35247)
 export protein=(FCGR2A FCGR2A ICAM1 ERAP2 SAA1 VTN TBCA PRELP SFTPD)
@@ -163,3 +163,59 @@ done
   done
 ) | \
 sed 's/ /\t/g;s/frequentist_//g' > ERAP2.tsv
+
+# Upload data from Cardio
+HOST=
+PASS=
+USER=$USER
+
+cd /DO-NOT-MODIFY-SCRATCH/curated_genetic_data/interval/imputed/
+/usr/bin/lftp -u ${USER},${PASS} sftp://${HOST} <<EOF
+cd Caprion;
+put impute_2_interval.bgen;
+put impute_3_interval.bgen;
+put impute_4_interval.bgen;
+put impute_6_interval.bgen;
+put impute_7_interval.bgen;
+put impute_10_interval.bgen;
+put impute_12_interval.bgen;
+put impute_13_interval.bgen;
+put impute_20_interval.bgen;
+put impute_2_interval.bgen.bgi;
+put impute_3_interval.bgen.bgi;
+put impute_4_interval.bgen.bgi;
+put impute_6_interval.bgen.bgi;
+put impute_7_interval.bgen.bgi;
+put impute_10_interval.bgen.bgi;
+put impute_12_interval.bgen.bgi;
+put impute_13_interval.bgen.bgi;
+put impute_20_interval.bgen.bgi;
+bye;
+EOF
+# chrs for tromso proteins: [1]  2  3  4  6  7 10 [11] 12 13 [17] [19] 20
+# /rds-jmmh2-post_qc_data/interval/imputed/uk10k_1000g_b37
+
+awk '!a[$0]++' tromso.txt | parallel -C' ' '
+  snptest \
+          -data impute_{3}_interval.bgen tromso.sample -log tromso-${2}-${1}-snptest.log -cov_all \
+          -filetype bgen \
+          -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
+          -method score \
+          -pheno ${2} -printids \
+          -snpid {1} \
+          -o tromso-{2}-{1}-snptest.out;\
+  snptest \
+          -data impute_{3}_interval.bgen tromso.sample -log tromso-${2}-${1}-snptest.log -cov_all \
+          -filetype bgen \
+          -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
+          -method score \
+          -pheno ${2}_invn -printids \
+          -snpid {1} \
+          -o tromso-{2}_invn-{1}-snptest.out;
+'
+
+(
+  awk 'NR==19' tromso-*-*-snptest.out | head -1 | awk '{print "Protein", $0}'
+  awk '!a[$0]++' tromso.txt | parallel -C'' 'awk -v protein={2} 'NR==20 {print protein, \$0}' tromso-{2}-{1}-snptest.out'
+) | \
+sed 's/ /\t/g;s/frequentist_//g' > tromso.tsv

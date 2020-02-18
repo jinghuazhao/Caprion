@@ -1,4 +1,4 @@
-# 13-12-2019 JHZ
+# 18-2-2020 JHZ
 
 source("caprion.ini")
 
@@ -106,8 +106,8 @@ dev.off()
 # RLE plot
 pdf("rle.pdf", width=50, height=12)
 par(mfrow=c(2,1))
-makeRLEplot(d, log2.data=FALSE, groups=group, col.group=col.group, cex=0.3, showTitle=TRUE)
-makeRLEplot(d, log2.data=FALSE, cex=0.3, showTitle=TRUE, title="Uncoloured relative log expression (RLE) plot")
+gap::makeRLEplot(d, log2.data=FALSE, groups=group, col.group=col.group, cex=0.3, showTitle=TRUE)
+gap::makeRLEplot(d, log2.data=FALSE, cex=0.3, showTitle=TRUE, title="Uncoloured relative log expression (RLE) plot")
 dev.off()
 
 # overlaps

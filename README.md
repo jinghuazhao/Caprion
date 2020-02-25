@@ -28,3 +28,10 @@ Hofert M, Prasad A, Zhu M (2019). Quasi-Monte Carlo for multivariate distributio
 Kingma DP, Welling M (2014). Auto-Encoding Variational Bayes. https://arxiv.org/abs/1312.6114, https://keras.rstudio.com/articles/examples/variational_autoencoder.html.
 
 Trivadis SK (2017). Variational autoencoders for anomaly detection. https://rpubs.com/zkajdan/308801.
+
+## URLs
+
+https://github.com/diazale/gt-dimred,
+https://github.com/lmcinnes/umap,
+https://umap-learn.readthedocs.io/en/latest/.
+

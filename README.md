@@ -1,3 +1,11 @@
+# Caprion work
+
+* [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing.
+* [utils/affymetrix.sh](utils/affymetrix.sh) is for variant-specific association analysis.
+* [utils/qctool.sb](utils/qctool.sb) is used to extract available sample and genotypes.
+
+---
+
 ## autoencoder (AE) vs PCA
 
 As shown at <a href="https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/">R-bloggers<img src="https://i0.wp.com/gradientdescending.com/wp-content/uploads/2018/07/reconstruction-1.png" width="560" height="400" align="right"></a>,

@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --ntasks=1
+#SBATCH --job-name=qctool
+#SBATCH --time=6:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --array=1-22
+#SBATCH --output=work/qctool_%A_%a.out
+#SBATCH --error=work/qctool_%A_%a.err
+#SBATCH --export ALL
+
+export chr=${SLURM_ARRAY_TASK_ID}
+export interval=/rds/project/jmmh2/rds-jmmh2-post_qc_data/interval/imputed/uk10k_1000g_b37/imputed
+export TMPDIR=/rds/user/$USER/hpc-work/
+
+echo ${p}
+
+qctool -g $interval/impute_${chr}_interval.bgen -s $interval/interval.samples -incl-samples affymetrix.id \
+       -og caprion-${chr}.bgen -os caprion-${chr}.samples -bgen-bits 8

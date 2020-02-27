@@ -1,6 +1,7 @@
-# 18-2-2020 JHZ
+# 27-2-2020 JHZ
 
 source("caprion.ini")
+load("caprion.rda")
 
 tromso_sample <- function()
 # replication of TROMSO study

@@ -1,0 +1,28 @@
+#!/usr/bin/bash
+
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --ntasks=1
+#SBATCH --job-name=plink2
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=50000
+#SBATCH --array=1-987
+#SBATCH --output=work/plink2_%A_%a.out
+#SBATCH --error=work/plink2_%A_%a.err
+#SBATCH --export ALL
+
+export TMPDIR=/rds/user/$USER/hpc-work/
+module load plink/2.00-alpha
+
+export col=$(cut -d' ' -f ${SLURM_ARRAY_TASK_ID} swath-ms.uniprot)
+for v in ${col} ${col}_inv
+do
+    plink2 \
+           --bgen swath-ms.bgen --sample swath-ms.sample \
+           --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
+           --pheno swath-ms.pheno --pheno-name ${col} --covar swath-ms.covar \
+           --out ${v}
+    grep -v NA ${v}.${col}.glm.linear | \
+    gzip -f > plink2/${v}-plink2.gz
+    rm ${v}.${col}.glm.linear
+done

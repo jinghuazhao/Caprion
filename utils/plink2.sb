@@ -20,7 +20,7 @@ do
     plink2 \
            --bfile caprion.01 \
            --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
-           --pheno swath-ms.pheno --pheno-name ${col} --covar swath-ms.covar \
+           --pheno caprion.pheno --pheno-name ${col} --covar caprion.covar \
            --out ${v}
     grep -v NA ${v}.${col}.glm.linear | \
     gzip -f > plink2/${v}-plink2.gz

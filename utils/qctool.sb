@@ -21,3 +21,4 @@ qctool -g $interval/impute_${chr}_interval.bgen -s $interval/interval.samples -i
 bgenix -g caprion-${chr}.bgen -index -clobber
 
 # qctool -g caprion-#.bgen -s SomaLogic.sample -ofiletype binary_ped -og caprion.bgen
+# plink --bfile caprion.bgen --maf 0.01 --make-bed --out caprion.01

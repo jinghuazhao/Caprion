@@ -2,6 +2,8 @@
 
 source("caprion.ini")
 load("caprion.rda")
+affymetrix("SomaLogic")
+affymetrix("all")
 
 # outliers by AE
 prot <- pheno_protein[,-(1:9)]

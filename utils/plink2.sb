@@ -18,7 +18,7 @@ export col=$(cut -d' ' -f ${SLURM_ARRAY_TASK_ID} swath-ms.uniprot)
 for v in ${col} ${col}_inv
 do
     plink2 \
-           --bgen swath-ms.bgen --sample swath-ms.sample \
+           --bfile caprion.01 \
            --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
            --pheno swath-ms.pheno --pheno-name ${col} --covar swath-ms.covar \
            --out ${v}

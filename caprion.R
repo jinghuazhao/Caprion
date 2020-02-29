@@ -1,9 +1,9 @@
-# 27-2-2020 JHZ
+# 29-2-2020 JHZ
 
 source("caprion.ini")
 load("caprion.rda")
 affymetrix("SomaLogic")
-affymetrix("all")
+affymetrix("pgwas")
 
 # outliers by AE
 prot <- pheno_protein[,-(1:9)]

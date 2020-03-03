@@ -10,7 +10,6 @@ R --slave --vanilla --args \
 R --slave --vanilla --args \
   input_data_path=VTN.txt \
   output_data_rootname=VTN_man \
-  custom_peak_annotation_file_path=annotate.txt \
   reference_file_path=turboman_hg19_reference_data.rda \
   pvalue_sign=5e-8 \
   plot_title="VTN example" < turboman.r

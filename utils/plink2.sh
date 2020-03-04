@@ -13,10 +13,10 @@ parallel -C' ' '
       plink2 \
              --bfile caprion.01 --fam caprion.fam \
              --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
-             --pheno caprion.pheno --pheno-name ${col} --covar caprion.covar \
+             --pheno caprion.pheno --pheno-name ${v} --covar caprion.covar \
              --out work/${v}
-      grep -v NA work/${v}.${col}.glm.linear | \
+      grep -v NA work/${v}.${v}.glm.linear | \
       gzip -f > plink2/${v}-plink2.gz
-      rm work/${v}.${col}.glm.linear
+      rm work/${v}.${v}.glm.linear
   done
 '

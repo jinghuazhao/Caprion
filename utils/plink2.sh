@@ -7,7 +7,7 @@ module load plink/2.00-alpha
 seq 987 | \
 parallel -C' ' '
   export col=$(cut -d" " -f {} caprion.uniprot); \
-  for v in ${col} ${col}_inv;
+  for v in ${col} ${col}_invn;
   do
       echo ${v}
       plink2 \

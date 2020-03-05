@@ -1,6 +1,6 @@
 # Caprion work
 
-* [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing.
+* [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing. Their derivatives are in the utils/ subdirectory:
   * [utils/affymetrix.sh](utils/affymetrix.sh) is for variant-specific association analysis.
   * [utils/qctool.sb](utils/qctool.sb) is used to extract available sample and genotypes.
   * [utils/qctool.sh](utils/qctool.sh) further extracts genotypes with MAF 0.01 only.

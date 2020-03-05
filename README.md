@@ -1,10 +1,11 @@
 # Caprion work
 
 * [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing.
-* [utils/affymetrix.sh](utils/affymetrix.sh) is for variant-specific association analysis.
-* [utils/qctool.sb](utils/qctool.sb) is used to extract available sample and genotypes.
-* [utils/qctool.sh](utils/qctool.sh) further extracts genotypes with MAF 0.01 only.
-* [utils/plink2.sh](utils/plink2.sh) non-SLURM version of association analysis..
+  * [utils/affymetrix.sh](utils/affymetrix.sh) is for variant-specific association analysis.
+  * [utils/qctool.sb](utils/qctool.sb) is used to extract available sample and genotypes.
+  * [utils/qctool.sh](utils/qctool.sh) further extracts genotypes with MAF 0.01 only.
+  * [utils/plink2.sh](utils/plink2.sh) non-SLURM version of association analysis..
+* [caprion.ipynb](caprion.ipynb) is an attempt to use Jupyter notebook.
 
 ---
 

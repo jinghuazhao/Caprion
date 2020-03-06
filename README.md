@@ -6,7 +6,7 @@
   * [utils/qctool.sh](utils/qctool.sh) further extracts genotypes with MAF 0.01 only.
   * [utils/plink2.sh](utils/plink2.sh) non-SLURM version of association analysis.
   * [utils/qqman.sh](utils/qqman.sh) QQ and Manhattan plots.
-  * [utils/sentinels_nold.sh](utils/sentinels_nold.sh) Sentinel selection.
+  * [utils/sentinels_nold.sh](utils/sentinels_nold.sh) and [utils/merge.sh](utils/merge.sh) select sentinels.
 * [caprion.ipynb](caprion.ipynb) is an attempt to use Jupyter notebook.
 
 ---

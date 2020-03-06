@@ -1,4 +1,4 @@
-# 5-3-2020 JHZ
+# 6-3-2020 JHZ
 
 export tag=_nold
 
@@ -16,7 +16,7 @@ function pgz()
       if (x<0) return -x;
       else return x;
     }
-    NR>1 && abs(\$11)>=6.496698" | sort -k1,1n -k2,2n
+    NR>1 && abs(\$11)>=6.568987" | sort -k1,1n -k2,2n
   ) | gzip -f > sentinels/{}.p.gz'
 }
 

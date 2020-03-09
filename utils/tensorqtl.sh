@@ -35,3 +35,9 @@ python3 -m tensorqtl ${plink_prefix_path} ${expression_bed} ${prefix} \
     --covariates ${covariates_file} \
     --mode trans
 
+R --no-save -q <<END
+  library(SparkR)
+  sparkR.session()
+  df <- read.parquet("caprion.trans_qtl_pairs.parquet")
+  head(df)
+END

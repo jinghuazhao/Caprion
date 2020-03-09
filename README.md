@@ -7,7 +7,7 @@
   * [utils/plink2.sh](utils/plink2.sh) non-SLURM version of association analysis.
   * [utils/qqman.sh](utils/qqman.sh) and [utils/qqman.R](utils/qqman.R) produce QQ and Manhattan plots.
   * [utils/sentinels_nold.sh](utils/sentinels_nold.sh) and [utils/merge.sh](utils/merge.sh) select sentinels.
-* [caprion.ipynb](caprion.ipynb) is an attempt to use Jupyter notebook.
+* [caprion.ipynb](caprion.ipynb) is a Jupyter notebook with some preprocessing done by [utils/tensorqtl.sh](utils/tensorqtl.sh).
 
 ---
 

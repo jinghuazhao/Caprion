@@ -35,6 +35,8 @@ python3 -m tensorqtl ${plink_prefix_path} ${expression_bed} ${prefix} \
     --covariates ${covariates_file} \
     --mode trans
 
+module load spark/2.4.0-bin-hadoop2.7
+
 R --no-save -q <<END
   library(SparkR)
   sparkR.session()

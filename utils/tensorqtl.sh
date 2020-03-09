@@ -28,7 +28,7 @@ python3 -m tensorqtl ${plink_prefix_path} ${expression_bed} ${prefix} \
     --covariates ${covariates_file} \
     --mode cis
 
-export plink_prefix_path=caprion
+export plink_prefix_path=caprion.01
 export expression_bed=caprion.expression.bed.gz
 
 python3 -m tensorqtl ${plink_prefix_path} ${expression_bed} ${prefix} \

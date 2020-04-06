@@ -1,4 +1,4 @@
-# 1-4-2020 JHZ
+# 6-4-2020 JHZ
 
 export tag=_nold
 
@@ -30,7 +30,7 @@ function _HLA()
       (
         zcat sentinels/${p}.p.gz | \
         awk -vOFS="\t" '{start=$2-1;$2=start "\t" $2};1' | \
-        awk '!($1 == "6" && $3 >= 25392021 && $3 < 33392022)'
+        awk 'NR>1 && !($1 == "6" && $3 >= 25392021 && $3 < 33392022)'
         zcat sentinels/${p}.p.gz | \
         awk -vOFS="\t" '{start=$2-1;$2=start "\t" $2};1' | \
         awk '$1 == "6" && $3 >= 25392021 && $3 < 33392022' | \

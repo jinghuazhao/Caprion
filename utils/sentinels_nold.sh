@@ -1,4 +1,4 @@
-# 10-4-2020 JHZ
+# 12-4-2020 JHZ
 
 export tag=_nold
 
@@ -10,7 +10,7 @@ function pgz()
   parallel -j6 -C' ' '
   (
     zcat bgen/{}-plink2.gz | head -1
-    zcat bgen/{}-plink2.gz | awk "NR>1 && \$12 <=5e-8" | sort -k1,1n -k2,2n
+    zcat bgen/{}-plink2.gz | awk "NR>1 && \$12 <=1e-5" | sort -k1,1n -k2,2n
   ) | gzip -f > sentinels/{}.p.gz'
 }
 

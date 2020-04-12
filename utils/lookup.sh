@@ -54,7 +54,7 @@ function Olink()
   export OLINK=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/jp549/olink-merged-output
   ls $OLINK > olink.list
   join -11 -22 \
-       <(awk 'NR>1{gsub(/_invn/,"");print $5,$6}' swath-ms.merge | sort -k1,1) \
+       <(awk 'NR>1{gsub(/_invn/,"");print $5,$6}' caprion.merge | sort -k1,1) \
        <(ls $OLINK/*gz  | sed 's/___/ /g;s/_chr_merged.gz\*//g;s///g;s///g;s///g' | sort -k2,2) | \
   awk '{
      gsub(/chr/,"",$2);
@@ -70,4 +70,9 @@ function Olink()
   '
 }
 
-Olink
+(
+  gunzip -c /rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/jp549/olink-merged-output/INTERVAL_cvd3_SELP___P16109_chr_merged.gz | \
+  awk 'NR==1{print "UniProt","pos",$2,$22,$24,$25}'
+  Olink | \
+  awk '{if(NF==2) printf $1,$2," "; else print $2,$22,$24,$25}'
+) > olink.overlap

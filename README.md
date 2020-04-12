@@ -7,6 +7,8 @@
   * [utils/plink2.sh](utils/plink2.sh) non-SLURM version of association analysis.
   * [utils/qqman.sh](utils/qqman.sh) and [utils/qqman.R](utils/qqman.R) produce QQ and Manhattan plots.
   * [utils/sentinels_nold.sh](utils/sentinels_nold.sh) and [utils/merge.sh](utils/merge.sh) select sentinels.
+  * [utils/ps.sh](utils/ps.sh) and [utils/ps.R](utils/ps.R) run through PhenoScanner.
+  * [utils/lookup.sh](utils/lookup.sh) looks up for overlap with SomaLogic and Olink.
 * [caprion.ipynb](caprion.ipynb) is a Jupyter notebook with some preprocessing done by [utils/tensorqtl.sh](utils/tensorqtl.sh).
 
 ---

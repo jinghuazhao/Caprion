@@ -8,14 +8,8 @@ function check()
     echo Empty
   else
     grep -H -w ${prot} $INF/doc/hgTables.tsv
-    grep -H -w ${prot} $HOME/SomaLogic/doc/SOMALOGIC_Master_Table_160410_1129info.tsv
+    grep -H -w ${prot} INTERVAL_box.tsv
   fi
-}
-
-function Sun()
-{
-  grep $1 -w pQTL.Sun-B_pQTL_EUR_2017
-  check $1
 }
 
 function Folkersen()
@@ -42,3 +36,38 @@ do
   Sun ${rsid}
   echo 
 done
+
+function Sun()
+{
+  awk 'NR>1{gsub(/_invn/,"");print $5,$6}' caprion-invn.sentinels | \
+  parallel -C' ' '
+    echo {1} {2}
+    grep -w {1} pQTL.Sun-B_pQTL_EUR_2017 | grep {2}
+    grep -H -w {1} INTERVAL_box.tsv
+  '
+}
+
+Sun
+
+function Olink()
+{
+  export OLINK=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/jp549/olink-merged-output
+  ls $OLINK > olink.list
+  join -11 -22 \
+       <(awk 'NR>1{gsub(/_invn/,"");print $5,$6}' swath-ms.merge | sort -k1,1) \
+       <(ls $OLINK/*gz  | sed 's/___/ /g;s/_chr_merged.gz\*//g;s///g;s///g;s///g' | sort -k2,2) | \
+  awk '{
+     gsub(/chr/,"",$2);
+     split($2,a,":");
+     chr=a[1];
+     pos=a[2];
+     print $1,pos,$3,chr
+  }' | \
+  parallel -C' ' '
+    echo {1} {2}
+    zgrep -H -w {2} {3}___{1}_chr_merged.gz | \
+    awk -vchr={4} "(\$3==chr)"
+  '
+}
+
+Olink

@@ -1,4 +1,4 @@
-# 6-4-2020 JHZ
+# 10-4-2020 JHZ
 
 export tag=_nold
 
@@ -7,16 +7,10 @@ function pgz()
 {
   ls bgen/*.gz | grep invn | \
   sed 's|bgen/||g;s/-plink2//g;s/.gz//g' | \
-  parallel -j3 -C' ' '
+  parallel -j6 -C' ' '
   (
-  # zcat bgen/{}-plink2.gz | head -1
-    zcat bgen/{}-plink2.gz | awk "
-    function abs(x)
-    {
-      if (x<0) return -x;
-      else return x;
-    }
-    NR>1 && abs(\$11)>=5" | sort -k1,1n -k2,2n
+    zcat bgen/{}-plink2.gz | head -1
+    zcat bgen/{}-plink2.gz | awk "NR>1 && \$12 <=5e-8" | sort -k1,1n -k2,2n
   ) | gzip -f > sentinels/{}.p.gz'
 }
 

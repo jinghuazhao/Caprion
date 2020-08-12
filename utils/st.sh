@@ -1,9 +1,9 @@
-# 12-4-2020 JHZ
+#!/usr/bin/bash
 
-mkdir sentinels
-rm work/*merge work/*sentinels
-utils/sentninels_nold.sh
-utils/merge.sh
-utils/ps.sh
-R --no-save -q < utils/ps.R
-utils/lookup.sh > ll
+git add README.md
+git commit -m "README"
+git add caprion.ini caprion.R caprion.ipynb
+git commit -m "Primary Code"
+git add utils
+git commit -m "utilities"
+git push

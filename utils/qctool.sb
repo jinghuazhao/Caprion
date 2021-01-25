@@ -10,12 +10,13 @@
 #SBATCH --error=work/qctool_%A_%a.err
 #SBATCH --export ALL
 
+export caprion=${HOME}/Caprion
 export chr=${SLURM_ARRAY_TASK_ID}
 export interval=/rds/project/jmmh2/rds-jmmh2-post_qc_data/interval/imputed/uk10k_1000g_b37/imputed
 export TMPDIR=/rds/user/$USER/hpc-work/
 
 echo ${p}
 
-qctool -g $interval/impute_${chr}_interval.bgen -s $interval/interval.samples -incl-samples affymetrix.id \
-       -og caprion-${chr}.bgen -os caprion-${chr}.samples -bgen-bits 8
-bgenix -g caprion-${chr}.bgen -index -clobber
+qctool -g ${interval}/impute_${chr}_interval.bgen -s $interval/interval.samples -incl-samples affymetrix.id \
+       -og ${caprion}/data/caprion-${chr}.bgen -os ${caprion}/data/caprion-${chr}.samples -bgen-bits 8
+bgenix -g ${caprion}/data/caprion-${chr}.bgen -index -clobber

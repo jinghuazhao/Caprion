@@ -11,6 +11,7 @@
 #SBATCH --error=work/plink2_%A_%a.err
 #SBATCH --export ALL
 
+export caprion=${HOME}/Caprion
 export TMPDIR=/rds/user/$USER/hpc-work/
 module load plink/2.00-alpha
 
@@ -18,9 +19,9 @@ export col=$(cut -d' ' -f ${SLURM_ARRAY_TASK_ID} swath-ms.uniprot)
 for v in ${col} ${col}_inv
 do
     plink2 \
-           --bfile caprion.01 \
+           --bfile ${caprion}/data/caprion.01 \
            --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
-           --pheno caprion.pheno --pheno-name ${col} --covar caprion.covar \
+           --pheno ${caprion}/data/caprion.pheno --pheno-name ${col} --covar ${caprion}/data/caprion.covar \
            --out ${v}
     grep -v NA ${v}.${col}.glm.linear | \
     gzip -f > plink2/${v}-plink2.gz

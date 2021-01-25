@@ -1,5 +1,6 @@
-# 13-12-2019 JHZ
+# 25-1-2021 JHZ
 
+export caprion=${HOME}/Caprion
 export uniprot=(P12318 P12318 P05362 Q6P179 P0DJI8 P04004 O75347 P51888 P35247)
 export protein=(FCGR2A FCGR2A ICAM1 ERAP2 SAA1 VTN TBCA PRELP SFTPD)
 export rsid=(rs1801274 rs148396952 rs5498 rs2927608 rs35179000 rs704 rs429358 rs1138545 rs62143206)
@@ -26,11 +27,13 @@ function bgen_gen()
   for i in `seq 0 8`
   do
     export chr=$(awk -v snpid=${snpid[i]} 'BEGIN{split(snpid,chrpos,":");print chrpos[1]}')
-    echo ${rsid[i]} > ${rsid[i]}
-    qctool -g impute_${chr}_interval.bgen -s SomaLogic.sample -incl-rsids ${rsid[i]} -incl-samples affymetrix.id -ofiletype bgen_v1.1 -og ${rsid[i]}.bgen
-    bgenix -g ${rsid[i]}.bgen -index -clobber
-    qctool -g impute_${chr}_interval.bgen -s SomaLogic.sample -incl-rsids ${rsid[i]} -incl-samples affymetrix.id -ofiletype gen -og ${rsid[i]}.gen
-    ( head -2 SomaLogic.sample; sed '1,2d' SomaLogic.sample | grep -v "NA NA NA" ) > ${rsid[i]}.sample
+    echo ${rsid[i]} > ${caprion}/rsid/${rsid[i]}
+    qctool -g impute_${chr}_interval.bgen -s SomaLogic.sample -incl-rsids ${rsid[i]} -incl-samples affymetrix.id \
+           -ofiletype bgen_v1.1 -og ${caprion}/rsid/${rsid[i]}.bgen
+    bgenix -g ${caprion}/rsid/${rsid[i]}.bgen -index -clobber
+    qctool -g impute_${chr}_interval.bgen -s SomaLogic.sample -incl-rsids ${caprion}/rsid/${rsid[i]} \
+           -incl-samples affymetrix.id -ofiletype gen -og ${caprion}/rsid/${rsid[i]}.gen
+    ( head -2 SomaLogic.sample; sed '1,2d' SomaLogic.sample | grep -v "NA NA NA" ) > ${caprion}/rsid/${rsid[i]}.sample
   done
 }
 
@@ -39,8 +42,8 @@ function assoc_bolt()
   bolt \
       --bfile=${mi} \
       --remove=affymetrix.id2 \
-      --bgenFile=${rsid[i]}.bgen \
-      --sampleFile=${rsid[i]}.sample \
+      --bgenFile=${caprion}/rsid/${rsid[i]}.bgen \
+      --sampleFile=${caprion}/rsid/${rsid[i]}.sample \
       --phenoFile=SomaLogic.sample \
       --phenoCol=${uniprot[i]} \
       --covarFile=SomaLogic.sample \
@@ -52,27 +55,27 @@ function assoc_bolt()
       --LDscoresUseChip \
       --noMapCheck \
       --numLeaveOutChunks 2 \
-      --statsFileBgenSnps=${uniprot[i]}-${rsid[i]}.bgen-stats \
-      --statsFile=${uniprot[i]}-${rsid[i]}.stats \
-      2>&1 | tee ${uniprot[i]}-${rsid[i]}-bolt.log
+      --statsFileBgenSnps=${caprion}/rsid/${uniprot[i]}-${rsid[i]}.bgen-stats \
+      --statsFile=${caprion}/rsid/${uniprot[i]}-${rsid[i]}.stats \
+      2>&1 | tee ${caprion}/rsid/${uniprot[i]}-${rsid[i]}-bolt.log
 }
 
 function assoc_snptest()
 {
   snptest \
-          -data ${rsid[i]}.bgen ${rsid[i]}.sample -log ${uniprot[i]}-${rsid[i]}-snptest.log -cov_all \
+          -data ${caprion}/rsid/${rsid[i]}.bgen ${caprion}/rsid/${rsid[i]}.sample -log ${caprion}/rsid/${uniprot[i]}-${rsid[i]}-snptest.log -cov_all \
           -filetype bgen \
           -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
           -method score \
           -pheno ${uniprot[i]} -printids \
-          -o ${uniprot[i]}-${rsid[i]}.out
+          -o ${caprion}/rsid/${uniprot[i]}-${rsid[i]}.out
   snptest \
-          -data ${rsid[i]}.bgen ${rsid[i]}.sample -log ${uniprot[i]}_invn-${rsid[i]}-snptest.log -cov_all \
+          -data ${caprion}/rsid/${rsid[i]}.bgen ${caprion}/rsid/${rsid[i]}.sample -log ${caprion}/rsid/${uniprot[i]}_invn-${rsid[i]}-snptest.log -cov_all \
           -filetype bgen \
           -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
           -method score \
           -pheno ${uniprot[i]}_invn -printids \
-          -o ${uniprot[i]}_invn-${rsid[i]}.out
+          -o ${caprion}/rsid/${uniprot[i]}_invn-${rsid[i]}.out
 }
 
 for i in `seq 0 8`
@@ -81,18 +84,18 @@ do
   assoc_snptest
 done
 (
-  cat *out | head -19 | sed 's/allele//g;s/frequentist_//g' | tail -n 1 | awk -v OFS="\t" '{print "uniprot", "protein", $0}'
+  cat ${caprion}/rsid/*out | head -19 | sed 's/allele//g;s/frequentist_//g' | tail -n 1 | awk -v OFS="\t" '{print "uniprot", "protein", $0}'
   for i in `seq 0 8`
   do
-    awk 'NR==20' ${uniprot[i]}-${rsid[i]}.out | \
+    awk 'NR==20' ${caprion}/rsid/${uniprot[i]}-${rsid[i]}.out | \
     awk -v uniprot=${uniprot[i]} -v protein=${protein[i]} -v OFS="\t" '{print uniprot, protein, $0}'
   done
 ) > affymetrix.tsv
 (
-  cat *out | head -19 | sed 's/allele//g;s/frequentist_//g' | tail -n 1 | awk -v OFS="\t" '{print "uniprot", "protein", $0}'
+  cat ${caprion}/rsid/*out | head -19 | sed 's/allele//g;s/frequentist_//g' | tail -n 1 | awk -v OFS="\t" '{print "uniprot", "protein", $0}'
   for i in `seq 0 8`
   do
-    awk 'NR==20' ${uniprot[i]}_invn-${rsid[i]}.out | \
+    awk 'NR==20' ${caprion}/rsid/${uniprot[i]}_invn-${rsid[i]}.out | \
     awk -v uniprot=${uniprot[i]} -v protein=${protein[i]}_invn -v OFS="\t" '{print uniprot, protein, $0}'
   done
 ) > affymetrix_invn.tsv
@@ -144,25 +147,25 @@ bedtools intersect -a - -b affymetrix.results -wo
 
 # ERAP2 peptides and rs2927608
 export rsid=rs2927608
-for peptides in $(head -1 ERAP2.sample | sed 's/ /\n/g' | awk 'NR>26')
+for peptides in $(head -1 ${caprion}/ERAP2/ERAP2.sample | sed 's/ /\n/g' | awk 'NR>26')
 do
   snptest \
-          -data ${rsid}.bgen ERAP2.sample -log ERAP2-${peptides}-${rsid}-snptest.log -cov_all \
+          -data ${rsid}.bgen ${caprion}/ERAP2/ERAP2.sample -log ${caprion}/ERAP2/ERAP2-${peptides}-${rsid}-snptest.log -cov_all \
           -filetype bgen \
           -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
           -method score \
           -pheno ${peptides} -printids \
-          -o ERAP2-${peptides}-${rsid}-snptest.out
+          -o ${caprion}/ERAP2/ERAP2-${peptides}-${rsid}-snptest.out
 done
 
 (
-  awk 'NR==19' ERAP2-*-${rsid}-snptest.out | head -1 | awk '{print "peptides_Isotope.Group", $0}'
-  for peptides in $(head -1 ERAP2.sample | sed 's/ /\n/g' | awk 'NR>26')
+  awk 'NR==19' ${caprion}/ERAP2/ERAP2-*-${rsid}-snptest.out | head -1 | awk '{print "peptides_Isotope.Group", $0}'
+  for peptides in $(head -1 ${caprion}/ERAP2/ERAP2.sample | sed 's/ /\n/g' | awk 'NR>26')
   do
-     awk -v peptides=${peptides} 'NR==20 {print peptides, $0}' ERAP2-${peptides}-${rsid}-snptest.out
+     awk -v peptides=${peptides} 'NR==20 {print peptides, $0}' ${caprion}/ERAP2/ERAP2-${peptides}-${rsid}-snptest.out
   done
 ) | \
-sed 's/ /\t/g;s/frequentist_//g' > ERAP2.tsv
+sed 's/ /\t/g;s/frequentist_//g' > ${caprion}/ERAP2/ERAP2.tsv
 
 # Upload data from Cardio
 HOST=
@@ -195,30 +198,30 @@ EOF
 # chrs for tromso proteins: [1]  2  3  4  6  7 10 [11] 12 13 [17] [19] 20
 # /rds-jmmh2-post_qc_data/interval/imputed/uk10k_1000g_b37
 
-awk '!a[$0]++' tromso.txt | parallel -C' ' '
+awk '!a[$0]++' ${caprion}/tromso/tromso.txt | parallel -C' ' '
   snptest \
-          -data impute_{3}_interval.bgen tromso.sample -log tromso-{2}-{1}-snptest.log -cov_all \
+          -data impute_{3}_interval.bgen ${caprion}/tromso/tromso.sample -log ${caprion}/tromso/tromso-{2}-{1}-snptest.log -cov_all \
           -filetype bgen \
           -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
           -method score \
           -pheno {2} -printids \
           -snpid {1} -include_samples affymetrix.id \
-          -o tromso-{2}-{1}-snptest.out;\
+          -o ${caprion}/tromso/tromso-{2}-{1}-snptest.out;\
   snptest \
-          -data impute_{3}_interval.bgen tromso.sample -log tromso-{2}-{1}-snptest.log -cov_all \
+          -data impute_{3}_interval.bgen ${caprion}/tromso/tromso.sample -log ${caprion}/tromso/tromso-{2}-{1}-snptest.log -cov_all \
           -filetype bgen \
           -frequentist 1 -hwe -missing_code NA,-999 -use_raw_covariates -use_raw_phenotypes \
           -method score \
           -pheno {2}_invn -printids \
           -snpid {1} -include_samples affymetrix.id \
-          -o tromso-{2}_invn-{1}-snptest.out;
+          -o ${caprion}/tromso/tromso-{2}_invn-{1}-snptest.out;
 '
 
 (
-  awk 'NR==21' tromso-*-*-snptest.out | head -1 | awk '{print "Protein", $0}'
-  awk '!a[$0]++' tromso.txt | parallel -C' ' '
-      awk -vprotein={2} "NR==22 {print protein, \$0}" tromso-{2}-{1}-snptest.out;\
-      awk -vprotein={2}_inv "NR==22 {print protein, \$0}" tromso-{2}_invn-{1}-snptest.out;\
+  awk 'NR==21' ${caprion}/tromso/tromso-*-*-snptest.out | head -1 | awk '{print "Protein", $0}'
+  awk '!a[$0]++' ${caprion}/tromso/tromso.txt | parallel -C' ' '
+      awk -vprotein={2} "NR==22 {print protein, \$0}" ${caprion}/tromso/tromso-{2}-{1}-snptest.out;\
+      awk -vprotein={2}_inv "NR==22 {print protein, \$0}" ${caprion}/tromso/tromso-{2}_invn-{1}-snptest.out;\
   '
 ) | \
-sed 's/ /\t/g;s/frequentist_//g' > tromso.tsv
+sed 's/ /\t/g;s/frequentist_//g' > ${caprion}/tromso/tromso.tsv

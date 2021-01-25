@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 
+export caprion=${HOME}/Caprion
 export TMPDIR=/rds/user/$USER/hpc-work/
 
 module load plink/2.00-alpha
@@ -13,9 +14,9 @@ parallel -C' ' '
   do
       echo ${v}
       plink2 \
-             --bfile caprion.01 --fam caprion.fam \
+             --bfile ${caprion}/data/caprion.01 --fam ${caprion}/data/caprion.fam \
              --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
-             --pheno caprion.pheno --pheno-name ${v} --covar caprion.covar \
+             --pheno ${caprion}/data/caprion.pheno --pheno-name ${v} --covar ${caprion}/data/caprion.covar \
              --out work/${v}
       grep -v NA work/${v}.${v}.glm.linear | \
       gzip -f > plink2/${v}-plink2.gz
@@ -33,9 +34,9 @@ parallel -C' ' '
   do
       echo ${v}
       plink2 \
-             --bgen caprion.01.bgen --sample caprion.sample \
+             --bgen ${caprion}/data/caprion.01.bgen --sample ${caprion}/data/caprion.sample \
              --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
-             --pheno caprion.pheno --pheno-name ${v} --covar caprion.covar \
+             --pheno ${caprion}/data/caprion.pheno --pheno-name ${v} --covar ${caprion}/data/caprion.covar \
              --out work/${v}
       grep -v NA work/${v}.${v}.glm.linear | \
       gzip -f > bgen/${v}-plink2.gz

@@ -1,4 +1,4 @@
-# 9-3-2020 JHZ
+# 25-1-2021 JHZ
 
 # recycle tensorQTL venv
 # ln -s $HOME/tensorqtl/venv
@@ -13,9 +13,11 @@ jupyter notebook --ip=127.0.0.1 --no-browser --port 8087
 # ssh -4 -L 8087:127.0.0.1:8087 -fN login-e-10.hpc.cam.ac.uk
 firefox http://127.0.0.1:8087/?token=d991ea12ce42b216d3aacd3c573e95280b6cd30d4b4aeeed &
 
+export caprion=${HOME}/Caprion
 export covariates_file=1.covariates.txt
 export prefix=caprion
 
+cd ${caprion}/data
 ln -sf caprion.01.bed 1.bed
 awk -v OFS="\t" '{$1="chr" $1};1' caprion.01.bim > 1.bim
 ln -sf caprion.01.fam 1.fam
@@ -43,3 +45,5 @@ R --no-save -q <<END
   df <- read.parquet("caprion.trans_qtl_pairs.parquet")
   head(df)
 END
+
+cd -

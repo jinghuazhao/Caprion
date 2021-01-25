@@ -19,6 +19,7 @@ R --no-save <<END
   EPCR <- Normalized_All_Peptides[c("LIMS.ID","EPCR_HUMAN")]
   EPCR_filt <- Protein_DR_Filt_Peptides[c("LIMS.ID","EPCR_HUMAN")]
 # plot(cbind(EPCR,EPCR_filt)[,c(2,4)])
+  require(ANN2)
   par(mfrow=c(3,1))
   with(EPCR,
   {
@@ -26,4 +27,17 @@ R --no-save <<END
     hist(EPCR_HUMAN)
     boxplot(EPCR_HUMAN,horizontal = TRUE)
   })
+  par()
+  AE <- autoencoder(Normalized_All_Peptides[,-1], hidden.layers=c(100,20,30), loss.type = 'pseudo-huber',
+                    activ.functions = c('tanh','linear','tanh'),
+                    batch.size = 8, optim.type = 'adam',
+                    n.epochs = 1000, val.prop = 0)
+# Plot loss during training
+  plot(AE)
+# Make reconstruction and compression plots
+  reconstruction_plot(AE, Normalized_All_Peptides[,-1])
+  compression_plot(AE, Normalized_All_Peptides[,-1])
+# Reconstruct data and show states with highest anomaly scores
+  recX <- reconstruct(AE, Normalized_All_Peptides[,-1])
+  sort(recX$anomaly_scores, decreasing = TRUE)
 END

@@ -1,0 +1,104 @@
+# EPCR-PROC in Caprion pilot study Phase I
+
+Working directory,
+
+~/rds/projects/olink_proteomics/scallop/Caprion/EPCR-PROC
+
+The scatter, histogram and boxplots were extracted as EPCR-PROC-desc.pdf.
+
+* ![EPCR](EPCR-PROC/EPCR-PROC-desc-0.png)
+* ![PROC](EPCR-PROC/EPCR-PROC-desc-1.png)
+
+Association statistics from invnormal(prot)~genotypes are EPCR.sentinels and PROC.sentinels.
+
+## Annotations
+```
+#    Protein Accession  Gene            Protein.Description
+# EPCR_HUMAN    Q9UNN8 PROCR Endothelial protein C receptor
+# PROC_HUMAN    P04070  PROC Vitamin K-dependent protein C
+
+# chrom chromStart chromEnd strand    acc uniprotName geneName geneSynonyms hgncSym         ensGene
+# chr20   33759957 33764613      + Q9UNN8  EPCR_HUMAN    PROCR         EPCR   PROCR ENSG00000101000
+#  chr2 128177518 128186519      + P04070  PROC_HUMAN    PROC                  PROC ENSG00000115718
+```
+
+## Q-Q/Manhattan plots
+
+Before and after invnormal transformation.
+
+* ![EPCR](EPCR-PROC/Q9UNN8_invn_manhattan.png)
+* ![EPCR](EPCR-PROC/Q9UNN8_invn_qq.png)
+* ![PROC](EPCR-PROC/P04070_invn_manhattan.png)
+* ![PROC](EPCR-PROC/P04070_invn_qq.png)
+
+## Correlation of piptides
+
+* EPCR-PROC.tsv. The raw data.
+* EPCR-PROC-corr.tsv. The Pearson correlation.
+* EPCR-PROC-corr.png. The heatmap.
+
+![Heatmap](EPCR-PROC/EPCR-PROC-corr.png)
+
+## Sentinels
+
+### EPCR
+
+MarkerName|P|prot|rsid
+----------|-|----|----
+chr1:198680470|7.7746e-06|Q9UNN8_invn|rs150905683
+chr1:242492519|4.52035e-06|Q9UNN8_invn|rs4658474
+chr2:40640161|8.47293e-06|Q9UNN8_invn|rs6742589
+chr2:108904323|1.79526e-06|Q9UNN8_invn|rs71421322
+chr2:129343910|3.38733e-06|Q9UNN8_invn|rs538566482
+chr3:3589208|6.97483e-06|Q9UNN8_invn|rs73010413
+chr3:63622010|4.92919e-06|Q9UNN8_invn|rs73126516
+chr3:115857670|8.18486e-06|Q9UNN8_invn|rs36060209
+chr4:26467624|3.08996e-06|Q9UNN8_invn|rs78545240
+chr5:117693310|2.17759e-06|Q9UNN8_invn|rs73791119
+chr5:178789756|6.07192e-06|Q9UNN8_invn|rs11749206
+chr6:10437912|8.87339e-06|Q9UNN8_invn|rs76522721
+chr6:31385204|5.65772e-07|Q9UNN8_invn|rs113425623
+chr6:150708928|6.90209e-06|Q9UNN8_invn|rs9478711
+chr7:46878807|2.58103e-06|Q9UNN8_invn|rs73119156
+chr8:113975571|7.68998e-06|Q9UNN8_invn|rs10505197
+chr8:141604230|1.29017e-06|Q9UNN8_invn|rs11997990
+chr11:8066317|2.82897e-06|Q9UNN8_invn|rs72848407
+chr11:82121298|8.22729e-06|Q9UNN8_invn|rs7114139
+chr12:119574662|3.5405e-06|Q9UNN8_invn|rs12229183
+chr14:45522256|5.26276e-07|Q9UNN8_invn|rs374947851
+chr16:54065346|8.6531e-06|Q9UNN8_invn|rs12051239
+chr16:86878088|1.07322e-06|Q9UNN8_invn|rs11645358
+chr18:65690741|3.02894e-06|Q9UNN8_invn|rs17078446
+
+### PROC
+
+MarkerName|P|prot|rsid
+----------|-|----|----
+chr1:14700486|4.41035e-06|P04070_invn|rs1539170
+chr1:226790403|4.91707e-06|P04070_invn|rs878149
+chr2:85379656|1.95094e-06|P04070_invn|rs2568224
+chr3:39025856|2.77768e-06|P04070_invn|rs78768764
+chr3:70686181|5.40327e-06|P04070_invn|rs9826254
+chr3:106597199|8.58278e-07|P04070_invn|rs56400218
+chr6:3251943|7.99169e-06|P04070_invn|rs11963805
+chr6:7937069|3.63501e-06|P04070_invn|rs776682351
+chr6:145369170|3.93743e-06|P04070_invn|rs117840209
+chr7:136707968|5.2286e-06|P04070_invn|rs10246819
+chr8:7128386|9.31995e-07|P04070_invn|rs370324853
+chr8:99183900|5.71606e-06|P04070_invn|rs2443574
+chr9:138730664|2.63476e-06|P04070_invn|rs141376886
+chr10:54410153|3.65163e-06|P04070_invn|rs1348351
+chr10:70244181|4.25257e-06|P04070_invn|rs35608830
+chr11:13498427|8.78973e-07|P04070_invn|rs11022845
+chr11:13498427|8.78973e-07|P04070_invn|rs556750517
+chr11:23539628|9.03995e-06|P04070_invn|rs7943543
+chr12:133801548|9.85288e-06|P04070_invn|rs556045604
+chr13:67082089|5.07758e-06|P04070_invn|rs148386003
+chr13:81938729|4.35324e-06|P04070_invn|rs117099502
+chr13:104582407|6.21026e-06|P04070_invn|rs11842347
+chr14:93804153|4.33826e-07|P04070_invn|rs117720114
+chr15:65003284|1.67562e-06|P04070_invn|rs144408155
+chr18:12739631|9.43079e-06|P04070_invn|rs62096050
+chr20:36889971|8.93867e-06|P04070_invn|rs6098808
+chr20:36889971|8.93867e-06|P04070_invn|rs767174705
+chr21:34516707|4.38852e-06|P04070_invn|rs963950

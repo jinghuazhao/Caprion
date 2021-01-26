@@ -4,32 +4,12 @@ Working directory,
 
 ~/rds/projects/olink_proteomics/scallop/Caprion/EPCR-PROC
 
-The scatter, histogram and boxplots were extracted as EPCR-PROC-desc.pdf.
+## Scatter, histogram and boxplots
+
+They were extracted as EPCR-PROC-desc.pdf.
 
 * ![EPCR](EPCR-PROC/EPCR-PROC-desc-0.png)
 * ![PROC](EPCR-PROC/EPCR-PROC-desc-1.png)
-
-Association statistics from invnormal(prot)~genotypes are EPCR.sentinels and PROC.sentinels.
-
-## Annotations
-```
-#    Protein Accession  Gene            Protein.Description
-# EPCR_HUMAN    Q9UNN8 PROCR Endothelial protein C receptor
-# PROC_HUMAN    P04070  PROC Vitamin K-dependent protein C
-
-# chrom chromStart chromEnd strand    acc uniprotName geneName geneSynonyms hgncSym         ensGene
-# chr20   33759957 33764613      + Q9UNN8  EPCR_HUMAN    PROCR         EPCR   PROCR ENSG00000101000
-#  chr2 128177518 128186519      + P04070  PROC_HUMAN    PROC                  PROC ENSG00000115718
-```
-
-## Q-Q/Manhattan plots
-
-Before and after invnormal transformation.
-
-* ![EPCR](EPCR-PROC/Q9UNN8_invn_manhattan.png)
-* ![EPCR](EPCR-PROC/Q9UNN8_invn_qq.png)
-* ![PROC](EPCR-PROC/P04070_invn_manhattan.png)
-* ![PROC](EPCR-PROC/P04070_invn_qq.png)
 
 ## Correlation of piptides
 
@@ -39,7 +19,29 @@ Before and after invnormal transformation.
 
 ![Heatmap](EPCR-PROC/EPCR-PROC-corr.png)
 
+## Annotations
+```
+#    Protein Accession  Gene            Protein.Description
+# EPCR_HUMAN    Q9UNN8 PROCR Endothelial protein C receptor
+# PROC_HUMAN    P04070  PROC Vitamin K-dependent protein C
+
+# chrom chromStart  chromEnd strand    acc uniprotName geneName geneSynonyms hgncSym         ensGene
+# chr20   33759957  33764613      + Q9UNN8  EPCR_HUMAN    PROCR         EPCR   PROCR ENSG00000101000
+#  chr2  128177518 128186519      + P04070  PROC_HUMAN     PROC                 PROC ENSG00000115718
+```
+
+## Q-Q/Manhattan plots
+
+Before and after invnormal transformation.
+
+* ![EPCR](EPCR-PROC/Q9UNN8_invn_qq.png)
+* ![EPCR](EPCR-PROC/Q9UNN8_invn_manhattan.png)
+* ![PROC](EPCR-PROC/P04070_invn_qq.png)
+* ![PROC](EPCR-PROC/P04070_invn_manhattan.png)
+
 ## Sentinels
+
+Sentinels based on association statistics from invnormal(prot)~genotypes are EPCR.sentinels and PROC.sentinels.
 
 ### EPCR
 

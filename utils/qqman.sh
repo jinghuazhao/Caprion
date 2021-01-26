@@ -1,33 +1,33 @@
-# 5-3-2020 JHZ
+# 26-1-2021 JHZ
 
-cat qqman.list | \
-parallel -j1 -C' ' '
-  echo {1} {2}
-  export uniprot={1}
-  export protein={2}
-  for v in ${uniprot} ${uniprot}_invn
-  do
-    gunzip -c bgen/${v}-plink2.gz | \
-    cut -f1,2,12 --output-delimiter=" " > ${v}.txt
+function qqmanhattanplot()
+{
+  parallel -j1 --env caprion -C' ' '
+    export uniprot={1}
+    export protein={2}
+    R --no-save < utils/qqman.R
 
+    gunzip -c bgen/${uniprot}-plink2.gz | \
+    cut -f1,2,12 --output-delimiter=" " > ${caprion}/EPCR-PROC/${uniprot}.txt
     R --slave --vanilla --args \
-      input_data_path=${v}.txt \
-      output_data_rootname=${v}_qq \
-      plot_title="${v} (${protein})" < turboqq.r
+      input_data_path=${caprion}/EPCR-PROC/${uniprot}.txt \
+      output_data_rootname=${uniprot}_turboqq \
+      plot_title="${protein} (${uniprot})" < ~/cambridge-ceu/turboqq/turboqq.r
+    R --slave --vanilla --args \
+      input_data_path=${caprion}/EPCR-PROC/${uniprot}.txt \
+      output_data_rootname=${uniprot}_turboman \
+      custom_peak_annotation_file_path=${caprion}/EPCR-PROC/${uniprot}.annotate \
+      reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
+      pvalue_sign=8.210181e-12 \
+      plot_title="${protein} (${uniprot})" < ~/cambridge-ceu/turboman/turboman.r
+    rm ${caprion}/EPCR-PROC/${uniprot}.txt
+  '
+}
 
-#    R --slave --vanilla --args \
-#      input_data_path=${v}.txt \
-#      output_data_rootname=${v}_man \
-#      custom_peak_annotation_file_path=annotate.txt \
-#      reference_file_path=turboman_hg19_reference_data.rda \
-#      pvalue_sign=8.210181e-12 \
-#      plot_title="${v} (${protein})" < turboman.r
-
-    rm ${v}.txt
-  done
-'
-# Feed to Tryggve
-# cat qqman.list | parallel --dry-run -C' ' 'get {1}_invn-plink2.gz'
-#
-cat qqman.list | parallel -j1 -C' ' 'export uniprot={1};R --no-save < utils/qqman.R'
-cat qqman.list | parallel -j1 -C' ' 'export uniprot={1}_invn;R --no-save < utils/qqman.R'
+export caprion=~/rds/projects/olink_proteomics/scallop/Caprion/
+sed '1,2d' EPCR-PROC/EPCR.sentinels | tr '|' '\t' | cut -f1 | \
+awk '{split($1,a,":");sub(/chr/,"",a[1]);print a[1],a[2]}'> ${caprion}/EPCR-PROC/Q9UNN8.annotate
+sed '1,2d' EPCR-PROC/PROC.sentinels | tr '|' '\t' | cut -f1 | \
+awk '{split($1,a,":");sub(/chr/,"",a[1]);print a[1],a[2]}'> ${caprion}/EPCR-PROC/P04070.annotate
+awk 'NR==1{print $1 "_invn", $2 "_invn"}' qqman.list | qqmanhattanplot
+awk 'NR==2{print $1 "_invn", $2 "_invn"}' qqman.list | qqmanhattanplot

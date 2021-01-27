@@ -10,14 +10,14 @@ export snp_pos=~/rds/projects/olink_proteomics/scallop/INF/work/snp_pos
   grep Q9UNN8 ${caprion}/1e-5/caprion-invn.sentinels | sort -k6,6 | join -16 -22 - ${snp_pos} | \
   awk '{gsub("chr","",$2)};1' | \
   sort -k2,2n -k3,3n
-) | cut -d ' ' -f2-4 --complement | sed 's/ /|/g' > ${caprion}/EPCR-PROC/EPCR.sentinels
+) | cut -d ' ' -f2-4 --complement | sed 's/ /|/g' > ${caprion}/EPCR-PROC/Q9UNN8_invn.sentinels
 (
   echo MarkerName Chrom Start End P prot rsid
   echo ---------- ----- ----- --- - ---- ----
   grep P04070 ${caprion}/1e-5/caprion-invn.sentinels | sort -k6,6 | join -16 -22 - ${snp_pos} | \
   awk '{gsub("chr","",$2)};1' | \
   sort -k2,2n -k3,3n
-) | cut -d' ' -f2-4 --complement | sed 's/ /|/g' > ${caprion}/EPCR-PROC/PROC.sentinels
+) | cut -d' ' -f2-4 --complement | sed 's/ /|/g' > ${caprion}/EPCR-PROC/P04070_invn.sentinels
 
 qpdf ${caprion}/scatter-histogram-boxwhisker.pdf --pages . 319,754 -- ${caprion}/${protein}/${protein}-desc.pdf
 convert ${caprion}/${protein}/${protein}-desc.pdf ${caprion}/${protein}/${protein}-desc.png

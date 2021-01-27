@@ -39,7 +39,7 @@ Associaiton statistics were based on invn(ormal) transformation, invnormal(prot)
 
 ## Sentinels
 
-Sentinels are EPCR_invn.sentinels and PROC_invn.sentinels.
+Sentinels are Q9UNN8_invn.sentinels and P04070_invn.sentinels.
 
 ### EPCR
 

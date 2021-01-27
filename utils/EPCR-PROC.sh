@@ -54,7 +54,7 @@ extract <- function(prots=c("EPCR_HUMAN","PROC_HUMAN"))
 # Isotope.Group.ID, Modified.Peptide.Sequence
   d1 <- subset(Normalized_Peptides,Protein %in% prots)
   piptides <- t(d1[,-(1:6)])
-  colnames(piptides) <- paste0(gsub("HUMAN","",d1[,2]),d1[,1])
+  colnames(piptides) <- paste0(gsub("HUMAN","",d1[,2]),d1[,1],"_",d1[,3])
 # Protein
   d2 <- subset(Protein_All_Peptides,Protein %in% prots)
   all <- t(d2[,-1])
@@ -76,5 +76,14 @@ pheatmap(cor(epcr_proc))
 dev.off()
 EPCR_PROC_corr[!lower.tri(cor(epcr_proc))] <- NA
 write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"EPCR-PROC","EPCR-PROC-corr.tsv"),quote=FALSE,sep="\t")
+
+epcr_proc_names <- colnames(epcr_proc)
+epcr_names <- epcr_proc_names[grepl("EPCR",epcr_proc_names)]
+EPCR <- data.frame(epcr_proc[,epcr_names])
+data.frame(names(EPCR))
+format(cor(EPCR),digits=3)
+names(EPCR)[1:4] <- c("EPCR_442603139","EPCR_442605396","EPCR_442582461","EPCR_442581804")
+EPCR_lm <- lm(EPCR_All~EPCR_442603139+EPCR_442605396+EPCR_442582461+EPCR_442581804,data=EPCR)
+summary(EPCR_lm)
 
 END

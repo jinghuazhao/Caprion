@@ -1,4 +1,4 @@
-# EPCR-PROC in Caprion pilot study Phase I
+# EPCR-PROC in Caprion pilot study
 
 Working directory,
 
@@ -15,6 +15,8 @@ Working directory,
 #  chr2  128177518 128186519      + P04070  PROC_HUMAN     PROC                 PROC ENSG00000115718
 ```
 
+# Phase I data
+
 ## Correlation of piptides
 
 * EPCR-PROC.tsv. The raw data.
@@ -22,6 +24,46 @@ Working directory,
 * EPCR-PROC-corr.png. The heatmap.
 
 ![Heatmap](EPCR-PROC/EPCR-PROC-corr.png)
+
+```
+                          names.EPCR.
+1 EPCR_442603139_LHM.147.0354.LQISYFR
+2 EPCR_442605396_LHM.147.0354.LQISYFR
+3           EPCR_442582461_LHMLQISYFR
+4            EPCR_442581804_TLAFPLTIR
+5                            EPCR_All
+6                             EPCR_DR
+
+               EPCR_442603139 EPCR_442605396 EPCR_442582461 EPCR_442581804 EPCR_All  EPCR_DR
+EPCR_442603139 
+EPCR_442605396 "-0.0546"
+EPCR_442582461 " 0.2541"      " 0.0815"
+EPCR_442581804 " 0.3482"      " 0.0190"      " 0.3011"
+EPCR_All       " 0.2660"      " 0.9359"      " 0.2662"      " 0.2138"
+EPCR_DR        " 0.2660"      " 0.9359"      " 0.2662"      " 0.2138"      " 1.0000"
+
+Call:
+lm(formula = EPCR_All ~ EPCR_442603139 + EPCR_442605396 + EPCR_442582461 +
+    EPCR_442581804, data = EPCR)
+
+Residuals:
+      Min        1Q    Median        3Q       Max
+-0.060649 -0.010128  0.000392  0.011153  0.056049
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)
+(Intercept)    8.7522184  0.0853057  102.60   <2e-16 ***
+EPCR_442603139 0.0111745  0.0002604   42.92   <2e-16 ***
+EPCR_442605396 0.4346305  0.0026603  163.38   <2e-16 ***
+EPCR_442582461 0.0470646  0.0028821   16.33   <2e-16 ***
+EPCR_442581804 0.0323885  0.0027846   11.63   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.01921 on 195 degrees of freedom
+Multiple R-squared:  0.9936,    Adjusted R-squared:  0.9935
+F-statistic:  7588 on 4 and 195 DF,  p-value: < 2.2e-16
+```
 
 ## Scatter, histogram and boxplots
 
@@ -102,3 +144,21 @@ chr18:12739631|9.43079e-06|P04070_invn|rs62096050
 chr20:36889971|8.93867e-06|P04070_invn|rs6098808
 chr20:36889971|8.93867e-06|P04070_invn|rs767174705
 chr21:34516707|4.38852e-06|P04070_invn|rs963950
+
+# Phase II data
+
+```
+                                     EPCR_All   EPCR_DR
+EPCR_442581804_TLAFPLTIR            0.5113919 0.6174716
+EPCR_442582461_LHMLQISYFR           0.2986443 0.4357448
+EPCR_442603139_LHM[147.0354]LQISYFR 0.7980766 0.7396526
+EPCR_442605396_LHM[147.0354]LQISYFR 0.6105076 0.5631775
+EPCR_All                            1.0000000 0.9822826
+EPCR_DR                             0.9822826 1.0000000
+```
+
+![Desc1](EPCR-PROC/EPCR-PROC-phase2-0.png)
+![Desc2](EPCR-PROC/EPCR-PROC-phase2-1.png)
+
+![Pattens of correlation](EPCR-PROC/EPCR-PROC-phase2-all.png)
+![Correlations](EPCR-PROC/EPCR-PROC-phase2-corr.png)

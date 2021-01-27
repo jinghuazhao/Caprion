@@ -62,7 +62,7 @@ R --no-save <<END
   {
     plot(PROC_All)
     hist(PROC_All)
-    boxplot(EPCR_All,horizontal = TRUE)
+    boxplot(PROC_All,horizontal = TRUE)
   })
   dev.off()
   require(ANN2)

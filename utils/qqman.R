@@ -1,4 +1,4 @@
-# 26-1-2021 JHZ
+# 27-1-2021 JHZ
 
 uniprot <- Sys.getenv("uniprot")
 protein <- Sys.getenv("protein")
@@ -14,7 +14,7 @@ tbl <- subset(tbl,!is.na(CHR)&!is.na(BP)&!is.na(P))
 par(cex=2.5)
 qq <- paste0(uniprot,"_qq.png");
 png(qq,width=12,height=10,units="in",pointsize=4,res=300)
-qq(with(tbl,P))
+qq(with(tbl,P),cex.lab=2.5)
 dev.off()
 manhattan <- paste0(uniprot,"_manhattan.png");
 png(manhattan,width=12,height=10,units="in",pointsize=4,res=300)

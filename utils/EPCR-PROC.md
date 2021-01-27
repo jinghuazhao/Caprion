@@ -4,21 +4,6 @@ Working directory,
 
 ~/rds/projects/olink_proteomics/scallop/Caprion/EPCR-PROC
 
-## Scatter, histogram and boxplots
-
-They were extracted as EPCR-PROC-desc.pdf.
-
-* ![EPCR](EPCR-PROC/EPCR-PROC-desc-0.png)
-* ![PROC](EPCR-PROC/EPCR-PROC-desc-1.png)
-
-## Correlation of piptides
-
-* EPCR-PROC.tsv. The raw data.
-* EPCR-PROC-corr.tsv. The Pearson correlation.
-* EPCR-PROC-corr.png. The heatmap.
-
-![Heatmap](EPCR-PROC/EPCR-PROC-corr.png)
-
 ## Annotations
 ```
 #    Protein Accession  Gene            Protein.Description
@@ -30,18 +15,31 @@ They were extracted as EPCR-PROC-desc.pdf.
 #  chr2  128177518 128186519      + P04070  PROC_HUMAN     PROC                 PROC ENSG00000115718
 ```
 
+## Correlation of piptides
+
+* EPCR-PROC.tsv. The raw data.
+* EPCR-PROC-corr.tsv. The Pearson correlation.
+* EPCR-PROC-corr.png. The heatmap.
+
+![Heatmap](EPCR-PROC/EPCR-PROC-corr.png)
+
+## Scatter, histogram and boxplots
+
+![EPCR](EPCR-PROC/EPCR-PROC-desc-0.png)
+![PROC](EPCR-PROC/EPCR-PROC-desc-1.png)
+
 ## Q-Q/Manhattan plots
 
-Before and after invnormal transformation.
+Associaiton statistics were based on invn(ormal) transformation, invnormal(prot)~genotypes.
 
-* ![EPCR](EPCR-PROC/Q9UNN8_invn_qq.png)
-* ![EPCR](EPCR-PROC/Q9UNN8_invn_manhattan.png)
-* ![PROC](EPCR-PROC/P04070_invn_qq.png)
-* ![PROC](EPCR-PROC/P04070_invn_manhattan.png)
+![EPCR](EPCR-PROC/Q9UNN8_invn_turboqq.png)
+![EPCR](EPCR-PROC/Q9UNN8_invn_turboman.png)
+![PROC](EPCR-PROC/P04070_invn_turboqq.png)
+![PROC](EPCR-PROC/P04070_invn_turboman.png)
 
 ## Sentinels
 
-Sentinels based on association statistics from invnormal(prot)~genotypes are EPCR.sentinels and PROC.sentinels.
+Sentinels are EPCR_invn.sentinels and PROC_invn.sentinels.
 
 ### EPCR
 

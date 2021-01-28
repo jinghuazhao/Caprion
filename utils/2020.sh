@@ -39,17 +39,17 @@ R --no-save <<END
   EPCR_PROC_corr <- cor(epcr_proc)
   corrplot(EPCR_PROC_corr,method="square",type="lower",na.label="x")
   dev.off()
-  write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
-  EPCR_PROC_corr[!lower.tri(cor(epcr_proc))] <- NA
-  write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
   library(pheatmap)
   short.mm <- c("PROC_442607670","PROC_442611348","PROC_442616032","PROC_442686905","PROC_442739582","PROC_442847259")
   r <- names(epcr_proc)
   r2 <- data.frame(long.name=r,short.name=substr(r,1,14))
   long.mm <- subset(r2,short.name%in%short.mm)[["long.name"]]
+  EPCR_PROC_corr <- cor(epcr_proc[setdiff(names(epcr_proc),long.mm)])
   png(file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-corr.png"),width=12,height=10,units="in",pointsize=4,res=300)
-  pheatmap(cor(epcr_proc[setdiff(names(epcr_proc),long.mm)]))
+  pheatmap(EPCR_PROC_corr)
   dev.off()
+  EPCR_PROC_corr[!lower.tri(EPCR_PROC_corr)] <- NA
+  write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
 #
   png(file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-0.png"),width=12,height=10,units="in",pointsize=4,res=300)
   par(mfrow=c(3,1))

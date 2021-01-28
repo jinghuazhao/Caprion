@@ -25,8 +25,8 @@ Chain PRO_0000021191	18 – 238	Endothelial protein C receptor
 
 # Topology
 
-Topological domain	18 – 210	ExtracellularSequence analysis
-Transmembrane	211 – 231	HelicalSequence analysis	
+Topological domain	18 – 210	Extracellular
+Transmembrane	211 – 231	Helical
 Topological domain	232 – 238	Cytoplasmic
 
 # Sequence

@@ -65,6 +65,16 @@ R --no-save <<END
     boxplot(PROC_All,horizontal = TRUE)
   })
   dev.off()
+  epcr_proc_names <- colnames(epcr_proc)
+  epcr_names <- epcr_proc_names[grepl("EPCR",epcr_proc_names)]
+  EPCR <- data.frame(epcr_proc[,epcr_names])
+  data.frame(names(EPCR))
+  format(cor(EPCR),digits=3)
+  head(EPCR)
+  names(EPCR)[1:4] <- c("EPCR_442581804","EPCR_442582461","EPCR_442603139","EPCR_442605396")
+  EPCR_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
+  summary(EPCR_lm)
+
   require(ANN2)
   AE <- autoencoder(Normalized_All[,-1], hidden.layers=c(100,20,30), loss.type = 'pseudo-huber',
                     activ.functions = c('tanh','linear','tanh'),

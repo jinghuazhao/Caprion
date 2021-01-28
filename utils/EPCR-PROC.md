@@ -13,6 +13,34 @@ Working directory,
 # chrom chromStart  chromEnd strand    acc uniprotName geneName geneSynonyms hgncSym         ensGene
 # chr20   33759957  33764613      + Q9UNN8  EPCR_HUMAN    PROCR         EPCR   PROCR ENSG00000101000
 #  chr2  128177518 128186519      + P04070  PROC_HUMAN     PROC                 PROC ENSG00000115718
+
+# https://www.ebi.ac.uk/pdbe/pdbe-kb/proteins/Q9UNN8
+# https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0010980#s5
+# https://www.uniprot.org/uniprot/Q9UNN8
+
+# Molecule processing
+
+Signal peptidei	1 – 17	Sequence analysis
+Chain PRO_0000021191	18 – 238	Endothelial protein C receptor
+
+# Topology
+
+Topological domain	18 – 210	ExtracellularSequence analysis
+Transmembrane	211 – 231	HelicalSequence analysis	
+Topological domain	232 – 238	Cytoplasmic
+
+# Sequence
+
+        10         20         30         40         50
+MLTTLLPILL LSGWAFCSQD ASDGLQRLHM LQISYFRDPY HVWYQGNASL 
+        60         70         80         90        100
+GGHLTHVLEG PDTNTTIIQL QPLQEPESWA RTQSGLQSYL LQFHGLVRLV 
+       110        120        130        140        150
+HQERTLAFPL TIRCFLGCEL PPEGSRAHVF FEVAVNGSSF VSFRPERALW 
+       160        170        180        190        200
+QADTQVTSGV VTFTLQQLNA YNRTRYELRE FLEDTCVQYV QKHISAENTK 
+       210        220        230 
+GSQTSRSYTS LVLGVLVGSF IIAGVAVGIF LCTGGRRC
 ```
 
 # Phase I data
@@ -155,10 +183,31 @@ EPCR_442603139_LHM[147.0354]LQISYFR 0.7980766 0.7396526
 EPCR_442605396_LHM[147.0354]LQISYFR 0.6105076 0.5631775
 EPCR_All                            1.0000000 0.9822826
 EPCR_DR                             0.9822826 1.0000000
+
+Call:
+lm(formula = EPCR_All ~ EPCR_442581804 + EPCR_442582461 + EPCR_442603139 +
+    EPCR_442605396, data = EPCR)
+
+Residuals:
+      Min        1Q    Median        3Q       Max
+-0.099107 -0.014281 -0.001071  0.013681  0.161415
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)
+(Intercept)    1.201e+01  2.372e-02  506.08   <2e-16 ***
+EPCR_442581804 7.439e-02  1.914e-03   38.86   <2e-16 ***
+EPCR_442582461 1.244e-01  1.772e-03   70.25   <2e-16 ***
+EPCR_442603139 4.275e-02  1.422e-04  300.64   <2e-16 ***
+EPCR_442605396 3.084e-02  1.459e-04  211.41   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.02638 on 1538 degrees of freedom
+Multiple R-squared:  0.9932,    Adjusted R-squared:  0.9931
+F-statistic: 5.586e+04 on 4 and 1538 DF,  p-value: < 2.2e-16
 ```
 
 ![Desc1](EPCR-PROC/EPCR-PROC-phase2-0.png)
-![Desc2](EPCR-PROC/EPCR-PROC-phase2-1.png)
 
 ![Pattens of correlation](EPCR-PROC/EPCR-PROC-phase2-all.png)
 ![Correlations](EPCR-PROC/EPCR-PROC-phase2-corr.png)

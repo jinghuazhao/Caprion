@@ -23,7 +23,7 @@ data2/bgen --> utils/plink2.sh
 utils/plink2.sh --> utils/sentinels_nold.sh
 utils/sentinels_nold.sh --> merge.sh
 ```
-![](https://tinyurl.com/965gvskh)
+![](https://tinyurl.com/29ggq5m3)
 
 ---
 

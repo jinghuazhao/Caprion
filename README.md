@@ -13,11 +13,18 @@
 * Phase II work
 
 ```mermaid
-graph LR;
+graph TB;
+utils/tensoqtl.sh
 utils/2020.sh --> EPCR-PROC
 utils/2020.sh --> data2/affymetrix.id
+data2/affymetrix.id  --> data2/bgen
 utils/qctool.sb --> data2/bgen
+data2/bgen --> utils/plink2.sh
+utils/plink2.sh --> utils/sentinels_nold.sh
+utils/sentinels_nold.sh --> merge.sh
 ```
+![](https://tinyurl.com/965gvskh)
+
 ---
 
 ## autoencoder (AE) vs PCA

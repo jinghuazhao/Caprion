@@ -1,5 +1,25 @@
 #!/usr/bin/bash
 
+#SBATCH --job-name=_qctool
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --qos=cardio
+#SBATCH --array=1-22
+#SBATCH --mem=40800
+#SBATCH --time=5-00:00:00
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_step2_%A_%a.out
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_step2_%A_%a.err
+#SBATCH --export ALL
+
+export caprion=${HOME}/Caprion
+export chr=${SLURM_ARRAY_TASK_ID}
+export interval=/rds/project/jmmh2/rds-jmmh2-post_qc_data/interval/imputed/uk10k_1000g_b37/
+export TMPDIR=/rds/user/$USER/hpc-work/
+
+echo ${p}
+
+function phase1()
+{
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --ntasks=1
 #SBATCH --job-name=qctool
@@ -10,13 +30,16 @@
 #SBATCH --error=work/qctool_%A_%a.err
 #SBATCH --export ALL
 
-export caprion=${HOME}/Caprion
-export chr=${SLURM_ARRAY_TASK_ID}
-export interval=/rds/project/jmmh2/rds-jmmh2-post_qc_data/interval/imputed/uk10k_1000g_b37/imputed
-export TMPDIR=/rds/user/$USER/hpc-work/
+  qctool -g ${interval}/impute_${chr}_interval.bgen -s $interval/interval.samples -incl-samples affymetrix.id \
+         -og ${caprion}/data/caprion-${chr}.bgen -os ${caprion}/data/caprion-${chr}.samples -bgen-bits 8
+  bgenix -g ${caprion}/data/caprion-${chr}.bgen -index -clobber
+}
 
-echo ${p}
+function phase2()
+{
+  qctool -g ${interval}/impute_${chr}_interval.bgen -s $interval/interval.samples -incl-samples ${caprion}/data2/affymetrix.id \
+         -og ${caprion}/data2/caprion-${chr}.bgen -os ${caprion}/data2/caprion-${chr}.samples -bgen-bits 8
+  bgenix -g ${caprion}/data2/caprion-${chr}.bgen -index -clobber
+}
 
-qctool -g ${interval}/impute_${chr}_interval.bgen -s $interval/interval.samples -incl-samples affymetrix.id \
-       -og ${caprion}/data/caprion-${chr}.bgen -os ${caprion}/data/caprion-${chr}.samples -bgen-bits 8
-bgenix -g ${caprion}/data/caprion-${chr}.bgen -index -clobber
+phase2

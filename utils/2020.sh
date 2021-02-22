@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 export dir=~/rds/projects/olink_proteomics
+if [ ! -d ${dir}/scallop/Caprion/data2 ]; then mkdir ${dir}/scallop/Caprion/data2; fi
 R --no-save <<END
   library(openxlsx)
   dir <- Sys.getenv("dir")
@@ -29,7 +30,10 @@ R --no-save <<END
   # Protein_DR_Filt
     dr <- Protein_DR_Filt[names(Protein_DR_Filt)%in%prots]
     colnames(dr) <- gsub("HUMAN","DR",colnames(dr))
-    cbind(piptides,all,dr)
+    peptides_all_dr <- cbind(piptides,all,dr)
+    write.table(data.frame(caprion_id=rownames(peptides_all_dr),peptides_all_dr),file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC_All.tsv"),
+                quote=FALSE,row.names=FALSE,sep="\t")
+    peptides_all_dr
   }
   load("2020.rda")
 # EPCR-PROC
@@ -92,4 +96,25 @@ R --no-save <<END
 # Reconstruct data and show states with highest anomaly scores
   recX <- reconstruct(AE, Normalized_All[,-1])
   sort(recX$anomaly_scores, decreasing = TRUE)
+# Make phenotype file
+  dir <- Sys.getenv("dir")
+  pilotsMap <- read.csv("pilotsMap_17FEB2021.csv")
+  OmicsMap <- read.csv("INTERVAL_OmicsMap_20210217.csv")
+  data <- read.csv("INTERVALdata_17FEB2021.csv")
+  head(pilotsMap)
+  dim(pilotsMap)
+  head(OmicsMap)
+  dim(OmicsMap)
+  head(data)
+  dim(data)
+  id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
+  date <- c("attendanceDate","sexPulse","monthPulse","yearPulse","agePulse")
+  covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl")
+  id_date_covars <- merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE)
+  dim(id_date_covars)
+  head(id_date_covars[c(id,date,covars)])
+  peptides_all_dr <- read.delim(file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC_All.tsv"),as.is=TRUE)
+  pheno2 <- merge(id_date_covars[c(id,date,covars)],peptides_all_dr,by="caprion_id")
+  write.table(subset(pheno2,!is.na(Affymetrix_gwasQC_bl),select=Affymetrix_gwasQC_bl),
+              file=file.path(dir,"scallop","Caprion","data2","affymetrix.id"),quote=FALSE,row.names=FALSE,col.names=FALSE)
 END

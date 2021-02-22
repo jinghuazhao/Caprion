@@ -10,7 +10,14 @@
   * [utils/ps.sh](utils/ps.sh) and [utils/ps.R](utils/ps.R) run through PhenoScanner.
   * [utils/lookup.sh](utils/lookup.sh) looks up for overlap with SomaLogic and Olink.
 * [caprion.ipynb](caprion.ipynb) is a Jupyter notebook with some preprocessing done by [utils/tensorqtl.sh](utils/tensorqtl.sh).
+* Phase II work
 
+```mermaid
+graph LR;
+utils/2020.sh --> EPCR-PROC
+utils/2020.sh --> data2/affymetrix.id
+utils/qctool.sb --> data2/bgen
+```
 ---
 
 ## autoencoder (AE) vs PCA

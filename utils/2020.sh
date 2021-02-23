@@ -1,11 +1,12 @@
 #!/usr/bin/bash
 
 export dir=~/rds/projects/olink_proteomics
+export caprion=~/rds/projects/olink_proteomics/scallop/Caprion
 if [ ! -d ${dir}/scallop/Caprion/data2 ]; then mkdir ${dir}/scallop/Caprion/data2; fi
 R --no-save <<END
-  library(openxlsx)
   dir <- Sys.getenv("dir")
 # workbook
+  library(openxlsx)
   wb <- file.path(dir,"ZYQ_EDR_28AUG2020.xlsx")
   Legend <- read.xlsx(wb, sheet = 1, startRow = 3)
   Samples <- read.xlsx(wb, sheet = 2, startRow = 6)
@@ -97,7 +98,6 @@ R --no-save <<END
   recX <- reconstruct(AE, Normalized_All[,-1])
   sort(recX$anomaly_scores, decreasing = TRUE)
 # Make phenotype file
-  dir <- Sys.getenv("dir")
   pilotsMap <- read.csv("pilotsMap_17FEB2021.csv")
   OmicsMap <- read.csv("INTERVAL_OmicsMap_20210217.csv")
   data <- read.csv("INTERVALdata_17FEB2021.csv")
@@ -117,4 +117,18 @@ R --no-save <<END
   pheno2 <- merge(id_date_covars[c(id,date,covars)],peptides_all_dr,by="caprion_id")
   write.table(subset(pheno2,!is.na(Affymetrix_gwasQC_bl),select=Affymetrix_gwasQC_bl),
               file=file.path(dir,"scallop","Caprion","data2","affymetrix.id"),quote=FALSE,row.names=FALSE,col.names=FALSE)
+  library(gap)
+  C <- "agePulse"
+  D <- "sexPulse"
+  cols <- grep("EPCR|PROC",names(pheno2))
+  P <- names(pheno2)[cols]
+  P_inv <- sapply(cols,function(x) {invnormal(pheno2[,x])})
+  colnames(P_inv) <- paste0(P,"_invn")
+  pheno2 <- within(data.frame(pheno2,P_inv),{ID_1 <- Affymetrix_gwasQC_bl; ID_2 <- Affymetrix_gwasQC_bl; missing <- 0})
+  snptest_sample(subset(pheno2,!is.na(Affymetrix_gwasQC_bl)),sample_file=file.path(dir,"scallop","Caprion","data2","caprion.sample"),
+                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
 END
+(
+  cut -d' ' -f3-5 --complement ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/caprion.pheno
+  cut -d' ' -f1,2,4,5 ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/caprion.covar
+)

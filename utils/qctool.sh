@@ -19,7 +19,7 @@ function phase2()
   plink --bfile ${caprion}/data2/caprion.bgen --maf 0.01 --make-bed --out ${caprion}/data2/caprion.01
   awk '{$1=$2};1' ${caprion}/data2/caprion.01.fam > ${caprion}/data2/caprion.fam
   cut -f2 ${caprion}/data2/caprion.01.bim > ${caprion}/data2/caprion.01.snpids
-  qctool -g ${caprion}/data2/caprion-#.bgen -s ${caprion}/data2/caprion.sample -og ${caprion}/data2/caprion.01.bgen -bgen-bits 8 \
+  qctool -g ${caprion}/data2/caprion-#.bgen -s ${caprion}/data2/caprion-1.samples -og ${caprion}/data2/caprion.01.bgen -bgen-bits 8 \
          -incl-snpids ${caprion}/data2/caprion.01.snpids
   bgenix -g ${caprion}/data2/caprion.01.bgen -index -clobber
 }

@@ -51,7 +51,7 @@ if [ ! -d ${caprion}/bgen2 ]; then mkdir ${caprion}/bgen2; fi
 seq 39 | \
 parallel -C' ' --env caprion '
   export col=$(head -1 ${caprion}/data2/caprion.pheno | cut -d" " -f1,2 --complement | cut -d" " -f {}); \
-  for v in ${col}_invn;
+  for v in ${col};
   do
       echo ${v}
       plink2 \

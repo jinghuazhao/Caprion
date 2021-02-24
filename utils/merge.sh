@@ -1,4 +1,4 @@
-# 12-4-2020 JHZ
+#/usr/bin/bash
 
 export TMPDIR=$HPC_WORK/work
 export tag=_nold
@@ -38,10 +38,32 @@ done
 cut -f5 caprion.merge | sed '1d' | sort | uniq > caprion.merge.prot
 
 R --no-save -q <<END
-  merge <- read.delim("caprion.merge",as.is=TRUE)
+  merge <- within(read.delim("caprion.merge",as.is=TRUE),{Chrom <- as.numeric(gsub("chr","",Chrom))})
   m <- subset(merge,SNP!=".")
-  write.table(m[,1:6],file="caprion-invn.sentinels",row.names=FALSE,quote=FALSE)
+  ord <- with(m,order(Chrom,End))
+  write.table(m[ord,c(1:6,9)],file="caprion-invn.sentinels",row.names=FALSE,quote=FALSE)
+  library(TwoSampleMR)
+  options(width=200)
+  write.table(round(ld_matrix(c("rs867186",subset(m,Chrom==20)[["SNP"]]),with_alleles=FALSE),digits=3),file="caprion-20ld.tsv",quote=FALSE,sep="\t")
 END
+# Not in the LD reference panel
+# rs546883904
+# rs117537961
+# rs35892192
+# rs538920223
+# rs546883904
+# rs33970207
+# rs139746733
 
 cut -d' ' -f5 caprion-invn.sentinels | sed '1d' | sort | uniq > caprion-invn.sentinels.prot
 gunzip -c hgTables.gz | awk 'length($1)<=5' | grep -f caprion-invn.sentinels.prot -
+
+# chr20:33764554_A_G rs867186
+
+cd ${caprion}/bgen2
+(
+  gunzip -c *.gz | \
+  head -1
+  zgrep -w rs867186 *gz
+) | sed 's/_invn-plink2.gz://g' > ${caprion}/rs867186.txt
+cd -

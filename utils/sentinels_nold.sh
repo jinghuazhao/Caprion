@@ -1,4 +1,4 @@
-# 12-4-2020 JHZ
+#!/usr/bin/bash
 
 function pgz1()
 # 1. extract all significant SNPs

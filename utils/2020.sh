@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
-export dir=~/rds/projects/olink_proteomics
-export caprion=~/rds/projects/olink_proteomics/scallop/Caprion
-if [ ! -d ${dir}/scallop/Caprion/data2 ]; then mkdir ${dir}/scallop/Caprion/data2; fi
+export dir=~/rds/projects/Caprion_proteomics
+export caprion=~/rds/projects/Caprion_proteomics/pilot
+if [ ! -d ${caprion}/data2 ]; then mkdir ${caprion}/data2; fi
 R --no-save <<END
   dir <- Sys.getenv("dir")
 # workbook

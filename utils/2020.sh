@@ -18,6 +18,19 @@ R --no-save <<END
   Normalized_All <- read.csv(file.path(dir,"ZYQ_Protein_Norm_All_20200813_v1.csv"))
   Protein_DR_Filt <- read.csv(file.path(dir,"ZYQ_Protein_Norm_DR_filt_20200813_v1.csv"))
   save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,file="2020.rda")
+# PCA
+  ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
+  pdf("pca-2020.pdf")
+  screeplot(ppc, npcs=20, type="lines", main="PCA screeplot")
+  with(ppc,plot(rotation[,1:2],pch=19,cex=0.6))
+  title("Eigenvectors")
+  with(ppc,cor(rotation[,1:2]))
+  with(ppc,plot(x[,1:2],pch=19,cex=0.6))
+  with(ppc,cor(x[,1:2]))
+  title("Principal components")
+  biplot(ppc,cex=0.1)
+  title("biplot")
+  dev.off()
   extract2 <- function(prots=c("EPCR_HUMAN","PROC_HUMAN"))
   {
   # Piptides by Isotope.Group.ID

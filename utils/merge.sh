@@ -47,7 +47,7 @@ R --no-save -q <<END
   write.table(round(ld_matrix(c("rs867186",subset(m,Chrom==20)[["SNP"]]),with_alleles=FALSE),digits=3),file="caprion-20ld.tsv",quote=FALSE,sep="\t")
 END
 # Not in the LD reference panel
-# rs546883904, rs117537961, rs35892192, rs538920223, rs546883904, rs33970207, rs139746733
+# rs545281213, rs190767097, rs117612661, rs33970207, rs139746733
 
 cut -d' ' -f5 caprion-invn.sentinels | sed '1d' | sort | uniq > caprion-invn.sentinels.prot
 gunzip -c hgTables.gz | awk 'length($1)<=5' | grep -f caprion-invn.sentinels.prot -

@@ -83,7 +83,7 @@ function _HLA2()
 function pgz2group()
 # 1. extract all significant SNPs
 {
-  ls ${src}/*.gz | grep invn | grep ${group} \
+  ls ${src}/*.gz | grep invn | grep ${group} | \
   sed "s|${src}/||g;s/-${group}-plink2//g;s/.gz//g" | \
   parallel -j6 -C' ' --env src --env dest --env p --env group '
   (
@@ -114,7 +114,7 @@ function _HLA2group()
     ) > ${dest}/${p}-${group}${tag}.p
     export lines=$(wc -l ${dest}/${p}-${group}${tag}.p | cut -d' ' -f1)
     if [ $lines -eq 1 ]; then
-      echo removing ${p}${tag} with $lines lines
+      echo removing ${p}-${group}${tag} with $lines lines
       rm ${dest}/${p}-${group}${tag}.p
     fi
   done

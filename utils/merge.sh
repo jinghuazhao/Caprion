@@ -60,7 +60,7 @@ function nogrouping()
 
 function grouping()
 {
-  for p in $(ls sentinels/*${group}${tag}.p | sed 's|sentinels/||g;s|'"${group}$tag"'.p||g'); do
+  for p in $(ls sentinels/*${group}${tag}.p | grep ${group} | sed 's|sentinels/||g;s|'"-${group}$tag"'.p||g'); do
   echo $p
   export p=${p}
   (
@@ -87,30 +87,31 @@ function grouping()
   done
   (
     cat work/*${group}.sentinels | head -1
-    for p in $(ls sentinels/*${group}${tag}.p | sed 's|sentinels/||g;s|'"${group}$tag"'.p||g'); do awk 'NR>1' work/${p}-${group}.sentinels; done
+    for p in $(ls sentinels/*${group}${tag}.p | sed 's|sentinels/||g;s|'"-${group}$tag"'.p||g'); do awk 'NR>1' work/${p}-${group}.sentinels; done
   ) > caprion-${group}.merge
-  cut -f5 caprion.merge | sed '1d' | sort | uniq > caprion-${group}.merge.prot
+  cut -f5 caprion-${group}.merge | sed '1d' | sort | uniq > caprion-${group}.merge.prot
   R --no-save -q <<\ \ END
     group <- Sys.getenv("group")
     merge <- within(read.delim(paste0("caprion-",group,".merge"),as.is=TRUE),{Chrom <- as.numeric(gsub("chr","",Chrom))})
     m <- subset(merge,SNP!=".")
     ord <- with(m,order(Chrom,End))
-    write.table(m[ord,c(1:6,9)],file=paste0("caprion",group,"-invn.sentinels"),row.names=FALSE,quote=FALSE)
+    write.table(m[ord,c(1:6,9)],file=paste0("caprion-",group,"-invn.sentinels"),row.names=FALSE,quote=FALSE)
     library(TwoSampleMR)
     options(width=200)
     write.table(round(ld_matrix(c("rs867186",subset(m,Chrom==20)[["SNP"]]),with_alleles=FALSE),digits=3),
                 file=paste0("caprion-",group,"-20ld.tsv"),quote=FALSE,sep="\t")
   END
   # Not in the LD reference panel
-  # rs545281213, rs190767097, rs117612661, rs33970207, rs139746733
+  # group1 rs146082057, rs544527276, rs145965345, rs527241169, rs397865498
+  # group2 rs142132444
   cut -d' ' -f5 caprion-${group}-invn.sentinels | sed '1d' | sort | uniq > caprion-${group}-invn.sentinels.prot
   gunzip -c hgTables.gz | awk 'length($1)<=5' | grep -f caprion-${group}-invn.sentinels.prot -
   # chr20:33764554_A_G rs867186
   cd ${caprion}/bgen2
   (
-    gunzip -c *-${group}.gz | \
+    gunzip -c *-${group}-plink2.gz | \
     head -1
-    zgrep -w rs867186 *gz
+    zgrep -w rs867186 *${group}-plink2.gz
   ) | sed 's/_invn-${group}-plink2.gz://g' > ${caprion}/rs867186-${group}.txt
   cd -
 }

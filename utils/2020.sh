@@ -20,17 +20,37 @@ R --no-save <<END
   save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,file="2020.rda")
 # PCA
   ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
+  pc1pc2 <- with(ppc,x)[,1:2]
+  rownames(pc1pc2) <- Normalized_All[["LIMS.ID"]]
+  eigenvec <- with(ppc,rotation)[,1:2]
+  cor(eigenvec)
+  cor(pc1pc2)
   pdf("pca-2020.pdf")
   screeplot(ppc, npcs=20, type="lines", main="PCA screeplot")
-  with(ppc,plot(rotation[,1:2],pch=19,cex=0.6))
+  plot(eigenvec,pch=19,cex=0.6)
   title("Eigenvectors")
-  with(ppc,cor(rotation[,1:2]))
-  with(ppc,plot(x[,1:2],pch=19,cex=0.6))
-  with(ppc,cor(x[,1:2]))
+  plot(pc1pc2,pch=19,cex=0.6)
   title("Principal components")
   biplot(ppc,cex=0.1)
   title("biplot")
   dev.off()
+  pdf("clustering-2020.pdf")
+# K-means clustering
+  km <- kmeans(pc1pc2,2)
+  table(with(km,cluster))
+  plot(pc1pc2, col = with(km,cluster), pch=19, cex=0.8)
+  points(with(km,centers), col = 1:2, pch = 8, cex = 2)
+  title("K-means clustering")
+# model-based clustering
+  mc <- Mclust(pc1pc2,G=2)
+  summary(mc)
+  table(with(mc,classification))
+  plot(mc, what=c("classification"))
+  title("Model-based clustering")
+  dev.off()
+  caprion_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
+  mc_caprion_mc <- cbind(caprion_mc,classification=with(mc,classification))
+  with(mc_caprion_mc,table(pc1_group,classification))
   extract2 <- function(prots=c("EPCR_HUMAN","PROC_HUMAN"))
   {
   # Piptides by Isotope.Group.ID

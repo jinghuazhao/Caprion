@@ -42,6 +42,7 @@ R --no-save <<END
   points(with(km,centers), col = 1:2, pch = 8, cex = 2)
   title("K-means clustering")
 # model-based clustering
+  library(mclust)
   mc <- Mclust(pc1pc2,G=2)
   summary(mc)
   table(with(mc,classification))
@@ -65,7 +66,7 @@ R --no-save <<END
     dr <- Protein_DR_Filt[names(Protein_DR_Filt)%in%prots]
     colnames(dr) <- gsub("HUMAN","DR",colnames(dr))
     peptides_all_dr <- cbind(piptides,all,dr)
-    write.table(data.frame(caprion_id=rownames(peptides_all_dr),peptides_all_dr),file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC_All.tsv"),
+    write.table(data.frame(caprion_id=rownames(peptides_all_dr),peptides_all_dr),file.path(dir,"pilot","EPCR-PROC","EPCR-PROC_All.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
     peptides_all_dr
   }
@@ -73,7 +74,7 @@ R --no-save <<END
 # EPCR-PROC
   epcr_proc <- extract2()
   library(corrplot)
-  png(file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-all.png"),width=12,height=10,units="in",pointsize=4,res=300)
+  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-all.png"),width=12,height=10,units="in",pointsize=4,res=300)
   EPCR_PROC_corr <- cor(epcr_proc)
   corrplot(EPCR_PROC_corr,method="square",type="lower",na.label="x")
   dev.off()
@@ -83,13 +84,13 @@ R --no-save <<END
   r2 <- data.frame(long.name=r,short.name=substr(r,1,14))
   long.mm <- subset(r2,short.name%in%short.mm)[["long.name"]]
   EPCR_PROC_corr <- cor(epcr_proc[setdiff(names(epcr_proc),long.mm)])
-  png(file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-corr.png"),width=12,height=10,units="in",pointsize=4,res=300)
+  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.png"),width=12,height=10,units="in",pointsize=4,res=300)
   pheatmap(EPCR_PROC_corr)
   dev.off()
   EPCR_PROC_corr[!lower.tri(EPCR_PROC_corr)] <- NA
-  write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
+  write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
 #
-  png(file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-0.png"),width=12,height=10,units="in",pointsize=4,res=300)
+  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-0.png"),width=12,height=10,units="in",pointsize=4,res=300)
   par(mfrow=c(3,1))
   with(epcr_proc,
   {
@@ -98,7 +99,7 @@ R --no-save <<END
     boxplot(EPCR_All,horizontal = TRUE)
   })
   dev.off()
-  png(file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC-phase2-1.png"),width=12,height=10,units="in",pointsize=4,res=300)
+  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-1.png"),width=12,height=10,units="in",pointsize=4,res=300)
   par(mfrow=c(3,1))
   with(epcr_proc,
   {
@@ -142,26 +143,27 @@ R --no-save <<END
   dim(data)
   id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
   date <- c("attendanceDate","sexPulse","monthPulse","yearPulse","agePulse")
-  covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl")
-  id_date_covars <- merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE)
+  covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl","classification")
+  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
+  id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
   dim(id_date_covars)
   head(id_date_covars[c(id,date,covars)])
-  peptides_all_dr <- read.delim(file.path(dir,"scallop","Caprion","EPCR-PROC","EPCR-PROC_All.tsv"),as.is=TRUE)
+  peptides_all_dr <- read.delim(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC_All.tsv"),as.is=TRUE)
   pheno2 <- merge(id_date_covars[c(id,date,covars)],peptides_all_dr,by="caprion_id")
   write.table(subset(pheno2,!is.na(Affymetrix_gwasQC_bl),select=Affymetrix_gwasQC_bl),
-              file=file.path(dir,"scallop","Caprion","data2","affymetrix.id"),quote=FALSE,row.names=FALSE,col.names=FALSE)
+              file=file.path(dir,"pilot","data2","affymetrix.id"),quote=FALSE,row.names=FALSE,col.names=FALSE)
   library(gap)
   C <- "agePulse"
-  D <- "sexPulse"
+  D <- c("sexPulse","classification")
   cols <- grep("EPCR|PROC",names(pheno2))
   P <- names(pheno2)[cols]
   P_inv <- sapply(cols,function(x) {invnormal(pheno2[,x])})
   colnames(P_inv) <- paste0(P,"_invn")
   pheno2 <- within(data.frame(pheno2,P_inv),{ID_1 <- Affymetrix_gwasQC_bl; ID_2 <- Affymetrix_gwasQC_bl; missing <- 0})
-  snptest_sample(subset(pheno2,!is.na(Affymetrix_gwasQC_bl)),sample_file=file.path(dir,"scallop","Caprion","data2","caprion.sample"),
+  snptest_sample(subset(pheno2,!is.na(Affymetrix_gwasQC_bl)),sample_file=file.path(dir,"pilot","data2","caprion.sample"),
                  ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
 END
 (
-  cut -d' ' -f3-5 --complement ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/caprion.pheno
-  cut -d' ' -f1,2,4,5 ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/caprion.covar
+  cut -d' ' -f3-6 --complement ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/caprion.pheno
+  cut -d' ' -f1,2,4-6 ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/caprion.covar
 )

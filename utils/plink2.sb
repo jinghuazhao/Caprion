@@ -11,7 +11,7 @@
 #SBATCH --error=/rds/user/jhz22/hpc-work/work/_step2_%A_%a.err
 #SBATCH --export ALL
 
-export caprion=${HOME}/Caprion
+export caprion=${HOME}/Caprion/pilot
 export TMPDIR=/rds/user/jhz22/hpc-work/work
 module load plink/2.00-alpha
 

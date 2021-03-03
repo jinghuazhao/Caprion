@@ -111,7 +111,7 @@ function grouping()
   (
     gunzip -c *-${group}-plink2.gz | \
     head -1
-    zgrep -w rs867186 *${group}-plink2.gz
+    zgrep -w rs867186 *-${group}-plink2.gz
   ) | sed 's/_invn-${group}-plink2.gz://g' > ${caprion}/rs867186-${group}.txt
   cd -
 }

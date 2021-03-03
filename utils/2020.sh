@@ -166,4 +166,6 @@ END
 (
   cut -d' ' -f3-6 --complement ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/caprion.pheno
   cut -d' ' -f1,2,4-6 ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/caprion.covar
+  sed '1,2d' ${caprion}/data2/caprion.sample | awk '$6==1 {print $1,$2}' > ${caprion}/data2/caprion.group1
+  sed '1,2d' ${caprion}/data2/caprion.sample | awk '$6==2 {print $1,$2}' > ${caprion}/data2/caprion.group2
 )

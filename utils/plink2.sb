@@ -61,4 +61,24 @@ function phase2()
   done
 }
 
-phase2
+function phase2group()
+{
+  export col=$(head -1 ${caprion}/data2/caprion.pheno | cut -d" " -f1,2 --complement | cut -d" " -f ${SLURM_ARRAY_TASK_ID});
+  for group in group1 group2
+  do
+     for v in ${col};
+     do
+         echo ${v}
+         plink2 \
+                --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/caprion.sample --keep ${caprion}/data2/caprion.${group} \
+                --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
+                --pheno ${caprion}/data2/caprion.pheno --pheno-name ${v} --covar ${caprion}/data2/caprion.covar \
+                --out ${caprion}/work/${v}
+         grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
+         gzip -f > ${caprion}/bgen2/${v}-${group}-plink2.gz
+         rm ${caprion}/work/${v}.${v}.glm.linear
+     done
+  done
+}
+
+phase2group

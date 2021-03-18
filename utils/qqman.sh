@@ -23,7 +23,7 @@ function qqmanhattanplot()
   '
 }
 
-export caprion=~/rds/projects/olink_proteomics/scallop/Caprion/
+export caprion=~/rds/projects/Caprion_proteomics/pilot/
 (
   echo chromosome position
   sed '1,2d' EPCR-PROC/EPCR.sentinels | tr '|' '\t' | cut -f1 | \

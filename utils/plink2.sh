@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-export caprion=${HOME}/Caprion
+export caprion=${HOME}/Caprion/pilot
 export TMPDIR=/rds/user/$USER/hpc-work/
 
 module load plink/2.00-alpha

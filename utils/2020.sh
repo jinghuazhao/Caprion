@@ -18,6 +18,7 @@ R --no-save <<END
   Normalized_All <- read.csv(file.path(dir,"ZYQ_Protein_Norm_All_20200813_v1.csv"))
   Protein_DR_Filt <- read.csv(file.path(dir,"ZYQ_Protein_Norm_DR_filt_20200813_v1.csv"))
   save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,file="2020.rda")
+  load("2020.rda")
 # PCA
   ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
   pc1pc2 <- with(ppc,x)[,1:2]
@@ -41,7 +42,7 @@ R --no-save <<END
   plot(pc1pc2, col = with(km,cluster), pch=19, cex=0.8)
   points(with(km,centers), col = 1:2, pch = 8, cex = 2)
   title("K-means clustering")
-# model-based clustering
+# Model-based clustering
   library(mclust)
   mc <- Mclust(pc1pc2,G=2)
   summary(mc)
@@ -52,6 +53,24 @@ R --no-save <<END
   caprion_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
   mc_caprion_mc <- cbind(caprion_mc,classification=with(mc,classification))
   with(mc_caprion_mc,table(pc1_group,classification))
+# Phenotype files
+  pilotsMap <- read.csv("pilotsMap_17FEB2021.csv")
+  OmicsMap <- read.csv("INTERVAL_OmicsMap_20210217.csv")
+  data <- read.csv("INTERVALdata_17FEB2021.csv")
+  head(pilotsMap)
+  dim(pilotsMap)
+  head(OmicsMap)
+  dim(OmicsMap)
+  head(data)
+  dim(data)
+  id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
+  date <- c("attendanceDate","sexPulse","monthPulse","yearPulse","agePulse")
+  covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl","classification")
+  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
+  id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
+  dim(id_date_covars)
+  head(id_date_covars[c(id,date,covars)])
+# EPCR-PROC
   extract2 <- function(prots=c("EPCR_HUMAN","PROC_HUMAN"))
   {
   # Piptides by Isotope.Group.ID
@@ -70,8 +89,6 @@ R --no-save <<END
                 quote=FALSE,row.names=FALSE,sep="\t")
     peptides_all_dr
   }
-  load("2020.rda")
-# EPCR-PROC
   epcr_proc <- extract2()
   library(corrplot)
   png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-all.png"),width=12,height=10,units="in",pointsize=4,res=300)
@@ -117,37 +134,7 @@ R --no-save <<END
   names(EPCR)[1:4] <- c("EPCR_442581804","EPCR_442582461","EPCR_442603139","EPCR_442605396")
   EPCR_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
   summary(EPCR_lm)
-
-  require(ANN2)
-  AE <- autoencoder(Normalized_All[,-1], hidden.layers=c(100,20,30), loss.type = 'pseudo-huber',
-                    activ.functions = c('tanh','linear','tanh'),
-                    batch.size = 8, optim.type = 'adam',
-                    n.epochs = 1000, val.prop = 0)
-# Plot loss during training
-  plot(AE)
-# Make reconstruction and compression plots
-  reconstruction_plot(AE, Normalized_All[,-1])
-  compression_plot(AE, Normalized_All[,-1])
-# Reconstruct data and show states with highest anomaly scores
-  recX <- reconstruct(AE, Normalized_All[,-1])
-  sort(recX$anomaly_scores, decreasing = TRUE)
-# Make phenotype file
-  pilotsMap <- read.csv("pilotsMap_17FEB2021.csv")
-  OmicsMap <- read.csv("INTERVAL_OmicsMap_20210217.csv")
-  data <- read.csv("INTERVALdata_17FEB2021.csv")
-  head(pilotsMap)
-  dim(pilotsMap)
-  head(OmicsMap)
-  dim(OmicsMap)
-  head(data)
-  dim(data)
-  id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
-  date <- c("attendanceDate","sexPulse","monthPulse","yearPulse","agePulse")
-  covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl","classification")
-  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
-  id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
-  dim(id_date_covars)
-  head(id_date_covars[c(id,date,covars)])
+# SNPTEST phenotype file
   peptides_all_dr <- read.delim(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC_All.tsv"),as.is=TRUE)
   pheno2 <- merge(id_date_covars[c(id,date,covars)],peptides_all_dr,by="caprion_id")
   write.table(subset(pheno2,!is.na(Affymetrix_gwasQC_bl),select=Affymetrix_gwasQC_bl),
@@ -162,10 +149,77 @@ R --no-save <<END
   pheno2 <- within(data.frame(pheno2,P_inv),{ID_1 <- Affymetrix_gwasQC_bl; ID_2 <- Affymetrix_gwasQC_bl; missing <- 0})
   snptest_sample(subset(pheno2,!is.na(Affymetrix_gwasQC_bl)),sample_file=file.path(dir,"pilot","data2","caprion.sample"),
                  ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
+# All data at phase 2
+  extract <- function()
+  {
+  # Piptides by Isotope.Group.ID
+    d1 <- merge(Mapping,Comp_Neq1,by="Isotope.Group.ID")
+    piptides <- t(d1[grepl("Protein|ZYQ",names(d1))][,-1])
+    colnames(piptides) <- paste0(gsub("HUMAN","",d1[,3]),d1[,1],"_",d1[,2])
+  # Protein_All
+    all <- Normalized_All[names(Normalized_All)]
+    colnames(all) <- gsub("HUMAN","All",colnames(all))
+  # Protein_DR_Filt
+    dr <- Protein_DR_Filt[names(Protein_DR_Filt)]
+    colnames(dr) <- gsub("HUMAN","DR",colnames(dr))
+    peptides_all_dr <- cbind(piptides,all,dr)
+    All <- data.frame(caprion_id=rownames(peptides_all_dr),peptides_all_dr)
+    write.table(All,file.path(dir,"pilot","data2","phase2_All.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
+    All
+  }
+# SNPTEST phenotype file
+  library(gap)
+  peptides_all_dr <- extract()
+  pheno2 <- merge(id_date_covars[c(id,date,covars)],peptides_all_dr,by="caprion_id")
+  id1_id2_missing <- with(pheno2,data.frame(ID_1=Affymetrix_gwasQC_bl, ID_2=Affymetrix_gwasQC_bl, missing=0))
+  C <- "agePulse"
+  D <- c("sexPulse","classification")
+  CD <- pheno2[c(C,D)]
+  cols <- 17:ncol(pheno2)
+  P <- names(pheno2)[cols]
+  P_inv <- sapply(cols,function(x) {invnormal(pheno2[,x])})
+  colnames(P_inv) <- paste0(P,"_invn")
+  snptest_sample(subset(data.frame(id1_id2_missing,CD,P_inv),!is.na(ID_1)),
+                 sample_file=file.path(dir,"pilot","data2","phase2.sample"),
+                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
+# AutoEncoder
+  require(ANN2)
+  AE <- autoencoder(Normalized_All[,-1], hidden.layers=c(100,20,30), loss.type = 'pseudo-huber',
+                    activ.functions = c('tanh','linear','tanh'),
+                    batch.size = 8, optim.type = 'adam',
+                    n.epochs = 1000, val.prop = 0)
+# Plot loss during training
+  plot(AE)
+# Make reconstruction and compression plots
+  reconstruction_plot(AE, Normalized_All[,-1])
+  compression_plot(AE, Normalized_All[,-1])
+# Reconstruct data and show states with highest anomaly scores
+  recX <- reconstruct(AE, Normalized_All[,-1])
+  sort(recX$anomaly_scores, decreasing = TRUE)
 END
+
+# EPCR-PROC
 (
   cut -d' ' -f3-6 --complement ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/caprion.pheno
   cut -d' ' -f1,2,4-6 ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/caprion.covar
   sed '1,2d' ${caprion}/data2/caprion.sample | awk '$6==1 {print $1,$2}' > ${caprion}/data2/caprion.group1
   sed '1,2d' ${caprion}/data2/caprion.sample | awk '$6==2 {print $1,$2}' > ${caprion}/data2/caprion.group2
 )
+# All
+(
+  cut -d' ' -f3-6 --complement ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/phase2.pheno
+  cut -d' ' -f1,2,4-6 ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/phase2.covar
+  sed '1,2d' ${caprion}/data2/phase2.sample | awk '$6==1 {print $1,$2}' > ${caprion}/data2/phase2.group1
+  sed '1,2d' ${caprion}/data2/phase2.sample | awk '$6==2 {print $1,$2}' > ${caprion}/data2/phase2.group2
+)
+
+# Comp_Neq1
+# Normalized log-intensities for every study sample (identified by their Caprion's LIMS ID), and identified IG. IGs mapping to several proteins were not normalized and are therefore not reported.
+# An IG is a peak (from Rosetta Elucidator), identified by its Isotope Group ID, matched or not to a Modified Peptide Sequence, along with the corresponding Monoisotopic m/z, retention time (Max Isotope Time Centroid) and Charge
+
+# Normalised log-intensities mapped to single proteins for All samples
+export All=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_All$")
+
+# Normalised log-intensities mapped to single proteins for samples with Detection Rate > 10%
+# DR is calculated as the proportion of samples with a raw intensity (i.e. pre-normalization, original - not logged - scale) above 50,000.
+export DR=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_DR$")

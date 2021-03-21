@@ -1,15 +1,33 @@
 # Caprion work
 
-* [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing. Their derivatives are in the utils/ subdirectory:
-  * [utils/affymetrix.sh](utils/affymetrix.sh) is for variant-specific association analysis.
-  * [utils/qctool.sb](utils/qctool.sb) is used to extract available sample and genotypes.
-  * [utils/qctool.sh](utils/qctool.sh) further extracts genotypes with MAF 0.01 only.
-  * [utils/plink2.sh](utils/plink2.sh) non-SLURM version of association analysis.
-  * [utils/qqman.sh](utils/qqman.sh) and [utils/qqman.R](utils/qqman.R) produce QQ and Manhattan plots.
-  * [utils/sentinels_nold.sh](utils/sentinels_nold.sh) and [utils/merge.sh](utils/merge.sh) select sentinels.
-  * [utils/ps.sh](utils/ps.sh) and [utils/ps.R](utils/ps.R) run through PhenoScanner.
-  * [utils/lookup.sh](utils/lookup.sh) looks up for overlap with SomaLogic and Olink.
-* [caprion.ipynb](caprion.ipynb) is a Jupyter notebook with some preprocessing done by [utils/tensorqtl.sh](utils/tensorqtl.sh).
+## Site map
+
+* Phase I work
+  * data/ contains genotype files in .bgen format
+  * bgen/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
+    * 1e-5
+    * 1e-6
+    * 5e-8
+* Phase II work
+  * data2/ contains genotype files in .bgen format
+  * bgen2/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
+    * 1e-5
+    * 1e-7
+    * 5e-8
+
+## Coding
+
+* Phase I work
+  * [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing. Their derivatives are in the utils/ subdirectory:
+    * [utils/affymetrix.sh](utils/affymetrix.sh) is for variant-specific association analysis.
+    * [utils/qctool.sb](utils/qctool.sb) is used to extract available sample and genotypes.
+    * [utils/qctool.sh](utils/qctool.sh) further extracts genotypes with MAF 0.01 only.
+    * [utils/plink2.sh](utils/plink2.sh) non-SLURM version of association analysis.
+    * [utils/qqman.sh](utils/qqman.sh) and [utils/qqman.R](utils/qqman.R) produce QQ and Manhattan plots.
+    * [utils/sentinels_nold.sh](utils/sentinels_nold.sh) and [utils/merge.sh](utils/merge.sh) select sentinels.
+    * [utils/ps.sh](utils/ps.sh) and [utils/ps.R](utils/ps.R) run through PhenoScanner.
+    * [utils/lookup.sh](utils/lookup.sh) looks up for overlap with SomaLogic and Olink.
+    * [caprion.ipynb](caprion.ipynb) is a Jupyter notebook with some preprocessing done by [utils/tensorqtl.sh](utils/tensorqtl.sh).
 * Phase II work
 
 ```mermaid

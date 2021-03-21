@@ -116,7 +116,7 @@ function grouping()
   cd -
 }
 
-export group=group1
-grouping
-export group=group2
-grouping
+nogrouping
+
+# export group=group1; grouping
+# export group=group2; grouping

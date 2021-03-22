@@ -1,0 +1,43 @@
+#!/usr/bin/bash
+
+#SBATCH --job-name=_2020
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --qos=cardio
+#SBATCH --array=1-983
+#SBATCH --mem=40800
+#SBATCH --time=5-00:00:00
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_2020_%A_%a.out
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_2020_%A_%a.err
+#SBATCH --export ALL
+
+export TMPDIR=/rds/user/jhz22/hpc-work/work
+export caprion=~/rds/projects/Caprion_proteomics/pilot
+export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/2020.id)
+export uniprot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $2}' ${caprion}/2020.id)
+
+(
+  echo snpid chr pos rsid p pr
+  join \
+  <(gunzip -c ${caprion}/bgen/${uniprot}_invn-plink2.gz | \
+    awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$2"_"a1"_"a2; print snpid,$1,$2,$3,$12}' | \
+    sort -k1,1 \
+   ) \
+  <(gunzip -c ${caprion}/bgen2/${prot}_All_invn-plink2.gz | \
+    awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$2"_"a1"_"a2; print snpid,$12}' | \
+    sort -k1,1 \
+   )
+) | grep -f > ${caprion}/work/${uniprot}-${prot}-phase1-phase2.dat.gz
+
+module load gcc/6
+R --no-save -q <<END
+  caprion <- Sys.getenv("caprion")
+  prot <- Sys.getenv("prot")
+  uniprot <- Sys.getenv("uniprot")
+  epcr <- read.table(file.path(caprion,"work",paste(uniprot,prot,"phase1-phase2.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
+  png(file.path(caprion,"work",paste0(uniprot,prot,"phase1-phase2.png",sep="-")),res=300,width=12,height=10,units="in")
+  gap::miamiplot(epcr,chr="chr",bp="pos",p="pr",pr="p",snp="rsid",cex=0.4,ylab="Phase II (top)/I (bottom)")
+  dev.off()
+END
+
+rm ${caprion}/work/${uniprot}-${prot}-phase1-phase2.dat.gz

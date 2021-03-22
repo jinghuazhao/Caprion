@@ -3,6 +3,7 @@
 export dir=~/rds/projects/Caprion_proteomics
 export caprion=~/rds/projects/Caprion_proteomics/pilot
 if [ ! -d ${caprion}/data2 ]; then mkdir ${caprion}/data2; fi
+
 R --no-save <<END
   dir <- Sys.getenv("dir")
 # workbook
@@ -19,6 +20,11 @@ R --no-save <<END
   Protein_DR_Filt <- read.csv(file.path(dir,"ZYQ_Protein_Norm_DR_filt_20200813_v1.csv"))
   save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,file="2020.rda")
   load("2020.rda")
+  Annotations[,1] <- gsub("1433","X1433",Annotations[,1])
+  Annotations[,1] <- gsub("4F","X4F",Annotations[,1])
+  Annotations[,1] <- gsub("6P","X6P",Annotations[,1])
+  prot_uniprot <- data.frame(prot=gsub("_HUMAN","",Annotations[,1]),Accession=Annotations[,2])
+  write.table(prot_uniprot,file="2020.id",col.names=FALSE,quote=FALSE,row.names=FALSE)
 # PCA
   ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
   pc1pc2 <- with(ppc,x)[,1:2]

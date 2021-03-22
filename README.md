@@ -12,7 +12,6 @@
   * data2/ contains genotype files in .bgen format
   * bgen2/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
     * 1e-5
-    * 1e-7
     * 5e-8
 
 ## Coding
@@ -71,4 +70,3 @@ Trivadis SK (2017). Variational autoencoders for anomaly detection. https://rpub
 https://github.com/diazale/gt-dimred,
 https://github.com/lmcinnes/umap,
 https://umap-learn.readthedocs.io/en/latest/.
-

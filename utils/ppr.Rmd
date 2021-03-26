@@ -48,7 +48,7 @@ The plot was produced with miamiplot() function in R/gap.
 
 The sentinels were obtained via a distance-based iterative merging -- for a given p value cutoff the procedure involves several steps:
 
-1. Obtain a list of genomewide significant variants and their (+/- 1Mb) flanking regions. For HLA region (chr6:25392021-33392022), only one sentinel is kept.
+1. Obtain a list of genomewide significant variants and their (+/- 1Mb) flanking regions. For HLA region (chr6:25392021-33392022), only one variant is kept.
 2. Identify non-overlapping regions.
 3. Select the most significant variant in these regions as sentinels; in cases there are ties, keep only one of them.
 

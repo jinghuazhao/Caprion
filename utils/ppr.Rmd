@@ -1,7 +1,7 @@
 ---
 title: "Comparison of statistical significance"
 author:
-- Jing Hua Zhao
+- 
 date: "`r Sys.Date()`"
 toc: true
 number_sections: true
@@ -32,7 +32,7 @@ The correlation are based on $z \sim n(0,1)$
 
 This offers an informative way of contrasting two vectors of p values emanating from the same chromosomal positions, and an example is given below.
 
-```{r}
+```{r echo=FALSE}
 include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
 ```
 
@@ -40,7 +40,7 @@ include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
 
 To be made.
 
-# Detailed files at CSD3
+# Files at CSD3
 
 ## Data
 
@@ -76,9 +76,9 @@ Here phase II results were based on all data (_All).
 
 The EPCR-PROC case study was reported earlier.
 
-# Further work
+# Possible work
 
-It is possible to work on the piptides and also those above limit of detection (_DR).
+It is possible to work on the piptides and also only those above limit of detection (_DR).
 
 # Appendix: A toy example
 

@@ -1,7 +1,7 @@
 ---
-title: "Comparison of statistical significance"
+title: "Caprion proteomics phase I/II studies"
 author:
-- 
+- Jing Hua Zhao,..., Adam Buterworth
 date: "`r Sys.Date()`"
 toc: true
 number_sections: true
@@ -48,13 +48,18 @@ The plot was produced with miamiplot() function in R/gap.
 
 The sentinels were obtained via a distance-based iterative merging -- for a given p value cutoff the procedure involves several steps:
 
-1. Obtain a list of genomewide significant variants and their (+/- 1Mb) flanking regions
-2. Identify non-overlapping regions
-3. Select the most significant variant in these regions as sentinels
+1. Obtain a list of genomewide significant variants and their (+/- 1Mb) flanking regions. For HLA region (chr6:25392021-33392022), only one sentinel is kept.
+2. Identify non-overlapping regions.
+3. Select the most significant variant in these regions as sentinels; in cases there are ties, keep only one of them.
 
-in cases there are ties, keep only one of them.
+Step 2 is implemented using `bedtools`. Step 3 is facilitaed with an R:
 
-To be made.
+```r
+  library(dplyr)
+  sentinels <- merged_results %>% group_by(trait,Chrom,Start,End) %>% slice(which.min(P))
+```
+
+Our focus here is on $10^{-5}$ and $5 \times 10^{-8}$.
 
 # Files at CSD3
 

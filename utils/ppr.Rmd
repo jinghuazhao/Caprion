@@ -1,0 +1,104 @@
+---
+title: "Comparison of statistical significance"
+author:
+- Jing Hua Zhao
+date: "`r Sys.Date()`"
+toc: true
+number_sections: true
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(png)
+```
+
+The documentation is concerned about the two-phase Caprion proteomics study.
+
+## Statistical models
+
+Association statistics were obtained according to the following model.
+
+> invnormal(protein) ~ covariates + genotypes
+
+## Phase I and Phase II correlation
+
+The correlation are based on $z \sim n(0,1)$
+
+## Miami plots
+
+This offers an informative way of contrasting two vectors of p values emanating from the same chromosomal positions, and an example is given below.
+
+```{r}
+include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
+```
+
+## Overlap of sentinels
+
+To be made.
+
+# Detailed files at CSD3
+
+## Data
+
+/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/
+
+## Analysis
+
+pilot/ subdirectory of data.
+
+Item           | I                   | II
+---------------|---------------------|-------------------
+Data           | data                | data2
+PLINK2 results | bgen (1e-5, 5e-8)   | bgen2 (1e-5, 5e-8)
+
+where sentinels from specific p value cutoff are in their own named directories, i.e., 1e-5, 5e-8.
+
+# A summary
+
+Item      |I/protein| II/protein
+----------|---------|-----------
+N         | 196     | 1488
+----------|---------|-----------
+Sentinels |
+----------|---------|-----------
+1e-5      |25766/987| 16298/982
+----------|---------|-----------
+5e-8      |226/203  | 192/178
+----------|---------|-----------
+
+Here phase II results were based on all data (_All).
+
+# A case study
+
+The EPCR-PROC case study was reported earlier.
+
+# Further work
+
+It is possible to work on the piptides and also those above limit of detection (_DR).
+
+# Appendix: A toy example
+
+The idea is best illustrated with a toy example involving two vectors of p values (`p` and `pr`) below
+
+```{r echo=TRUE}
+# z=-1.96 correspond to a two-sided p=0.05
+z <- function(p) -qnorm(p/2)
+z(0.05)
+p <- 1:10/10; p
+pr <- 1:10/100; pr
+cor(z(p),z(pr))
+wilcox.test(p,pr,alternative="less",paired=TRUE)
+```
+where the correlation is obtained according to $n(0,1)$ and a nonparametric test of difference conducted. Note in particular the way the statistical significance was reported, for `pr` was generated an order of magnitude smaller than `p`.
+
+Information regarding the Miami plot above.
+
+```{r}
+img_path <- "miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png"
+img <- readPNG(img_path, native = TRUE, info = TRUE)
+attr(img, "info")
+```

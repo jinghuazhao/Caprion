@@ -162,14 +162,14 @@ R --no-save <<END
     d1 <- merge(Mapping,Comp_Neq1,by="Isotope.Group.ID")
     piptides <- t(d1[grepl("Protein|ZYQ",names(d1))][,-1])
     colnames(piptides) <- paste0(gsub("HUMAN","",d1[,3]),d1[,1],"_",d1[,2])
+    piptides <- data.frame(caprion_id=rownames(piptides),piptides)
   # Protein_All
     all <- Normalized_All[names(Normalized_All)]
     colnames(all) <- gsub("HUMAN","All",colnames(all))
   # Protein_DR_Filt
     dr <- Protein_DR_Filt[names(Protein_DR_Filt)]
     colnames(dr) <- gsub("HUMAN","DR",colnames(dr))
-    peptides_all_dr <- cbind(piptides,all,dr)
-    All <- data.frame(caprion_id=rownames(peptides_all_dr),peptides_all_dr)
+    All <- merge(merge(piptides,all,by.x="caprion_id",by.y="LIMS.ID"),dr,by.x="caprion_id",by.y="LIMS.ID")
     write.table(All,file.path(dir,"pilot","data2","phase2_All.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
     All
   }
@@ -229,3 +229,5 @@ export All=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_All
 # Normalised log-intensities mapped to single proteins for samples with Detection Rate > 10%
 # DR is calculated as the proportion of samples with a raw intensity (i.e. pre-normalization, original - not logged - scale) above 50,000.
 export DR=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_DR$")
+
+# ls miamiplot/|sed 's/-phase1-phase2.png//;s/-/\t/' | cut -f2 | grep -f - -v 2020.id > 2020.left

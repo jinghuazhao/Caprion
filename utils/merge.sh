@@ -2,6 +2,7 @@
 
 export TMPDIR=$HPC_WORK/work
 export tag=_nold
+export caprion=~/rds/projects/Caprion_proteomics/pilot
 
 function nogrouping()
 {
@@ -53,8 +54,8 @@ function nogrouping()
   (
     gunzip -c *.gz | \
     head -1
-    zgrep -w rs867186 *gz
-  ) | sed 's/_invn-plink2.gz://g' > ${caprion}/rs867186.txt
+    ls *.gz | parallel -j20 -C' ' 'zgrep -w rs867186 {}'
+  ) | sed 's/_invn-plink2.gz://g' > rs867186.txt
   cd -
 }
 

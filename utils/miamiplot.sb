@@ -39,6 +39,8 @@ R --no-save -q <<END
   uniprot_prot <- read.table(file.path(caprion,"work",paste(uniprot,prot,"phase1-phase2.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
   png(file.path(caprion,"miamiplot",paste(uniprot,prot,"phase1-phase2.png",sep="-")),res=300,width=12,height=10,units="in")
   gap::miamiplot(uniprot_prot,chr="chr",bp="pos",p="pr",pr="p",snp="rsid",cex=0.4,ylab="Phase II (top)/I (bottom)")
+  cor_p1_p2 <- with(uniprot_prot,cor(gap::log10p(p),gap::log10p(pr),use="complete.obs",method="spearman"))
+  legend("topright",sprintf("Spearman r(log10(p),log10(pr))=%.4f",cor_p1_p2))
   dev.off()
 END
 

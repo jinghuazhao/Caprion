@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-export caprion=${HOME}/Caprion
+export caprion=${HOME}/Caprion/pilot
 
 function phase1()
 {

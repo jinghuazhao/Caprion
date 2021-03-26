@@ -16,7 +16,7 @@ library(knitr)
 library(png)
 ```
 
-The documentation is concerned about the two-phase Caprion proteomics study.
+The documentation considers the reationale and elementary results the two-phase Caprion proteomics study.
 
 ## Statistical models
 
@@ -24,19 +24,35 @@ Association statistics were obtained according to the following model.
 
 > invnormal(protein) ~ covariates + genotypes
 
+The genotypes were in .bgen format with MAF > 0.01 and the association analysis was furnished with PLINK v2 available on CSD3 through `module load plink/2.00-alpha`.
+
 ## Phase I and Phase II correlation
 
-The correlation are based on $z \sim n(0,1)$
+Genome-wide p values at both phases were used.
+
+To improve the property of statistics involving p values, they are converted to their normal(0, 1) deviates ($z$) for calculation of correlations. Without loss of generality, let $z$>0 and for a two-sided p value, we have $p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z)$ due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative distribution function.
+
+We therefore have the R function `z <- function(p) -qnorm(p/2)`.
 
 ## Miami plots
 
-This offers an informative way of contrasting two vectors of p values emanating from the same chromosomal positions, and an example is given below.
+This visually contrasts two vectors of p values emanating from the same chromosomal positions, and an example is given below.
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.cap="P22626-ROA2 Miami plot"}
 include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
 ```
 
+The plot was produced with miamiplot() function in R/gap.
+
 ## Overlap of sentinels
+
+The sentinels were obtained via a distance-based iterative merging -- for a given p value cutoff the procedure involves several steps:
+
+* Obtain a list of genomewide significant variants and their flanking regions
+* Identify non-overlapping regions
+* Select the most significant variant in these regions as sentinels
+
+in cases there are ties, keep only one of them.
 
 To be made.
 
@@ -97,7 +113,7 @@ where the correlation is obtained according to $n(0,1)$ and a nonparametric test
 
 Information regarding the Miami plot above.
 
-```{r}
+```{r echo=FALSE}
 img_path <- "miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png"
 img <- readPNG(img_path, native = TRUE, info = TRUE)
 attr(img, "info")

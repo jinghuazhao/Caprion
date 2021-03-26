@@ -56,7 +56,9 @@ Step 2 is implemented using `bedtools`. Step 3 is facilitaed with an R:
 
 ```r
   library(dplyr)
-  sentinels <- merged_results %>% group_by(trait,Chrom,Start,End) %>% slice(which.min(P))
+  sentinels <- merged_results %>%
+               group_by(trait,Chrom,Start,End) %>%
+               slice(which.min(P))
 ```
 
 Our focus here is on $10^{-5}$ and $5 \times 10^{-8}$.

@@ -230,4 +230,11 @@ export All=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_All
 # DR is calculated as the proportion of samples with a raw intensity (i.e. pre-normalization, original - not logged - scale) above 50,000.
 export DR=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_DR$")
 
-# ls miamiplot/|sed 's/-phase1-phase2.png//;s/-/\t/' | cut -f2 | grep -f - -v 2020.id > 2020.left
+# a list of unplotted Miami plot
+# ls miamiplot/24-03-2021|sed 's/-phase1-phase2.png//;s/-/\t/' | cut -f2 | grep -f - -v 2020.id > 2020.left
+
+export a=${caprion}/bgen/5e-8/caprion-invn.sentinels
+export b=${caprion}/bgen2/5e-8/caprion-invn.sentinels
+bedtools intersect -a <(awk '{if(NR>1) $1="chr"$1;print}' $a | tr ' ' '\t') \
+                   -b <(awk '{if(NR>1) $1="chr"$1;print}' $b | tr ' ' '\t') \
+                   -wa -wb -loj

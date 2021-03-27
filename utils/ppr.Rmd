@@ -18,7 +18,7 @@ library(knitr)
 library(png)
 ```
 
-The documentation considers the reationale and elementary results from the two-phase Caprion proteomics study.
+The documentation provides the reationale and elementary results from the two-phase Caprion proteomics study.
 
 Phase I (study code ZWK) included 196 samples and Phase II (study code ZYQ) contained 1,488 samples.
 
@@ -37,7 +37,7 @@ $$
 invnormal(protein) \sim covariates + genotypes
 \end{equation*}
 $$
-For phase II model, the covariate in includes sample classificaiton according to model-based clustering.
+For phase II model, the covariates include sample classificaiton according to model-based clustering.
 
 The genotypes were in .bgen format with MAF > 0.01 and the association analysis was furnished with PLINK v2 available on CSD3 through `module load plink/2.00-alpha`.
 
@@ -62,7 +62,9 @@ Step 2 is implemented using `bedtools`. Step 3 is facilitaed with an R:
 
 Genome-wide p values at both phases were used.
 
-To improve the property of statistics involving p values, they are converted to their normal(0, 1) deviates ($z$) for calculation of correlations. Without loss of generality, let $z$>0 (or $z$=$-z$ otherwise) and for a two-sided p value, we have $p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z)$ due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative distribution function.
+To improve the property of statistics involving p values, they are converted to their normal(0, 1) deviates ($z$) for calculation of correlations.
+
+Without loss of generality, let $z$>0 (or $z$=$-z$ otherwise) and for a two-sided p value, we have $$p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z)$$ due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative distribution function.
 
 We therefore have the R function `z <- function(p) -qnorm(p/2)`.
 
@@ -112,7 +114,9 @@ Here phase II results were based on all data (_All, normalised log-intensities f
 
 The EPCR-PROC case study was reported earlier.
 
-# Possible work
+# Reflections
+
+It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger. It is unclear if this is due to a systematic bias in the measurement.
 
 It is possible to work on the piptides and/or also only those above limit of detection (_DR, normalised log-intensities for every sample with detection rate >10%).
 
@@ -132,6 +136,18 @@ include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
 
 <div id="refs"></div>
 
+---
+references:
+- id: zyq
+  title: Summary Report Slides For: Biomarker Discovery Analysis of Human Plasma Using a NonTargeted LC-MS/MS Approach
+  author:
+  - caprion
+  type: article-journal
+  issued:
+    year: 2020
+    month: 9
+---
+
 # Appendix: A toy example
 
 The idea is best illustrated with a toy example involving two vectors of p values (`p` and `pr`) below
@@ -145,7 +161,7 @@ pr <- 1:10/100; pr
 cor(z(p),z(pr))
 wilcox.test(p,pr,alternative="less",paired=TRUE)
 ```
-where the correlation is obtained according to $n(0,1)$ and a nonparametric test of difference conducted. Note in particular the way the statistical significance was reported, for `pr` was generated an order of magnitude smaller than `p`.
+where the correlation is obtained according to [0,1] and a nonparametric test of difference conducted. Note in particular the way the statistical significance was reported, for `pr` was generated an order of magnitude smaller than `p`.
 
 Information regarding the Miami plot above.
 

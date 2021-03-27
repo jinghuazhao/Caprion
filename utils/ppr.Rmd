@@ -6,8 +6,8 @@ date: "`r Sys.Date()`"
 toc: true
 number_sections: true
 output:
-  pdf_document: default
-  html_document: default
+  pdf_document2: default
+  html_document2: default
 bibliography: ppr.bib
 csl: nature-genetics.csl
 ---
@@ -34,11 +34,11 @@ agreed excellently with the two-class membership provided by the company.
 ## Association analysis
 
 Association statistics were obtained according to model \@ref(eq:model).
-$$
+
 \begin{equation}
 invnormal(protein) \sim covariates + genotypes (\#eq:model)
 \end{equation}
-$$
+
 For phase II model, the covariates include sample classificaiton according to model-based clustering.
 
 The genotypes were in .bgen format with MAF > 0.01 and the association analysis was furnished with PLINK v2 available on CSD3 through `module load plink/2.00-alpha`.

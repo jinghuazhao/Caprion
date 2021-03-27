@@ -14,8 +14,10 @@ csl: nature-genetics.csl
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(bookdown)
 library(knitr)
 library(png)
+library(tinytex)
 ```
 
 The documentation provides the reationale and elementary results from the two-phase Caprion proteomics study.
@@ -24,18 +26,18 @@ Phase I (study code ZWK) included 196 samples and Phase II (study code ZYQ) cont
 
 ## Exploratory analysis
 
-An undisclosed pattern was reported in [@zyq] but recovered through PCA.
+An undisclosed pattern was reported in @zyq but recovered through PCA.
 
 The clustering based on PC1 and PC2 featured poorly with K-means but perfectly with model-based clustering, which 
 agreed excellently with the two-class membership provided by the company.
 
 ## Association analysis
 
-Association statistics were obtained according to the following model.
+Association statistics were obtained according to model \@ref(eq:model).
 $$
-\begin{equation*}
-invnormal(protein) \sim covariates + genotypes
-\end{equation*}
+\begin{equation}
+invnormal(protein) \sim covariates + genotypes (\#eq:model)
+\end{equation}
 $$
 For phase II model, the covariates include sample classificaiton according to model-based clustering.
 
@@ -45,7 +47,7 @@ The genotypes were in .bgen format with MAF > 0.01 and the association analysis 
 
 The sentinels were obtained via a distance-based iterative merging -- for a given p value cutoff the procedure involves several steps:
 
-1. Obtain a list of genomewide significant variants and their (+/- 1Mb) flanking regions. For HLA region (chr6:25392021-33392022), only one variant is kept.
+1. Obtain a list of genomewide significant variants and their (+/- 1Mb) flanking regions. For HLA region (build 37, chr6:25392021-33392022), only one variant is kept.
 2. Identify non-overlapping regions.
 3. Select the most significant variant in these regions as sentinels; in cases there are ties, keep only one of them.
 
@@ -64,7 +66,13 @@ Genome-wide p values at both phases were used.
 
 To improve the property of statistics involving p values, they are converted to their normal(0, 1) deviates ($z$) for calculation of correlations.
 
-Without loss of generality, let $z$>0 (or $z$=$-z$ otherwise) and for a two-sided p value, we have $$p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z)$$ due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative distribution function.
+Without loss of generality, let $z$>0 (or $z$=$-z$ otherwise) and for a two-sided p value, we have 
+
+$$\begin{equation}
+p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z) (\#eq:pvalue)
+\end{equation}$$
+
+due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative distribution function.
 
 We therefore have the R function `z <- function(p) -qnorm(p/2)`.
 
@@ -132,23 +140,18 @@ include_graphics("clustering-2020-1.png")
 include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
 ```
 
-# References {-}
+# References
 
 <div id="refs"></div>
 
 ---
-references:
-- id: zyq
-  title: Summary Report Slides For: Biomarker Discovery Analysis of Human Plasma Using a NonTargeted LC-MS/MS Approach
-  author:
-  - caprion
-  type: article-journal
-  issued:
-    year: 2020
-    month: 9
+nocite: |
+@zyq
 ---
 
-# Appendix: A toy example
+# (APPENDIX) Appendix {-}
+
+# Correlation between p values and their difference
 
 The idea is best illustrated with a toy example involving two vectors of p values (`p` and `pr`) below
 
@@ -163,10 +166,21 @@ wilcox.test(p,pr,alternative="less",paired=TRUE)
 ```
 where the correlation is obtained according to [0,1] and a nonparametric test of difference conducted. Note in particular the way the statistical significance was reported, for `pr` was generated an order of magnitude smaller than `p`.
 
-Information regarding the Miami plot above.
+# Information regarding the Miami plot above.
 
 ```{r echo=FALSE}
 img_path <- "miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png"
 img <- readPNG(img_path, native = TRUE, info = TRUE)
 attr(img, "info")
 ```
+---
+references:
+- id: zyq
+  title: Summary Report Slides For: Biomarker Discovery Analysis of Human Plasma Using a NonTargeted LC-MS/MS Approach
+  author:
+  - caprion
+  type: article-journal
+  issued:
+    year: 2020
+    month: 9
+---

@@ -3,13 +3,14 @@ title: "Analysis of phase II Caprion proteomics data"
 author:
 - Jing Hua Zhao,..., Adam Buterworth
 date: "`r Sys.Date()`"
-toc: true
+toc: false
 number_sections: true
 output:
-  pdf_document2: default
-  html_document2: default
-bibliography: ppr.bib
+  bookdown::word_document2: default
+bibliography: [packages.bib, ppr.bib]
+link-citations: yes
 csl: nature-genetics.csl
+nocite: '@*'
 ---
 
 ```{r setup, include=FALSE}
@@ -20,6 +21,10 @@ library(png)
 library(tinytex)
 ```
 
+```{r, include=FALSE}
+knitr::write_bib(file = 'packages.bib')
+```
+
 The documentation provides the reationale and elementary results from the two-phase Caprion proteomics study.
 
 Phase I (study code ZWK) included 196 samples and Phase II (study code ZYQ) contained 1,488 samples.
@@ -28,7 +33,7 @@ Phase I (study code ZWK) included 196 samples and Phase II (study code ZYQ) cont
 
 An undisclosed pattern was reported in @zyq but recovered through PCA.
 
-The clustering based on PC1 and PC2 featured poorly with K-means but perfectly with model-based clustering, which 
+The clustering based on PC1 and PC2 featured poorly with K-means \@ref(fig:kmeans) but perfectly with model-based clustering \@ref(fig:mclust), which 
 agreed excellently with the two-class membership provided by the company.
 
 ## Association analysis
@@ -68,17 +73,17 @@ To improve the property of statistics involving p values, they are converted to 
 
 Without loss of generality, let $z$>0 (or $z$=$-z$ otherwise) and for a two-sided p value, we have 
 
-$$\begin{equation}
+\begin{equation}
 p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z) (\#eq:pvalue)
-\end{equation}$$
+\end{equation}
 
-due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative distribution function.
+due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative normal distribution function.
 
 We therefore have the R function `z <- function(p) -qnorm(p/2)`.
 
 ## Miami plots
 
-This visually contrasts two vectors of p values emanating from the same chromosomal positions, and an example is given below.
+This visually contrasts two vectors of p values emanating from the same chromosomal positions, and an example on P22626-ROA2 \@ref(fig:P22626_ROA2) is given below.
 
 The plot was produced with miamiplot() function in R/gap.
 
@@ -128,26 +133,21 @@ It is somewhat counterintuitive not to see more significant results from phase I
 
 It is possible to work on the piptides and/or also only those above limit of detection (_DR, normalised log-intensities for every sample with detection rate >10%).
 
-```{r echo=FALSE, fig.cap="K-means clustering of phase II proteins"}
+```{r kmeans, fig.cap="K-means clustering of phase II proteins", echo=FALSE}
 include_graphics("clustering-2020-0.png")
 ```
 
-```{r echo=FALSE, fig.cap="Model-based clustering of phase II proteins"}
+```{r mclust, fig.cap="Model-based clustering of phase II proteins", echo=FALSE}
 include_graphics("clustering-2020-1.png")
 ```
 
-```{r echo=FALSE, fig.cap="P22626-ROA2 Miami plot"}
+```{r P22626_ROA2, fig.cap="P22626-ROA2 Miami plot", echo=FALSE}
 include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
 ```
 
 # References
 
 <div id="refs"></div>
-
----
-nocite: |
-@zyq
----
 
 # (APPENDIX) Appendix {-}
 
@@ -166,21 +166,10 @@ wilcox.test(p,pr,alternative="less",paired=TRUE)
 ```
 where the correlation is obtained according to [0,1] and a nonparametric test of difference conducted. Note in particular the way the statistical significance was reported, for `pr` was generated an order of magnitude smaller than `p`.
 
-# Information regarding the Miami plot above.
+# Information regarding the Miami plot
 
 ```{r echo=FALSE}
 img_path <- "miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png"
 img <- readPNG(img_path, native = TRUE, info = TRUE)
 attr(img, "info")
 ```
----
-references:
-- id: zyq
-  title: Summary Report Slides For: Biomarker Discovery Analysis of Human Plasma Using a NonTargeted LC-MS/MS Approach
-  author:
-  - caprion
-  type: article-journal
-  issued:
-    year: 2020
-    month: 9
----

@@ -231,7 +231,7 @@ export All=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_All
 export DR=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_DR$")
 
 # a list of unplotted Miami plot
-# ls miamiplot/24-03-2021|sed 's/-phase1-phase2.png//;s/-/\t/' | cut -f2 | grep -f - -v 2020.id > 2020.left
+ls miamiplot/|sed 's/-phase1-phase2.png//;s/-/\t/' | cut -f2 | grep -f - -v 2020.id > 2020.left
 
 export a=${caprion}/bgen/5e-8/caprion-invn.sentinels
 export b=${caprion}/bgen2/5e-8/caprion-invn.sentinels

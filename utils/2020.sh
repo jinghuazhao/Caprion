@@ -3,6 +3,7 @@
 export dir=~/rds/projects/Caprion_proteomics
 export caprion=~/rds/projects/Caprion_proteomics/pilot
 if [ ! -d ${caprion}/data2 ]; then mkdir ${caprion}/data2; fi
+if [ ! -d ${caprion}/bgen2 ]; then mkdir ${caprion}/bgen2; fi
 
 R --no-save <<END
   dir <- Sys.getenv("dir")
@@ -233,8 +234,9 @@ export DR=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_DR$"
 # a list of unplotted Miami plot
 ls miamiplot/|sed 's/-phase1-phase2.png//;s/-/\t/' | cut -f2 | grep -f - -v 2020.id > 2020.left
 
-export a=${caprion}/bgen/5e-8/caprion-invn.sentinels
-export b=${caprion}/bgen2/5e-8/caprion-invn.sentinels
+export threshold=1e-6
+export a=${caprion}/bgen/${threshold}/caprion-invn.sentinels
+export b=${caprion}/bgen2/${threshold}/caprion-invn.sentinels
 bedtools intersect -a <(awk '{if(NR>1) $1="chr"$1;print}' $a | tr ' ' '\t') \
                    -b <(awk '{if(NR>1) $1="chr"$1;print}' $b | tr ' ' '\t') \
                    -wa -wb -loj

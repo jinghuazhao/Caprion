@@ -38,33 +38,35 @@ Phase I (study code ZWK) included 196 samples and Phase II (study code ZYQ) cont
 
 ## Exploratory analysis
 
-An undisclosed pattern was recovered through PCA.
-
-The clustering based on PC1 and PC2 featured poorly with K-means but perfectly with model-based clustering, which 
-agreed excellently with the two-class membership provided by the company.
-
-```{r cluster, fig.cap="Figure 1. Pattern in phase II proteins", fig.height=10, echo=FALSE}
+```{r, echo=FALSE}
   load("2020.rda")
 # PCA
   ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
   pc1pc2 <- with(ppc,x)[,1:2]
 # K-means clustering
   km <- kmeans(pc1pc2,2)
+# Model-based clustering
+  suppressPackageStartupMessages(library(mclust))
+  mc <- Mclust(pc1pc2,G=2)
+  caprion_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
+  mc_caprion_mc <- cbind(caprion_mc,classification=with(mc,classification))
+```
+An undisclosed pattern was recovered through PCA.
+
+The clustering based on PC1 and PC2 featured poorly with K-means but perfectly with model-based clustering (**classification**), which 
+agreed excellently with the two-class membership provided by Caprion (**pc1_group**) as shown in the following table.
+
+```{r ctable, echo=FALSE}
+  with(mc_caprion_mc,table(pc1_group,classification))
+```
+
+```{r cluster, fig.cap="Figure 1. Pattern in phase II proteins", fig.height=10, echo=FALSE}
   par(mfrow=c(2,1))
   plot(pc1pc2, col = with(km,cluster), pch=19, cex=0.8)
   points(with(km,centers), col = 1:2, pch = 8, cex = 2)
   title("K-means clustering")
-# Model-based clustering
-  suppressPackageStartupMessages(library(mclust))
-  mc <- Mclust(pc1pc2,G=2)
   plot(mc, what=c("classification"))
   title("Model-based clustering")
-```
-
-```{r ctable, echo=FALSE}
-  caprion_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
-  mc_caprion_mc <- cbind(caprion_mc,classification=with(mc,classification))
-  with(mc_caprion_mc,table(pc1_group,classification))
 ```
 
 ## Association analysis
@@ -86,7 +88,7 @@ The sentinels were obtained via a distance-based iterative merging -- for a give
 2. Identify non-overlapping regions.
 3. Select the most significant variant in these regions as sentinels; in cases there are ties, keep only one of them.
 
-Step 2 is implemented using `bedtools`. Step 3 can be facilitaed with an R:
+Step 2 is implemented using `bedtools`. Step 3 can be facilitated with R:
 
 ```r
   library(dplyr)
@@ -109,7 +111,28 @@ $$
 
 due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative normal distribution function.
 
-```{r normal, echo=FALSE, fig.cap="Figure 2. Normal(0,1) distribution", fig.width=6, fig.height=4}
+```{r function, fig.cap="Figure 2. Normal(0,1) distribution", fig.width=6, fig.height=4, echo=FALSE}
+plotp <- function(mean=0, sd=1, z=1.96)
+{
+  lb <- -z; ub <- z
+  x <- seq(-5,5,length=100)*sd + mean
+  hx <- dnorm(x,mean,sd)
+  plot(x, hx, type="n", xlab="z", ylab="", main="Normal Distribution", axes=FALSE)
+  lines(x, hx)
+  i <- x <= lb
+  polygon(c(-5,x[i],lb), c(0,hx[i],0), col="red")
+  i <- x >= ub
+  polygon(c(ub,x[i],5), c(0,hx[i],0), col="red")
+  area <- pnorm(lb, mean, sd) + 1 - pnorm(ub, mean, sd)
+  result <- paste("P(z<=",lb,"| z>=",ub,") =", signif(area, digits=3))
+  mtext(result,3)
+  axis(1, at=c(-z, 0, z), pos=0)
+}
+
+plotp()
+```
+
+```{r normal, echo=FALSE, eval=FALSE, fig.cap="Figure 2. Normal(0,1) distribution", fig.width=6, fig.height=4}
 z0 <- 1.96
 z <- 5
 ea <- seq(-z, z, length = 10000)

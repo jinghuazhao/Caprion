@@ -92,7 +92,7 @@ The sentinels were obtained via a distance-based iterative merging -- for a give
 2. Identify non-overlapping regions.
 3. Select the most significant variant in these regions as sentinels; in cases there are ties, keep only one of them.
 
-Step 2 is implemented using `bedtools`. Step 3 can be facilitated with R:
+Step 2 is implemented using `bedtools`. Step 3 produces unique sentinels per protein and can be facilitated with R:
 
 ```r
   library(dplyr)
@@ -164,7 +164,7 @@ We therefore have the R function `z <- function(p) -qnorm(p/2)`.
 
 This visually contrasts two vectors of p values emanating from the same chromosomal positions, and an example on Q9Y6E2-BZW2 is given below.
 
-The plot was produced with miamiplot() function in R/gap.
+The plot was produced with the `miamiplot()` function in R/gap.
 
 ```{r Q9Y6E2-BZW2, fig.cap="Figure 3. Q9Y6E2-BZW2 Miami plot", fig.height=7, fig.wdith=8, echo=FALSE}
 include_graphics("miamiplot/Q9Y6E2-BZW2-phase1-phase2.png")
@@ -178,13 +178,13 @@ Our focus here is on $10^{-6}$ and $5 \times 10^{-8}$. There were little overlap
 
 ## Data
 
-The raw data as with Caprion report can be found from the following directory.
+The raw data as with Caprion report can be found from the following directory:
 
 /rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/
 
 ## Analysis
 
-The analysis as with derived data and results can be found from this subdirectory.
+The analysis as with derived data and results can be found from this subdirectory:
 
 pilot/
 
@@ -216,9 +216,9 @@ The EPCR-PROC case study was reported earlier.
 
 # Reflections
 
-A study of 196 individuals appeared sufficient to see statistical significance at $10^{-5}$ level; however for $5\times 10^{-8}$ even N=1,488 appeared not sufficient though it did boost the number of signals at $10^{-6}$. The fact that little overlaps were seen from $10^{-5}$ and $5\times 10^{-8}$ suggested that the former more likely generated false positives while the latter more likely to be equally unreliable, leaving the only $10^{-6}$ to be a good balance of false positive and power.
+A study of 196 individuals appeared sufficient to see statistical significance at $10^{-5}$ level; however for $5\times 10^{-8}$ even N=1,488 appeared not sufficient though it did boost the number of signals at $10^{-6}$. The fact that little overlaps were seen from $10^{-5}$ and $5\times 10^{-8}$ suggested that the former more likely generated false positives while the latter more likely to be equally unreliable, leaving $10^{-6}$ to be a good balance of false positive and power.
 
-It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger; the impact of the systematic bias in the measurement was unclear. Thinking again, it might be more appropriate to use 20 PCs as covariates in the model since the classification essentially encapsulated with proportion of variance explained increasing from 37.7% to 57.2%. It is also rather tempting to use the first three PCs for model-based clustering.
+It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger; the impact of the systematic bias in the measurement was unclear. Thinking again, it might be more appropriate to use 20 PCs as covariates in the model since the classification essentially encapsulated with proportion of variance explained increasing from 37.7% to 57.2%. It is also rather tempting to use at least the first three PCs for model-based clustering.
 
 For the EPCR-PROC case, the findings were essentially null.
 

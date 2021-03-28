@@ -19,6 +19,7 @@ library(bookdown)
 library(knitr)
 library(png)
 library(tinytex)
+library(lattice)
 ```
 
 ```{r, include=FALSE}
@@ -29,22 +30,45 @@ The documentation provides the reationale and elementary results from the two-ph
 
 Phase I (study code ZWK) included 196 samples and Phase II (study code ZYQ) contained 1,488 samples.
 
+> Briefly, the method employed immuno-depletion of the most abundant proteins from plasma samples, followed by protein reduction, alkylation and digestion.
+
+> Peptide samples were desalted prior to mass spectrometry analysis.
+
+> A two-stage approach normalization was employed. After normalization, a pattern was identified but could not be explained. The pattern has been left in, with the sponsor’s approval.
+
 ## Exploratory analysis
 
-An undisclosed pattern was reported in @zyq but recovered through PCA.
+An undisclosed pattern was recovered through PCA.
 
-The clustering based on PC1 and PC2 featured poorly with K-means \@ref(fig:kmeans) but perfectly with model-based clustering \@ref(fig:mclust), which 
+The clustering based on PC1 and PC2 featured poorly with K-means but perfectly with model-based clustering, which 
 agreed excellently with the two-class membership provided by the company.
+
+```{r cluster, fig.cap="Figure 1. Pattern in phase II proteins", fig.height=10, echo=FALSE}
+  load("2020.rda")
+# PCA
+  ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
+  pc1pc2 <- with(ppc,x)[,1:2]
+# K-means clustering
+  km <- kmeans(pc1pc2,2)
+  par(mfrow=c(2,1))
+  plot(pc1pc2, col = with(km,cluster), pch=19, cex=0.8)
+  points(with(km,centers), col = 1:2, pch = 8, cex = 2)
+  title("K-means clustering")
+# Model-based clustering
+  suppressPackageStartupMessages(library(mclust))
+  mc <- Mclust(pc1pc2,G=2)
+  plot(mc, what=c("classification"))
+  title("Model-based clustering")
+```
 
 ## Association analysis
 
-Association statistics were obtained according to model \@ref(eq:model).
+Association statistics were obtained according to model.
 
-\begin{equation}
-invnormal(protein) \sim covariates + genotypes (\#eq:model)
-\end{equation}
-
-For phase II model, the covariates include sample classificaiton according to model-based clustering.
+$$
+\textrm{invnormal(protein)} \sim \textrm{covariates + genotypes}
+$$
+For phase II model, the covariates include sample classification according to model-based clustering.
 
 The genotypes were in .bgen format with MAF > 0.01 and the association analysis was furnished with PLINK v2 available on CSD3 through `module load plink/2.00-alpha`.
 
@@ -56,7 +80,7 @@ The sentinels were obtained via a distance-based iterative merging -- for a give
 2. Identify non-overlapping regions.
 3. Select the most significant variant in these regions as sentinels; in cases there are ties, keep only one of them.
 
-Step 2 is implemented using `bedtools`. Step 3 is facilitaed with an R:
+Step 2 is implemented using `bedtools`. Step 3 can be facilitaed with an R:
 
 ```r
   library(dplyr)
@@ -73,11 +97,33 @@ To improve the property of statistics involving p values, they are converted to 
 
 Without loss of generality, let $z$>0 (or $z$=$-z$ otherwise) and for a two-sided p value, we have 
 
-\begin{equation}
-p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z) (\#eq:pvalue)
-\end{equation}
+$$
+p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z)
+$$
 
 due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative normal distribution function.
+
+```{r normal, echo=FALSE, fig.cap="Figure 2. Normal(0,1) distribution", fig.width=6, fig.height=4}
+z0 <- 1.96
+z <- 5
+ea <- seq(-z, z, length = 10000)
+eb <- dnorm(ea, 0, 1)
+        xyplot(eb ~ ea,
+               type = "l",
+               panel = function(x,y, ...)
+               {
+                   panel.xyplot(x,y, ...)
+                   panel.abline(v = 0, lty = 2)
+                   xx <- c(-z, x[x>=-z & x<=-z0], -z0)
+                   yy <- c(0, y[x>=-z & x<=-z0], 0)
+                   panel.polygon(xx,yy, ..., col='red')
+                   xx <- c(z0, x[x>=z0 & x<=z], z)
+                   yy <- c(0, y[x>=z0 & x<=z], 0)
+                   panel.polygon(xx,yy, ..., col='red')
+               },
+               xlab="z",
+               ylab=expression(1/sqrt(2*pi) * exp(-z^2/2)))
+```
 
 We therefore have the R function `z <- function(p) -qnorm(p/2)`.
 
@@ -86,6 +132,10 @@ We therefore have the R function `z <- function(p) -qnorm(p/2)`.
 This visually contrasts two vectors of p values emanating from the same chromosomal positions, and an example on P22626-ROA2 \@ref(fig:P22626_ROA2) is given below.
 
 The plot was produced with miamiplot() function in R/gap.
+
+```{r P22626_ROA2, fig.cap="Figure 3. P22626-ROA2 Miami plot", fig.height=4.5, fig.wdith=4.5, echo=FALSE}
+include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
+```
 
 ## Overlap of sentinels
 
@@ -121,7 +171,7 @@ Sentinels |
 5e-8      |226/203  | 192/178
 ----------|---------|-----------
 
-Here phase II results were based on all data (_All, normalised log-intensities for every sample)[@zyq].
+Here phase II results were based on all data (_All, normalised log-intensities for every sample).
 
 # A case study
 
@@ -132,18 +182,6 @@ The EPCR-PROC case study was reported earlier.
 It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger. It is unclear if this is due to a systematic bias in the measurement.
 
 It is possible to work on the piptides and/or also only those above limit of detection (_DR, normalised log-intensities for every sample with detection rate >10%).
-
-```{r kmeans, fig.cap="K-means clustering of phase II proteins", echo=FALSE}
-include_graphics("clustering-2020-0.png")
-```
-
-```{r mclust, fig.cap="Model-based clustering of phase II proteins", echo=FALSE}
-include_graphics("clustering-2020-1.png")
-```
-
-```{r P22626_ROA2, fig.cap="P22626-ROA2 Miami plot", echo=FALSE}
-include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
-```
 
 # References
 

@@ -61,6 +61,12 @@ agreed excellently with the two-class membership provided by the company.
   title("Model-based clustering")
 ```
 
+```{r ctable, echo=FALSE}
+  caprion_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
+  mc_caprion_mc <- cbind(caprion_mc,classification=with(mc,classification))
+  with(mc_caprion_mc,table(pc1_group,classification))
+```
+
 ## Association analysis
 
 Association statistics were obtained according to model.

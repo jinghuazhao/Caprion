@@ -56,8 +56,9 @@ An undisclosed pattern was recovered through PCA.
 The clustering based on PC1 and PC2 featured poorly with K-means but perfectly with model-based clustering (**classification**), which 
 agreed excellently with the two-class membership provided by Caprion (**pc1_group**) as shown in the following table.
 
-```{r ctable, echo=FALSE}
-  with(mc_caprion_mc,table(pc1_group,classification))
+```{r, echo=FALSE}
+with(mc_caprion_mc,table(pc1_group,classification))
+# print(xtable::xtable(as.data.frame(with(mc_caprion_mc,table(pc1_group,classification)))),type="html")
 ```
 
 ```{r cluster, fig.cap="Figure 1. Pattern in phase II proteins", fig.height=10, echo=FALSE}
@@ -162,13 +163,13 @@ This visually contrasts two vectors of p values emanating from the same chromoso
 
 The plot was produced with miamiplot() function in R/gap.
 
-```{r P22626_ROA2, fig.cap="Figure 3. P22626-ROA2 Miami plot", fig.height=4.5, fig.wdith=4.5, echo=FALSE}
-include_graphics("miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png")
+```{r Q9Y6E2-BZW2, fig.cap="Figure 3. Q9Y6E2-BZW2 Miami plot", fig.height=5, fig.wdith=6, echo=FALSE}
+include_graphics("miamiplot/Q9Y6E2-BZW2-phase1-phase2.png")
 ```
 
 ## Overlap of sentinels
 
-Our focus here is on $10^{-5}$ and $5 \times 10^{-8}$.
+Our focus here is on $10^{-6}$ and $5 \times 10^{-8}$.
 
 # Files at CSD3
 
@@ -183,7 +184,7 @@ pilot/ subdirectory of data.
 Item           | I                   | II
 ---------------|---------------------|-------------------
 Data           | data                | data2
-PLINK2 results | bgen (1e-5, 5e-8)   | bgen2 (1e-5, 5e-8)
+PLINK2 results | bgen (1e-6, 5e-8)   | bgen2 (1e-6, 5e-8)
 
 where sentinels from specific p value cutoff are in their own named directories, i.e., 1e-5, 5e-8.
 
@@ -195,7 +196,7 @@ N         | 196     | 1488
 ----------|---------|-----------
 Sentinels |
 ----------|---------|-----------
-1e-5      |25766/987| 16298/982
+1e-6      |2807/934| 16298/982
 ----------|---------|-----------
 5e-8      |226/203  | 192/178
 ----------|---------|-----------
@@ -207,6 +208,8 @@ Here phase II results were based on all data (_All, normalised log-intensities f
 The EPCR-PROC case study was reported earlier.
 
 # Reflections
+
+It appears that a study of 196 individuals is sufficient to see statistical significance at $10^{-5}$.
 
 It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger. It is unclear if this is due to a systematic bias in the measurement.
 

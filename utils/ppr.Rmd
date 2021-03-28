@@ -38,10 +38,14 @@ Phase I (study code ZWK) included 196 samples and Phase II (study code ZYQ) cont
 
 ## Exploratory analysis
 
+An undisclosed pattern was recovered through PCA.
+
 ```{r, echo=FALSE}
   load("2020.rda")
 # PCA
   ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
+  pve <- cumsum(ppc$sdev^2/sum(ppc$sdev^2))
+  cat("Proportion of variance explained from up to 20 PCs: \n",round(pve[1:20],3),"\n")
   pc1pc2 <- with(ppc,x)[,1:2]
 # K-means clustering
   km <- kmeans(pc1pc2,2)
@@ -51,7 +55,6 @@ Phase I (study code ZWK) included 196 samples and Phase II (study code ZYQ) cont
   caprion_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
   mc_caprion_mc <- cbind(caprion_mc,classification=with(mc,classification))
 ```
-An undisclosed pattern was recovered through PCA.
 
 The clustering based on PC1 and PC2 featured poorly with K-means but perfectly with model-based clustering (**classification**), which 
 agreed excellently with the two-class membership provided by Caprion (**pc1_group**) as shown in the following table.
@@ -77,7 +80,7 @@ Association statistics were obtained according to model.
 $$
 \textrm{invnormal(protein)} \sim \textrm{covariates + genotypes}
 $$
-The covariates were sex, age, bmi and 20 PCs. For phase II model, the covariates were sex, age, sample classification according to model-based clustering.
+The covariates were sex, age, bmi and 20 PCs. For phase II model, the (feverish haste) covariates were sex, age, sample classification according to model-based clustering.
 
 The genotypes were in .bgen format with MAF > 0.01 and the association analysis was furnished with PLINK v2 available on CSD3 through `module load plink/2.00-alpha`.
 
@@ -215,7 +218,7 @@ The EPCR-PROC case study was reported earlier.
 
 A study of 196 individuals appeared sufficient to see statistical significance at $10^{-5}$ level; however for $5\times 10^{-8}$ even N=1,488 appeared not sufficient though it did boost the number of signals at $10^{-6}$. The fact that little overlaps were seen from $10^{-5}$ and $5\times 10^{-8}$ suggested that the former more likely generated false positives while the latter more likely to be equally unreliable, leaving the only $10^{-6}$ to be a good balance of false positive and power.
 
-It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger; the impact of the systematic bias in the measurement was unclear.
+It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger; the impact of the systematic bias in the measurement was unclear. Thinking again, it might be more appropriate to use 20 PCs as covariates in the model since the classification essentially encapsulated with proportion of variance explained increasing from 37.7% to 57.2%. It is also rather tempting to use the first three PCs for model-based clustering.
 
 For the EPCR-PROC case, the findings were essentially null.
 

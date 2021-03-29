@@ -92,9 +92,9 @@ The sentinels were obtained via a distance-based iterative merging -- for a give
 2. Identify non-overlapping regions.
 3. Select the most significant variant in these regions as sentinels; in cases there are ties, keep only one of them.
 
-Step 2 is implemented using `bedtools`. Step 3 produces unique sentinels per protein and can be facilitated with R:
+Step 2 is implemented using `bedtools`. Step 3 produces unique sentinels per protein and can be facilitated with R.
 
-```r
+```{r, eval=FALSE, echo=FALSE}
   library(dplyr)
   sentinels <- merged_results %>%
                group_by(trait,Chrom,Start,End) %>%
@@ -139,9 +139,9 @@ plotp()
 ```{r normal, echo=FALSE, eval=FALSE, fig.cap="Figure 2. Normal(0,1) distribution", fig.width=6, fig.height=4}
 z0 <- 1.96
 z <- 5
-ea <- seq(-z, z, length = 10000)
-eb <- dnorm(ea, 0, 1)
-        xyplot(eb ~ ea,
+a <- seq(-z, z, length = 10000)
+b <- dnorm(a, 0, 1)
+        xyplot(b ~ a,
                type = "l",
                panel = function(x,y, ...)
                {
@@ -218,7 +218,7 @@ The EPCR-PROC case study was reported earlier.
 
 A study of 196 individuals appeared sufficient to see statistical significance at $10^{-5}$ level; however for $5\times 10^{-8}$ even N=1,488 appeared not sufficient though it did boost the number of signals at $10^{-6}$. The fact that little overlaps were seen from $10^{-5}$ and $5\times 10^{-8}$ suggested that the former more likely generated false positives while the latter more likely to be equally unreliable, leaving $10^{-6}$ to be a good balance of false positive and power.
 
-It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger; the impact of the systematic bias in the measurement was unclear. Thinking again, it might be more appropriate to use 20 PCs as covariates in the model since the classification essentially encapsulated with proportion of variance explained increasing from 37.7% to 57.2%. It is also rather tempting to use at least the first three PCs for model-based clustering.
+It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger; the impact of the systematic bias in the measurement was unclear. It might be tempting to use more PCs in the model-based clustering with proportion of variance explained increasing from 30.0% to 57.2% from one to 20 PCs; nevertheless much improvement of the classification won't be expected since there is already and perfect separation.
 
 For the EPCR-PROC case, the findings were essentially null.
 
@@ -231,6 +231,17 @@ In pratice, one tends to meta-analyse phase I and II results and in this case, i
 Caprion. Summary Report Slides For: Biomarker Discovery Analysis of Human Plasma Using a NonTargeted LC-MS/MS Approach. 2020.
 
 # (APPENDIX) Appendix {-}
+
+# 3d scatter plot
+
+```{r 3d, fig.cap="3d scatter plot", echo=FALSE}
+  library(scatterplot3d)
+  with(mc,
+  {
+       scatterplot3d(cbind(data,classification), color=classification, main="Plot of the PC1, PC2 and classification", pch=16)
+       legend("right", legend=levels(as.factor(classification)), col=c("blue", "red"), pch=16)
+  })
+```
 
 # Correlation between p values and their difference
 

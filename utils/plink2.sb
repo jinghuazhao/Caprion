@@ -89,7 +89,7 @@ function phase2_All()
       echo ${v}
       plink2 \
              --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/phase2.sample \
-             --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
+             --glm hide-covar --input-missing-phenotype -999 --covar-variance-standardize \
              --pheno ${caprion}/data2/phase2.pheno --pheno-name ${v} --covar ${caprion}/data2/phase2.covar \
              --out ${caprion}/work/${v}
       grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \

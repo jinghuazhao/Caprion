@@ -180,11 +180,11 @@ R --no-save <<END
   missing_eigenvec <- merge(missing,eigenvec,by.x="affymetrix_gwasqc_bl",by.y="X.FID")
   library(gap)
   peptides_all_dr <- extract()
-  id_date_covars_missing_eigenvec <- merge(within(id_date_covars[c(id,date,covars)],{bmi=wt_bl/ht_bl/ht_bl;ethnicity=0}),
+  id_date_covars_missing_eigenvec <- merge(within(id_date_covars[c(id,date,covars)],{bmi=wt_bl/ht_bl/ht_bl;ethnicity=1}),
                                            missing_eigenvec,
                                            by.x="Affymetrix_gwasQC_bl",by.y="affymetrix_gwasqc_bl",all.x=TRUE)
   nonwhite <- with(id_date_covars_missing_eigenvec,ethnicPulse%in%c("Not Disclosed","Unknown"))
-  id_date_covars_missing_eigenvec[nonwhite,"ethnicity"] <- 1
+  id_date_covars_missing_eigenvec[nonwhite,"ethnicity"] <- 2
   id_date_covars_missing_eigenvec_peptides_all_dr <- merge(id_date_covars_missing_eigenvec,peptides_all_dr,by="caprion_id")
   ord <- with(id_date_covars_missing_eigenvec_peptides_all_dr,order(Affymetrix_gwasQC_bl))
   pheno2 <- id_date_covars_missing_eigenvec_peptides_all_dr[ord,]
@@ -224,7 +224,9 @@ END
 )
 # All
 (
-  cut -d' ' -f3-28 --complement ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/phase2.pheno
+  cut -d' ' -f3-28 --complement ${caprion}/data2/phase2.sample | awk '
+     {if(NR==1) {$1="FID";$2="IID"} else gsub(/NA/,"-999",$0)};1' | \
+     sed '2d' > ${caprion}/data2/phase2.pheno
   cut -d' ' -f1,2,4-28 ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/phase2.covar
   sed '1,2d' ${caprion}/data2/phase2.sample | awk '$28==1 {print $1,$2}' > ${caprion}/data2/phase2.group1
   sed '1,2d' ${caprion}/data2/phase2.sample | awk '$28==2 {print $1,$2}' > ${caprion}/data2/phase2.group2

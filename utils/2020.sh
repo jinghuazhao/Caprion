@@ -186,10 +186,9 @@ R --no-save <<END
   nonwhite <- with(id_date_covars_missing_eigenvec,ethnicPulse%in%c("Not Disclosed","Unknown"))
   id_date_covars_missing_eigenvec[nonwhite,"ethnicity"] <- 1
   id_date_covars_missing_eigenvec_peptides_all_dr <- merge(id_date_covars_missing_eigenvec,peptides_all_dr,by="caprion_id")
-  id1_id2_missing <- with(id_date_covars_missing_eigenvec_peptides_all_dr, 
-                          data.frame(ID_1=Affymetrix_gwasQC_bl, ID_2=Affymetrix_gwasQC_bl, missing=missing))
   ord <- with(id_date_covars_missing_eigenvec_peptides_all_dr,order(Affymetrix_gwasQC_bl))
   pheno2 <- id_date_covars_missing_eigenvec_peptides_all_dr[ord,]
+  id1_id2_missing <- with(pheno2, data.frame(ID_1=Affymetrix_gwasQC_bl, ID_2=Affymetrix_gwasQC_bl, missing=missing))
   C <- c("agePulse","bmi",paste0("PC",1:20))
   D <- c("sexPulse","ethnicity","classification")
   CD <- pheno2[c(C,D)]

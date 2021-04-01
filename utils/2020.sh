@@ -177,20 +177,23 @@ R --no-save <<END
 # SNPTEST phenotype file
   missing <- read.table("data/merged_imputation.missing",col.names=c("affymetrix_gwasqc_bl","missing"))
   eigenvec <- read.delim("data/merged_imputation.eigenvec")
+  missing_eigenvec <- merge(missing,eigenvec,by.x="affymetrix_gwasqc_bl",by.y="X.FID")
   library(gap)
   peptides_all_dr <- extract()
-  id_date_covars_eigenvec <- merge(within(id_date_covars[c(id,date,covars)],{bmi=wt_bl/ht_bl/ht_bl}), eigenvec,
-                                   by.x="Affymetrix_gwasQC_bl",by.y="X.FID",all.x=TRUE)
-  id_date_covars_eigenvec_peptides_all_dr_missing <- merge(merge(id_date_covars_eigenvec,peptides_all_dr,by="caprion_id"),missing,
-                                                           by.x="Affymetrix_gwasQC_bl",by.y="affymetrix_gwasqc_bl",all.x=TRUE)
-  id1_id2_missing <- with(id_date_covars_eigenvec_peptides_all_dr_missing, 
+  id_date_covars_missing_eigenvec <- merge(within(id_date_covars[c(id,date,covars)],{bmi=wt_bl/ht_bl/ht_bl;ethnicity=0}),
+                                           missing_eigenvec,
+                                           by.x="Affymetrix_gwasQC_bl",by.y="affymetrix_gwasqc_bl",all.x=TRUE)
+  nonwhite <- with(id_date_covars_missing_eigenvec,ethnicPulse%in%c("Not Disclosed","Unknown"))
+  id_date_covars_missing_eigenvec[nonwhite,"ethnicity"] <- 1
+  id_date_covars_missing_eigenvec_peptides_all_dr <- merge(id_date_covars_missing_eigenvec,peptides_all_dr,by="caprion_id")
+  id1_id2_missing <- with(id_date_covars_missing_eigenvec_peptides_all_dr, 
                           data.frame(ID_1=Affymetrix_gwasQC_bl, ID_2=Affymetrix_gwasQC_bl, missing=missing))
-  ord <- with(id_date_covars_eigenvec_peptides_all_dr_missing,order(caprion_id))
-  pheno2 <- id_date_covars_eigenvec_peptides_all_dr_missing[ord,]
+  ord <- with(id_date_covars_missing_eigenvec_peptides_all_dr,order(Affymetrix_gwasQC_bl))
+  pheno2 <- id_date_covars_missing_eigenvec_peptides_all_dr[ord,]
   C <- c("agePulse","bmi",paste0("PC",1:20))
-  D <- c("sexPulse","classification")
+  D <- c("sexPulse","ethnicity","classification")
   CD <- pheno2[c(C,D)]
-  cols <- 39:ncol(pheno2)
+  cols <- 41:ncol(pheno2)
   P <- names(pheno2)[cols]
   P_inv <- sapply(cols,function(x) {invnormal(pheno2[,x])})
   colnames(P_inv) <- paste0(P,"_invn")
@@ -222,10 +225,10 @@ END
 )
 # All
 (
-  cut -d' ' -f3-27 --complement ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/phase2.pheno
-  cut -d' ' -f1,2,4-27 ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/phase2.covar
-  sed '1,2d' ${caprion}/data2/phase2.sample | awk '$27==1 {print $1,$2}' > ${caprion}/data2/phase2.group1
-  sed '1,2d' ${caprion}/data2/phase2.sample | awk '$27==2 {print $1,$2}' > ${caprion}/data2/phase2.group2
+  cut -d' ' -f3-28 --complement ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/phase2.pheno
+  cut -d' ' -f1,2,4-28 ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/phase2.covar
+  sed '1,2d' ${caprion}/data2/phase2.sample | awk '$28==1 {print $1,$2}' > ${caprion}/data2/phase2.group1
+  sed '1,2d' ${caprion}/data2/phase2.sample | awk '$28==2 {print $1,$2}' > ${caprion}/data2/phase2.group2
 )
 
 # Comp_Neq1

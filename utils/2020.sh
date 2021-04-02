@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 export dir=~/rds/projects/Caprion_proteomics
-export caprion=~/rds/projects/Caprion_proteomics/pilot
+export caprion=${dir}/pilot
 if [ ! -d ${caprion}/data2 ]; then mkdir ${caprion}/data2; fi
 if [ ! -d ${caprion}/bgen2 ]; then mkdir ${caprion}/bgen2; fi
 
@@ -26,6 +26,20 @@ R --no-save <<END
   Annotations[,1] <- gsub("6P","X6P",Annotations[,1])
   prot_uniprot <- data.frame(prot=gsub("_HUMAN","",Annotations[,1]),Accession=Annotations[,2])
   write.table(prot_uniprot,file="2020.id",col.names=FALSE,quote=FALSE,row.names=FALSE)
+# AutoEncoder
+  require(ANN2)
+  AE <- autoencoder(Normalized_All[,-1], hidden.layers=c(100,20,30), loss.type = 'pseudo-huber',
+                    activ.functions = c('tanh','linear','tanh'),
+                    batch.size = 8, optim.type = 'adam',
+                    n.epochs = 1000, val.prop = 0)
+# Plot loss during training
+  plot(AE)
+# Make reconstruction and compression plots
+  reconstruction_plot(AE, Normalized_All[,-1])
+  compression_plot(AE, Normalized_All[,-1])
+# Reconstruct data and show states with highest anomaly scores
+  recX <- reconstruct(AE, Normalized_All[,-1])
+  sort(recX$anomaly_scores, decreasing = TRUE)
 # PCA
   ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
   pc1pc2 <- with(ppc,x)[,1:2]
@@ -77,85 +91,6 @@ R --no-save <<END
   id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
   dim(id_date_covars)
   head(id_date_covars[c(id,date,covars)])
-# EPCR-PROC
-  extract2 <- function(prots=c("EPCR_HUMAN","PROC_HUMAN"))
-  {
-  # Piptides by Isotope.Group.ID
-    mapping <- subset(Mapping,Protein%in%prots)
-    d1 <- merge(mapping,Comp_Neq1,by="Isotope.Group.ID")
-    piptides <- t(d1[grepl("Protein|ZYQ",names(d1))][,-1])
-    colnames(piptides) <- paste0(gsub("HUMAN","",d1[,3]),d1[,1],"_",d1[,2])
-  # Protein_All
-    all <- Normalized_All[names(Normalized_All)%in%prots]
-    colnames(all) <- gsub("HUMAN","All",colnames(all))
-  # Protein_DR_Filt
-    dr <- Protein_DR_Filt[names(Protein_DR_Filt)%in%prots]
-    colnames(dr) <- gsub("HUMAN","DR",colnames(dr))
-    peptides_all_dr <- cbind(piptides,all,dr)
-    write.table(data.frame(caprion_id=rownames(peptides_all_dr),peptides_all_dr),file.path(dir,"pilot","EPCR-PROC","EPCR-PROC_All.tsv"),
-                quote=FALSE,row.names=FALSE,sep="\t")
-    peptides_all_dr
-  }
-  epcr_proc <- extract2()
-  library(corrplot)
-  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-all.png"),width=12,height=10,units="in",pointsize=4,res=300)
-  EPCR_PROC_corr <- cor(epcr_proc)
-  corrplot(EPCR_PROC_corr,method="square",type="lower",na.label="x")
-  dev.off()
-  library(pheatmap)
-  short.mm <- c("PROC_442607670","PROC_442611348","PROC_442616032","PROC_442686905","PROC_442739582","PROC_442847259")
-  r <- names(epcr_proc)
-  r2 <- data.frame(long.name=r,short.name=substr(r,1,14))
-  long.mm <- subset(r2,short.name%in%short.mm)[["long.name"]]
-  EPCR_PROC_corr <- cor(epcr_proc[setdiff(names(epcr_proc),long.mm)])
-  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.png"),width=12,height=10,units="in",pointsize=4,res=300)
-  pheatmap(EPCR_PROC_corr)
-  dev.off()
-  EPCR_PROC_corr[!lower.tri(EPCR_PROC_corr)] <- NA
-  write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
-#
-  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-0.png"),width=12,height=10,units="in",pointsize=4,res=300)
-  par(mfrow=c(3,1))
-  with(epcr_proc,
-  {
-    plot(EPCR_All)
-    hist(EPCR_All)
-    boxplot(EPCR_All,horizontal = TRUE)
-  })
-  dev.off()
-  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-1.png"),width=12,height=10,units="in",pointsize=4,res=300)
-  par(mfrow=c(3,1))
-  with(epcr_proc,
-  {
-    plot(PROC_All)
-    hist(PROC_All)
-    boxplot(PROC_All,horizontal = TRUE)
-  })
-  dev.off()
-  epcr_proc_names <- colnames(epcr_proc)
-  epcr_names <- epcr_proc_names[grepl("EPCR",epcr_proc_names)]
-  EPCR <- data.frame(epcr_proc[,epcr_names])
-  data.frame(names(EPCR))
-  format(cor(EPCR),digits=3)
-  head(EPCR)
-  names(EPCR)[1:4] <- c("EPCR_442581804","EPCR_442582461","EPCR_442603139","EPCR_442605396")
-  EPCR_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
-  summary(EPCR_lm)
-# SNPTEST phenotype file
-  peptides_all_dr <- read.delim(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC_All.tsv"),as.is=TRUE)
-  pheno2 <- merge(id_date_covars[c(id,date,covars)],peptides_all_dr,by="caprion_id")
-  write.table(subset(pheno2,!is.na(Affymetrix_gwasQC_bl),select=Affymetrix_gwasQC_bl),
-              file=file.path(dir,"pilot","data2","affymetrix.id"),quote=FALSE,row.names=FALSE,col.names=FALSE)
-  library(gap)
-  C <- "agePulse"
-  D <- c("sexPulse","classification")
-  cols <- grep("EPCR|PROC",names(pheno2))
-  P <- names(pheno2)[cols]
-  P_inv <- sapply(cols,function(x) {invnormal(pheno2[,x])})
-  colnames(P_inv) <- paste0(P,"_invn")
-  pheno2 <- within(data.frame(pheno2,P_inv),{ID_1 <- Affymetrix_gwasQC_bl; ID_2 <- Affymetrix_gwasQC_bl; missing <- 0})
-  snptest_sample(subset(pheno2,!is.na(Affymetrix_gwasQC_bl)),sample_file=file.path(dir,"pilot","data2","caprion.sample"),
-                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
 # All data at phase 2
   extract <- function()
   {
@@ -194,35 +129,73 @@ R --no-save <<END
   CD <- pheno2[c(C,D)]
   cols <- 41:ncol(pheno2)
   P <- names(pheno2)[cols]
-  P_inv <- sapply(cols,function(x) {invnormal(pheno2[,x])})
-  colnames(P_inv) <- paste0(P,"_invn")
-  snptest_sample(subset(data.frame(id1_id2_missing,CD,P_inv),!is.na(ID_1)),
+  P_invn <- sapply(cols,function(x) {invnormal(pheno2[,x])})
+  colnames(P_invn) <- paste0(P,"_invn")
+  write.table(subset(pheno2,!is.na(Affymetrix_gwasQC_bl),select=Affymetrix_gwasQC_bl),
+              file=file.path(dir,"pilot","data2","affymetrix.id"),quote=FALSE,row.names=FALSE,col.names=FALSE)
+  snptest_sample(subset(data.frame(id1_id2_missing,CD,P_invn),!is.na(ID_1)),
                  sample_file=file.path(dir,"pilot","data2","phase2.sample"),
                  ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
-# AutoEncoder
-  require(ANN2)
-  AE <- autoencoder(Normalized_All[,-1], hidden.layers=c(100,20,30), loss.type = 'pseudo-huber',
-                    activ.functions = c('tanh','linear','tanh'),
-                    batch.size = 8, optim.type = 'adam',
-                    n.epochs = 1000, val.prop = 0)
-# Plot loss during training
-  plot(AE)
-# Make reconstruction and compression plots
-  reconstruction_plot(AE, Normalized_All[,-1])
-  compression_plot(AE, Normalized_All[,-1])
-# Reconstruct data and show states with highest anomaly scores
-  recX <- reconstruct(AE, Normalized_All[,-1])
-  sort(recX$anomaly_scores, decreasing = TRUE)
+# EPCR-PROC
+  prots <- c("EPCR","PROC")
+  vars <- names(peptides_all_dr)
+  epcr_proc <- peptides_all_dr[grepl("caprion_id",vars)|grepl(prots[1],vars)|grepl(prots[2],vars)]
+  write.table(epcr_proc,file.path(dir,"pilot","EPCR-PROC","EPCR-PROC_All.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
+  library(corrplot)
+  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-all.png"),width=12,height=10,units="in",pointsize=4,res=300)
+  EPCR_PROC_corr <- cor(epcr_proc[,-1])
+  corrplot(EPCR_PROC_corr,method="square",type="lower",na.label="x")
+  dev.off()
+  library(pheatmap)
+  short.mm <- c("PROC_442607670","PROC_442611348","PROC_442616032","PROC_442686905","PROC_442739582","PROC_442847259")
+  r <- names(epcr_proc)
+  r2 <- data.frame(long.name=r,short.name=substr(r,1,14))
+  long.mm <- subset(r2,short.name%in%short.mm)[["long.name"]]
+  EPCR_PROC_corr <- cor(epcr_proc[setdiff(names(epcr_proc[,-1]),long.mm)])
+  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.png"),width=12,height=10,units="in",pointsize=4,res=300)
+  pheatmap(EPCR_PROC_corr)
+  dev.off()
+  EPCR_PROC_corr[!lower.tri(EPCR_PROC_corr)] <- NA
+  write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
+  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-0.png"),width=12,height=10,units="in",pointsize=4,res=300)
+  par(mfrow=c(3,1))
+  with(epcr_proc,
+  {
+    plot(EPCR_All)
+    hist(EPCR_All)
+    boxplot(EPCR_All,horizontal = TRUE)
+  })
+  dev.off()
+  png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-1.png"),width=12,height=10,units="in",pointsize=4,res=300)
+  par(mfrow=c(3,1))
+  with(epcr_proc,
+  {
+    plot(PROC_All)
+    hist(PROC_All)
+    boxplot(PROC_All,horizontal = TRUE)
+  })
+  dev.off()
+  epcr_proc_names <- names(epcr_proc)[-1]
+  epcr_names <- epcr_proc_names[grepl("EPCR",epcr_proc_names)]
+  EPCR <- data.frame(epcr_proc[,epcr_names])
+  data.frame(names(EPCR))
+  format(cor(EPCR),digits=3)
+  head(EPCR)
+  names(EPCR)[1:4] <- c("EPCR_442581804","EPCR_442582461","EPCR_442603139","EPCR_442605396")
+  EPCR_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
+  summary(EPCR_lm)
+# SNPTEST phenotype file
+  epcr_proc_pheno2 <- pheno2[c(names(id_date_covars_missing_eigenvec),epcr_proc_names)]
+  epcr_proc_P <- epcr_proc_names
+  epcr_proc_P_invn <- sapply(1:length(epcr_proc_P),function(x) invnormal(epcr_proc_pheno2[,x]))
+  colnames(epcr_proc_P_invn) <- paste0(epcr_proc_P,"_invn")
+  Affymetrix_gwasQC_id <- with(epcr_proc_pheno2,Affymetrix_gwasQC_bl)
+  snptest_sample(subset(data.frame(epcr_proc_pheno2,epcr_proc_P_invn,ID_1=Affymetrix_gwasQC_id,ID_2=Affymetrix_gwasQC_id),!is.na(ID_1)),
+                 sample_file=file.path(dir,"pilot","data2","epcr-proc.sample"),
+                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(epcr_proc_P,"_invn"))
 END
 
-# EPCR-PROC
-(
-  cut -d' ' -f3-6 --complement ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '2d' > ${caprion}/data2/caprion.pheno
-  cut -d' ' -f1,2,4-6 ${caprion}/data2/caprion.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/caprion.covar
-  sed '1,2d' ${caprion}/data2/caprion.sample | awk '$6==1 {print $1,$2}' > ${caprion}/data2/caprion.group1
-  sed '1,2d' ${caprion}/data2/caprion.sample | awk '$6==2 {print $1,$2}' > ${caprion}/data2/caprion.group2
-)
-# All
+# All for phase 2
 (
   cut -d' ' -f3-28 --complement ${caprion}/data2/phase2.sample | awk '
      {if(NR==1) {$1="FID";$2="IID"} else gsub(/NA/,"-999",$0)};1' | \
@@ -230,6 +203,15 @@ END
   cut -d' ' -f1,2,4-28 ${caprion}/data2/phase2.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/phase2.covar
   sed '1,2d' ${caprion}/data2/phase2.sample | awk '$28==1 {print $1,$2}' > ${caprion}/data2/phase2.group1
   sed '1,2d' ${caprion}/data2/phase2.sample | awk '$28==2 {print $1,$2}' > ${caprion}/data2/phase2.group2
+)
+# EPCR-PROC
+(
+  cut -d' ' -f3-28 --complement ${caprion}/data2/epcr-proc.sample | awk '
+      {if(NR==1) {$1="FID";$2="IID"} else gsub(/NA/,"-999",$0)};1' | \
+      sed '2d' > ${caprion}/data2/caprion.pheno
+  cut -d' ' -f1,2,4-28 ${caprion}/data2/epcr-proc.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/epcr-proc.covar
+  sed '1,2d' ${caprion}/data2/epcr-proc.sample | awk '$28==1 {print $1,$2}' > ${caprion}/data2/epcr-proc.group1
+  sed '1,2d' ${caprion}/data2/epcr-proc.sample | awk '$28==2 {print $1,$2}' > ${caprion}/data2/epcr-proc.group2
 )
 
 # Comp_Neq1
@@ -246,7 +228,7 @@ export DR=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_DR$"
 # a list of unplotted Miami plot
 ls miamiplot/|sed 's/-phase1-phase2.png//;s/-/\t/' | cut -f2 | grep -f - -v 2020.id > 2020.left
 
-export threshold=1e-6
+export threshold=5e-8
 export a=${caprion}/bgen/${threshold}/caprion-invn.sentinels
 export b=${caprion}/bgen2/${threshold}/caprion-invn.sentinels
 bedtools intersect -a <(awk '{if(NR>1) $1="chr"$1;print}' $a | tr ' ' '\t') \

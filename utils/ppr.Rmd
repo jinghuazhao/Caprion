@@ -162,17 +162,25 @@ We therefore have the R function `z <- function(p) -qnorm(p/2)`.
 
 ## Miami plots
 
-This visually contrasts two vectors of p values emanating from the same chromosomal positions, and an example on Q9Y6E2-BZW2 is given below.
+This visually contrasts two vectors of p values emanating from the same chromosomal positions, and an example on P31946-1433B is given below.
 
 The plot was produced with the `miamiplot()` function in R/gap.
 
-```{r Q9Y6E2-BZW2, fig.cap="Figure 3. Q9Y6E2-BZW2 Miami plot", fig.height=7, fig.wdith=8, echo=FALSE}
-include_graphics("miamiplot/Q9Y6E2-BZW2-phase1-phase2.png")
+```{r P31946-1433B, fig.cap="Figure 3. P31946-1433B Miami plot", fig.height=7, fig.wdith=8, echo=FALSE}
+include_graphics("miamiplot/P31946-X1433B-phase1-phase2.png")
 ```
+
+It turned to be typical that phase II produced more significant results, Wilcoxon test p=1.
 
 ## Overlap of sentinels
 
-Our focus here is on $10^{-6}$ and $5 \times 10^{-8}$. There were little overlaps at $10^{-5}$ and $5\times 10^{-8}$ but 98 at $10^{-6}$.
+Our focus here is on $10^{-5}$, $10^{-6}$ and $5 \times 10^{-8}$.
+
+P                 | Overlap
+------------------|--------
+$10^{-5}$         | 25,766
+$10^{-6}$         | 3,244
+$5\times 10^{-8}$ | 415
 
 # Files at CSD3
 
@@ -199,13 +207,15 @@ where bgen/ and bgen2/ contain the PLINK2 results based on bgen format; sentinel
 
 Item      |I/protein| II/protein
 ----------|---------|-----------
-N         | 196     | 1488
+N         | 196     | 1,488
 ----------|---------|-----------
 Sentinels |
 ----------|---------|-----------
-1e-6      |2807/934 | 3210/945
+$10^{-5}$|25,767/987 | 25,942/983
 ----------|---------|-----------
-5e-8      |226/203  | 192/178
+$10^{-6}$ |2807/934 | 3,274/956
+----------|---------|-----------
+$5\times 10^{-8}$   |226/203  | 426/364
 ----------|---------|-----------
 
 Here phase II results were based on all data (_All, normalised log-intensities for every sample).
@@ -218,7 +228,7 @@ The EPCR-PROC case study was reported earlier.
 
 A study of 196 individuals appeared sufficient to see statistical significance at $10^{-5}$ level; however for $5\times 10^{-8}$ even N=1,488 appeared not sufficient though it did boost the number of signals at $10^{-6}$. The fact that little overlaps were seen from $10^{-5}$ and $5\times 10^{-8}$ suggested that the former more likely generated false positives while the latter more likely to be equally unreliable, leaving $10^{-6}$ to be a good balance of false positive and power.
 
-It is somewhat counterintuitive not to see more significant results from phase II although the sample size is seven fold larger; the impact of the systematic bias in the measurement was unclear. It might be tempting to use more PCs in the model-based clustering with proportion of variance explained increasing from 30.0% to 57.2% from one to 20 PCs; nevertheless much improvement of the classification won't be expected since there is already and perfect separation up to three PCs through R/rgl (dynamic plot not shown here).
+The small correlations between the normal deviates between two phases seemed counterintuitve but to some extent was related to LD; the impact of the systematic bias in the measurement was unclear. It might be tempting to use more PCs in the model-based clustering with proportion of variance explained increasing from 30.0% to 57.2% from one to 20 PCs; nevertheless much improvement of the classification won't be expected since there is already and perfect separation up to three PCs through R/rgl (dynamic plot not shown here).
 
 For the EPCR-PROC case, the findings were essentially null.
 
@@ -263,7 +273,7 @@ where the correlation is obtained according to [0,1] and a nonparametric test of
 # Information regarding the Miami plot
 
 ```{r echo=FALSE}
-img_path <- "miamiplot/24-03-2021/P22626-ROA2-phase1-phase2.png"
+img_path <- "miamiplot/P31946-X1433B-phase1-phase2.png"
 img <- readPNG(img_path, native = TRUE, info = TRUE)
 attr(img, "info")
 ```

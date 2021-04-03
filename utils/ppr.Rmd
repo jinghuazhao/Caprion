@@ -220,6 +220,8 @@ $5\times 10^{-8}$   |226/203  | 426/364
 
 Here phase II results were based on all data (_All, normalised log-intensities for every sample).
 
+Directory miamiplot/ contains the Miami plots.
+
 # A case study
 
 The EPCR-PROC case study was reported earlier.

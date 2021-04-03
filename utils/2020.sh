@@ -137,23 +137,35 @@ R --no-save <<END
                  sample_file=file.path(dir,"pilot","data2","phase2.sample"),
                  ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
 # EPCR-PROC
-  prots <- c("EPCR","PROC")
   vars <- names(peptides_all_dr)
+  prots <- c("EPCR","PROC")
   epcr_proc <- peptides_all_dr[grepl("caprion_id",vars)|grepl(prots[1],vars)|grepl(prots[2],vars)]
   write.table(epcr_proc,file.path(dir,"pilot","EPCR-PROC","EPCR-PROC_All.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
+  epcr_proc_names <- names(epcr_proc)[-1]
+  epcr_names <- epcr_proc_names[grepl("EPCR",epcr_proc_names)]
+  EPCR <- data.frame(epcr_proc[,epcr_names])
+  data.frame(names(EPCR))
+  format(cor(EPCR),digits=3)
+  head(EPCR)
+  names(EPCR) <- substr(epcr_names,1,14)
+  EPCR_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
+  proc_names <- epcr_proc_names[grepl("PROC",epcr_proc_names)]
+  PROC <- data.frame(epcr_proc[,proc_names])
+  data.frame(names(PROC))
+  format(cor(PROC),digits=3)
+  head(PROC)
+  names(PROC) <- substr(proc_names,1,14)
+  PROC_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
+  summary(PROC_lm)
   library(corrplot)
   png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-all.png"),width=12,height=10,units="in",pointsize=4,res=300)
   EPCR_PROC_corr <- cor(epcr_proc[,-1])
   corrplot(EPCR_PROC_corr,method="square",type="lower",na.label="x")
   dev.off()
   library(pheatmap)
-  short.mm <- c("PROC_442607670","PROC_442611348","PROC_442616032","PROC_442686905","PROC_442739582","PROC_442847259")
-  r <- names(epcr_proc)
-  r2 <- data.frame(long.name=r,short.name=substr(r,1,14))
-  long.mm <- subset(r2,short.name%in%short.mm)[["long.name"]]
-  EPCR_PROC_corr <- cor(epcr_proc[setdiff(names(epcr_proc[,-1]),long.mm)])
   png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.png"),width=12,height=10,units="in",pointsize=4,res=300)
-  pheatmap(EPCR_PROC_corr)
+  col_row <- rownames(subset(as.data.frame(EPCR_PROC_corr),!is.na(EPCR_All)))
+  pheatmap(EPCR_PROC_corr[col_row,col_row])
   dev.off()
   EPCR_PROC_corr[!lower.tri(EPCR_PROC_corr)] <- NA
   write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
@@ -175,22 +187,9 @@ R --no-save <<END
     boxplot(PROC_All,horizontal = TRUE)
   })
   dev.off()
-  epcr_proc_names <- names(epcr_proc)[-1]
-  epcr_names <- epcr_proc_names[grepl("EPCR",epcr_proc_names)]
-  EPCR <- data.frame(epcr_proc[,epcr_names])
-  data.frame(names(EPCR))
-  format(cor(EPCR),digits=3)
-  head(EPCR)
-  names(EPCR)[1:4] <- c("EPCR_442581804","EPCR_442582461","EPCR_442603139","EPCR_442605396")
-  EPCR_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
-  summary(EPCR_lm)
 # SNPTEST phenotype file
-  epcr_proc_pheno2 <- pheno2[c(names(id_date_covars_missing_eigenvec),epcr_proc_names)]
-  epcr_proc_P <- epcr_proc_names
-  epcr_proc_P_invn <- sapply(1:length(epcr_proc_P),function(x) invnormal(epcr_proc_pheno2[,x]))
-  colnames(epcr_proc_P_invn) <- paste0(epcr_proc_P,"_invn")
-  Affymetrix_gwasQC_id <- with(epcr_proc_pheno2,Affymetrix_gwasQC_bl)
-  snptest_sample(subset(data.frame(epcr_proc_pheno2,epcr_proc_P_invn,ID_1=Affymetrix_gwasQC_id,ID_2=Affymetrix_gwasQC_id),!is.na(ID_1)),
+  epcr_proc_P_invn <- P_invn[,colnames(P_invn)%in%paste0(epcr_proc_names,"_invn")]
+  snptest_sample(subset(data.frame(id1_id2_missing,CD,epcr_proc_P_invn),!is.na(ID_1)),
                  sample_file=file.path(dir,"pilot","data2","epcr-proc.sample"),
                  ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(epcr_proc_P,"_invn"))
 END
@@ -208,7 +207,7 @@ END
 (
   cut -d' ' -f3-28 --complement ${caprion}/data2/epcr-proc.sample | awk '
       {if(NR==1) {$1="FID";$2="IID"} else gsub(/NA/,"-999",$0)};1' | \
-      sed '2d' > ${caprion}/data2/caprion.pheno
+      sed '2d' > ${caprion}/data2/epcr-proc.pheno
   cut -d' ' -f1,2,4-28 ${caprion}/data2/epcr-proc.sample | awk '{if(NR==1) {$1="FID";$2="IID"}};1' | sed '1,2d' > ${caprion}/data2/epcr-proc.covar
   sed '1,2d' ${caprion}/data2/epcr-proc.sample | awk '$28==1 {print $1,$2}' > ${caprion}/data2/epcr-proc.group1
   sed '1,2d' ${caprion}/data2/epcr-proc.sample | awk '$28==2 {print $1,$2}' > ${caprion}/data2/epcr-proc.group2

@@ -4,7 +4,7 @@
 #SBATCH --account CARDIO-SL0-CPU
 #SBATCH --partition cardio
 #SBATCH --qos=cardio
-#SBATCH --array=1-983
+#SBATCH --array=1-39
 #SBATCH --mem=40800
 #SBATCH --time=5-00:00:00
 #SBATCH --output=/rds/user/jhz22/hpc-work/work/_plink2_%A_%a.out
@@ -44,38 +44,38 @@ do
 done
 }
 
-function phase2()
+function epcr_proc()
 {
-  export col=$(head -1 ${caprion}/data2/caprion.pheno | cut -d" " -f1,2 --complement | cut -d" " -f ${SLURM_ARRAY_TASK_ID});
+  export col=$(head -1 ${caprion}/data2/epcr-proc.pheno | cut -d" " -f1,2 --complement | cut -d" " -f ${SLURM_ARRAY_TASK_ID});
   for v in ${col};
   do
       echo ${v}
       plink2 \
-             --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/caprion.sample \
-             --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
-             --pheno ${caprion}/data2/caprion.pheno --pheno-name ${v} --covar ${caprion}/data2/caprion.covar \
+             --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/epcr_proc.sample \
+             --glm hide-covar --input-missing-phenotype -999 --covar-variance-standardize \
+             --pheno ${caprion}/data2/epcr-proc.pheno --pheno-name ${v} --covar ${caprion}/data2/epcr-proc.covar \
              --out ${caprion}/work/${v}
       grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
-      gzip -f > ${caprion}/bgen2/${v}-plink2.gz
+      gzip -f > ${caprion}/bgen2/EPCR_PROC/${v}-plink2.gz
       rm ${caprion}/work/${v}.${v}.glm.linear
   done
 }
 
-function phase2group()
+function epcr_proc_group()
 {
-  export col=$(head -1 ${caprion}/data2/caprion.pheno | cut -d" " -f1,2 --complement | cut -d" " -f ${SLURM_ARRAY_TASK_ID});
+  export col=$(head -1 ${caprion}/data2/epcr-proc.pheno | cut -d" " -f1,2 --complement | cut -d" " -f ${SLURM_ARRAY_TASK_ID});
   for group in group1 group2
   do
      for v in ${col};
      do
          echo ${v}
          plink2 \
-                --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/caprion.sample --keep ${caprion}/data2/caprion.${group} \
-                --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
-                --pheno ${caprion}/data2/caprion.pheno --pheno-name ${v} --covar ${caprion}/data2/caprion.covar \
+                --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/epcr-proc.sample --keep ${caprion}/data2/epcr-proc.${group} \
+                --glm hide-covar --input-missing-phenotype -999 --covar-variance-standardize \
+                --pheno ${caprion}/data2/epcr-proc.pheno --pheno-name ${v} --covar ${caprion}/data2/epcr-proc.covar \
                 --out ${caprion}/work/${v}
          grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
-         gzip -f > ${caprion}/bgen2/${v}-${group}-plink2.gz
+         gzip -f > ${caprion}/bgen2/EPCR_PROC/${v}-${group}-plink2.gz
          rm ${caprion}/work/${v}.${v}.glm.linear
      done
   done
@@ -98,4 +98,6 @@ function phase2_All()
   done
 }
 
-phase2_All
+epcr_proc
+epcr_proc_group
+# phase2_All

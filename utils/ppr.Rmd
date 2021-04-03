@@ -218,7 +218,7 @@ $10^{-6}$ |2807/934 | 3,274/956
 $5\times 10^{-8}$   |226/203  | 426/364
 ----------|---------|-----------
 
-Here phase II results were based on all data (_All, normalised log-intensities for every sample).
+Note that there were 987 uniprot IDs from phase I and phase II results were based on all data (_All, normalised log-intensities for every sample).
 
 Directory miamiplot/ contains the Miami plots.
 

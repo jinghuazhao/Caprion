@@ -5,7 +5,7 @@
 #SBATCH --partition cardio
 #SBATCH --qos=cardio
 #SBATCH --array=1-39
-#SBATCH --mem=40800
+#SBATCH --mem=50000
 #SBATCH --time=5-00:00:00
 #SBATCH --output=/rds/user/jhz22/hpc-work/work/_plink2_%A_%a.out
 #SBATCH --error=/rds/user/jhz22/hpc-work/work/_plink2_%A_%a.err
@@ -31,7 +31,7 @@ function phase1()
 #SBATCH --export ALL
 
 export col=$(cut -d' ' -f ${SLURM_ARRAY_TASK_ID} swath-ms.uniprot)
-for v in ${col} ${col}_inv
+for v in ${col} ${col}_invn
 do
     plink2 \
            --bfile ${caprion}/data/caprion.01 \
@@ -51,7 +51,7 @@ function epcr_proc()
   do
       echo ${v}
       plink2 \
-             --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/epcr_proc.sample \
+             --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/epcr-proc.sample \
              --glm hide-covar --input-missing-phenotype -999 --covar-variance-standardize \
              --pheno ${caprion}/data2/epcr-proc.pheno --pheno-name ${v} --covar ${caprion}/data2/epcr-proc.covar \
              --out ${caprion}/work/${v}
@@ -99,5 +99,5 @@ function phase2_All()
 }
 
 epcr_proc
-epcr_proc_group
+# epcr_proc_group
 # phase2_All

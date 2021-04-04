@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-export caprion=~/rds/projects/olink_proteomics/scallop/Caprion/
+export caprion=~/rds/projects/Caprion_proteomics/pilot/
 export protein=EPCR-PROC
 export snp_pos=~/rds/projects/olink_proteomics/scallop/INF/work/snp_pos
 
@@ -87,3 +87,7 @@ EPCR_lm <- lm(EPCR_All~EPCR_442603139+EPCR_442605396+EPCR_442582461+EPCR_4425818
 summary(EPCR_lm)
 
 END
+
+cut -d' ' -f2,3 --complement --output-delimiter='|' ${caprion}/bgen2/EPCR-PROC/5e-8/caprion-invn.sentinels | \
+sed 's/Chrom/chr/;s/_invn//g;s/chr[0-9]*://'
+

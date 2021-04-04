@@ -121,11 +121,12 @@ function _HLA2group()
 }
 
 export tag=_nold
-export src=bgen2
+export src=bgen
 export dest=sentinels
 export p=1e-5
-if [ ! -d ${dest} ]; then mkdir -p ${dest}; fi
-# for group in group1 group2; do export group=${group}; pgz2group; _HLA2group; done
 
 pgz2
 _HLA2
+
+if [ ! -d ${dest} ]; then mkdir -p ${dest}; fi
+# for group in group1 group2; do export group=${group}; pgz2group; _HLA2group; done

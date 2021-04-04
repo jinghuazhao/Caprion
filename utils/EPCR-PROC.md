@@ -2,7 +2,11 @@
 
 Working directory,
 
-~/rds/projects/olink_proteomics/scallop/Caprion/EPCR-PROC
+~/rds/projects/Caprion_proteomics/pilot/EPCR-PROC
+
+and association results
+
+~/rds/projects/Caprion_proteomics/pilot/bgen2/EPCR-PROC
 
 ## Annotations
 ```
@@ -10,9 +14,9 @@ Working directory,
 # EPCR_HUMAN    Q9UNN8 PROCR Endothelial protein C receptor
 # PROC_HUMAN    P04070  PROC Vitamin K-dependent protein C
 
-# chrom chromStart  chromEnd strand    acc uniprotName geneName geneSynonyms hgncSym         ensGene
-# chr20   33759957  33764613      + Q9UNN8  EPCR_HUMAN    PROCR         EPCR   PROCR ENSG00000101000
-#  chr2  128177518 128186519      + P04070  PROC_HUMAN     PROC                 PROC ENSG00000115718
+# chrom chromStart  chromEnd strand  uniprotName hgncSym         ensGene
+# chr20   33759957  33764613      +   EPCR_HUMAN   PROCR ENSG00000101000
+#  chr2  128177518 128186519      +   PROC_HUMAN    PROC ENSG00000115718
 
 # https://www.ebi.ac.uk/pdbe/pdbe-kb/proteins/Q9UNN8
 # https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0010980#s5
@@ -64,36 +68,6 @@ GSQTSRSYTS LVLGVLVGSF IIAGVAVGIF LCTGGRRC
 4            EPCR_442581804_TLAFPLTIR
 5                            EPCR_All
 6                             EPCR_DR
-
-               EPCR_442603139 EPCR_442605396 EPCR_442582461 EPCR_442581804 EPCR_All  EPCR_DR
-EPCR_442603139 
-EPCR_442605396 "-0.0546"
-EPCR_442582461 " 0.2541"      " 0.0815"
-EPCR_442581804 " 0.3482"      " 0.0190"      " 0.3011"
-EPCR_All       " 0.2660"      " 0.9359"      " 0.2662"      " 0.2138"
-EPCR_DR        " 0.2660"      " 0.9359"      " 0.2662"      " 0.2138"      " 1.0000"
-
-Call:
-lm(formula = EPCR_All ~ EPCR_442603139 + EPCR_442605396 + EPCR_442582461 +
-    EPCR_442581804, data = EPCR)
-
-Residuals:
-      Min        1Q    Median        3Q       Max
--0.060649 -0.010128  0.000392  0.011153  0.056049
-
-Coefficients:
-                Estimate Std. Error t value Pr(>|t|)
-(Intercept)    8.7522184  0.0853057  102.60   <2e-16 ***
-EPCR_442603139 0.0111745  0.0002604   42.92   <2e-16 ***
-EPCR_442605396 0.4346305  0.0026603  163.38   <2e-16 ***
-EPCR_442582461 0.0470646  0.0028821   16.33   <2e-16 ***
-EPCR_442581804 0.0323885  0.0027846   11.63   <2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.01921 on 195 degrees of freedom
-Multiple R-squared:  0.9936,    Adjusted R-squared:  0.9935
-F-statistic:  7588 on 4 and 195 DF,  p-value: < 2.2e-16
 ```
 
 ## Scatter, histogram and boxplots
@@ -178,7 +152,16 @@ chr21:34516707|4.38852e-06|P04070_invn|rs963950
 
 # Phase II data
 
+## Scatter, histogram and boxplots
+
+![EPCR](EPCR-PROC/EPCR-PROC-phase2-0.png)
+![PROC](EPCR-PROC/EPCR-PROC-phase2-1.png)
+
+![Pattens of correlation](EPCR-PROC/EPCR-PROC-phase2-all.png)
+![Correlations](EPCR-PROC/EPCR-PROC-phase2-corr.png)
+
 ```
+Correlation:
                                      EPCR_All   EPCR_DR
 EPCR_442581804_TLAFPLTIR            0.5113919 0.6174716
 EPCR_442582461_LHMLQISYFR           0.2986443 0.4357448
@@ -187,13 +170,10 @@ EPCR_442605396_LHM[147.0354]LQISYFR 0.6105076 0.5631775
 EPCR_All                            1.0000000 0.9822826
 EPCR_DR                             0.9822826 1.0000000
 
-Call:
+Linear model:
+
 lm(formula = EPCR_All ~ EPCR_442581804 + EPCR_442582461 + EPCR_442603139 +
     EPCR_442605396, data = EPCR)
-
-Residuals:
-      Min        1Q    Median        3Q       Max
--0.099107 -0.014281 -0.001071  0.013681  0.161415
 
 Coefficients:
                 Estimate Std. Error t value Pr(>|t|)
@@ -210,7 +190,36 @@ Multiple R-squared:  0.9932,    Adjusted R-squared:  0.9931
 F-statistic: 5.586e+04 on 4 and 1538 DF,  p-value: < 2.2e-16
 ```
 
-![Desc1](EPCR-PROC/EPCR-PROC-phase2-0.png)
+## Association results
 
-![Pattens of correlation](EPCR-PROC/EPCR-PROC-phase2-all.png)
-![Correlations](EPCR-PROC/EPCR-PROC-phase2-corr.png)
+### Sentinels
+
+chr|P|prot|Pos|SNP
+---|-|----|----------|---
+2|3.07538e-08|EPCR_442581804_TLAFPLTIR|37819409|rs112338777
+3|2.22701e-08|PROC_442589612_YLDWIHGHIR|39510601|rs13067113
+3|1.11376e-08|EPCR_442582461_LHMLQISYFR|49500024|rs577462830
+3|4.58887e-09|EPCR_442603139_LHM.147.0354.LQISYFR|191558143|rs145822522
+10|2.56787e-08|EPCR_442603139_LHM.147.0354.LQISYFR|56282688|rs150815432
+12|1.86016e-08|PROC_442611348_TFVLNFIK|72065081|rs35805727
+17|3.99688e-08|PROC_442597510_TFVLNFIK|30865735|rs2519863
+20|2.68308e-08|PROC_442747564_ELNQAGQETLVTGWGYHSSR|33741570|rs376468120
+20|4.11194e-08|PROC_DR|33741570|rs376468120
+20|2.19713e-08|PROC_442580684_YLDWIHGHIR|33784021|rs11906148
+20|3.59909e-11|PROC_442582032_LGEYDLRR|33784021|rs11906148
+20|3.0714e-12|PROC_442590967_WELDLDIK|33752110|rs143373163
+20|4.72132e-12|PROC_442593037_TFVLN.115.0269.FIK|33741570|rs376468120
+20|1.30569e-15|PROC_442580593_TFVLNFIK|33741570|rs376468120
+20|6.64232e-12|PROC_442580878_LGEYDLR|33741570|rs376468120
+20|6.23775e-13|PROC_442581615_RGDSPWQVVLLDSK|33741570|rs376468120
+20|1.66179e-14|PROC_442585077_TFVLN.115.0269.FIK|33773630|rs117249133
+20|1.05465e-15|PROC_442605638_TFVLN.115.0269.FIK|33784021|rs11906148
+20|2.51841e-13|PROC_442618737_RGDSPWQVVLLDSKK|33784021|rs11906148
+20|1.30432e-13|PROC_442652002_DTEDQEDQVDPR|33768650|rs10564067
+20|4.41775e-12|PROC_442688824_ELNQAGQETLVTGWGYHSSR|33775200|rs11167260
+20|6.29456e-15|PROC_442688952_RGDSPWQVVLLDSK|33745891|rs141474375
+20|7.23675e-51|EPCR_442603139_LHM.147.0354.LQISYFR|33754405|rs8119351
+20|1.20912e-103|EPCR_442582461_LHMLQISYFR|33746789|rs144917890
+20|3.18567e-109|EPCR_All|33769926|rs945961
+20|8.01571e-125|EPCR_DR|33769926|rs945961
+20|2.57793e-195|EPCR_442581804_TLAFPLTIR|33746789|rs144917890

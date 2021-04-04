@@ -178,9 +178,9 @@ Our focus here is on $10^{-5}$, $10^{-6}$ and $5 \times 10^{-8}$.
 
 P                 | Overlap
 ------------------|--------
-$10^{-5}$         | 25,766
-$10^{-6}$         | 3,244
-$5\times 10^{-8}$ | 415
+$10^{-5}$         | 19,730
+$10^{-6}$         | 680
+$5\times 10^{-8}$ | 275
 
 # Files at CSD3
 
@@ -218,13 +218,13 @@ $10^{-6}$ |2807/934 | 3,274/956
 $5\times 10^{-8}$   |226/203  | 426/364
 ----------|---------|-----------
 
-Note that there were 987 uniprot IDs from phase I and phase II results were based on all data (_All, normalised log-intensities for every sample).
+Note that uniprot IDs were used for phase I while protein names were used for phase II, based on all data (_All, normalised log-intensities for every sample).
 
 Directory miamiplot/ contains the Miami plots.
 
 # A case study
 
-The EPCR-PROC case study was reported earlier.
+See a separate document for full details.
 
 # Reflections
 
@@ -232,7 +232,7 @@ A study of 196 individuals appeared sufficient to see statistical significance a
 
 The small correlations between the normal deviates between two phases seemed counterintuitve but to some extent was related to LD; the impact of the systematic bias in the measurement was unclear. It might be tempting to use more PCs in the model-based clustering with proportion of variance explained increasing from 30.0% to 57.2% from one to 20 PCs; nevertheless much improvement of the classification won't be expected since there is already and perfect separation up to three PCs through R/rgl (dynamic plot not shown here).
 
-For the EPCR-PROC case, the findings were essentially null.
+For the EPCR-PROC case, both cis and trans pQTL were reported.
 
 In pratice, one tends to meta-analyse phase I and II results and in this case, it is possible to work on the piptides and/or also only those above limit of detection (_DR, normalised log-intensities for every sample with detection rate >10%).
 

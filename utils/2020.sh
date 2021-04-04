@@ -137,6 +137,7 @@ R --no-save <<END
                  sample_file=file.path(dir,"pilot","data2","phase2.sample"),
                  ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
 # EPCR-PROC
+  subset(Annotations,grepl("EPCR",Protein)|grepl("PROC",Protein))
   vars <- names(peptides_all_dr)
   prots <- c("EPCR","PROC")
   epcr_proc <- peptides_all_dr[grepl("caprion_id",vars)|grepl(prots[1],vars)|grepl(prots[2],vars)]
@@ -148,6 +149,8 @@ R --no-save <<END
   format(cor(EPCR),digits=3)
   head(EPCR)
   names(EPCR) <- substr(epcr_names,1,14)
+  options(width=100)
+  round(cor(EPCR[c("EPCR_442581804","EPCR_442582461","EPCR_442603139","EPCR_442605396","EPCR_All","EPCR_DR")]),digits=3)
   EPCR_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
   proc_names <- epcr_proc_names[grepl("PROC",epcr_proc_names)]
   PROC <- data.frame(epcr_proc[,proc_names])
@@ -155,8 +158,6 @@ R --no-save <<END
   format(cor(PROC),digits=3)
   head(PROC)
   names(PROC) <- substr(proc_names,1,14)
-  PROC_lm <- lm(EPCR_All~EPCR_442581804+EPCR_442582461+EPCR_442603139+EPCR_442605396,data=EPCR)
-  summary(PROC_lm)
   library(corrplot)
   png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-all.png"),width=12,height=10,units="in",pointsize=4,res=300)
   EPCR_PROC_corr <- cor(epcr_proc[,-1])
@@ -167,8 +168,7 @@ R --no-save <<END
   col_row <- rownames(subset(as.data.frame(EPCR_PROC_corr),!is.na(EPCR_All)))
   pheatmap(EPCR_PROC_corr[col_row,col_row])
   dev.off()
-  EPCR_PROC_corr[!lower.tri(EPCR_PROC_corr)] <- NA
-  write.table(format(EPCR_PROC_corr,digits=2),file=file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
+  write.table(format(EPCR_PROC_corr[col_row,col_row],digits=2),file=file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-corr.tsv"),quote=FALSE,sep="\t")
   png(file.path(dir,"pilot","EPCR-PROC","EPCR-PROC-phase2-0.png"),width=12,height=10,units="in",pointsize=4,res=300)
   par(mfrow=c(3,1))
   with(epcr_proc,
@@ -191,7 +191,7 @@ R --no-save <<END
   epcr_proc_P_invn <- P_invn[,colnames(P_invn)%in%paste0(epcr_proc_names,"_invn")]
   snptest_sample(subset(data.frame(id1_id2_missing,CD,epcr_proc_P_invn),!is.na(ID_1)),
                  sample_file=file.path(dir,"pilot","data2","epcr-proc.sample"),
-                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(epcr_proc_P,"_invn"))
+                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(epcr_proc_names,"_invn"))
 END
 
 # All for phase 2
@@ -232,4 +232,5 @@ export a=${caprion}/bgen/${threshold}/caprion-invn.sentinels
 export b=${caprion}/bgen2/${threshold}/caprion-invn.sentinels
 bedtools intersect -a <(awk '{if(NR>1) $1="chr"$1;print}' $a | tr ' ' '\t') \
                    -b <(awk '{if(NR>1) $1="chr"$1;print}' $b | tr ' ' '\t') \
-                   -wa -wb -loj
+                   -wa -wb -loj | \
+awk '$8!="."'

@@ -1,4 +1,9 @@
-# 29-2-2020 JHZ
+# 5-4-2021 JHZ
+
+load("caprion.rda")
+prot_uniprot <- data.frame(prot=gsub("_HUMAN","",Annotations[,1]),Accession=Annotations[,2])
+ord <- with(prot_uniprot,order(Accession))
+write.table(prot_uniprot[ord,],file="2019.id",col.names=FALSE,quote=FALSE,row.names=FALSE)
 
 source("caprion.ini")
 load("caprion.rda")

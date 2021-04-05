@@ -227,10 +227,41 @@ export DR=$(head ${caprion}/data2/phase2_All.tsv | sed 's/\t/\n/g' | grep "_DR$"
 # a list of unplotted Miami plot
 ls miamiplot/|sed 's/-phase1-phase2.png//;s/-/\t/' | cut -f2 | grep -f - -v 2020.id > 2020.left
 
-export threshold=5e-8
-export a=${caprion}/bgen/${threshold}/caprion-invn.sentinels
-export b=${caprion}/bgen2/${threshold}/caprion-invn.sentinels
-bedtools intersect -a <(awk '{if(NR>1) $1="chr"$1;print}' $a | tr ' ' '\t') \
-                   -b <(awk '{if(NR>1) $1="chr"$1;print}' $b | tr ' ' '\t') \
-                   -wa -wb -loj | \
-awk '$8!="."'
+# Four proteins missing in phase 2
+sort -k2,2 2020.id | join -v1 -12 -22 2019.id -
+
+function overlap()
+{
+  export threshold=$1
+  export a=${caprion}/bgen/${threshold}/caprion-invn.sentinels
+  export b=${caprion}/bgen2/${threshold}/caprion-invn.sentinels
+  bedtools intersect -a <(awk '{if(NR>1) $1="chr"$1;print}' $a | tr ' ' '\t') \
+                     -b <(awk '{if(NR>1) $1="chr"$1;print}' $b | tr ' ' '\t') \
+                     -wa -wb -loj | \
+  awk '$8!="."' | \
+  wc -l
+
+  bedtools intersect -a <(sed '1d;s/_invn//g' $a | \
+                          sort -k5,5 | \
+                          join -15 -22 - 2019.id | \
+                          cut -d' ' -f1 --complement | \
+                          sort -k1,1n -k2,2n | \
+                          awk '{$1="chr"$1;print}' | \
+                          tr ' ' '\t') \
+                     -b <(sed '1d;s/_All_invn//' $b | \
+                          awk '{$1="chr"$1;print}' | \
+                          tr ' ' '\t') \
+                     -wa -wb -loj | \
+  awk '$8!="." && $7==$12'
+}
+
+for p in 1e-5 1e-6 5e-8
+do
+  echo ${p}
+  echo All overlaps
+  overlap ${p} | wc -l
+  echo Replicated pQTLs
+  overlap ${p} | cut -f1-7 | uniq | wc -l
+done
+
+overlap ${p} | cut -f2-3,7,8-10 --complement | sed 's/^chr//;s/chr[0-9]*://g' | tr '\t' '|'

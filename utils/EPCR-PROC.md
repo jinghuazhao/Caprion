@@ -1,12 +1,9 @@
 # EPCR-PROC in Caprion pilot study
 
-Working directory,
-
-~/rds/projects/Caprion_proteomics/pilot/EPCR-PROC
-
-and association results
-
-~/rds/projects/Caprion_proteomics/pilot/bgen2/EPCR-PROC
+From ~/rds/projects/Caprion_proteomics/pilot/, the EPCR-PROC/ directory contains
+part of the results in this document and association results for phase I were
+extracted from bgen/ and for phase II from bgen2/EPCR-PROC/ also with results on
+piptides.
 
 ## Annotations
 ```
@@ -77,7 +74,7 @@ GSQTSRSYTS LVLGVLVGSF IIAGVAVGIF LCTGGRRC
 
 ## Q-Q/Manhattan plots
 
-Associaiton statistics were based on invn(ormal) transformation, invnormal(prot)~genotypes.
+Associaiton statistics were based on invn(ormal) transformation, invnormal(prot)~covariates+genotypes.
 
 ![EPCR](EPCR-PROC/Q9UNN8_invn_turboqq.png)
 ![EPCR](EPCR-PROC/Q9UNN8_invn_turboman.png)
@@ -194,6 +191,8 @@ F-statistic: 5.586e+04 on 4 and 1538 DF,  p-value: < 2.2e-16
 
 ### Sentinels
 
+The EPCR and PROC results are shown in the following table.
+
 chr|P|prot|Pos|SNP
 ---|-|----|----------|---
 2|3.07538e-08|EPCR_442581804_TLAFPLTIR|37819409|rs112338777
@@ -223,3 +222,8 @@ chr|P|prot|Pos|SNP
 20|3.18567e-109|EPCR_All|33769926|rs945961
 20|8.01571e-125|EPCR_DR|33769926|rs945961
 20|2.57793e-195|EPCR_442581804_TLAFPLTIR|33746789|rs144917890
+
+Q-Q and Manhattan plots for EPCR_All.
+
+![EPCR](EPCR-PROC/EPCR_All_invn_turboqq.png)
+![EPCR](EPCR-PROC/EPCR_All_invn_turboman.png)

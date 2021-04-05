@@ -90,4 +90,3 @@ END
 
 cut -d' ' -f2,3 --complement --output-delimiter='|' ${caprion}/bgen2/EPCR-PROC/5e-8/caprion-invn.sentinels | \
 sed 's/Chrom/chr/;s/_invn//g;s/chr[0-9]*://'
-

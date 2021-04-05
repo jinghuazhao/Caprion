@@ -1,9 +1,4 @@
-# EPCR-PROC in Caprion pilot study
-
-From ~/rds/projects/Caprion_proteomics/pilot/, the EPCR-PROC/ directory contains
-part of the results in this document and association results for phase I were
-extracted from bgen/ and for phase II from bgen2/EPCR-PROC/ also with results on
-piptides.
+# EPCR-PROC in the Caprion pilot study
 
 ## Annotations
 ```
@@ -47,45 +42,28 @@ GSQTSRSYTS LVLGVLVGSF IIAGVAVGIF LCTGGRRC
 # https://www.uniprot.org/peptidesearch/
 ```
 
-# Phase I data
+## Files on CSD3
 
-## Correlation of piptides
+Under ~/rds/projects/Caprion_proteomics/pilot/, 
+* EPCR-PROC/ directory contains part of the results in this document
+* bgen/ contains association results for phase I as extracted here
+* bgen2/ contins association results for phase II
+  - EPCR-PROC/ contains results on piptides, All and DR.
 
-* EPCR-PROC.tsv. The raw data.
-* EPCR-PROC-corr.tsv. The Pearson correlation.
-* EPCR-PROC-corr.png. The heatmap.
+## Phase I data
 
-![Heatmap](EPCR-PROC/EPCR-PROC-corr.png)
-
-```
-                          names.EPCR.
-1 EPCR_442603139_LHM.147.0354.LQISYFR
-2 EPCR_442605396_LHM.147.0354.LQISYFR
-3           EPCR_442582461_LHMLQISYFR
-4            EPCR_442581804_TLAFPLTIR
-5                            EPCR_All
-6                             EPCR_DR
-```
-
-## Scatter, histogram and boxplots
-
-![EPCR](EPCR-PROC/EPCR-PROC-desc-0.png)
-![PROC](EPCR-PROC/EPCR-PROC-desc-1.png)
-
-## Q-Q/Manhattan plots
+### Q-Q/Manhattan plots
 
 Associaiton statistics were based on invn(ormal) transformation, invnormal(prot)~covariates+genotypes.
 
-![EPCR](EPCR-PROC/Q9UNN8_invn_turboqq.png)
-![EPCR](EPCR-PROC/Q9UNN8_invn_turboman.png)
-![PROC](EPCR-PROC/P04070_invn_turboqq.png)
-![PROC](EPCR-PROC/P04070_invn_turboman.png)
+![EPCR](EPCR-PROC/Q9UNN8_invn_turboqq.png){width=50%}
+![EPCR](EPCR-PROC/Q9UNN8_invn_turboman.png){width=50%}
+![PROC](EPCR-PROC/P04070_invn_turboqq.png){width=50%}
+![PROC](EPCR-PROC/P04070_invn_turboman.png){width=50%}
 
-## Sentinels
+### Sentinels
 
-Sentinels are Q9UNN8_invn.sentinels and P04070_invn.sentinels.
-
-### EPCR
+#### EPCR
 
 MarkerName|P|prot|rsid
 ----------|-|----|----
@@ -114,7 +92,7 @@ chr16:54065346|8.6531e-06|Q9UNN8_invn|rs12051239
 chr16:86878088|1.07322e-06|Q9UNN8_invn|rs11645358
 chr18:65690741|3.02894e-06|Q9UNN8_invn|rs17078446
 
-### PROC
+#### PROC
 
 MarkerName|P|prot|rsid
 ----------|-|----|----
@@ -147,15 +125,14 @@ chr20:36889971|8.93867e-06|P04070_invn|rs6098808
 chr20:36889971|8.93867e-06|P04070_invn|rs767174705
 chr21:34516707|4.38852e-06|P04070_invn|rs963950
 
-# Phase II data
+### Correlation of piptides
 
-## Scatter, histogram and boxplots
+![Heatmap](EPCR-PROC/EPCR-PROC-corr.png){width=50%}
 
-![EPCR](EPCR-PROC/EPCR-PROC-phase2-0.png)
-![PROC](EPCR-PROC/EPCR-PROC-phase2-1.png)
+## Phase II data
 
-![Pattens of correlation](EPCR-PROC/EPCR-PROC-phase2-all.png)
-![Correlations](EPCR-PROC/EPCR-PROC-phase2-corr.png)
+![Pattens of correlation](EPCR-PROC/EPCR-PROC-phase2-all.png){width=50%}
+![Correlations](EPCR-PROC/EPCR-PROC-phase2-corr.png){width=50%}
 
 ```
 Correlation:
@@ -187,9 +164,14 @@ Multiple R-squared:  0.9932,    Adjusted R-squared:  0.9931
 F-statistic: 5.586e+04 on 4 and 1538 DF,  p-value: < 2.2e-16
 ```
 
-## Association results
+### Association results
 
-### Sentinels
+#### Q-Q and Manhattan plots for EPCR_All.
+
+![EPCR](EPCR-PROC/EPCR_All_invn_turboqq.png){width=50%}
+![EPCR](EPCR-PROC/EPCR_All_invn_turboman.png){width=50%}
+
+#### Sentinels
 
 The EPCR and PROC results are shown in the following table.
 
@@ -223,7 +205,60 @@ chr|P|prot|Pos|SNP
 20|8.01571e-125|EPCR_DR|33769926|rs945961
 20|2.57793e-195|EPCR_442581804_TLAFPLTIR|33746789|rs144917890
 
-Q-Q and Manhattan plots for EPCR_All.
+#### LD information
 
-![EPCR](EPCR-PROC/EPCR_All_invn_turboqq.png)
-![EPCR](EPCR-PROC/EPCR_All_invn_turboman.png)
+Four SNPs does not present on the LD reference panel: rs112338777, rs577462830, rs145822522,
+rs10564067.
+
+```
+            rs13067113 rs150815432 rs35805727 rs2519863 rs376468120 rs11906148
+rs13067113           1          NA         NA        NA          NA         NA
+rs150815432          0           1         NA        NA          NA         NA
+rs35805727           0           0          1        NA          NA         NA
+rs2519863            0           0          0      1.00          NA         NA
+rs376468120          0           0          0      0.01        1.00         NA
+rs11906148           0           0          0      0.00        0.88       1.00
+rs143373163          0           0          0      0.01        0.91       0.95
+rs117249133          0           0          0      0.00        0.90       0.99
+rs11167260           0           0          0      0.00        0.90       0.99
+rs141474375          0           0          0      0.01        0.91       0.95
+rs8119351            0           0          0      0.01        0.92       0.97
+rs144917890          0           0          0      0.01        0.91       0.95
+rs945961             0           0          0      0.00        0.90       0.99
+            rs143373163 rs117249133 rs11167260 rs141474375 rs8119351
+rs13067113           NA          NA         NA          NA        NA
+rs150815432          NA          NA         NA          NA        NA
+rs35805727           NA          NA         NA          NA        NA
+rs2519863            NA          NA         NA          NA        NA
+rs376468120          NA          NA         NA          NA        NA
+rs11906148           NA          NA         NA          NA        NA
+rs143373163        1.00          NA         NA          NA        NA
+rs117249133        0.97        1.00         NA          NA        NA
+rs11167260         0.97        1.00       1.00          NA        NA
+rs141474375        1.00        0.97       0.97        1.00        NA
+rs8119351          0.99        0.98       0.98        0.99      1.00
+rs144917890        1.00        0.97       0.97        1.00      0.99
+rs945961           0.97        1.00       1.00        0.97      0.98
+            rs144917890 rs945961
+rs13067113           NA       NA
+rs150815432          NA       NA
+rs35805727           NA       NA
+rs2519863            NA       NA
+rs376468120          NA       NA
+rs11906148           NA       NA
+rs143373163          NA       NA
+rs117249133          NA       NA
+rs11167260           NA       NA
+rs141474375          NA       NA
+rs8119351            NA       NA
+rs144917890        1.00       NA
+rs945961           0.97        1
+```
+Therefore the first four SNPs were in low LD among themselves and others in high LD.
+
+## Summary
+
+While there was some indication of possible pQTLs from phase I data,
+the phase II results were more convincing. In particular, _All and _DR
+data gave the same cis-pQTL for EPCR. Not surprisingly, the significance was also
+seen in piptides highly correlated with _All and _DR.

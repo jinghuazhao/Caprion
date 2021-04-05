@@ -47,7 +47,7 @@ As quoted from the Caprion report:
 
 ## Exploratory analysis
 
-An undisclosed pattern was reported but successfully recovered through PCA, as furnished with R's `prcomp`.
+An undisclosed pattern was reported but revealed through PCA, as furnished with R's `prcomp`.
 
 ```{r, echo=FALSE}
   load("2020.rda")

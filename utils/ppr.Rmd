@@ -302,7 +302,7 @@ chr|$\mbox{P}_I$|$\mbox{Pos}_I$|$\mbox{RSid}_{I}$|$P_{II}$|Protein|$\mbox{Pos}_{
 
 # A case study
 
-See a separate document for more details of EPCR-PROT study.
+See a separate document for more details of the EPCR-PROC study.
 
 # Reflections
 

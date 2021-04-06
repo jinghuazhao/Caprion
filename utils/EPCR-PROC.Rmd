@@ -83,7 +83,7 @@ Under ~/rds/projects/Caprion_proteomics/pilot/,
 * EPCR-PROC/ directory contains part of the results in this document
 * bgen/ contains association results for phase I as extracted here
 * bgen2/ contins association results for phase II
-  - EPCR-PROC/ contains results on piptides, All and DR.
+  - EPCR-PROC/ contains results on peptides, All and DR.
 
 ## Phase I data
 
@@ -166,7 +166,7 @@ chr20:36889971|8.93867e-06|P04070_invn|rs6098808
 chr20:36889971|8.93867e-06|P04070_invn|rs767174705
 chr21:34516707|4.38852e-06|P04070_invn|rs963950
 
-### Correlation of piptides
+### Correlation of peptides
 
 ```{r heatmap1, fig.cap="Figure 2. Heatmap", fig.height=7, fig.wdith=8, echo=FALSE}
 include_graphics("EPCR-PROC/EPCR-PROC-corr.png")
@@ -275,4 +275,4 @@ The figure shows clear LD blocks.
 While there was some indication of possible pQTLs from phase I data,
 the phase II results were more convincing. In particular, _All and _DR
 data gave the same cis-pQTL for EPCR. Not surprisingly, the significance was also
-seen in piptides highly correlated with _All and _DR.
+seen in peptides highly correlated with _All and _DR.

@@ -88,14 +88,5 @@ summary(EPCR_lm)
 
 END
 
-cut -d' ' -f2,3 --complement --output-delimiter='|' \
-${caprion}/bgen2/EPCR-PROC/5e-8/caprion-invn.sentinels | \
-sed 's/Chrom/chr/;s/_invn//g;s/chr[0-9]*://' > ${caprion}/EPCR-PROC/EPCR-PROC.sentinels
-
-R --no-save -q <<END
-  caprion <- Sys.getenv("caprion")
-  sentinels <- read.table(file.path(caprion,"EPCR-PROC","EPCR-PROC.sentinels"),header=TRUE,sep="|")
-  ldmatrix <- TwoSampleMR::ld_matrix(with(sentinels,SNP),with_alleles=FALSE)^2
-  ldmatrix[upper.tri(ldmatrix)] <- NA
-  round(ldmatrix,digits=2)
-END
+Rscript -e "knitr::knit('EPCR-PROC.Rmd')"
+pandoc EPCR-PROC.md -o EPCR-PROC.docx

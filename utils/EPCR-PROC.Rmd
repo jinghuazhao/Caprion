@@ -17,13 +17,11 @@ nocite: '@*'
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(engine.opts = list(bash = "-l"))
 library(bookdown)
-library(cowplot)
 library(knitr)
 library(magick)
 library(png)
 library(tinytex)
 library(lattice)
-library(ggplot2)
 ```
 
 ```{r, include=FALSE}
@@ -91,15 +89,9 @@ Under ~/rds/projects/Caprion_proteomics/pilot/,
 
 Associaiton statistics were based on invn(ormal) transformation, invnormal(prot)~covariates+genotypes.
 
-```{r qqman1, fig.cap="Figure 1. Q-Q and manhattan plots", fig.height=8, fig.wdith=12, echo=FALSE}
-p1 <- ggdraw() + draw_image("EPCR-PROC/Q9UNN8_invn_turboqq.png")
-p2 <- ggdraw() + draw_image("EPCR-PROC/Q9UNN8_invn_turboman.png")
-# plot_grid(p1, p2)
-p3 <- ggdraw() + draw_image("EPCR-PROC/P04070_invn_turboqq.png")
-p4 <- ggdraw() + draw_image("EPCR-PROC/P04070_invn_turboman.png")
-# plot_grid(p3, p4)
-include_graphics(c("EPCR-PROC/Q9UNN8_invn_turboqq.png","EPCR-PROC/Q9UNN8_invn_turboman.png"))
-include_graphics(c("EPCR-PROC/P04070_invn_turboqq.png","EPCR-PROC/P04070_invn_turboman.png"))
+```{r qqman1, fig.cap="Figure 1. Q-Q and manhattan plots", fig.show="hold", echo=FALSE}
+include_graphics(c("EPCR-PROC/Q9UNN8_invn_turboqq.png","EPCR-PROC/Q9UNN8_invn_turboman.png", 
+                   "EPCR-PROC/P04070_invn_turboqq.png","EPCR-PROC/P04070_invn_turboman.png"))
 ```
 
 ### Sentinels
@@ -174,7 +166,7 @@ include_graphics("EPCR-PROC/EPCR-PROC-corr.png")
 
 ## Phase II data
 
-```{r heatmap2, fig.cap="Figure 3. Phase II heatmap", fig.height=7, fig.wdith=8 , echo=FALSE}
+```{r heatmap2, fig.cap="Figure 3. Phase II heatmap", fig.show="hold", fig.height=7, fig.wdith=8, echo=FALSE}
 include_graphics(c("EPCR-PROC/EPCR-PROC-phase2-all.png","EPCR-PROC/EPCR-PROC-phase2-corr.png"))
 ```
 
@@ -212,7 +204,7 @@ F-statistic: 5.586e+04 on 4 and 1538 DF,  p-value: < 2.2e-16
 
 #### Q-Q and Manhattan plots for EPCR_All.
 
-```{r qqman2, fig.cap="Figure 4. Q-Q and manhattan plots for EPCR", out.wdith="50%", echo=FALSE}
+```{r qqman2, fig.cap="Figure 4. Q-Q and manhattan plots for EPCR", fig.show="hold", echo=FALSE}
 include_graphics(c("EPCR-PROC/EPCR_All_invn_turboqq.png","EPCR-PROC/EPCR_All_invn_turboman.png"))
 ```
 

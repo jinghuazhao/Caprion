@@ -167,7 +167,7 @@ b <- dnorm(a, 0, 1)
                ylab=expression(1/sqrt(2*pi) * exp(-z^2/2)))
 ```
 
-We therefore have the R function `z <- function(p) -qnorm(p/2)`.
+We therefore have the R function `z <- function(p) qnorm(p/2,lower.tail=FALSE)`.
 
 ## Miami plots
 
@@ -339,7 +339,7 @@ The idea is best illustrated with a toy example involving two vectors of p value
 
 ```{r echo=TRUE}
 # z=-1.96 correspond to a two-sided p=0.05
-z <- function(p) -qnorm(p/2)
+z <- function(p) qnorm(p/2, lower.tail=FALSE)
 z(0.05)
 p <- 1:10/10; p
 pr <- 1:10/100; pr

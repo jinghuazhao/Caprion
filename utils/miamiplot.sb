@@ -1,12 +1,11 @@
 #!/usr/bin/bash
 
 #SBATCH --job-name=_2020
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --qos=cardio
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=skylake
+#SBATCH --time=12:00:00
 #SBATCH --array=1-983
 #SBATCH --mem=40800
-#SBATCH --time=5-00:00:00
 #SBATCH --output=/rds/user/jhz22/hpc-work/work/_2020_%A_%a.out
 #SBATCH --error=/rds/user/jhz22/hpc-work/work/_2020_%A_%a.err
 #SBATCH --export ALL
@@ -39,7 +38,7 @@ R --no-save -q <<END
   uniprot_prot <- read.table(file.path(caprion,"work",paste(uniprot,prot,"phase1-phase2.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
   png(file.path(caprion,"miamiplot",paste(uniprot,prot,"phase1-phase2.png",sep="-")),res=300,width=12,height=10,units="in")
   gap::miamiplot(uniprot_prot,chr="chr",bp="pos",p="pr",pr="p",snp="rsid",cex=0.4,ylab="Phase II (top)/I (bottom)")
-  z <- function(p) -qnorm(p/2)
+  z <- function(p) qnorm(p/2,lower.tail=FALSE)
   cor_p1_p2 <- with(uniprot_prot,cor(z(p),z(pr),use="complete.obs",method="pearson"))
   sign_test_p1_p2 <- with(uniprot_prot,wilcox.test(p, pr, alternative="less", paired=TRUE, na.action="na.omit"))
   legend("topright",sprintf("Pearson r(z(p),z(pr))=%.4f,Wilcoxon signed rank test p=%.4f",cor_p1_p2,with(sign_test_p1_p2,p.value)))

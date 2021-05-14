@@ -15,6 +15,11 @@
     * 5e-8
 * Comparison of Phases I and II
   * miamiplot
+* Batch 3 data (N=815)
+  * data3/ .bgen data
+  * bgen3/ PLINK2 results
+    * 1e-5
+    * 5e-8
 
 ## Coding
 
@@ -42,6 +47,14 @@ data2/bgen --> utils/plink2.sh
 utils/plink2.sh --> utils/sentinels_nold.sh
 utils/sentinels_nold.sh --> merge.sh
 ```
+
+* Batch 3 work
+
+```mermaid
+graph TB
+utils/2021.sh
+```
+
 ---
 
 ## autoencoder (AE) vs PCA

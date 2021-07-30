@@ -90,7 +90,7 @@ https://umap-learn.readthedocs.io/en/latest/.
 
 ---
 
-ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis
+## ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis
 
 Jul 28, 2021 | Adam Bonislawski
 

@@ -3,23 +3,23 @@
 ## Site map
 
 1. Phase I work (N=196)
-  * data/ contains genotype files in .bgen format
-  * bgen/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
-    * 1e-5
-    * 1e-6
-    * 5e-8
+   * data/ contains genotype files in .bgen format
+   * bgen/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
+     * 1e-5
+     * 1e-6
+     * 5e-8
 2. Phase II work (N=1,488)
-  * data2/ contains genotype files in .bgen format
-  * bgen2/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
-    * 1e-5
-    * 5e-8
-  * Comparison of Phases I and II
-    * miamiplot
+   * data2/ contains genotype files in .bgen format
+   * bgen2/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
+     * 1e-5
+     * 5e-8
+   * Comparison of Phases I and II
+     * miamiplot
 3. Batch 3 data (N=815)
-  * data3/ .bgen data
-  * bgen3/ PLINK2 results
-    * 1e-5
-    * 5e-8
+   * data3/ .bgen data
+   * bgen3/ PLINK2 results
+     * 1e-5
+     * 5e-8
 
 ## Coding
 

@@ -86,7 +86,7 @@
 <div class="col-md-9" role="main">
 <h1 id="caprion-work">Caprion work</h1>
 <h2 id="site-map">Site map</h2>
-<ol>
+<ul>
 <li>Pilot (N=196)</li>
 <li>data/ contains genotype files in .bgen format</li>
 <li>bgen/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories<ul>
@@ -113,9 +113,9 @@
 <li>5e-8</li>
 </ul>
 </li>
-</ol>
+</ul>
 <h2 id="coding">Coding</h2>
-<ol>
+<ul>
 <li>Pilot</li>
 <li><a href="caprion.R">caprion.R</a> and <a href="caprion.ini">caprion.ini</a> are for data processing. Their derivatives are in the utils/ subdirectory:<ul>
 <li><a href="utils/affymetrix.sh">utils/affymetrix.sh</a> is for variant-specific association analysis.</li>
@@ -130,7 +130,7 @@
 </ul>
 </li>
 <li>Batch 2</li>
-</ol>
+</ul>
 <div class="mermaid">graph TB;
 utils/tensoqtl.sh
 utils/2020.sh --&gt; EPCR-PROC
@@ -141,9 +141,9 @@ data2/bgen --&gt; utils/plink2.sh
 utils/plink2.sh --&gt; utils/sentinels_nold.sh
 utils/sentinels_nold.sh --&gt; merge.sh
 </div>
-<ol>
+<ul>
 <li>Batch 3</li>
-</ol>
+</ul>
 <div class="mermaid">graph TB
 utils/2021.sh
 </div>
@@ -276,5 +276,5 @@ https://umap-learn.readthedocs.io/en/latest/.</p>
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2021-08-02 19:14:52.432676+00:00
+Build Date UTC : 2021-08-02 19:18:13.519468+00:00
 -->

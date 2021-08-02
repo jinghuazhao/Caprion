@@ -2,18 +2,18 @@
 
 ## Site map
 
-1. Phase I work (N=196)
+1. pilot (N=196)
    * data/ contains genotype files in .bgen format
    * bgen/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
      * 1e-5
      * 1e-6
      * 5e-8
-2. Phase II work (N=1,488)
+2. Batch 2 (N=1,488)
    * data2/ contains genotype files in .bgen format
    * bgen2/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
      * 1e-5
      * 5e-8
-   * Comparison of Phases I and II
+   * Comparison of pilot and batch 2
      * miamiplot
 3. Batch 3 data (N=815)
    * data3/ .bgen data
@@ -23,7 +23,7 @@
 
 ## Coding
 
-* Phase I work
+* Pilot
   * [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing. Their derivatives are in the utils/ subdirectory:
     * [utils/affymetrix.sh](utils/affymetrix.sh) is for variant-specific association analysis.
     * [utils/qctool.sb](utils/qctool.sb) is used to extract available sample and genotypes.
@@ -34,7 +34,7 @@
     * [utils/ps.sh](utils/ps.sh) and [utils/ps.R](utils/ps.R) run through PhenoScanner.
     * [utils/lookup.sh](utils/lookup.sh) looks up for overlap with SomaLogic and Olink.
     * [caprion.ipynb](caprion.ipynb) is a Jupyter notebook with some preprocessing done by [utils/tensorqtl.sh](utils/tensorqtl.sh).
-* Phase II work
+* Batch 2
 
 ```mermaid
 graph TB;
@@ -48,7 +48,7 @@ utils/plink2.sh --> utils/sentinels_nold.sh
 utils/sentinels_nold.sh --> merge.sh
 ```
 
-* Batch 3 work
+* Batch 3
 
 ```mermaid
 graph TB

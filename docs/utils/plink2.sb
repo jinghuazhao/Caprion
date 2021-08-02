@@ -1,0 +1,103 @@
+#!/usr/bin/bash
+
+#SBATCH --job-name=_plink2
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --qos=cardio
+#SBATCH --array=1-39
+#SBATCH --mem=50000
+#SBATCH --time=5-00:00:00
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_plink2_%A_%a.out
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_plink2_%A_%a.err
+#SBATCH --export ALL
+
+export caprion=${HOME}/Caprion/pilot
+export TMPDIR=/rds/user/jhz22/hpc-work/work
+module load plink/2.00-alpha
+
+if [ ! -d ${caprion}/bgen2 ]; then mkdir ${caprion}/bgen2; fi
+
+function phase1()
+{
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --ntasks=1
+#SBATCH --job-name=plink2
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=50000
+#SBATCH --array=1-987
+#SBATCH --output=work/plink2_%A_%a.out
+#SBATCH --error=work/plink2_%A_%a.err
+#SBATCH --export ALL
+
+export col=$(cut -d' ' -f ${SLURM_ARRAY_TASK_ID} swath-ms.uniprot)
+for v in ${col} ${col}_invn
+do
+    plink2 \
+           --bfile ${caprion}/data/caprion.01 \
+           --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
+           --pheno ${caprion}/data/caprion.pheno --pheno-name ${col} --covar ${caprion}/data/caprion.covar \
+           --out ${v}
+    grep -v NA ${v}.${col}.glm.linear | \
+    gzip -f > plink2/${v}-plink2.gz
+    rm ${v}.${col}.glm.linear
+done
+}
+
+function epcr_proc()
+{
+  export col=$(head -1 ${caprion}/data2/epcr-proc.pheno | cut -d" " -f1,2 --complement | cut -d" " -f ${SLURM_ARRAY_TASK_ID});
+  for v in ${col};
+  do
+      echo ${v}
+      plink2 \
+             --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/epcr-proc.sample \
+             --glm hide-covar --input-missing-phenotype -999 --covar-variance-standardize \
+             --pheno ${caprion}/data2/epcr-proc.pheno --pheno-name ${v} --covar ${caprion}/data2/epcr-proc.covar \
+             --out ${caprion}/work/${v}
+      grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
+      gzip -f > ${caprion}/bgen2/EPCR_PROC/${v}-plink2.gz
+      rm ${caprion}/work/${v}.${v}.glm.linear
+  done
+}
+
+function epcr_proc_group()
+{
+  export col=$(head -1 ${caprion}/data2/epcr-proc.pheno | cut -d" " -f1,2 --complement | cut -d" " -f ${SLURM_ARRAY_TASK_ID});
+  for group in group1 group2
+  do
+     for v in ${col};
+     do
+         echo ${v}
+         plink2 \
+                --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/epcr-proc.sample --keep ${caprion}/data2/epcr-proc.${group} \
+                --glm hide-covar --input-missing-phenotype -999 --covar-variance-standardize \
+                --pheno ${caprion}/data2/epcr-proc.pheno --pheno-name ${v} --covar ${caprion}/data2/epcr-proc.covar \
+                --out ${caprion}/work/${v}
+         grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
+         gzip -f > ${caprion}/bgen2/EPCR_PROC/${v}-${group}-plink2.gz
+         rm ${caprion}/work/${v}.${v}.glm.linear
+     done
+  done
+}
+
+function phase2_All()
+{
+  export col=$(head -1 ${caprion}/data2/phase2.pheno | sed 's/ /\n/g' | grep "_All_invn$" | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
+  for v in ${col};
+  do
+      echo ${v}
+      plink2 \
+             --bgen ${caprion}/data2/caprion.01.bgen --sample ${caprion}/data2/phase2.sample \
+             --glm hide-covar --input-missing-phenotype -999 --covar-variance-standardize \
+             --pheno ${caprion}/data2/phase2.pheno --pheno-name ${v} --covar ${caprion}/data2/phase2.covar \
+             --out ${caprion}/work/${v}
+      grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
+      gzip -f > ${caprion}/bgen2/${v}-plink2.gz
+      rm ${caprion}/work/${v}.${v}.glm.linear
+  done
+}
+
+epcr_proc
+# epcr_proc_group
+# phase2_All

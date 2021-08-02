@@ -1,0 +1,357 @@
+---
+title: "Analysis of phase II Caprion proteomics data"
+author:
+- Jing Hua Zhao,..., Adam Buterworth
+date: "`r Sys.Date()`"
+toc: false
+number_sections: true
+output:
+  bookdown::word_document2: default
+bibliography: [packages.bib, ppr.bib]
+link-citations: yes
+csl: nature-genetics.csl
+nocite: '@*'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bookdown)
+library(knitr)
+library(png)
+library(tinytex)
+library(lattice)
+```
+
+```{r, include=FALSE}
+knitr::write_bib(file = 'packages.bib')
+```
+
+The documentation provides the reationale and elementary results from the two-phase Caprion proteomics study.
+
+A brief summary of the study samples is shown in the following table.
+
+Phase (study code)     | N
+-----------------------|--
+I (ZWK)  | 196 
+II (ZYQ) | 1,488
+
+## The experiment
+
+As quoted from the Caprion report:
+
+> Briefly, the method employed immuno-depletion of the most abundant proteins from plasma samples, followed by protein reduction, alkylation and digestion.
+
+> Peptide samples were desalted prior to mass spectrometry analysis.
+
+> A two-stage approach normalization was employed. After normalization, a pattern was identified but could not be explained. The pattern has been left in, with the sponsor’s approval.
+
+## Exploratory analysis
+
+An undisclosed pattern was reported but revealed through PCA, as furnished with R's `prcomp`.
+
+```{r, echo=FALSE}
+  load("2020.rda")
+# PCA
+  ppc <- with(Normalized_All, prcomp(na.omit(Normalized_All[,-1]), rank=50, scale=TRUE))
+  pve <- cumsum(ppc$sdev^2/sum(ppc$sdev^2))
+  cat("Proportion of variance explained from up to 20 PCs: \n",round(pve[1:20],3),"\n")
+  pc1pc2 <- with(ppc,x)[,1:2]
+# K-means clustering
+  km <- kmeans(pc1pc2,2)
+# Model-based clustering
+  suppressPackageStartupMessages(library(mclust))
+  mc <- Mclust(pc1pc2,G=2)
+  caprion_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
+  mc_caprion_mc <- cbind(caprion_mc,classification=with(mc,classification))
+```
+
+The clustering based on PC1 and PC2 featured poorly with K-means but perfectly with model-based clustering (**classification**), which 
+agreed excellently with the two-class membership provided by Caprion (**pc1_group**) as shown in the following table.
+
+```{r, echo=FALSE}
+with(mc_caprion_mc,table(classification,pc1_group))
+# print(xtable::xtable(as.data.frame(with(mc_caprion_mc,table(pc1_group,classification)))),type="html")
+```
+
+```{r cluster, fig.cap="Figure 1. Pattern in phase II proteins", fig.height=10, echo=FALSE}
+  par(mfrow=c(2,1))
+  plot(pc1pc2, col = with(km,cluster), pch=19, cex=0.8)
+  points(with(km,centers), col = 1:2, pch = 8, cex = 2)
+  title("K-means clustering")
+  plot(mc, what=c("classification"))
+  title("Model-based clustering")
+```
+
+## Association analysis
+
+Association statistics were obtained according to model.
+
+$$
+\textrm{invnormal(protein)} \sim \textrm{covariates + genotypes}
+$$
+The covariates were sex, age, bmi and 20 PCs. For phase II model, ethnicity and sample classification according to model-based clustering were also added.
+
+The genotypes were in .bgen format with MAF > 0.01 and the association analysis was furnished with PLINK v2 available on CSD3 through `module load plink/2.00-alpha`.
+
+## Selection of sentinels
+
+The sentinels were obtained via a distance-based iterative merging -- for a given p value cutoff the procedure involves several steps:
+
+1. Obtain a list of genomewide significant variants and their (+/- 1Mb) flanking regions. For HLA region (build 37, chr6:25392021-33392022), only one variant is kept.
+2. Identify non-overlapping regions.
+3. Select the most significant variant in these regions as sentinels; in cases there are ties, keep only one of them.
+
+Step 2 is implemented using `bedtools`. Step 3 produces unique sentinels per protein and can be facilitated with R.
+
+```{r, eval=FALSE, echo=FALSE}
+  library(dplyr)
+  sentinels <- merged_results %>%
+               group_by(trait,Chrom,Start,End) %>%
+               slice(which.min(P))
+```
+
+## Phase I and Phase II correlation
+
+Genome-wide p values at both phases were used.
+
+To improve the property of statistics involving p values, they are converted to their normal(0, 1) deviates ($z$) for calculation of correlations.
+
+Without loss of generality, let $z$>0 (or $z$=$-z$ otherwise) and for a two-sided p value, we have 
+
+$$
+p=\Phi(-z)+(1-\Phi(z)) = 2\Phi(-z)
+$$
+
+due to symmetry, so $z=\Phi^{-1}(p/2)$ where $\Phi(.)$ is the cumulative normal distribution function.
+
+```{r function, fig.cap="Figure 2. Normal(0,1) distribution", fig.width=6, fig.height=4, echo=FALSE}
+plotp <- function(mean=0, sd=1, z=1.96)
+{
+  lb <- -z; ub <- z
+  x <- seq(-5,5,length=100)*sd + mean
+  hx <- dnorm(x,mean,sd)
+  plot(x, hx, type="n", xlab="z", ylab="", main="Normal Distribution", axes=FALSE)
+  lines(x, hx)
+  i <- x <= lb
+  polygon(c(-5,x[i],lb), c(0,hx[i],0), col="red")
+  i <- x >= ub
+  polygon(c(ub,x[i],5), c(0,hx[i],0), col="red")
+  area <- pnorm(lb, mean, sd) + 1 - pnorm(ub, mean, sd)
+  result <- paste("P(z<=",lb,"| z>=",ub,") =", signif(area, digits=3))
+  mtext(result,3)
+  axis(1, at=c(-z, 0, z), pos=0)
+}
+
+plotp()
+```
+
+```{r normal, echo=FALSE, eval=FALSE, fig.cap="Figure 2. Normal(0,1) distribution", fig.width=6, fig.height=4}
+z0 <- 1.96
+z <- 5
+a <- seq(-z, z, length = 10000)
+b <- dnorm(a, 0, 1)
+        xyplot(b ~ a,
+               type = "l",
+               panel = function(x,y, ...)
+               {
+                   panel.xyplot(x,y, ...)
+                   panel.abline(v = 0, lty = 2)
+                   xx <- c(-z, x[x>=-z & x<=-z0], -z0)
+                   yy <- c(0, y[x>=-z & x<=-z0], 0)
+                   panel.polygon(xx,yy, ..., col='red')
+                   xx <- c(z0, x[x>=z0 & x<=z], z)
+                   yy <- c(0, y[x>=z0 & x<=z], 0)
+                   panel.polygon(xx,yy, ..., col='red')
+               },
+               xlab="z",
+               ylab=expression(1/sqrt(2*pi) * exp(-z^2/2)))
+```
+
+We therefore have the R function `z <- function(p) qnorm(p/2,lower.tail=FALSE)`.
+
+## Miami plots
+
+A Miami plot visually contrasts two vectors of p values emanating from the same chromosomal positions, and an example on P31946-1433B is given below.
+
+The plot was produced with the `miamiplot()` function in R/gap.
+
+```{r P31946-1433B, fig.cap="Figure 3. P31946-1433B Miami plot", fig.height=7, fig.wdith=8, echo=FALSE}
+include_graphics("miamiplot/P31946-X1433B-phase1-phase2.png")
+```
+
+Phase II typically produced more significant results, Wilcoxon test p=1.
+
+# Files at CSD3
+
+The raw data as with Caprion report can be found from the following directory:
+
+/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/
+
+The analysis as with derived data and results can be found from this subdirectory:
+
+pilot/
+
+Item           | Phase I             | Phase II
+---------------|---------------------|-------------------
+Data           | data/               | data2/
+PLINK2 results | bgen/ (1e-6, 5e-8) | bgen2/ (1e-6, 5e-8)
+
+where bgen/ and bgen2/ contain the PLINK2 results based on bgen format; sentinels from specific p value cutoff are in their own named directories (scientific format), i.e., 1e-5, 1e-6, 5e-8.
+
+Directory miamiplot/ contains the Miami plots.
+
+# A summary of sentinels
+
+Item      |I/protein| II/protein
+----------|---------|-----------
+$10^{-5}$|25,767/987 | 25,942/983
+$10^{-6}$ |2807/934 | 3,274/956
+$5\times 10^{-8}$   |226/203  | 426/364
+
+Note that phase I was based on all data (Protein_All_Peptides); four of them were missing at phase II:
+
+UniProt | Protein
+--------|--------
+P28072 | PSB6
+Q5VW32 | BROX
+Q9GZN8 | CT027
+Q9UBU3 | GHRL
+
+Protein names were used for phase II, based on all data (_All, normalised log-intensities for every sample).
+
+## Overlap of sentinels
+
+Our focus here is on $10^{-5}$, $10^{-6}$ and $5 \times 10^{-8}$. Since for each threshold genomic regions for a couple of phase I pQTLs overlapped with more than one regions for pQTLs at phase II (Overlapped intervals below), the unique number of replicated phase I pQTLs were also obtained.
+
+P                 | Overlapped intervals| pQTLs replicated
+------------------|---------------------|-----------------
+$10^{-5}$         | 134                 | 132
+$10^{-6}$         | 92                  | 90
+$5\times 10^{-8}$ | 67                  | 65
+
+Specifically, overlap of pQTLs ($5\times 10^{-8}$) are shown below.
+
+chr|$\mbox{P}_I$|$\mbox{Pos}_I$|$\mbox{RSid}_{I}$|$P_{II}$|Protein|$\mbox{Pos}_{II}$|$\mbox{RSid}_{II}$
+---|-----|-----|----|--------|-------|--------|---------------------
+1|3.44529e-08|17425077|rs2235913|1.07653e-46|RCN3|17424396|rs2746508
+1|8.08426e-13|150484987|rs13294|2.18252e-15|ECM1|150327896|rs138637164
+1|2.56284e-08|160874485|rs397861607|4.2348e-48|ITLN1|160854445|rs2039415
+1|2.56284e-08|160874485|rs397861607|4.2348e-48|ITLN1|160854526|rs2297559
+1|3.02464e-14|161478793|rs11464104|3.30669e-61|FCG2A|161478708|rs6671753
+1|3.89059e-21|161500130|rs2099684|4.18603e-51|FCG3A|161508763|rs10919544
+1|2.44323e-13|161605889|rs117827527|3.3037e-32|FCG3B|161601979|rs115878669
+1|3.22515e-16|196815711|rs71631868|4.50492e-58|FHR1|196690250|rs10922105
+1|5.78126e-10|230845794|rs699|5.45255e-32|BGH3|230845794|rs699
+3|5.48566e-10|45047631|rs7633604|4.83735e-26|GDIB|45055607|rs6441881
+3|1.2641e-15|49719729|rs9822268|7.8548e-54|HGFL|49678651|rs4283605
+3|9.07461e-10|98416900|rs10935473|2.34159e-11|VGFR3|98416900|rs10935473
+3|2.60194e-16|186341191|rs7635884|1.07753e-12|FETUA|186327314|rs6779468
+3|5.6262e-12|186342060|rs13073106|1.57546e-34|TAOK3|186332571|rs2593813
+3|7.99608e-11|186389828|rs9856702|3.66799e-11|CDKL3|186389559|rs10770
+3|1.32332e-20|186396616|rs1863622|7.57096e-93|HRG|186389559|rs10770
+3|1.82894e-16|186393786|rs7614709|9.24366e-41|CRAC1|186396616|rs1863622
+3|2.79236e-29|190347681|rs1024948|3.16068e-101|IL1AP|190346525|rs2361837
+3|3.91317e-39|194061578|rs11713634|3.31192e-146|CD5L|194062519|rs3732477
+3|2.44688e-08|194062519|rs3732477|7.34587e-29|CPN2|194062519|rs3732477
+4|2.42165e-19|72613036|rs705119|3.19975e-39|F107B|72610208|rs222047
+4|7.5841e-22|72616327|rs843005|5.07453e-67|NOL8|72618334|rs7041
+4|2.76266e-09|72617557|rs34265662|3.65436e-17|VTDB|72609398|rs3755967
+5|5.73199e-09|30839607|rs1921087|1.68949e-17|CADH6|30815593|rs10607302
+5|7.38008e-09|40972211|rs74480769|2.80417e-21|CO7|40972371|rs2305313
+5|4.96369e-09|96142683|rs371429555|6.58755e-22|ERAP1|96147733|rs10045403
+5|9.72683e-17|122354726|rs6880480|2.48902e-32|PPIC|122360403|rs17388251
+5|1.93522e-34|149508544|rs2304058|2.07777e-110|PGFRB|149508544|rs2304058
+5|5.20511e-36|176839890|rs2731674|1.69214e-79|FA12|176839898|rs2731673
+5|1.41047e-08|176839898|rs2731673|4.68565e-65|EZRI|176839898|rs2731673
+6|2.1649e-09|36922684|rs1405069|2.42876e-34|PI16|36922684|rs1405069
+6|2.46331e-09|74509261|rs9293944|9.28147e-14|CD109|74506208|rs10805980
+6|3.56806e-14|133012322|rs3798800|7.88317e-88|VNN1|133026332|rs146645725
+6|2.5118e-26|143825104|rs11155297|2.80644e-174|FUCO2|143825104|rs11155297
+6|2.45677e-40|143825104|rs11155297|1.86196e-207|FUCO|143825104|rs11155297
+6|1.9517e-08|161010118|rs10455872|1.48489e-84|APOA|161010118|rs10455872
+8|4.62442e-11|17752166|rs6982482|6.55782e-30|FGL1|17730338|rs7815785
+9|2.79511e-08|95173814|rs7856204|3.81225e-19|MIME|95112560|rs7020874
+9|2.93315e-08|136142185|rs8176672|6.13126e-45|ROBO4|136131461|rs8176741
+9|2.18021e-20|136139907|rs149092047|1.05583e-189|SIA7A|136139907|rs149092047
+9|3.7091e-17|136502328|rs2519143|7.05607e-133|DOPO|136500515|rs1611115
+10|7.56735e-15|54536839|rs7899547|1.04979e-94|MBL2|54536839|rs7899547
+10|1.28922e-12|101799302|rs4486555|2.49798e-26|CBPN|101829514|rs61751507
+11|2.17921e-08|47010491|rs112181005|1.26716e-09|NECT1|46917042|rs113362246
+12|2.12102e-20|104341015|rs1165694|9.40614e-21|ENPL|104339014|rs2583262
+13|4.17966e-13|46641249|rs9526137|6.29643e-14|CBPB2|46674909|rs1952187
+14|3.10312e-19|94925312|rs2104066|1.0444e-36|SPA11|94907172|rs12890328
+14|6.69194e-13|95053572|rs2069974|1.94672e-20|IPSP|95053572|rs2069974
+14|4.53538e-12|105386149|rs2841269|7.42825e-55|PLD4|105394859|rs2819469
+16|1.68143e-16|810593|rs2235503|3.54583e-84|MSLN|814494|rs7185523
+17|7.43846e-09|40787608|rs6503714|3.55574e-55|ANAG|40622538|rs77942990
+17|1.20129e-13|61565025|rs4335|5.20907e-58|ACE|61570422|rs4353
+17|1.27243e-09|64228995|rs149394327|7.20841e-20|LEP|64305051|rs78357146
+17|3.95763e-09|64188632|rs117128226|3.069e-19|APOH|64228995|rs149394327
+19|4.40531e-08|4544645|rs28731213|6.13057e-15|A2GL|4544968|rs35038650
+19|3.38549e-08|6713262|rs1047286|4.41795e-51|AL1A1|6713262|rs1047286
+19|4.88375e-20|41932275|rs284662|3.08491e-64|B3GN8|41912250|rs2241709
+19|6.52014e-13|45162038|rs203710|9.92954e-24|PVR|45162038|rs203710
+19|4.77969e-31|54800500|rs367070|1.10292e-194|LIRB1|54808174|rs1645788
+20|6.18173e-10|1896059|rs115287948|4.05413e-78|SHPS1|1895668|rs114623029
+20|6.18173e-10|1896059|rs115287948|4.05413e-78|SHPS1|1895673|rs76897346
+20|5.65463e-10|24835418|rs2150649|2.40593e-28|APMAP|24978732|rs112085660
+20|3.22398e-17|36997655|rs2232613|1.19006e-23|LBP|36997655|rs2232613
+21|3.40355e-08|46931109|rs12483377|3.57718e-20|COIA1|46931109|rs12483377
+21|2.02131e-09|47538324|rs73382451|2.78088e-29|CO6A2|47552209|rs35548026
+22|3.68838e-08|50722134|rs11547731|4.60783e-17|PLXB2|50722134|rs11547731
+
+# A case study
+
+See a separate document for more details of the EPCR-PROC study.
+
+# Reflections
+
+There has been scarce study of the performance of a protein GWAS. We showed that a study of 196 individuals appeared to yield an impressive number of significant results which were also replicated.
+
+The small correlations between the normal deviates between two phases seemed counterintuitve but possibly due to significantly smaller p values at phase II -- to make sure we also retained the association z-statistic and their correlations agreed with sign(z)*z(p) where sign() is the sign function; the impact of the systematic bias in the measurement was unclear. It might be tempting to use more PCs in the model-based clustering with proportion of variance explained increasing from 30.0% to 57.2% from one to 20 PCs; nevertheless much improvement of the classification won't be expected since there is already and perfect separation up to three PCs through R/rgl (dynamic plot not shown here).
+
+For the EPCR-PROC case, both cis and trans pQTL were reported. In practice, one tends to meta-analyse phase I and II results and in this case, it is possible to work on the piptides (as in the TROMSO study) and/or also only those above limit of detection (_DR, normalised log-intensities for every sample with detection rate >10%).
+
+# References
+
+<div id="refs"></div>
+
+Caprion. Summary Report Slides For: Biomarker Discovery Analysis of Human Plasma Using a NonTargeted LC-MS/MS Approach. 2020.
+
+# (APPENDIX) Appendix {-}
+
+# 3d scatter plot
+
+```{r 3d, fig.cap="3d scatter plot with PC1, PC2, and PC3", echo=FALSE}
+  library(scatterplot3d)
+  library(rgl)
+  with(mc,
+  {
+       scatterplot3d(with(ppc,x[,c(2,1,3)]), color=c("blue","red")[classification], main="Plot of the PC1, PC2 and PC3", pch=16)
+       legend("right", legend=levels(as.factor(classification)), col=c("blue", "red"), pch=16)
+       plot3d(with(ppc,x[,c(2,1,3)]),col=classification)
+  })
+```
+
+# Correlation between p values and their difference
+
+The idea is best illustrated with a toy example involving two vectors of p values (`p` and `pr`) below
+
+```{r echo=TRUE}
+# z=-1.96 correspond to a two-sided p=0.05
+z <- function(p) qnorm(p/2, lower.tail=FALSE)
+z(0.05)
+p <- 1:10/10; p
+pr <- 1:10/100; pr
+cor(z(p),z(pr))
+wilcox.test(p,pr,alternative="less",paired=TRUE)
+```
+where the correlation is obtained according to [0,1] and a nonparametric test of difference conducted. Note in particular the way the statistical significance was reported, for `pr` was generated an order of magnitude smaller than `p`.
+
+# Information regarding the Miami plot
+
+```{r echo=FALSE}
+img_path <- "miamiplot/P31946-X1433B-phase1-phase2.png"
+img <- readPNG(img_path, native = TRUE, info = TRUE)
+attr(img, "info")
+```

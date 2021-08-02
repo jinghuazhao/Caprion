@@ -2,7 +2,7 @@
 
 ## Site map
 
-1. pilot (N=196)
+1. Pilot (N=196)
    - data/ contains genotype files in .bgen format
    - bgen/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories
      * 1e-5

@@ -52,6 +52,10 @@ graph TB
 utils/2021.sh
 ```
 
+## gwas2
+
+This is likely to be a promising alternative -- a running through example is with [gwas2.do](utils/gwas2.do).
+
 ---
 
 ## autoencoder (AE) vs PCA

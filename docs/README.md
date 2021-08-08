@@ -54,7 +54,7 @@ utils/2021.sh
 
 ## gwas2
 
-This is likely to be a promising alternative -- a running through example is with [gwas2.do](utils/gwas2.do).
+This is a promising alternative with [gwas2.sh](utils/gwas2.sh) calling [gwas2.do](utils/gwas2.do).
 
 ---
 

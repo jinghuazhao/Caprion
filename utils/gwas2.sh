@@ -7,9 +7,14 @@ export caprion=${dir}/pilot
 . /etc/profile.d/modules.sh 
 module load ceuadmin/stata
 
-for trait in RCN3_442625488_VADQDGDSMATR_invn RCN3_442666668_EVAKEFDQLTPEESQAR_invn RCN3_All_invn RCN3_DR_invn
+export full=(RCN3_442625488_VADQDGDSMATR RCN3_442666668_EVAKEFDQLTPEESQAR RCN3_All RCN3_DR)
+export abbrev=(RCN3_44262548~n RCN3_44266666~R RCN3_All_invn RCN3_DR_invn)
+
+for i in {0..3} 
 do
-  export trait=${trait}
+  export y=${full[$i]}_invn
+  export trait=${abbrev[$i]}
   if [ ! -d ${caprion}/${trait} ]; then mkdir ${caprion}/${trait}; fi
+  echo ${y} -- ${trait}
   stata-mp -b do utils/gwas2.do
 done

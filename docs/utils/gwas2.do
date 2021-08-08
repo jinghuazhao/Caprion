@@ -1,7 +1,3 @@
-//
-// export TMPDIR=$HPC_WORK/work
-// 
-
 local dir : env HPC_WORK
 local y : env y
 local trait : env trait

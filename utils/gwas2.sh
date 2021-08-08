@@ -10,6 +10,8 @@ module load ceuadmin/stata
 export full=(RCN3_442625488_VADQDGDSMATR RCN3_442666668_EVAKEFDQLTPEESQAR RCN3_All RCN3_DR)
 export abbrev=(RCN3_44262548~n RCN3_44266666~R RCN3_All_invn RCN3_DR_invn)
 
+sed '2,3d' ${caprion}/data2/phase2.sample > ${caprion}/data2/phase2.dat
+
 for i in {0..3} 
 do
   export y=${full[$i]}_invn

@@ -6,7 +6,7 @@ local dir : env HPC_WORK
 local y : env y
 local trait : env trait
 set maxvar 21000
-insheet using data2/phase2.sample, delim(" ") case clear
+insheet using data2/phase2.dat, delim(" ") case clear
 rename ID_1 id
 format id %15.0g
 merge 1:1 id using "`dir'/data/interval/interval_data"

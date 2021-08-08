@@ -16,7 +16,7 @@ for i in {0..3}
 do
   export y=${full[$i]}_invn
   export trait=${abbrev[$i]}
-  if [ ! -d ${caprion}/${trait} ]; then mkdir ${caprion}/${trait}; fi
+  if [ ! -d ${caprion}/${y} ]; then mkdir ${caprion}/${y}; fi
   echo ${y} -- ${trait}
   stata-mp -b do utils/gwas2.do
 done

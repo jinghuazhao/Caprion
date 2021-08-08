@@ -18,5 +18,5 @@ do
   export trait=${abbrev[$i]}
   if [ ! -d ${caprion}/${y} ]; then mkdir ${caprion}/${y}; fi
   echo ${y} -- ${trait}
-  stata-mp -b do utils/gwas2.do
+  stata-mp -b do ${caprion}/utils/gwas2.do
 done

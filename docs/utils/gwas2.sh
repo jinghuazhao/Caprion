@@ -41,6 +41,14 @@ function pilot()
     echo ${y} -- ${trait}
     stata-mp -b do utils/gwas.do
   done
+  for i in {0..1}
+  do
+    export y=${uniprot[$i]}_invn
+    export trait=${prot[$i]}
+    echo ${y} -- ${trait}
+    head -1 ${caprion}/${trait}/interval.*.All.txt
+    grep -w rs113886122 ${caprion}/${trait}/interval.*.All.txt
+  done
 }
 
 function phase2()
@@ -79,9 +87,17 @@ function phase2()
   do
     export y=${full[$i]}_invn
     export trait=${abbrev[$i]}
-    if [ ! -d ${caprion}/${y} ]; then mkdir ${caprion}/${y}; fi
     echo ${y} -- ${trait}
     head -1 ${caprion}/${y}/interval.*.All.txt
     grep -w rs113886122 ${caprion}/${y}/interval.*.All.txt
   done
+}
+
+function RCN3_FCGRT_plink()
+{
+  gunzip -c bgen/Q96D15-plink2.gz | head -1
+  zgrep rs113886122 bgen/Q96D15-plink2.gz
+  zgrep rs113886122 bgen/P55899-plink2.gz
+  gunzip -c bgen2/RCN3_All_invn-plink2.gz | head -1
+  zgrep rs113886122 bgen2/RCN3_All_invn-plink2.gz
 }

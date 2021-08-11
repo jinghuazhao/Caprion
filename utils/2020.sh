@@ -128,14 +128,18 @@ R --no-save <<END
   D <- c("sexPulse","ethnicity","classification")
   CD <- pheno2[c(C,D)]
   cols <- 41:ncol(pheno2)
-  P <- names(pheno2)[cols]
-  P_invn <- sapply(cols,function(x) {invnormal(pheno2[,x])})
-  colnames(P_invn) <- paste0(P,"_invn")
+  P <- sapply(cols,function(x) pheno2[,x])
+  colnames(P) <- names(pheno2)[cols]
+  snptest_sample(subset(data.frame(id1_id2_missing,CD,P),!is.na(ID_1)),
+                 sample_file=file.path(dir,"pilot","data2","phase2.sample"),
+                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = colnames(P))
+  P_invn <- sapply(cols,function(x) invnormal(pheno2[,x]))
+  colnames(P_invn) <- paste0(colnames(P),"_invn")
+  snptest_sample(subset(data.frame(id1_id2_missing,CD,P_invn),!is.na(ID_1)),
+                 sample_file=file.path(dir,"pilot","data2","phase2_invn.sample"),
+                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = colnames(P_invn))
   write.table(subset(pheno2,!is.na(Affymetrix_gwasQC_bl),select=Affymetrix_gwasQC_bl),
               file=file.path(dir,"pilot","data2","affymetrix.id"),quote=FALSE,row.names=FALSE,col.names=FALSE)
-  snptest_sample(subset(data.frame(id1_id2_missing,CD,P_invn),!is.na(ID_1)),
-                 sample_file=file.path(dir,"pilot","data2","phase2.sample"),
-                 ID_1 = "ID_1",ID_2 = "ID_2", missing = "missing", C = C, D = D, P = paste0(P,"_invn"))
 # EPCR-PROC
   subset(Annotations,grepl("EPCR",Protein)|grepl("PROC",Protein))
   vars <- names(peptides_all_dr)

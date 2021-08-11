@@ -54,6 +54,7 @@ function pilot()
 function phase2()
 {
   sed '2,3d' ${caprion}/data2/phase2.sample > ${caprion}/data2/phase2.dat
+  sed '2,3d' ${caprion}/data2/phase2_invn.sample > ${caprion}/data2/phase2_invn.dat
   cd data2
   for chr in {1..22}
   do
@@ -74,6 +75,24 @@ function phase2()
   rm sample_info.txt
   cd -
   export full=(RCN3_442625488_VADQDGDSMATR RCN3_442666668_EVAKEFDQLTPEESQAR RCN3_All RCN3_DR)
+  export abbrev=(RCN3_44262548~R RCN3_44266666~R RCN3_All RCN3_DR)
+  for i in {0..3}
+  do
+    export y=${full[$i]}
+    export trait=${abbrev[$i]}
+    if [ ! -d ${caprion}/${y} ]; then mkdir ${caprion}/${y}; fi
+    echo ${y} -- ${trait}
+    stata-mp -b do ${caprion}/utils/gwas2.do
+  done
+  for i in {0..3}
+  do
+    export y=${full[$i]}
+    export trait=${abbrev[$i]}
+    echo ${y} -- ${trait}
+    head -1 ${caprion}/${y}/interval.*.All.txt
+    grep -w rs113886122 ${caprion}/${y}/interval.*.All.txt
+  done
+# _invn
   export abbrev=(RCN3_44262548~n RCN3_44266666~R RCN3_All_invn RCN3_DR_invn)
   for i in {0..3} 
   do
@@ -81,7 +100,7 @@ function phase2()
     export trait=${abbrev[$i]}
     if [ ! -d ${caprion}/${y} ]; then mkdir ${caprion}/${y}; fi
     echo ${y} -- ${trait}
-    stata-mp -b do ${caprion}/utils/gwas2.do
+    stata-mp -b do ${caprion}/utils/gwas2_invn.do
   done
   for i in {0..3}
   do

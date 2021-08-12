@@ -121,7 +121,7 @@ function phase2_run()
   for i in {0..3} 
   do
     export y=${full[$i]}_invn
-    export trait=${abbrev[$i]}_invn
+    export trait=${abbrev[$i]}
     if [ ! -d ${caprion}/${y} ]; then mkdir ${caprion}/${y}; fi
     echo ${y} -- ${trait}
     stata-mp -b do ${caprion}/utils/gwas2_invn.do

@@ -54,7 +54,7 @@ utils/2021.sh
 
 ## gwas2
 
-This is a promising alternative with [gwas2.sh](utils/gwas2.sh) calling [gwas2.do](utils/gwas2.do).
+This is a promising alternative showing through RCN3/FCGRN with [gwas2.sh](utils/gwas2.sh) calling [gwas2.do](utils/gwas2.do).
 ```mermaid
 graph TB;
 utils/gwas2.sh --> utils/gwas.do

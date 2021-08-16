@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 export TMPDIR=${HPC_WORK}/work
-export dir=~/rds/projects/Caprion_proteomics
+export dir=~/rda/projects/Caprion_proteomics
 export caprion=${dir}/pilot
 
 . /etc/profile.d/modules.sh 
@@ -144,3 +144,61 @@ function RCN3_FCGRT_plink()
   gunzip -c bgen2/RCN3_All_invn-plink2.gz | head -1
   zgrep rs113886122 bgen2/RCN3_All_invn-plink2.gz
 }
+
+function qq_manhattan_plot()
+{
+  parallel -j1 --env caprion --env dir -C' ' '
+    echo {}
+    cut -d" " -f1,4,12  --output-delimiter=" " ${dir}/{}/interval.{}.All.txt | \
+    grep -v NA > ${caprion}/${dir}/plot/{}.txt
+    (
+      echo chromosome position
+      awk "\$3<5e-8{print \$1,\$2}" ${dir}/plot/{}.txt
+    ) > ${caprion}/${dir}/plot/{}.annotate
+    R --slave --vanilla --args \
+      input_data_path=${caprion}/${dir}/plot/{}.txt \
+      output_data_rootname=${dir}/plot/{}_turboqq \
+      plot_title="{}" < ~/cambridge-ceu/turboqq/turboqq.r
+    R --slave --vanilla --args \
+      input_data_path=${caprion}/${dir}/plot/{}.txt \
+      output_data_rootname=${dir}/plot/{}_turboman \
+      custom_peak_annotation_file_path=${caprion}/${dir}/plot/{}.annotate \
+      reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
+      pvalue_sign=5e-8 \
+      plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
+    # rm ${caprion}/${dir}/plot/{}.txt
+  '
+}
+
+export dir=RCN3-FCGRT-genomewide
+export dirplot=${dir}/plot
+if [ ! -d ${dirplot} ]; then mkdir ${dirplot}/plot; fi
+ls ${dir} | grep "/" | sed 's|/||' | grep -v -e plot | qq_manhattan_plot
+
+R --no-save -q <<END
+  eda <- function(d,v)
+  {
+    plot(d[[v]],main=v,xlab="",ylab="")
+    hist(d[[v]],main="",xlab="")
+    boxplot(d[[v]],horizontal=TRUE)
+  }
+  setwd("/home/jhz22/Caprion/pilot")
+  phase2 <- read.table("data2/phase2.dat",header=TRUE)
+  phase2_invn <- read.table("data2/phase2_invn.dat",header=TRUE)
+  pilot <- read.table("data/caprion.dat",header=TRUE)
+  pdf("RCN3-FCGRT-genomewide/plot/eda.pdf")
+  par(mfrow=c(3,1))
+  eda(pilot,"Q96D15")
+  eda(pilot,"Q96D15_invn")
+  eda(pilot,"P55899")
+  eda(pilot,"P55899_invn")
+  eda(phase2,"RCN3_442625488_VADQDGDSMATR")
+  eda(phase2_invn,"RCN3_442625488_VADQDGDSMATR_invn")
+  eda(phase2,"RCN3_442666668_EVAKEFDQLTPEESQAR")
+  eda(phase2_invn,"RCN3_442666668_EVAKEFDQLTPEESQAR_invn")
+  eda(phase2,"RCN3_All")
+  eda(phase2_invn,"RCN3_All_invn")
+  eda(phase2,"RCN3_DR")
+  eda(phase2_invn,"RCN3_DR_invn")
+  dev.off()
+END

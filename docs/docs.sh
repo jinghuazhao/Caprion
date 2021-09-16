@@ -10,7 +10,6 @@ setup
 mkdocs build
 mkdocs gh-deploy
 
-git remote set-url origin https://github.com/jinghuazhao/Caprion.git
 git add .gitignore
 git commit -m ".gitignore"
 git add README.md
@@ -22,3 +21,4 @@ git commit -m "docs"
 git add mkdocs.yml
 git commit -m "mkdocs.ytml"
 git push
+# git remote set-url origin https://github.com/jinghuazhao/Caprion.git

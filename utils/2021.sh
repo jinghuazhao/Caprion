@@ -1,12 +1,11 @@
 #!/usr/bin/bash
 
-function setup()
-{
 export dir=~/rds/projects/Caprion_proteomics
 export caprion=${dir}/pilot
 if [ ! -d ${caprion}/data3 ]; then mkdir ${caprion}/data3; fi
 if [ ! -d ${caprion}/bgen3 ]; then mkdir ${caprion}/bgen3; fi
 
+# UDP
 R --no-save <<END
   library(openxlsx)
   samples <- read.xlsx("UDP_EDR_20210423_samples.xlsx", sheet = 1, startRow = 5)
@@ -19,29 +18,33 @@ R --no-save <<END
   Protein_All_Peptides <- read.xlsx(wb,sheet="Protein_All_Peptides",startRow=1)
   Protein_DR_Filt_Peptides <- read.xlsx(wb,sheet="Protein_DR_Filt_Peptides",startRow=1)
   save(Samples,Annotations,Mapping,Normalized_Peptides,Protein_All_Peptides,Protein_DR_Filt_Peptides,file="2021.rda")
+# duplicates
+# mapping <- Mapping[,-3]
+# rownames(mapping) <- Mapping[,3]
+# samples <- Samples[,-1]
+# rownames(samples) <- Samples[,1]
 END
-}
 
-function es()
-{
 R --no-save <<END
   caprion <- Sys.getenv("caprion")
   load("2021.rda")
-
-  array_data <- function (x)
+  array_transpose <- function (x)
   {
     d <- x[,-1]
     rownames(d) <- x[,1]
     td <- t(d)
   }
-
-  norm_all <- array_data(Protein_All_Peptides)
-  dr_filt <- array_data(Protein_DR_Filt_Peptides)
-
-  ppc <- prcomp(na.omit(norm_all), rank=50, scale=TRUE)
+  norm_all <- array_transpose(Protein_All_Peptides)
+  dr_filt <- array_transpose(Protein_DR_Filt_Peptides)
+  ppc <- prcomp(na.omit(norm_all), rank=10, scale=TRUE)
   pc1pc2 <- with(ppc,x)[,1:2]
   rownames(pc1pc2) <- rownames(norm_all)
   eigenvec <- with(ppc,rotation)[,1:2]
+  library(dplyr)
+  pca <- with(ppc,x) %>%
+         data.frame()
+  pca <- pca %>%
+         mutate(id=rownames(pca))
   library(mclust)
   mc <- Mclust(pc1pc2,G=2)
   summary(mc)
@@ -55,41 +58,65 @@ R --no-save <<END
        dev.off()
        plot3d(with(ppc,x[,c(2,1,3)]),col=classification)
   })
-  pilotsMap <- read.csv("pilotsMap_17FEB2021.csv")
-  OmicsMap <- read.csv("INTERVAL_OmicsMap_20210217.csv")
-  data <- read.csv("INTERVALdata_17FEB2021.csv")
-  head(pilotsMap)
-  dim(pilotsMap)
-  head(OmicsMap)
-  dim(OmicsMap)
-  head(data)
-  dim(data)
+  pilotsMap <- read.csv("pilotsMap_15SEP2021.csv")
+  OmicsMap <- read.csv("INTERVAL_OmicsMap_20210915.csv")
+  data <- read.csv("INTERVALdata_15SEP2021.csv")
   id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
   date <- c("attendanceDate","sexPulse","monthPulse","yearPulse","agePulse")
   covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl","classification")
   grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
   id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
-  samples <- merge(id_date_covars,Samples,by.x="caprion_id",by.y="LIMS.ID",all.y=TRUE)
+  samples <- merge(id_date_covars,Samples,by.x="caprion_id",by.y="LIMS.ID",all.y=TRUE) %>%
+             left_join(pca,by=c("caprion_id"="id"))
   rownames(samples) <- samples[,1]
-
-# duplicates
-# mapping <- Mapping[,-3]
-# rownames(mapping) <- Mapping[,3]
-# samples <- Samples[,-1]
-# rownames(samples) <- Samples[,1]
+  library(Biobase)
+  pap <- as.matrix(Protein_All_Peptides[,-1])
+  rownames(pap) <- Protein_All_Peptides[,1]
+  id_extra <- setdiff(rownames(samples),colnames(pap))
   annotations <- Annotations[,-1]
   rownames(annotations) <- Annotations[,1]
-  library(Biobase)
   experimentData <- new("MIAME", name="Contact", lab="Caprion", contact="contact@caprion",
          title="INTERVAL pilot", abstract="phase 2 ExpressionSet", url="email",
          other=list(notes="Created from csv files"))
-  phenoData <- new("AnnotatedDataFrame", data=samples)
+  phenoData <- new("AnnotatedDataFrame", data=subset(samples,rownames(samples) %in% colnames(pap)))
+  all(rownames(phenoData)==colnames(pap))
   library(pQTLtools)
-  norm_es <- make_ExpressionSet(norm_all,phenoData,experimentData=experimentData)
-  featureNames(norm_es)[1:10]
-  sampleNames(norm_es)[1:10]
-  experimentData(norm_es)
-  lm(wt_bl~ht_bl,data=norm_es)
-  lm(X1433B_HUMAN~wt_bl,data=norm_es)
+# help("ExpressionSet-class")
+  norm_es <- make_ExpressionSet(pap,phenoData,experimentData=experimentData)
+  library(gap)
+  r <- sapply(1:length(featureNames(norm_es)),function(r) {
+                                               norm_es_r <- norm_es[r,]
+                                               fn <- paste0("invnormal(",sub("(^[0-9])","X\\1",featureNames(norm_es_r)),")")
+                                               f <- paste(fn,"~ agePulse + sexPulse + classification")
+                                               z <- lm(as.formula(f),data=norm_es_r, na.action=na.exclude)
+                                               resid(z)
+                                               })
+  colnames(r) <- featureNames(norm_es)
+  d <- data.frame(r)
+  d <- d %>%
+       mutate(caprion_id=rownames(r)) %>%
+       left_join(pData(norm_es)[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
+       select(Affymetrix_gwasQC_bl,caprion_id,setdiff(names(d),c("Affymetrix_gwasQC_bl","caprion_id"))) %>%
+       filter(!caprion_id %in%c("UDP0138","UDP0481"))
+  names(d) <- c("FID","IID",featureNames(norm_es))
+  write.table(d,file=file.path(caprion,"data3","UDP.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
+  checks <- function()
+  {
+    dim(pilotsMap)
+    dim(OmicsMap)
+    dim(data)
+    head(pilotsMap)
+    head(OmicsMap)
+    head(data)
+    head(exprs(norm_es))
+    head(pData(phenoData))
+    head(featureNames(norm_es))
+    head(sampleNames(norm_es))
+    experimentData(norm_es)
+    intersect(OmicsMap$caprion_id,sampleNames(norm_es))
+    intersect(OmicsMap$Affymetrix_gwasQC_bl,pData(norm_es)$Affymetrix_gwasQC_bl)
+  nrows <- length(featureNames(norm_es))
+  ncols <- length(intersect(OmicsMap$caprion_id,sampleNames(norm_es)))
+  r <- matrix(NA,nrows,ncols)
+  }
 END
-}

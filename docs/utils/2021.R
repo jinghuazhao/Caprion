@@ -22,8 +22,8 @@ zwk <- function()
   peptideData <- array_data(Normalized_Peptides,"Isotope.Group.ID",6)
   protein_ZWK <- ExpressionSet(proteinData,phenoData)
   dr_ZWK <- ExpressionSet(drData,phenoData)
-  peptides_ZWK <- ExpressionSet(peptideData,phenoData)
-  save(protein_ZWK,dr_ZWK,peptides_ZWK,file="ZWK.rda")
+  peptide_ZWK <- ExpressionSet(peptideData,phenoData)
+  save(protein_ZWK,dr_ZWK,peptide_ZWK,file="ZWK.rda")
 }
 
 # batch2, code ZYQ
@@ -49,8 +49,8 @@ zyq <- function()
   all(rownames(Samples)==colnames(proteinData))
   protein_ZYQ <- ExpressionSet(proteinData,phenoData)
   dr_ZYQ <- ExpressionSet(drData,phenoData)
-  peptides_ZYQ <- ExpressionSet(peptideData,phenoData)
-  save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,protein_ZYQ,dr_ZYQ,peptides_ZYQ,file="ZYQ.rda")
+  peptide_ZYQ <- ExpressionSet(peptideData,phenoData)
+  save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,protein_ZYQ,dr_ZYQ,peptide_ZYQ,file="ZYQ.rda")
 }
 
 # batch3, code UDP
@@ -71,8 +71,8 @@ udp <- function()
 # rownames(mapping) <- Mapping[,3]
 # samples <- Samples[,-1]
 # rownames(samples) <- Samples[,1]
-  caprion <- Sys.getenv("caprion")
   load("2021.rda")
+  caprion <- Sys.getenv("caprion")
   array_transpose <- function (x)
   {
     d <- x[,-1]
@@ -114,20 +114,23 @@ udp <- function()
   samples <- merge(id_date_covars,Samples,by.x="caprion_id",by.y="LIMS.ID",all.y=TRUE) %>%
              left_join(pca,by=c("caprion_id"="id"))
   rownames(samples) <- samples[,1]
-  library(Biobase)
-  proteinData <- as.matrix(Protein_All_Peptides[,-1])
-  rownames(proteinData) <- Protein_All_Peptides[,1]
-  id_extra <- setdiff(rownames(samples),colnames(pap))
+  proteinData <- array_data(Protein_All_Peptides,"Protein",1)
+  drData <- array_data(Protein_DR_Filt_Peptides,"Protein",1)
+  peptideData <- array_data(Protein_DR_Filt_Peptides,"Isotope.Group.ID",1)
+  id_extra <- setdiff(rownames(samples),colnames(proteinData))
   annotations <- Annotations[,-1]
   rownames(annotations) <- Annotations[,1]
   experimentData <- new("MIAME", name="Contact", lab="Caprion", contact="contact@caprion",
-         title="INTERVAL pilot", abstract="phase 2 ExpressionSet", url="email",
+         title="INTERVAL pilot", abstract="batch3 ExpressionSet", url="email",
          other=list(notes="Created from csv files"))
-  phenoData <- new("AnnotatedDataFrame", data=subset(samples,rownames(samples) %in% colnames(pap)))
-  all(rownames(phenoData)==colnames(pap))
+  phenoData <- new("AnnotatedDataFrame", data=subset(samples,rownames(samples) %in% colnames(proteinData)))
+  all(rownames(phenoData)==colnames(proteinData))
   library(pQTLtools)
 # help("ExpressionSet-class")
   protein_UDP <- make_ExpressionSet(proteinData,phenoData,experimentData=experimentData)
+  dr_UDP <- make_ExpressionSet(drData,phenoData,experimentData=experimentData)
+  peptide_UDP <- make_ExpressionSet(peptideData,phenoData,experimentData=experimentData)
+  save(protein_UDP,dr_UDP,peptide_UDP,file="UDP.rda")
   library(gap)
   r <- sapply(1:length(featureNames(protein_UDP)),function(r) {
                                                protein_UDP_r <- protein_UDP[r,]
@@ -145,7 +148,7 @@ udp <- function()
        filter(!caprion_id %in%c("UDP0138","UDP0481"))
   names(d) <- c("FID","IID",featureNames(protein_UDP))
   write.table(d,file=file.path(caprion,"data3","UDP.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
-  save(protein_UDP,file="UDP.rda")
+  save(protein_UDP,dr_UDP,peptide_UDP,file="UDP.rda")
   checks <- function()
   {
     dim(pilotsMap)

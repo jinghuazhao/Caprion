@@ -1,15 +1,13 @@
 # pilot, code ZWK
 
-initialize <- function()
+library(Biobase)
+library(openxlsx)
+
+rm(list=ls())
+array_data <- function(data_frame,id,id_end_col)
 {
-  rm(list=ls())
-  library(Biobase)
-  library(openxlsx)
-  array_data <- function(data_frame,id,id_end_col)
-  {
-    rownames(data_frame) <- data_frame[[id]]
-    arrayData <- as.matrix(data_frame[,-(1:id_end_col)])
-  }
+  rownames(data_frame) <- data_frame[[id]]
+  arrayData <- as.matrix(data_frame[,-(1:id_end_col)])
 }
 
 zwk <- function()
@@ -172,16 +170,25 @@ udp <- function()
   }
 }
 
-load("ZWK.rda")
-load("ZYQ.rda")
-load("UDP.rda")
-library(VennDiagram)
+overlap <- function(A,B) unlist(lapply(calculate.overlap(list(featureNames(A),featureNames(B))),length))
+
+zwk(); load("ZWK.rda")
+zyq(); load("ZYQ.rda")
+udp(); load("UDP.rda")
 protein <- list(pilot=featureNames(protein_ZWK),batch2=featureNames(protein_ZYQ),batch3=featureNames(protein_UDP))
 dr <- list(pilot=featureNames(dr_ZWK),batch2=featureNames(dr_ZYQ),batch3=featureNames(dr_UDP))
 peptide <- list(pilot=featureNames(peptide_ZWK),batch2=featureNames(peptide_ZYQ),batch3=featureNames(peptide_UDP))
+library(VennDiagram)
 calculate.overlap(protein)
 calculate.overlap(dr)
 calculate.overlap(peptide)
+overlap(protein_ZWK,protein_ZYQ)
+overlap(protein_ZWK,protein_UDP)
+overlap(protein_ZYQ,protein_UDP)
+overlap(peptide_ZWK,peptide_ZYQ)
+overlap(peptide_ZWK,peptide_UDP)
+overlap(peptide_ZYQ,peptide_UDP)
+
 VennDiagram::venn.diagram(protein,"protein_ZWK-ZQY-UDP.png")
 VennDiagram::venn.diagram(dr,"dr_ZWK-ZQY-UDP.png")
 VennDiagram::venn.diagram(peptide,"peptide_ZWK-ZQY-UDP.png")

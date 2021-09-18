@@ -44,7 +44,9 @@ zyq <- function()
   rownames(Samples) <- Samples$"LIMS.ID"
   phenoData <- new("AnnotatedDataFrame", data=Samples)
   proteinData <- t(array_data(Normalized_All,"LIMS.ID",1))
+  rownames(proteinData) <- sub("^X","\\1",rownames(proteinData))
   drData <- t(array_data(Protein_DR_Filt,"LIMS.ID",1))
+  rownames(drData) <- sub("^X","\\1",rownames(drData))
   peptideData <- array_data(Comp_Neq1,"Isotope.Group.ID",5)
   all(rownames(Samples)==colnames(proteinData))
   protein_ZYQ <- ExpressionSet(proteinData,phenoData)
@@ -116,7 +118,7 @@ udp <- function()
   rownames(samples) <- samples[,1]
   proteinData <- array_data(Protein_All_Peptides,"Protein",1)
   drData <- array_data(Protein_DR_Filt_Peptides,"Protein",1)
-  peptideData <- array_data(Protein_DR_Filt_Peptides,"Isotope.Group.ID",1)
+  peptideData <- array_data(Normalized_Peptides,"Isotope.Group.ID",6)
   id_extra <- setdiff(rownames(samples),colnames(proteinData))
   annotations <- Annotations[,-1]
   rownames(annotations) <- Annotations[,1]
@@ -169,3 +171,10 @@ udp <- function()
   r <- matrix(NA,nrows,ncols)
   }
 }
+
+load("ZWK.rda")
+load("ZYQ.rda")
+load("UDP.rda")
+library(VennDiagram)
+VennDiagram::venn.diagram(list(pilot=featureNames(protein_ZWK),batch2=featureNames(protein_ZYQ),batch3=featureNames(protein_UDP)),"protein_ZWK-ZQY-UDP.png")
+VennDiagram::venn.diagram(list(pilot=featureNames(peptide_ZWK),batch2=featureNames(peptide_ZYQ),batch3=featureNames(peptide_UDP)),"peptide_ZWK-ZQY-UDP.png")

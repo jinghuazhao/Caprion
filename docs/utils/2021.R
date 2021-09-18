@@ -3,9 +3,6 @@
 rm(list=ls())
 caprion <- Sys.getenv("caprion")
 
-library(Biobase)
-library(openxlsx)
-
 array_data <- function(data_frame,id,id_end_col)
 {
   rownames(data_frame) <- data_frame[[id]]
@@ -171,6 +168,9 @@ udp <- function()
   }
 }
 
+library(Biobase)
+library(openxlsx)
+library(VennDiagram)
 overlap <- function(A,B) unlist(lapply(calculate.overlap(list(featureNames(A),featureNames(B))),length))
 
 zwk();
@@ -180,7 +180,6 @@ load("ZWK.rda")
 load("ZYQ.rda")
 load("UDP.rda")
 
-library(VennDiagram)
 overlap(protein_ZWK,protein_ZYQ)
 overlap(protein_ZWK,protein_UDP)
 overlap(protein_ZYQ,protein_UDP)

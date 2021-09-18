@@ -5,26 +5,9 @@ export caprion=${dir}/pilot
 if [ ! -d ${caprion}/data3 ]; then mkdir ${caprion}/data3; fi
 if [ ! -d ${caprion}/bgen3 ]; then mkdir ${caprion}/bgen3; fi
 
-# UDP
-R --no-save <<END
-  library(openxlsx)
-  samples <- read.xlsx("UDP_EDR_20210423_samples.xlsx", sheet = 1, startRow = 5)
-  wb <- "UDP_EDR_20210423.xlsx"
-  Samples <- read.xlsx(wb,sheet="Samples",startRow=5)
-  names(Samples) <- c("LIMS.ID","Sample.ID","Comment")
-  Annotations <- read.xlsx(wb,sheet="Annotations",startRow=1)
-  Mapping <- read.xlsx(wb,sheet="Mapping",startRow=6)
-  Normalized_Peptides <- read.xlsx(wb,sheet="Normalized Peptides",startRow=1)
-  Protein_All_Peptides <- read.xlsx(wb,sheet="Protein_All_Peptides",startRow=1)
-  Protein_DR_Filt_Peptides <- read.xlsx(wb,sheet="Protein_DR_Filt_Peptides",startRow=1)
-  save(Samples,Annotations,Mapping,Normalized_Peptides,Protein_All_Peptides,Protein_DR_Filt_Peptides,file="2021.rda")
-# duplicates
-# mapping <- Mapping[,-3]
-# rownames(mapping) <- Mapping[,3]
-# samples <- Samples[,-1]
-# rownames(samples) <- Samples[,1]
-END
+R --no-save -q < ${caprion}/utils/2021.R
 
+# UDP
 R --no-save <<END
   caprion <- Sys.getenv("caprion")
   load("2021.rda")

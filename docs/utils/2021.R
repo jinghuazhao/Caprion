@@ -1,6 +1,7 @@
 # pilot, code ZWK
 
 rm(list=ls())
+caprion <- Sys.getenv("caprion")
 
 library(Biobase)
 library(openxlsx)
@@ -73,7 +74,6 @@ udp <- function()
 # samples <- Samples[,-1]
 # rownames(samples) <- Samples[,1]
   load("2021.rda")
-  caprion <- Sys.getenv("caprion")
   array_transpose <- function (x)
   {
     d <- x[,-1]

@@ -115,8 +115,8 @@ udp <- function()
              left_join(pca,by=c("caprion_id"="id"))
   rownames(samples) <- samples[,1]
   library(Biobase)
-  pap <- as.matrix(Protein_All_Peptides[,-1])
-  rownames(pap) <- Protein_All_Peptides[,1]
+  proteinData <- as.matrix(Protein_All_Peptides[,-1])
+  rownames(proteinData) <- Protein_All_Peptides[,1]
   id_extra <- setdiff(rownames(samples),colnames(pap))
   annotations <- Annotations[,-1]
   rownames(annotations) <- Annotations[,1]
@@ -127,24 +127,25 @@ udp <- function()
   all(rownames(phenoData)==colnames(pap))
   library(pQTLtools)
 # help("ExpressionSet-class")
-  norm_es <- make_ExpressionSet(pap,phenoData,experimentData=experimentData)
+  protein_UDP <- make_ExpressionSet(proteinData,phenoData,experimentData=experimentData)
   library(gap)
-  r <- sapply(1:length(featureNames(norm_es)),function(r) {
-                                               norm_es_r <- norm_es[r,]
-                                               fn <- paste0("invnormal(",sub("(^[0-9])","X\\1",featureNames(norm_es_r)),")")
+  r <- sapply(1:length(featureNames(protein_UDP)),function(r) {
+                                               protein_UDP_r <- protein_UDP[r,]
+                                               fn <- paste0("invnormal(",sub("(^[0-9])","X\\1",featureNames(protein_UDP_r)),")")
                                                f <- paste(fn,"~ agePulse + sexPulse + classification")
-                                               z <- lm(as.formula(f),data=norm_es_r, na.action=na.exclude)
+                                               z <- lm(as.formula(f),data=protein_UDP_r, na.action=na.exclude)
                                                resid(z)
                                                })
-  colnames(r) <- featureNames(norm_es)
+  colnames(r) <- featureNames(protein_UDP)
   d <- data.frame(r)
   d <- d %>%
        mutate(caprion_id=rownames(r)) %>%
-       left_join(pData(norm_es)[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
+       left_join(pData(protein_UDP)[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
        select(Affymetrix_gwasQC_bl,caprion_id,setdiff(names(d),c("Affymetrix_gwasQC_bl","caprion_id"))) %>%
        filter(!caprion_id %in%c("UDP0138","UDP0481"))
-  names(d) <- c("FID","IID",featureNames(norm_es))
+  names(d) <- c("FID","IID",featureNames(protein_UDP))
   write.table(d,file=file.path(caprion,"data3","UDP.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
+  save(protein_UDP,file="UDP.rda")
   checks <- function()
   {
     dim(pilotsMap)
@@ -153,15 +154,15 @@ udp <- function()
     head(pilotsMap)
     head(OmicsMap)
     head(data)
-    head(exprs(norm_es))
+    head(exprs(protein_UDP))
     head(pData(phenoData))
-    head(featureNames(norm_es))
-    head(sampleNames(norm_es))
-    experimentData(norm_es)
-    intersect(OmicsMap$caprion_id,sampleNames(norm_es))
-    intersect(OmicsMap$Affymetrix_gwasQC_bl,pData(norm_es)$Affymetrix_gwasQC_bl)
-  nrows <- length(featureNames(norm_es))
-  ncols <- length(intersect(OmicsMap$caprion_id,sampleNames(norm_es)))
+    head(featureNames(protein_UDP))
+    head(sampleNames(protein_UDP))
+    experimentData(protein_UDP)
+    intersect(OmicsMap$caprion_id,sampleNames(protein_UDP))
+    intersect(OmicsMap$Affymetrix_gwasQC_bl,pData(protein_UDP)$Affymetrix_gwasQC_bl)
+  nrows <- length(featureNames(protein_UDP))
+  ncols <- length(intersect(OmicsMap$caprion_id,sampleNames(protein_UDP)))
   r <- matrix(NA,nrows,ncols)
   }
 }

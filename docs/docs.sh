@@ -12,7 +12,7 @@ mkdocs gh-deploy
 
 git add .gitignore
 git commit -m ".gitignore"
-git add README.md
+git add README.md 2021.md
 git commit -m "README"
 git add caprion.ini caprion.R caprion.ipynb
 git commit -m "Primary Code"

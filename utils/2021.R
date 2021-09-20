@@ -1,15 +1,12 @@
 # pilot, code ZWK
 
-initialize <- function()
+rm(list=ls())
+caprion <- Sys.getenv("caprion")
+
+array_data <- function(data_frame,id,id_end_col)
 {
-  rm(list=ls())
-  library(Biobase)
-  library(openxlsx)
-  array_data <- function(data_frame,id,id_end_col)
-  {
-    rownames(data_frame) <- data_frame[[id]]
-    arrayData <- as.matrix(data_frame[,-(1:id_end_col)])
-  }
+  rownames(data_frame) <- data_frame[[id]]
+  arrayData <- as.matrix(data_frame[,-(1:id_end_col)])
 }
 
 zwk <- function()
@@ -22,8 +19,8 @@ zwk <- function()
   peptideData <- array_data(Normalized_Peptides,"Isotope.Group.ID",6)
   protein_ZWK <- ExpressionSet(proteinData,phenoData)
   dr_ZWK <- ExpressionSet(drData,phenoData)
-  peptides_ZWK <- ExpressionSet(peptideData,phenoData)
-  save(protein_ZWK,dr_ZWK,peptides_ZWK,file="ZWK.rda")
+  peptide_ZWK <- ExpressionSet(peptideData,phenoData)
+  save(protein_ZWK,dr_ZWK,peptide_ZWK,file="ZWK.rda")
 }
 
 # batch2, code ZYQ
@@ -44,13 +41,15 @@ zyq <- function()
   rownames(Samples) <- Samples$"LIMS.ID"
   phenoData <- new("AnnotatedDataFrame", data=Samples)
   proteinData <- t(array_data(Normalized_All,"LIMS.ID",1))
+  rownames(proteinData) <- sub("^X","\\1",rownames(proteinData))
   drData <- t(array_data(Protein_DR_Filt,"LIMS.ID",1))
+  rownames(drData) <- sub("^X","\\1",rownames(drData))
   peptideData <- array_data(Comp_Neq1,"Isotope.Group.ID",5)
   all(rownames(Samples)==colnames(proteinData))
   protein_ZYQ <- ExpressionSet(proteinData,phenoData)
   dr_ZYQ <- ExpressionSet(drData,phenoData)
-  peptides_ZYQ <- ExpressionSet(peptideData,phenoData)
-  save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,protein_ZYQ,dr_ZYQ,peptides_ZYQ,file="ZYQ.rda")
+  peptide_ZYQ <- ExpressionSet(peptideData,phenoData)
+  save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,protein_ZYQ,dr_ZYQ,peptide_ZYQ,file="ZYQ.rda")
 }
 
 # batch3, code UDP
@@ -71,7 +70,6 @@ udp <- function()
 # rownames(mapping) <- Mapping[,3]
 # samples <- Samples[,-1]
 # rownames(samples) <- Samples[,1]
-  caprion <- Sys.getenv("caprion")
   load("2021.rda")
   array_transpose <- function (x)
   {
@@ -114,20 +112,23 @@ udp <- function()
   samples <- merge(id_date_covars,Samples,by.x="caprion_id",by.y="LIMS.ID",all.y=TRUE) %>%
              left_join(pca,by=c("caprion_id"="id"))
   rownames(samples) <- samples[,1]
-  library(Biobase)
-  proteinData <- as.matrix(Protein_All_Peptides[,-1])
-  rownames(proteinData) <- Protein_All_Peptides[,1]
-  id_extra <- setdiff(rownames(samples),colnames(pap))
+  proteinData <- array_data(Protein_All_Peptides,"Protein",1)
+  drData <- array_data(Protein_DR_Filt_Peptides,"Protein",1)
+  peptideData <- array_data(Normalized_Peptides,"Isotope.Group.ID",6)
+  id_extra <- setdiff(rownames(samples),colnames(proteinData))
   annotations <- Annotations[,-1]
   rownames(annotations) <- Annotations[,1]
   experimentData <- new("MIAME", name="Contact", lab="Caprion", contact="contact@caprion",
-         title="INTERVAL pilot", abstract="phase 2 ExpressionSet", url="email",
+         title="INTERVAL pilot", abstract="batch3 ExpressionSet", url="email",
          other=list(notes="Created from csv files"))
-  phenoData <- new("AnnotatedDataFrame", data=subset(samples,rownames(samples) %in% colnames(pap)))
-  all(rownames(phenoData)==colnames(pap))
+  phenoData <- new("AnnotatedDataFrame", data=subset(samples,rownames(samples) %in% colnames(proteinData)))
+  all(rownames(phenoData)==colnames(proteinData))
   library(pQTLtools)
 # help("ExpressionSet-class")
   protein_UDP <- make_ExpressionSet(proteinData,phenoData,experimentData=experimentData)
+  dr_UDP <- make_ExpressionSet(drData,phenoData,experimentData=experimentData)
+  peptide_UDP <- make_ExpressionSet(peptideData,phenoData,experimentData=experimentData)
+  save(protein_UDP,dr_UDP,peptide_UDP,file="UDP.rda")
   library(gap)
   r <- sapply(1:length(featureNames(protein_UDP)),function(r) {
                                                protein_UDP_r <- protein_UDP[r,]
@@ -145,7 +146,7 @@ udp <- function()
        filter(!caprion_id %in%c("UDP0138","UDP0481"))
   names(d) <- c("FID","IID",featureNames(protein_UDP))
   write.table(d,file=file.path(caprion,"data3","UDP.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
-  save(protein_UDP,file="UDP.rda")
+  save(protein_UDP,dr_UDP,peptide_UDP,file="UDP.rda")
   checks <- function()
   {
     dim(pilotsMap)
@@ -166,3 +167,32 @@ udp <- function()
   r <- matrix(NA,nrows,ncols)
   }
 }
+
+library(Biobase)
+library(openxlsx)
+library(VennDiagram)
+overlap <- function(A,B) unlist(lapply(calculate.overlap(list(featureNames(A),featureNames(B))),length))
+
+zwk();
+zyq();
+udp();
+load("ZWK.rda")
+load("ZYQ.rda")
+load("UDP.rda")
+
+overlap(protein_ZWK,protein_ZYQ)
+overlap(protein_ZWK,protein_UDP)
+overlap(protein_ZYQ,protein_UDP)
+overlap(peptide_ZWK,peptide_ZYQ)
+overlap(peptide_ZWK,peptide_UDP)
+overlap(peptide_ZYQ,peptide_UDP)
+
+protein <- list(pilot=featureNames(protein_ZWK),batch2=featureNames(protein_ZYQ),batch3=featureNames(protein_UDP))
+dr <- list(pilot=featureNames(dr_ZWK),batch2=featureNames(dr_ZYQ),batch3=featureNames(dr_UDP))
+peptide <- list(pilot=featureNames(peptide_ZWK),batch2=featureNames(peptide_ZYQ),batch3=featureNames(peptide_UDP))
+unlist(lapply(calculate.overlap(protein),length))
+unlist(lapply(calculate.overlap(peptide),length))
+VennDiagram::venn.diagram(protein,"protein_ZWK-ZQY-UDP.png")
+VennDiagram::venn.diagram(peptide,"peptide_ZWK-ZQY-UDP.png")
+unlist(lapply(calculate.overlap(dr),length))
+VennDiagram::venn.diagram(dr,"dr_ZWK-ZQY-UDP.png")

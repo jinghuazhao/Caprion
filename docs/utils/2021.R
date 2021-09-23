@@ -200,11 +200,13 @@ median_ZWK <- sumstats(protein_ZWK,median)
 median_ZYQ <- sumstats(protein_ZYQ,median)
 median_UDP <- sumstats(protein_UDP,median)
 median_protein <- bind_rows(median_ZWK,median_ZYQ,median_UDP)
+rownames(median_protein) <- c("pilot","batch2","batch3")
 pairs(t(median_protein),pch=19)
 median_ZWK <- sumstats(peptide_ZWK,median)
 median_ZYQ <- sumstats(peptide_ZYQ,median)
 median_UDP <- sumstats(peptide_UDP,median)
 median_peptide <- bind_rows(median_ZWK,median_ZYQ,median_UDP)
+rownames(median_peptide) <- c("pilot","batch2","batch3")
 pairs(t(median_peptide),pch=19)
 
 # overlap

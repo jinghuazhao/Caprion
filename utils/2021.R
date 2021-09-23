@@ -5,8 +5,11 @@ caprion <- Sys.getenv("caprion")
 
 array_data <- function(data_frame,id,id_end_col)
 {
-  rownames(data_frame) <- data_frame[[id]]
-  arrayData <- as.matrix(data_frame[,-(1:id_end_col)])
+  arrayData <- data_frame[,-(1:id_end_col)]
+  chars <- sapply(arrayData, is.character)
+  arrayData[, chars] <- apply(arrayData[, chars], 2, as.numeric)
+  rownames(arrayData) <- data_frame[[id]]
+  as.matrix(arrayData)
 }
 
 zwk <- function()
@@ -170,15 +173,43 @@ udp <- function()
 
 library(Biobase)
 library(openxlsx)
-library(VennDiagram)
-overlap <- function(A,B) unlist(lapply(calculate.overlap(list(featureNames(A),featureNames(B))),length))
 
 zwk();
 zyq();
 udp();
+
+library(arrayQualityMetrics)
+list_outliers <- function(es, method="upperquartile") outliers(exprs(es),method=method)
+sumstats <- function(es,FUN=median) as.data.frame(as.data.frame(t(apply(exprs(es),1,FUN))))
 load("ZWK.rda")
 load("ZYQ.rda")
 load("UDP.rda")
+
+# outliers
+
+options(width=200)
+for (method in c("KS","sum","upperquartile"))
+{
+  ZWK_outliers <- list_outliers(protein_ZWK,method=method)
+  print(ZWK_outliers@statistic[ZWK_outliers@which])
+}
+
+# sumstats
+library(dplyr)
+median_ZWK <- sumstats(protein_ZWK,median)
+median_ZYQ <- sumstats(protein_ZYQ,median)
+median_UDP <- sumstats(protein_UDP,median)
+median_protein <- bind_rows(median_ZWK,median_ZYQ,median_UDP)
+pairs(t(median_protein),pch=19)
+median_ZWK <- sumstats(peptide_ZWK,median)
+median_ZYQ <- sumstats(peptide_ZYQ,median)
+median_UDP <- sumstats(peptide_UDP,median)
+median_peptide <- bind_rows(median_ZWK,median_ZYQ,median_UDP)
+pairs(t(median_peptide),pch=19)
+
+# overlap
+library(VennDiagram)
+overlap <- function(A,B) unlist(lapply(calculate.overlap(list(featureNames(A),featureNames(B))),length))
 
 overlap(protein_ZWK,protein_ZYQ)
 overlap(protein_ZWK,protein_UDP)

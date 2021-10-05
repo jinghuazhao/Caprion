@@ -180,7 +180,7 @@ udp();
 
 library(arrayQualityMetrics)
 list_outliers <- function(es, method="upperquartile") outliers(exprs(es),method=method)
-sumstats <- function(es,FUN=median) as.data.frame(as.data.frame(t(apply(exprs(es),1,FUN))))
+sumstats <- function(es,FUN=median) as.data.frame(t(apply(exprs(es),1,FUN)))
 load("ZWK.rda")
 load("ZYQ.rda")
 load("UDP.rda")
@@ -196,14 +196,17 @@ for (method in c("KS","sum","upperquartile"))
 
 # sumstats
 library(dplyr)
+library(ggplot2)
+library(cowplot)
 stat_test <- function(FUN)
 {
-  library(car)
-  for (protpept in c("protein","peptide"))
+  types <- c("protein","peptide")
+  prot_pept <- list()
+  for (protpept in 1:2)
   {
-    stat_ZWK <- sumstats(get(paste0(protpept,"_ZWK")),FUN)
-    stat_ZYQ <- sumstats(get(paste0(protpept,"_ZYQ")),FUN)
-    stat_UDP <- sumstats(get(paste0(protpept,"_UDP")),FUN)
+    stat_ZWK <- sumstats(get(paste0(types[protpept],"_ZWK")),FUN)
+    stat_ZYQ <- sumstats(get(paste0(types[protpept],"_ZYQ")),FUN)
+    stat_UDP <- sumstats(get(paste0(types[protpept],"_UDP")),FUN)
     d_a <- data.frame(stat=t(stat_ZWK),batch="pilot")
     d_b <- data.frame(stat=t(stat_ZYQ),batch="batch2")
     d_c <- data.frame(stat=t(stat_UDP),batch="batch3")
@@ -211,19 +214,25 @@ stat_test <- function(FUN)
     mm <- model.matrix(~batch,data=d_long)
     m <- lm(stat ~ batch, data=d_long)
     print(summary(m))
-    print(Anova(m))
+    print(car::Anova(m))
+    d_long <- mutate(d_long, batch=recode_factor(batch, '0' = 'pilot', '1' = 'batch2', '2' = 'batch3'))
+    ggplot(d_long, aes(x = stat)) + theme_bw() + cowplot::theme_cowplot() +
+                                    geom_histogram(fill = "white", colour = "black") + facet_grid(batch ~ ., scales = "free") +
+                                    ggtitle(paste0(types[protpept],"-",FUN)) + xlab(sub("p","P",types[protpept])) + ylab("Frequency")
+    ggsave(paste0(types[protpept],"-",FUN,".pdf"),device="pdf")
     d_wide <- bind_rows(stat_ZWK,stat_ZYQ,stat_UDP)
     rownames(d_wide) <- c("pilot","batch2","batch3")
     pairs(t(d_wide),pch=19)
-    title(paste(protpept,"(",FUN,")"))
-    invisible(list(long=d_long,wide=d_wide))
+    title(paste(types[protpept],"(",FUN,")"))
+    prot_pept[[protpept]] <- list(long=d_long,wide=d_wide)
   }
+  prot_pept
 }
 pdf("pairs.pdf")
 par(mfrow=c(1,2))
-stat_test("mean")
-stat_test("sd")
-stat_test("median")
+means <- stat_test("mean")
+sds <- stat_test("sd")
+medians <- stat_test("median")
 dev.off()
 
 # overlap

@@ -44,6 +44,9 @@
 <li class="navitem">
 <a class="nav-link" href="gwas2/">gwas2</a>
 </li>
+<li class="navitem">
+<a class="nav-link" href="tests/">tests</a>
+</li>
 </ul>
 <ul class="nav navbar-nav ml-auto">
 <li class="nav-item">
@@ -82,22 +85,6 @@
 </ul>
 </li>
 <li class="nav-item" data-level="2"><a class="nav-link" href="#coding">Coding</a>
-<ul class="nav flex-column">
-</ul>
-</li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#autoencoder-ae-vs-pca">autoencoder (AE) vs PCA</a>
-<ul class="nav flex-column">
-</ul>
-</li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#references">REFERENCES</a>
-<ul class="nav flex-column">
-</ul>
-</li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#urls">URLs</a>
-<ul class="nav flex-column">
-</ul>
-</li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#eth-zurich-u-toronto-team-develops-tool-for-bottom-up-proteomics-proteoform-analysis">ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -177,54 +164,7 @@ utils/sentinels_nold.sh --&gt; merge.sh
 </ul>
 <div class="mermaid">graph TB
 utils/2021.sh
-</div>
-<hr/>
-<h2 id="autoencoder-ae-vs-pca">autoencoder (AE) vs PCA</h2>
-<p>As shown at <a href="https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/">R-bloggers<img align="right" height="400" src="https://i0.wp.com/gradientdescending.com/wp-content/uploads/2018/07/reconstruction-1.png" width="560"/></a>,</p>
-<blockquote>
-<p>autoencoder is better at reconstructing the original data set than PCA when k is small, 
-however the error converges as k increases. For very large data sets this difference will be
-larger and means a smaller data set could be used for the same error as PCA. When dealing 
-with big data this is an important property`.</p>
-</blockquote>
-<p>where <code>k</code> corresponds to the number of principal components in PCA or bottleneck dimension in AE.</p>
-<p>The local adoption is <a href="utils/ae_test.Rmd">ae_test.Rmd</a> which produces <a href="utils/ae_test.html">ae_test.html</a> and <a href="utils/ae_test.pdf">ae_test.pdf</a>.</p>
-<p>Additional work will be on variatinoal autoencoder (VAE) as indicated in the references below.</p>
-<h2 id="references">REFERENCES</h2>
-<p>Bludau I, Frank M, Dörig C. et al. Systematic detection of functional proteoform groups from bottom-up proteomic datasets. Nat Commun 12, 3810 (2021). https://doi.org/10.1038/s41467-021-24030-x</p>
-<p>Hofert M, Prasad A, Zhu M (2019). Quasi-Monte Carlo for multivariate distributions viagenerative neural networks. https://arxiv.org/abs/1811.00683, https://CRAN.R-project.org/package=gnn.</p>
-<p>Kingma DP, Welling M (2014). Auto-Encoding Variational Bayes. https://arxiv.org/abs/1312.6114, https://keras.rstudio.com/articles/examples/variational_autoencoder.html.</p>
-<p>Trivadis SK (2017). Variational autoencoders for anomaly detection. https://rpubs.com/zkajdan/308801.</p>
-<h2 id="urls">URLs</h2>
-<p>https://github.com/diazale/gt-dimred,
-https://github.com/lmcinnes/umap,
-https://umap-learn.readthedocs.io/en/latest/.</p>
-<hr/>
-<h2 id="eth-zurich-u-toronto-team-develops-tool-for-bottom-up-proteomics-proteoform-analysis">ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis</h2>
-<p>Jul 28, 2021 | Adam Bonislawski</p>
-<p>NEW YORK – A team led by researchers at ETH Zurich and the University of Toronto has developed a tool that allows for the detection of protein proteoforms in bottom-up proteomics data.</p>
-<p>Described in a paper published in June in Nature Communications, the tool, called COPF (COrrelation-based functional ProteoForm) uses peptide correlation analysis to detect differences in proteoform populations across different samples or conditions and could aid researchers as they seek to better understand the role different protein forms play in biology and disease.</p>
-<p>The human genome is thought to have around 20,000 protein coding genes, but many of these 20,000 proteins exist in the body in various forms, differentiated by, for instance, post-translational modifications or amino acid substitutions. These different forms are called proteoforms, and it is widely believed that biological processes are guided not just by the proteins present but by what proteoforms are present and in what proportions.</p>
-<p>Traditional bottom-up proteomics workflows have provided only limited insight into proteoform populations however, due to the fact that the presence of a particular protein is typically inferred by the detection of just a few of its peptides and that digesting proteins into peptides for mass spec analysis makes it near impossible to link a modified peptide back to a particular proteoform.</p>
-<p>Some proteomics researchers have addressed this issue by moving to top-down proteomics, which looks at intact proteins, allowing them to better distinguish between different proteoforms. Top-down proteomics is very technically challenging, however, and is not yet able to analyze proteins with the breadth and depth of bottom-up workflows.</p>
-<p>Recently, the development of more reproducible and higher-throughput bottom-up workflows, and particular workflows using data independent-acquisition (DIA) mass spectrometry, have allowed researchers like the Nature Communications authors to apply peptide correlation analysis to the study of proteoforms.</p>
-<p>Peptide correlation analysis looks at differences in peptide behavior within and across proteins in bottom-up data.</p>
-<p>Researchers have developed a number of approaches for turning peptide measurements into protein data, with most working under the assumption that peptides from the same protein will behave the same way.</p>
-<p>In practice, though, that isn't the case. On one hand, there are a number of technical reasons why two peptides from the same protein may not behave the same way. For instance, different digestion efficiencies could lead to some peptides being more abundant than others. Different ionization efficiencies could similarly make one peptide more likely than another to be detected by the mass spec.</p>
-<p>The presence of different proteoforms could also play a role. For instance, if a protein is present in both a full-length and truncated form, expression changes observed in the full-length form wouldn't be observable if the peptide being measured wasn't present in the truncated form. Not only would this throw off protein-level quantitation, but it would also mask relative changes in the two protein forms that could be biologically important.</p>
-<p>A major challenge to applying this insight has been determining which differences in peptide behavior reflect real technical or biological variation and which are just noise, noted Hannes Röst, research chair in mass spectrometry-based personalized medicine at the University of Toronto and an author on the Nature Communications study.</p>
-<p>"In many cases [such variation] was noise," he said. "When you look at traditional shotgun proteomics workflows and data analyses, really the power is not at the peptide-level quantification but at the protein level from the aggregation of multiple peptides. On the peptide level you see a lot of noise, and I think that has prevented us from using this observation that individual peptides could yield a lot of interested information because people really only looked at the protein-level data, because that is what they trusted."</p>
-<p>Röst said that the development of targeted protein quantitation approaches like multiple-reaction monitoring (MRM) has demonstrated that individual peptides can be measured with high accuracy, and the development of DIA mass spec approaches has enabled MRM-style peptide quantitation at the proteome scale.</p>
-<p>At the same time, improvements in mass spec technology have allowed researchers to collect the kind of large and reproducible datasets required for peptide correlation analysis, he said.</p>
-<p>"These are types of experiments we wouldn't have imagined 10 years ago, because for correlation-based approaches to work, you need a relatively large number of samples, and you need low variance," he said. "We are not detecting [proteoforms] that are not changing between different [conditions], we are only detecting those that change. And for this to work we need to have multiple replicates and we need to have different conditions and to be able to measure these peptides with high quantitative accuracy across these conditions."</p>
-<p>The COPF tool looks at the intensities of peptides coming from a particular protein across all the samples measured in an experiment and then calculates peptide correlations for all the pairs of peptides coming from that protein and uses hierarchical clustering to divide the peptides into two clusters. It then scores the likelihood that multiple proteoforms of a protein are present by comparing the level of peptide correlation between the clusters to the level of in-cluster variation.</p>
-<p>The tool does not identify the specific modifications or variations that distinguish the different proteoforms but rather the peptides that appear to differentiate between the forms of the protein in the different biological contexts investigated. Analyzing a DIA dataset that looked at five different tissue types across eight different mice, COPF identified 63 proteins that exhibited different proteoform groups, including proteins with known tissue-specific splice variants. The researchers also identified proteoforms created by proteolytic and autocatalytic cleavage and phosphorylation, indicating, they wrote, that the tool is "agnostic to the different mechanisms by which proteoforms can be generated inside the cell."</p>
-<p>The development of COPF follows the publication last year of a study by researchers at Barts Cancer Institute and the University of Wisconsin-Madison detailing another peptide correlation analysis tool for identifying proteoforms in bottom-up data called PeCorA.</p>
-<p>Unlike COPF, which requires proteoforms to differ by two or more peptides, PeCorA can detect proteoforms based on single peptide differences. This makes it a potentially more sensitive tool but also less specific than COPF, Röst said.</p>
-<p>More generally, he said that he expected ongoing improvements in mass spec technology would further improve peptide correlation-based approaches like COPF and PeCorA by boosting peptide coverage.</p>
-<p>"To kind of cover every possible protein isoform we would need to have complete coverage of every protein, and unfortunately we are currently quite far away from having peptide-level coverage of every protein," he said. "I think that is currently one of the limitations where we are kind of hitting a wall."</p>
-<p>Röst added that his lab has begun acquiring data on Bruker's timsTOF Pro platform, "and there we definitely see both an increase in protein coverage and also in the number of peptides we can measure."</p>
-<p>"That's why I'm very optimistic that while this is just the first implementation of the method, the data we are producing at this moment is much more complete, and therefore I think it would be even more suitable to our approach than the data we used in the paper," he said.</p></div>
+</div></div>
 </div>
 </div>
 <footer class="col-md-12">
@@ -307,5 +247,5 @@ https://umap-learn.readthedocs.io/en/latest/.</p>
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2021-10-13 20:37:48.108742+00:00
+Build Date UTC : 2021-10-13 20:57:38.128764+00:00
 -->

@@ -1,6 +1,7 @@
 site_name: Caprion
 nav:
   - Home: README.md
+  - gwas2: gwas2.md
 theme:
     name: mkdocs
     nav_style: dark

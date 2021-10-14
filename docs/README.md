@@ -51,7 +51,8 @@ utils/sentinels_nold.sh --> merge.sh
 graph TB
 utils/2021.sh
 utils/2021.sh --> utils/eSet.R
-utils/2021.sh --> utils/2021.R --> utils/plink2.sh
+utils/2021.sh --> utils/2021.R
+utils/2021.R --> utils/plink2.sh
 utils/eSet.R --> utils/2021.R
 ```
 

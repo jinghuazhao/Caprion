@@ -164,7 +164,9 @@ utils/sentinels_nold.sh --&gt; merge.sh
 </ul>
 <div class="mermaid">graph TB
 utils/2021.sh
-utils/2021.sh --&gt; utils/2021.R
+utils/2021.sh --&gt; utils/eSet.R
+utils/2021.sh --&gt; utils/2021.R --&gt; utils/plink2.sh
+utils/eSet.R --&gt; utils/2021.R
 </div></div>
 </div>
 </div>
@@ -248,5 +250,5 @@ utils/2021.sh --&gt; utils/2021.R
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2021-10-14 09:57:27.512828+00:00
+Build Date UTC : 2021-10-14 11:18:50.769892+00:00
 -->

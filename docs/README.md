@@ -54,3 +54,5 @@ utils/2021.sh --> utils/eSet.R
 utils/2021.sh --> utils/2021.R --> utils/plink2.sh
 utils/eSet.R --> utils/2021.R
 ```
+
+Note that `eSet.R` actually covers data from pilot, batches 2 and 3, and that analyses across different data share much in common, e.g., w.r.t. the use of `plink2.sh`.

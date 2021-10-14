@@ -153,9 +153,9 @@
 utils/tensoqtl.sh
 utils/2020.sh --&gt; EPCR-PROC
 utils/2020.sh --&gt; data2/affymetrix.id
-data2/affymetrix.id  --&gt; data2/bgen
-utils/qctool.sb --&gt; data2/bgen
-data2/bgen --&gt; utils/plink2.sh
+data2/affymetrix.id  --&gt; data2/bgen2
+utils/qctool.sb --&gt; data2/bgen2
+data2/bgen2 --&gt; utils/plink2.sh
 utils/plink2.sh --&gt; utils/sentinels_nold.sh
 utils/sentinels_nold.sh --&gt; merge.sh
 </div>
@@ -164,6 +164,7 @@ utils/sentinels_nold.sh --&gt; merge.sh
 </ul>
 <div class="mermaid">graph TB
 utils/2021.sh
+utils/2021.sh --&gt; utils/2021.R
 </div></div>
 </div>
 </div>
@@ -247,5 +248,5 @@ utils/2021.sh
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2021-10-13 20:57:38.128764+00:00
+Build Date UTC : 2021-10-14 09:57:27.512828+00:00
 -->

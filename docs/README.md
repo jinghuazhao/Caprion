@@ -41,6 +41,7 @@ utils/tensoqtl.sh
 utils/2020.sh --> EPCR-PROC
 utils/2020.sh --> data2/affymetrix.id
 data2/affymetrix.id  --> data2/bgen2
+utils/qctool.sh --> utils/qctool.sb
 utils/qctool.sb --> data2/bgen2
 data2/bgen2 --> utils/plink2.sh
 utils/plink2.sh --> utils/sentinels_nold.sh
@@ -54,6 +55,8 @@ utils/2021.sh --> utils/eSet.R
 utils/2021.sh --> utils/2021.R
 utils/2021.R --> utils/plink2.sh
 utils/eSet.R --> utils/2021.R
+utils/2021.sh --> utils/UDP.R
+utils/UDP.R --> utils/plink2.sh
 ```
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3, and that analyses across different data share much in common, e.g., w.r.t. the use of `plink2.sh`.

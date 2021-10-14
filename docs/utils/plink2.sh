@@ -66,4 +66,25 @@ parallel -C' ' --env caprion '
 '
 }
 
-bgen2
+function bgen3()
+{
+if [ ! -d ${caprion}/bgen3 ]; then mkdir ${caprion}/bgen3; fi
+seq 39 | \
+parallel -C' ' --env caprion '
+  export col=$(head -1 ${caprion}/data3/caprion.pheno | cut -d" " -f1,2 --complement | cut -d" " -f {}); \
+  for v in ${col};
+  do
+      echo ${v}
+      plink2 \
+             --bgen ${caprion}/data3/caprion.01.bgen --sample ${caprion}/data3/caprion.sample \
+             --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
+             --pheno ${caprion}/data3/caprion.pheno --pheno-name ${v} --covar ${caprion}/data3/caprion.covar \
+             --out ${caprion}/work/${v}
+      grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
+      gzip -f > ${caprion}/bgen3/${v}-plink3.gz
+      rm ${caprion}/work/${v}.${v}.glm.linear
+  done
+'
+}
+
+bgen3

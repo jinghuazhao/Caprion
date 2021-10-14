@@ -40,9 +40,9 @@ graph TB;
 utils/tensoqtl.sh
 utils/2020.sh --> EPCR-PROC
 utils/2020.sh --> data2/affymetrix.id
-data2/affymetrix.id  --> data2/bgen
-utils/qctool.sb --> data2/bgen
-data2/bgen --> utils/plink2.sh
+data2/affymetrix.id  --> data2/bgen2
+utils/qctool.sb --> data2/bgen2
+data2/bgen2 --> utils/plink2.sh
 utils/plink2.sh --> utils/sentinels_nold.sh
 utils/sentinels_nold.sh --> merge.sh
 ```
@@ -50,4 +50,5 @@ utils/sentinels_nold.sh --> merge.sh
 ```mermaid
 graph TB
 utils/2021.sh
+utils/2021.sh --> utils/2021.R
 ```

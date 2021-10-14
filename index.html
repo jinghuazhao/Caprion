@@ -165,7 +165,8 @@ utils/sentinels_nold.sh --&gt; merge.sh
 <div class="mermaid">graph TB
 utils/2021.sh
 utils/2021.sh --&gt; utils/eSet.R
-utils/2021.sh --&gt; utils/2021.R --&gt; utils/plink2.sh
+utils/2021.sh --&gt; utils/2021.R
+utils/2021.R --&gt; utils/plink2.sh
 utils/eSet.R --&gt; utils/2021.R
 </div>
 <p>Note that <code>eSet.R</code> actually covers data from pilot, batches 2 and 3, and that analyses across different data share much in common, e.g., w.r.t. the use of <code>plink2.sh</code>.</p></div>
@@ -251,5 +252,5 @@ utils/eSet.R --&gt; utils/2021.R
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2021-10-14 11:53:59.801158+00:00
+Build Date UTC : 2021-10-14 11:55:40.992551+00:00
 -->

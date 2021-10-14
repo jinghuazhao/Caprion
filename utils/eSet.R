@@ -2,6 +2,11 @@
 
 rm(list=ls())
 caprion <- Sys.getenv("caprion")
+caprion <- ifelse(caprion=="",".",caprion)
+
+library(Biobase)
+library(openxlsx)
+library(pQTLtools)
 
 array_data <- function(data_frame,id,id_end_col)
 {
@@ -12,9 +17,8 @@ array_data <- function(data_frame,id,id_end_col)
   as.matrix(arrayData)
 }
 
-# pilot, code ZWK
-
 zwk <- function()
+# pilot, code ZWK
 {
   load("caprion.rda")
   rownames(Samples) <- Samples$"LIMS.ID:.Caprion.Sample.ID"
@@ -28,9 +32,8 @@ zwk <- function()
   save(protein_ZWK,dr_ZWK,peptide_ZWK,file="ZWK.rda")
 }
 
-# batch2, code ZYQ
-
 zyq <- function()
+# batch2, code ZYQ
 {
   dir <- "/home/jhz22/Caprion/pre_qc_data/batch2/CAM1184-ZYQ"
   wb <- file.path(dir,"ZYQ_EDR_28AUG2020_Updated.xlsx")
@@ -57,8 +60,8 @@ zyq <- function()
   save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,protein_ZYQ,dr_ZYQ,peptide_ZYQ,file="ZYQ.rda")
 }
 
-# batch3, code UDP
 udp <- function()
+# batch3, code UDP
 {
   samples <- read.xlsx("UDP_EDR_20210423_samples.xlsx", sheet = 1, startRow = 5)
   wb <- "UDP_EDR_20210423.xlsx"
@@ -70,52 +73,6 @@ udp <- function()
   Protein_All_Peptides <- read.xlsx(wb,sheet="Protein_All_Peptides",startRow=1)
   Protein_DR_Filt_Peptides <- read.xlsx(wb,sheet="Protein_DR_Filt_Peptides",startRow=1)
   save(Samples,Annotations,Mapping,Normalized_Peptides,Protein_All_Peptides,Protein_DR_Filt_Peptides,file="2021.rda")
-# duplicates
-# mapping <- Mapping[,-3]
-# rownames(mapping) <- Mapping[,3]
-# samples <- Samples[,-1]
-# rownames(samples) <- Samples[,1]
-  load("2021.rda")
-  array_transpose <- function (x)
-  {
-    d <- x[,-1]
-    rownames(d) <- x[,1]
-    td <- t(d)
-  }
-  norm_all <- array_transpose(Protein_All_Peptides)
-  dr_filt <- array_transpose(Protein_DR_Filt_Peptides)
-  ppc <- prcomp(na.omit(norm_all), rank=10, scale=TRUE)
-  pc1pc2 <- with(ppc,x)[,1:2]
-  rownames(pc1pc2) <- rownames(norm_all)
-  eigenvec <- with(ppc,rotation)[,1:2]
-  library(dplyr)
-  pca <- with(ppc,x) %>%
-         data.frame()
-  pca <- pca %>%
-         mutate(id=rownames(pca))
-  library(mclust)
-  mc <- Mclust(pc1pc2,G=2)
-  summary(mc)
-  library(scatterplot3d)
-  library(rgl)
-  with(mc,
-  {
-       png(file.path(caprion,"data3","SERPING1.png"),res=300,width=12,height=10,units="in")
-       scatterplot3d(with(ppc,x[,c(2,1,3)]), color=c("blue","red")[classification], main="Plot of the PC1, PC2 and PC3", pch=16)
-       legend("right", legend=levels(as.factor(classification)), col=c("blue", "red"), pch=16)
-       dev.off()
-       plot3d(with(ppc,x[,c(2,1,3)]),col=classification)
-  })
-  pilotsMap <- read.csv("pilotsMap_15SEP2021.csv")
-  OmicsMap <- read.csv("INTERVAL_OmicsMap_20210915.csv")
-  data <- read.csv("INTERVALdata_15SEP2021.csv")
-  id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
-  date <- c("attendanceDate","sexPulse","monthPulse","yearPulse","agePulse")
-  covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl","classification")
-  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
-  id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
-  samples <- merge(id_date_covars,Samples,by.x="caprion_id",by.y="LIMS.ID",all.y=TRUE) %>%
-             left_join(pca,by=c("caprion_id"="id"))
   rownames(samples) <- samples[,1]
   proteinData <- array_data(Protein_All_Peptides,"Protein",1)
   drData <- array_data(Protein_DR_Filt_Peptides,"Protein",1)
@@ -129,34 +86,12 @@ udp <- function()
   phenoData <- new("AnnotatedDataFrame", data=subset(samples,rownames(samples) %in% colnames(proteinData)))
   all(rownames(phenoData)==colnames(proteinData))
 # help("ExpressionSet-class")
+  library(pQTLtools)
   protein_UDP <- make_ExpressionSet(proteinData,phenoData,experimentData=experimentData)
   dr_UDP <- make_ExpressionSet(drData,phenoData,experimentData=experimentData)
   peptide_UDP <- make_ExpressionSet(peptideData,phenoData,experimentData=experimentData)
   save(protein_UDP,dr_UDP,peptide_UDP,file="UDP.rda")
-  checks <- function()
-  {
-    dim(pilotsMap)
-    dim(OmicsMap)
-    dim(data)
-    head(pilotsMap)
-    head(OmicsMap)
-    head(data)
-    head(exprs(protein_UDP))
-    head(pData(phenoData))
-    head(featureNames(protein_UDP))
-    head(sampleNames(protein_UDP))
-    experimentData(protein_UDP)
-    intersect(OmicsMap$caprion_id,sampleNames(protein_UDP))
-    intersect(OmicsMap$Affymetrix_gwasQC_bl,pData(protein_UDP)$Affymetrix_gwasQC_bl)
-    nrows <- length(featureNames(protein_UDP))
-    ncols <- length(intersect(OmicsMap$caprion_id,sampleNames(protein_UDP)))
-    r <- matrix(NA,nrows,ncols)
-  }
 }
-
-library(Biobase)
-library(openxlsx)
-library(pQTLtools)
 
 zwk();
 zyq();

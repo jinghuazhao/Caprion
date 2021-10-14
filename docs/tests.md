@@ -15,7 +15,7 @@ The local adoption is [ae_test.Rmd](utils/ae_test.Rmd) which produces [ae_test.h
 
 Additional work will be on variatinoal autoencoder (VAE) as indicated in the references below.
 
-## REFERENCES
+### REFERENCES
 
 Bludau I, Frank M, Dörig C. et al. Systematic detection of functional proteoform groups from bottom-up proteomic datasets. Nat Commun 12, 3810 (2021). https://doi.org/10.1038/s41467-021-24030-x
 
@@ -25,7 +25,7 @@ Kingma DP, Welling M (2014). Auto-Encoding Variational Bayes. https://arxiv.org/
 
 Trivadis SK (2017). Variational autoencoders for anomaly detection. https://rpubs.com/zkajdan/308801.
 
-## URLs
+### URLs
 
 https://github.com/diazale/gt-dimred,
 https://github.com/lmcinnes/umap,

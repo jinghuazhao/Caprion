@@ -1,4 +1,4 @@
-## gwas2
+# gwas2
 
 This is a promising alternative showing through RCN3/FCGRN with [gwas2.sh](utils/gwas2.sh).
 ```mermaid

@@ -61,3 +61,7 @@ utils/UDP.R --> utils/plink2.sh
 ```
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3, and that analyses across different data share much in common, e.g., w.r.t. the use of `plink2.sh`.
+
+## Reference
+
+Klaus B, Reisenauer S (2018). [An end to end workflow for differential gene expression using Affymetrix microarrays](https://bioconductor.org/packages/devel/workflows/vignettes/maEndToEnd/inst/doc/MA-Workflow.html).

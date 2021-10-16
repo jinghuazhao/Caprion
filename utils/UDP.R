@@ -74,26 +74,23 @@ UDP <- function()
              left_join(data.frame(pData(protein_UDP)),by=c("caprion_id"="LIMS.ID..Caprion.Sample.ID"))
   rownames(samples) <- samples[["caprion_id"]]
   pheno <- data.frame(caprion_id=sampleNames(protein_UDP),t(exprs(protein_UDP))) %>%
-           right_join(samples,by="caprion_id") %>%
-           slice(-(815:827))
+           right_join(samples,by="caprion_id")
   rhs <- paste("agePulse","sexPulse","classification",paste0("PC",1:20,collapse="+"),sep="+")
   r <- sapply(featureNames(protein_UDP),function(r) {
               x <- sub("(^[0-9])","X\\1",r)
-              pheno_UDP_r <- pheno[c(x,"agePulse","sexPulse","classification",paste0("PC",1:20))]
               y <- paste0("invnormal(",x,")")
               f <- paste(y,"~",rhs)
-              z <- lm(formula(f),data=pheno_UDP_r, na.action=na.exclude)
+              z <- lm(formula(f),data=pheno[c(x,"agePulse","sexPulse","classification",paste0("PC",1:20))], na.action=na.exclude)
               resid(z)
             })
   rownames(r) <- sampleNames(protein_UDP)
-  d <- data.frame(r)
-  d <- d %>%
+  d <- data.frame(r) %>%
        mutate(caprion_id=rownames(r)) %>%
        left_join(pheno[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
-       select(Affymetrix_gwasQC_bl,caprion_id,setdiff(names(d),c("Affymetrix_gwasQC_bl","caprion_id"))) %>%
-       filter(!caprion_id %in%c("UDP0138","UDP0481"))
+       select(Affymetrix_gwasQC_bl,caprion_id,names(data.frame(r))) %>%
+       filter(!caprion_id %in%c("UDP0138","UDP0481")) %>%
+       mutate(caprion_id=Affymetrix_gwasQC_bl)
   names(d) <- c("FID","IID",gsub("HUMAN","invn",featureNames(protein_UDP)))
-  d <- within(d,{IID <- FID})
   write.table(d,file=file.path(caprion,"data3","UDP.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
 }
 

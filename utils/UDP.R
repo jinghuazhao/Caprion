@@ -1,3 +1,5 @@
+# Phenotypic information on UDP
+
 caprion <- Sys.getenv("caprion")
 caprion <- ifelse(caprion=="",".",caprion)
 load("UDP.rda")
@@ -26,20 +28,16 @@ checks <- function()
   r <- matrix(NA,nrows,ncols)
 }
 
+array_transpose <- function (x)
+{
+  d <- x[,-1]
+  rownames(d) <- x[,1]
+  td <- t(d)
+}
+
 UDP <- function()
 {
-# duplicates
-# mapping <- Mapping[,-3]
-# rownames(mapping) <- Mapping[,3]
-# samples <- Samples[,-1]
-# rownames(samples) <- Samples[,1]
   load("2021.rda")
-  array_transpose <- function (x)
-  {
-    d <- x[,-1]
-    rownames(d) <- x[,1]
-    td <- t(d)
-  }
   norm_all <- array_transpose(Protein_All_Peptides)
   dr_filt <- array_transpose(Protein_DR_Filt_Peptides)
   ppc <- prcomp(na.omit(norm_all), rank=10, scale=TRUE)
@@ -72,17 +70,27 @@ UDP <- function()
   covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl","classification")
   grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
   id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
+  ev20 <- read.delim(file.path(caprion,"data","merged_imputation.eigenvec"))
+  names(ev20)[1] <- "FID"
   samples <- merge(id_date_covars,Samples,by.x="caprion_id",by.y="LIMS.ID",all.y=TRUE) %>%
-             left_join(pca,by=c("caprion_id"="id"))
-  rownames(samples) <- samples[,1]
-  r <- sapply(1:length(featureNames(protein_UDP)),function(r) {
-              protein_UDP_r <- protein_UDP[r,]
-              fn <- paste0("invnormal(",sub("(^[0-9])","X\\1",featureNames(protein_UDP_r)),")")
-              f <- paste(fn,"~ agePulse + sexPulse + classification")
-              z <- lm(as.formula(f),data=protein_UDP_r, na.action=na.exclude)
+             left_join(ev20,by=c("Affymetrix_gwasQC_bl"="FID")) %>%
+             select(caprion_id,sexPulse,agePulse,ethnicPulse,ht_bl,wt_bl,Affymetrix_gwasQC_bl,classification,paste0("PC",1:20)) %>%
+             left_join(data.frame(pData(protein_UDP)),by=c("caprion_id"="LIMS.ID..Caprion.Sample.ID"))
+  rownames(samples) <- samples[["caprion_id"]]
+  pheno <- data.frame(caprion_id=sampleNames(protein_UDP),t(exprs(protein_UDP))) %>%
+           right_join(samples,by="caprion_id") %>%
+           slice(-(815:827))
+  pcs <- paste(paste0("PC",1:20),collapse=" + ")
+  r <- sapply(featureNames(protein_UDP),function(r) {
+              x <- sub("(^[0-9])","X\\1",r)
+              pheno_UDP_r <- pheno[c(x,"agePulse","sexPulse","classification",paste0("PC",1:20))]
+              y <- paste0("invnormal(",x,")")
+              f <- paste(y,"~",paste("agePulse","sexPulse","classification",sep=" + "),"+",pcs)
+              print(f)
+              z <- lm(formula(f),data=pheno_UDP_r, na.action=na.exclude)
               resid(z)
             })
-  colnames(r) <- featureNames(protein_UDP)
+  rownames(r) <- sampleNames(protein_UDP)
   d <- data.frame(r)
   d <- d %>%
        mutate(caprion_id=rownames(r)) %>%

@@ -1,6 +1,9 @@
+# Summary statistics
+
 library(arrayQualityMetrics)
 list_outliers <- function(es, method="upperquartile") outliers(exprs(es),method=method)
 sumstats <- function(es,FUN=median) as.data.frame(t(apply(exprs(es),1,FUN)))
+
 load("ZWK.rda")
 load("ZYQ.rda")
 load("UDP.rda")

@@ -34,30 +34,30 @@
          * [utils/ps.sh](utils/ps.sh) and [utils/ps.R](utils/ps.R) run through PhenoScanner.
          * [utils/lookup.sh](utils/lookup.sh) looks up for overlap with SomaLogic and Olink.
          * [caprion.ipynb](caprion.ipynb) is a Jupyter notebook with some preprocessing done by [utils/tensorqtl.sh](utils/tensorqtl.sh).
-* Batch 2
+* Batch 2 (prefix=utils/ when unspecified)
 ```mermaid
 graph TB;
-utils/tensoqtl.sh
-utils/2020.sh --> EPCR-PROC
-utils/2020.sh --> data2/affymetrix.id
+tensoqtl.sh
+2020.sh --> EPCR-PROC/
+2020.sh --> data2/affymetrix.id
 data2/affymetrix.id  --> data2/bgen2
-utils/qctool.sh --> utils/qctool.sb
-utils/qctool.sb --> data2/bgen2
-data2/bgen2 --> utils/plink2.sh
-utils/plink2.sh --> utils/sentinels_nold.sh
-utils/sentinels_nold.sh --> merge.sh
+qctool.sh --> qctool.sb
+qctool.sb --> data2/bgen2
+data2/bgen2 --> plink2.sh
+plink2.sh --> sentinels_nold.sh
+sentinels_nold.sh --> merge.sh
 ```
-* Batch 3
+* Batch 3 (prefix=utils/)
 ```mermaid
 graph TB
-utils/2021.sh
-utils/2021.sh --> utils/eSet.R
-utils/2021.sh --> utils/2021.R
-utils/2021.R --> utils/plink2.sh
-utils/eSet.R --> utils/2021.R
-utils/eSet.R --> utils/UDP.R
-utils/2021.sh --> utils/UDP.R
-utils/UDP.R --> utils/plink2.sh
+2021.sh
+2021.sh --> eSet.R
+2021.sh --> 2021.R
+2021.R --> plink2.sh
+eSet.R --> 2021.R
+eSet.R --> UDP.R
+2021.sh --> UDP.R
+UDP.R --> plink2.sh
 ```
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3, and that analyses across different data share much in common, e.g., w.r.t. the use of `plink2.sh`.

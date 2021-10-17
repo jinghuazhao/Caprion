@@ -1,31 +1,13 @@
 # Phenotypic information on UDP
 
+options(width=200)
 caprion <- Sys.getenv("caprion")
 caprion <- ifelse(caprion=="",".",caprion)
 load("UDP.rda")
 
-library(Biobase)
-library(dplyr)
-library(gap)
-
-checks <- function()
-{
-  dim(pilotsMap)
-  dim(OmicsMap)
-  dim(data)
-  head(pilotsMap)
-  head(OmicsMap)
-  head(data)
-  head(exprs(protein_UDP))
-  head(featureNames(protein_UDP))
-  head(sampleNames(protein_UDP))
-  experimentData(protein_UDP)
-  intersect(OmicsMap$caprion_id,sampleNames(protein_UDP))
-  intersect(OmicsMap$Affymetrix_gwasQC_bl,pData(protein_UDP)$Affymetrix_gwasQC_bl)
-  nrows <- length(featureNames(protein_UDP))
-  ncols <- length(intersect(OmicsMap$caprion_id,sampleNames(protein_UDP)))
-  r <- matrix(NA,nrows,ncols)
-}
+suppressMessages(library(Biobase))
+suppressMessages(library(dplyr))
+suppressMessages(library(gap))
 
 cluster <- function(data, interactive=FALSE)
 {
@@ -33,7 +15,6 @@ cluster <- function(data, interactive=FALSE)
   pc1pc2 <- with(ppc,x)[,1:2]
   rownames(pc1pc2) <- rownames(data)
   eigenvec <- with(ppc,rotation)[,1:2]
-  library(dplyr)
   pca <- with(ppc,x) %>%
          data.frame()
   pca <- pca %>%
@@ -56,19 +37,17 @@ cluster <- function(data, interactive=FALSE)
 
 UDP <- function()
 {
+  mc <- cluster(t(exprs(protein_UDP)))
+  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
+  data <- read.csv("INTERVALdata_15SEP2021.csv")
   pilotsMap <- read.csv("pilotsMap_15SEP2021.csv")
   OmicsMap <- read.csv("INTERVAL_OmicsMap_20210915.csv")
-  data <- read.csv("INTERVALdata_15SEP2021.csv")
-  norm_all <- t(exprs(protein_UDP))
-  id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
-  date <- c("attendanceDate","sexPulse","agePulse")
-  covars <- c("ethnicPulse","ht_bl","wt_bl","classification")
-  mc <- cluster(norm_all)
-  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
-  id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id",all=TRUE)
-  ev20 <- read.delim(file.path(caprion,"data","merged_imputation.eigenvec"))
-  names(ev20)[1] <- "FID"
-  samples <- merge(id_date_covars,data.frame(caprion_id=sampleNames(protein_UDP)),by="caprion_id",all.y=TRUE) %>%
+  ev20 <- read.delim(file.path(caprion,"data","merged_imputation.eigenvec")) %>%
+          rename(FID=X.FID)
+  omicsmap <- merge(pilotsMap,OmicsMap,by="identifier",all=TRUE) %>%
+              mutate(caprion_id=if_else(caprion_id=="",CAPRION_BO,caprion_id))
+  data_omicsmap <- merge(merge(data,omicsmap,by="identifier",all=TRUE),grouping,by="caprion_id",all=TRUE)
+  samples <- merge(data_omicsmap,data.frame(caprion_id=sampleNames(protein_UDP)),by="caprion_id",all.y=TRUE) %>%
              left_join(ev20,by=c("Affymetrix_gwasQC_bl"="FID")) %>%
              select(caprion_id,sexPulse,agePulse,ethnicPulse,ht_bl,wt_bl,Affymetrix_gwasQC_bl,classification,paste0("PC",1:20)) %>%
              left_join(data.frame(pData(protein_UDP)),by=c("caprion_id"="LIMS.ID..Caprion.Sample.ID"))
@@ -84,23 +63,47 @@ UDP <- function()
               resid(z)
             })
   rownames(r) <- sampleNames(protein_UDP)
+  na_UDP <- rownames(subset(data.frame(r),is.na(ZYX_HUMAN)))
   d <- data.frame(r) %>%
        mutate(caprion_id=rownames(r)) %>%
        left_join(pheno[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
        select(Affymetrix_gwasQC_bl,caprion_id,names(data.frame(r))) %>%
-       filter(!caprion_id %in%c("UDP0138","UDP0481")) %>%
+       filter(!caprion_id %in% na_UDP) %>%
        mutate(caprion_id=Affymetrix_gwasQC_bl)
   names(d) <- c("FID","IID",gsub("HUMAN","invn",featureNames(protein_UDP)))
   write.table(d,file=file.path(caprion,"data3","UDP.tsv"),quote=FALSE,row.names=FALSE,sep="\t")
+  print(subset(data_omicsmap,caprion_id%in%na_UDP)[c("caprion_id","identifier","Affymetrix_gwasQC_bl")],row.names=FALSE)
 }
 
 UDP()
 
 # --- legacy code ---
 
-array_transpose <- function (x)
+checks <- function()
+{
+  dim(pilotsMap); head(pilotsMap)
+  dim(OmicsMap); head(OmicsMap)
+  dim(data); head(data)
+  head(exprs(protein_UDP))
+  head(featureNames(protein_UDP))
+  head(sampleNames(protein_UDP))
+  experimentData(protein_UDP)
+  intersect(OmicsMap$caprion_id,sampleNames(protein_UDP))
+  intersect(OmicsMap$Affymetrix_gwasQC_bl,pData(protein_UDP)$Affymetrix_gwasQC_bl)
+  nrows <- length(featureNames(protein_UDP))
+  ncols <- length(intersect(OmicsMap$caprion_id,sampleNames(protein_UDP)))
+}
+
+array_transpose <- function(x)
 {
   d <- x[,-1]
   rownames(d) <- x[,1]
   td <- t(d)
+}
+
+na_list <- function()
+{
+  if(file.exists(file.path(caprion,"data3","na_UDP.lst"))) na_UDP <- scan(file.path(caprion,"data3","na_UDP.lst"))
+  exprs(protein_UDP)[,na_UDP]
+  t(d[na_UDP,])
 }

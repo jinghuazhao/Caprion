@@ -271,7 +271,6 @@ done
 overlap ${p} | cut -f2-3,7,8-10 --complement | sed 's/^chr//;s/chr[0-9]*://g' | tr '\t' '|'
 
 csv <- function()
-# ~/rds/projects/olink_proteomics
 {
   load("2020.rda")
   write.csv(Comp_Neq1,file="ZYQ_Comp_Neq1_Norm_Int_20200812.csv", quote=FALSE, row.names=FALSE)

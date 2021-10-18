@@ -56,6 +56,22 @@ dr_protein <- function(eset,out)
   write.table(d["IID"],file=file.path(caprion,"data3",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
 }
 
+iinormal <- function(eset)
+{
+  require(parallel)
+  r <- mclapply(1:nrow(eset), mc.cores=25,
+                function(row) {
+                  y <- featureNames(eset[row])
+                  z <- invnormal(resid(lm(formula(paste(paste0("invnormal(",sub("(^[0-9])","X\\1",y),")"),"~",rhs)),
+                                          data=eset[row],na.action=na.exclude))
+                       )
+                }
+       )
+  r <- data.frame(r)
+  names(r) <- featureNames(eset)
+  return(r)
+}
+
 peptide <- function(eset,out)
 {
   vars <- c("caprion_id","sexPulse","agePulse","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl",paste0("PC",1:20))
@@ -70,9 +86,7 @@ peptide <- function(eset,out)
   pData(eset) <- pheno
   validObject(eset)
   rhs <- paste(setdiff(vars,c("caprion_id","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl")),collapse="+")
-  r <- sapply(featureNames(eset),function(r)
-              invnormal(resid(lm(formula(paste(paste0("invnormal(",sub("(^[0-9])","X\\1",r),")"),"~",rhs)),data=eset,na.action=na.exclude))))
-  rownames(r) <- sampleNames(eset)
+  r <- iinormal(eset)
   d <- mutate(data.frame(r),caprion_id=rownames(r)) %>%
        left_join(pheno[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
        select(Affymetrix_gwasQC_bl,caprion_id,names(data.frame(r))) %>%

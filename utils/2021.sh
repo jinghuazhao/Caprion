@@ -17,8 +17,3 @@ R --no-save -q < ${caprion}/utils/2021.R
 R --no-save -q < ${caprion}/utils/UDP.R
 
 pandoc 2021.md -o overlap.docx
-
-# --- legacy ---
-
-sed '1d' ${caprion}/data3/UDP.tsv | grep -n NA | cut -f1 | sed 's/:NA//' | tr '\n' ' ' > ${caprion}/data3/na_UDP.lst
-

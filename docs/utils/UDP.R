@@ -18,11 +18,11 @@ cluster <- function(data, interactive=FALSE)
   mc <- Mclust(pc1pc2,G=2)
   if (interactive) with(mc,
   {
-       png(file.path(caprion,"data3","3d.png"), res=300, width=12, height=10, units="in")
-       scatterplot3d::scatterplot3d(with(pca,x[,c(2,1,3)]), color=c("blue","red")[classification], main="Plot of the PC1, PC2 and PC3", pch=16)
-       legend("right", legend=levels(as.factor(classification)), col=c("blue", "red"), pch=16)
-       dev.off()
-       rgl::plot3d(with(pca,x[,c(2,1,3)]),col=classification)
+     png(file.path(caprion,"data3","3d.png"), res=300, width=12, height=10, units="in")
+     scatterplot3d::scatterplot3d(with(pca,x[,c(2,1,3)]), color=c("blue","red")[classification], main="Plot of the PC1, PC2 and PC3", pch=16)
+     legend("right", legend=levels(as.factor(classification)), col=c("blue", "red"), pch=16)
+     dev.off()
+     rgl::plot3d(with(pca,x[,c(2,1,3)]),col=classification)
   })
   mc
 }
@@ -52,7 +52,8 @@ dr_protein <- function(eset,out)
        filter(!is.na(Affymetrix_gwasQC_bl)) %>%
        mutate(caprion_id=Affymetrix_gwasQC_bl)
   names(d) <- c("FID","IID",gsub("HUMAN","invn",featureNames(eset)))
-  write.table(d,file=file.path(caprion,"data3",out),quote=FALSE,row.names=FALSE,sep="\t")
+  write.table(d,file=file.path(caprion,"data3",out),quote=FALSE,row.names=FALSE)
+  write.table(d["IID"],file=file.path(caprion,"data3",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
 }
 
 peptide <- function(eset,out)
@@ -78,12 +79,13 @@ peptide <- function(eset,out)
        filter(!is.na(Affymetrix_gwasQC_bl)) %>%
        mutate(caprion_id=Affymetrix_gwasQC_bl)
   names(d) <- c("FID","IID",paste0(featureNames(eset),"_invn"))
-  write.table(d,file=file.path(caprion,"data3",out),quote=FALSE,row.names=FALSE,sep="\t")
+  write.table(d,file=file.path(caprion,"data3",out),quote=FALSE,row.names=FALSE)
+  write.table(d["IID"],file=file.path(caprion,"data3",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
 }
 
-dr_protein(protein_UDP,"protein.tsv")
-dr_protein(dr_UDP,"dr.tsv")
-peptide(peptide_UDP,"peptide.tsv")
+dr_protein(protein_UDP,"protein.pheno")
+dr_protein(dr_UDP,"dr.pheno")
+peptide(peptide_UDP,"peptide.pheno")
 
 # --- legacy code ---
 

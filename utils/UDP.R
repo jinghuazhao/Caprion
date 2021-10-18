@@ -31,20 +31,19 @@ UDP <- function(eset,out)
 {
   vars <- c("caprion_id","sexPulse","agePulse","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl","classification",paste0("PC",1:20))
   mc_classification <- with(cluster(t(exprs(eset))),classification)
-  omicsmap <- merge(read.csv("pilotsMap_15SEP2021.csv"),read.csv("INTERVAL_OmicsMap_20210915.csv"),by="identifier",all=TRUE) %>%
-              mutate(caprion_id=if_else(caprion_id=="",CAPRION_BO,caprion_id))
-  data_omicsmap <- full_join(read.csv("INTERVALdata_15SEP2021.csv"),omicsmap,by="identifier") %>%
+  data_omicsmap <- merge(read.csv("pilotsMap_15SEP2021.csv"),read.csv("INTERVAL_OmicsMap_20210915.csv"),by="identifier",all=TRUE) %>%
+                   mutate(caprion_id=if_else(caprion_id=="",CAPRION_BO,caprion_id)) %>%
+                   full_join(read.csv("INTERVALdata_15SEP2021.csv"),by="identifier") %>%
                    full_join(data.frame(caprion_id=names(mc_classification),classification=mc_classification),by="caprion_id")
   pheno <- merge(data_omicsmap,data.frame(caprion_id=sampleNames(eset)),by="caprion_id",all.y=TRUE) %>%
            left_join(read.delim(file.path(caprion,"data","merged_imputation.eigenvec")),by=c("Affymetrix_gwasQC_bl"="X.FID")) %>%
-           select(all_of(vars)) %>%
-           left_join(data.frame(caprion_id=sampleNames(eset),t(exprs(eset))),by="caprion_id")
+           select(all_of(vars))
   rownames(pheno) <- with(pheno,caprion_id)
   pData(eset) <- pheno
   validObject(eset)
   rhs <- paste(setdiff(vars,c("caprion_id","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl")),collapse="+")
   r <- sapply(featureNames(eset),function(r) 
-              resid(lm(formula(paste(paste0("invnormal(",sub("(^[0-9])","X\\1",r),")"),"~",rhs)),data=eset,na.action=na.exclude)))
+              invnormal(resid(lm(formula(paste(paste0("invnormal(",sub("(^[0-9])","X\\1",r),")"),"~",rhs)),data=eset,na.action=na.exclude))))
   rownames(r) <- sampleNames(eset)
   na_UDP <- rownames(subset(data.frame(r),is.na(ZYX_HUMAN)))
   d <- mutate(data.frame(r),caprion_id=rownames(r)) %>%
@@ -57,7 +56,7 @@ UDP <- function(eset,out)
   print(subset(data_omicsmap,caprion_id%in%na_UDP)[c("caprion_id","identifier","Affymetrix_gwasQC_bl")],row.names=FALSE)
 }
 
-UDP(protein_UDP,"protein")
+UDP(protein_UDP,"protein.tsv")
 UDP(dr_UDP,"dr.tsv")
 UDP(peptide_UDP,"peptide.tsv")
 

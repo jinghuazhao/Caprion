@@ -39,18 +39,6 @@ lm_feature <- function(row)
   }, error = function(e) {})
 }
 
-iinvnormal <- function(eset)
-# https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html
-{
-  r <- mclapply(1:nrow(eset),lm_feature,mc.cores=20)
-  if (length(r)>0)
-  {
-    r <- data.frame(r)
-    names(r) <- featureNames(eset)
-  }
-  return(r)
-}
-
 peptide <- function(eset,out)
 {
   vars <- c("caprion_id","sexPulse","agePulse","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl",paste0("PC",1:20))
@@ -68,14 +56,14 @@ peptide <- function(eset,out)
   pData(eset) <- pheno
   validObject(eset)
   rhs <- paste(setdiff(vars,c("caprion_id","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl")),collapse="+")
-# r <- iinvnormal(eset)
-  cl <- makeCluster(20)
-  clusterExport(cl,"eset")
-  m <- nrow(eset)
-  r <- parLapply(cl,1:m,lm_feature)
+  r <- mclapply(1:nrow(eset),lm_feature,mc.cores=20)
+# cl <- makeCluster(20)
+# clusterExport(cl,"eset")
+# m <- nrow(eset)
+# r <- parLapply(cl,1:m,lm_feature)
   r <- data.frame(r)
+# stopCluster(cl)
   names(r) <- featureNames(eset)
-  stopCluster(cl)
   d <- mutate(data.frame(r),caprion_id=rownames(r)) %>%
        left_join(pheno[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
        select(Affymetrix_gwasQC_bl,caprion_id,names(data.frame(r))) %>%
@@ -148,3 +136,5 @@ na_list <- function()
   exprs(protein_UDP)[,na_UDP]
   t(d[na_UDP,])
 }
+
+# https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html

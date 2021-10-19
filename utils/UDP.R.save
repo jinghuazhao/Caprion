@@ -8,7 +8,6 @@ load("UDP.rda")
 suppressMessages(library(Biobase))
 suppressMessages(library(dplyr))
 suppressMessages(library(gap))
-suppressMessages(library(parallel))
 
 cluster <- function(data, interactive=FALSE)
 {
@@ -39,9 +38,9 @@ lm_feature <- function(row)
   }, error = function(e) {})
 }
 
-iinvnormal <- function(eset)
-# https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html
+iinormal <- function(eset)
 {
+  require(parallel)
   r <- mclapply(1:nrow(eset),lm_feature,mc.cores=20)
   if (length(r)>0)
   {
@@ -68,14 +67,8 @@ peptide <- function(eset,out)
   pData(eset) <- pheno
   validObject(eset)
   rhs <- paste(setdiff(vars,c("caprion_id","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl")),collapse="+")
-# r <- iinvnormal(eset)
-  cl <- makeCluster(20)
-  clusterExport(cl,"eset")
-  m <- nrow(eset)
-  r <- parLapply(cl,1:m,lm_feature)
-  r <- data.frame(r)
-  names(r) <- featureNames(eset)
-  stopCluster(cl)
+  r <- iinormal(eset)
+  i
   d <- mutate(data.frame(r),caprion_id=rownames(r)) %>%
        left_join(pheno[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
        select(Affymetrix_gwasQC_bl,caprion_id,names(data.frame(r))) %>%

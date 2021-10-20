@@ -64,7 +64,7 @@ qctool.sh --> plink2.sh
 2021.sh --> plink2.sh
 ```
 
-Note that `eSet.R` actually covers data from pilot, batches 2 and 3, and that analyses across different data share much in common, e.g., w.r.t. the use of `plink2.sh`.
+Note that `eSet.R` actually covers data from pilot, batches 2 and 3.
 
 ## Reference
 

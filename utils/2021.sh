@@ -15,6 +15,8 @@ function symlink()
 R --no-save -q < ${caprion}/utils/eSet.R
 R --no-save -q < ${caprion}/utils/2021.R
 R --no-save -q < ${caprion}/utils/UDP.R
+sbatch ${caprion}/utils/qctool.sb
+${caprion}/utils/qctool.sh
 sbatch ${caprion}/utils/plink2.sb
 
 pandoc 2021.md -o overlap.docx

@@ -43,9 +43,8 @@ tensoqtl.sh
 2020.sh --> EPCR-PROC/
 2020.sh --> data2/affymetrix.id
 data2/affymetrix.id  --> data2/bgen2
-qctool.sh --> qctool.sb
-qctool.sb --> data2/bgen2
-data2/bgen2 --> plink2.sh
+qctool.sb --> qctool.sh
+qctool.sh --> plink2.sh
 plink2.sh --> sentinels_nold.sh
 sentinels_nold.sh --> merge.sh
 ```

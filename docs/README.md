@@ -57,6 +57,8 @@ graph TB
 eSet.R --> 2021.R
 eSet.R --> UDP.R
 2021.sh --> UDP.R
+UDP.R --> qctool.sb,qctool.sh
+qctools.sb,qctool.sh --> plink2.sh
 UDP.R --> plink2.sh
 ```
 

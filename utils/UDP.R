@@ -4,8 +4,6 @@ options(width=200)
 caprion <- Sys.getenv("caprion")
 caprion <- ifelse(caprion=="",".",caprion)
 load("UDP.rda")
-vars <- c("caprion_id","sexPulse","agePulse","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl",paste0("PC",1:20))
-rhs <- paste(setdiff(vars,c("caprion_id","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl")),collapse="+")
 
 suppressMessages(library(Biobase))
 suppressMessages(library(dplyr))
@@ -32,6 +30,8 @@ cluster <- function(data, interactive=FALSE)
 
 dr_protein <- function(eset,out)
 {
+  vars <- c("caprion_id","sexPulse","agePulse","ethnicPulse","ht_bl","wt_bl","classification","Affymetrix_gwasQC_bl",paste0("PC",1:20))
+  rhs <- paste(setdiff(vars,c("caprion_id","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl")),collapse="+")
   mc_classification <- with(cluster(t(exprs(eset))),classification)
   data_omicsmap <- merge(read.csv("pilotsMap_15SEP2021.csv"),read.csv("INTERVAL_OmicsMap_20210915.csv"),by="identifier",all=TRUE) %>%
                    mutate(caprion_id=if_else(caprion_id=="",CAPRION_BO,caprion_id)) %>%
@@ -83,19 +83,33 @@ lm_parLapply <- function(row)
 }
 
 iinvnormal <- function()
-# https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html
 {
   cl <- makeCluster(20)
-  clusterExport(cl,"eset")
-  clusterExport(cl,"rhs")
-  m <- nrow(eset)
-  r <- parLapply(cl,1:m,lm_parLapply)
+  clusterExport(cl,"eset",envir=parent.frame())
+  clusterExport(cl,"rhs",envir=parent.frame())
+  r <- parLapply(cl,1:nrow(get("eset",envir=parent.frame())),lm_parLapply)
   stopCluster(cl)
   return(r)
 }
 
-peptide <- function(out)
+peptide <- function(eset,out)
 {
+  vars <- c("caprion_id","sexPulse","agePulse","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl",paste0("PC",1:20))
+  rhs <- paste(setdiff(vars,c("caprion_id","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl")),collapse="+")
+  data_omicsmap <- merge(read.csv("pilotsMap_15SEP2021.csv"),read.csv("INTERVAL_OmicsMap_20210915.csv"),by="identifier",all=TRUE) %>%
+                   mutate(caprion_id=if_else(caprion_id=="",CAPRION_BO,caprion_id)) %>%
+                   full_join(read.csv("INTERVALdata_15SEP2021.csv"),by="identifier") %>%
+                   full_join(data.frame(caprion_id=sampleNames(eset)),by="caprion_id")
+  data_omicsmap <- data_omicsmap %>%
+                   select(-setdiff(setdiff(names(data_omicsmap),vars),"identifier"))
+  print(subset(data_omicsmap,is.na(Affymetrix_gwasQC_bl))[c("caprion_id","identifier","Affymetrix_gwasQC_bl")],row.names=FALSE)
+  pheno <- merge(data_omicsmap,data.frame(caprion_id=sampleNames(eset)),by="caprion_id",all.y=TRUE) %>%
+           left_join(read.delim(file.path(caprion,"data","merged_imputation.eigenvec")),by=c("Affymetrix_gwasQC_bl"="X.FID")) %>%
+           select(all_of(vars))
+  rownames(pheno) <- with(pheno,caprion_id)
+  pData(eset) <- pheno
+  validObject(eset)
+# only works on an interactive session
 # r <- mclapply(1:nrow(eset),lm_mclapply,mc.cores=20)
   r <- iinvnormal()
   r <- data.frame(r)
@@ -110,27 +124,7 @@ peptide <- function(out)
   write.table(d["IID"],file=file.path(caprion,"data3",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
 }
 
-initialize <- function()
-{
-  data_omicsmap <- merge(read.csv("pilotsMap_15SEP2021.csv"),read.csv("INTERVAL_OmicsMap_20210915.csv"),by="identifier",all=TRUE) %>%
-                   mutate(caprion_id=if_else(caprion_id=="",CAPRION_BO,caprion_id)) %>%
-                   full_join(read.csv("INTERVALdata_15SEP2021.csv"),by="identifier") %>%
-                   full_join(data.frame(caprion_id=sampleNames(eset)),by="caprion_id")
-  data_omicsmap <- data_omicsmap %>%
-                   select(-setdiff(setdiff(names(data_omicsmap),vars),"identifier"))
-  print(subset(data_omicsmap,is.na(Affymetrix_gwasQC_bl))[c("caprion_id","identifier","Affymetrix_gwasQC_bl")],row.names=FALSE)
-  pheno <- merge(data_omicsmap,data.frame(caprion_id=sampleNames(eset)),by="caprion_id",all.y=TRUE) %>%
-           left_join(read.delim(file.path(caprion,"data","merged_imputation.eigenvec")),by=c("Affymetrix_gwasQC_bl"="X.FID")) %>%
-           select(all_of(vars))
-  rownames(pheno) <- with(pheno,caprion_id)
-  pheno
-}
-
-eset <- peptide_UDP
-pheno <- initialize()
-pData(eset) <- pheno
-validObject(eset)
-peptide("peptide.pheno")
+peptide(peptide_UDP,"peptide.pheno")
 
 # --- legacy code ---
 

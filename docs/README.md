@@ -23,6 +23,8 @@
 
 ## Coding
 
+There are apparent commonalities between batches from the list of programs and diagrams.
+
 * Pilot
     - [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing. Their derivatives are in the utils/ subdirectory:
          * [utils/affymetrix.sh](utils/affymetrix.sh) is for variant-specific association analysis.

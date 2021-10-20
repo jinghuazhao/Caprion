@@ -57,9 +57,9 @@ graph TB
 eSet.R --> 2021.R
 eSet.R --> UDP.R
 2021.sh --> UDP.R
-UDP.R --> qctool.sb,qctool.sh
-qctools.sb,qctool.sh --> plink2.sh
-UDP.R --> plink2.sh
+UDP.R --> qctool.sb
+qctool.sb --> qctool.sh
+2021.sh --> plink2.sh
 ```
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3, and that analyses across different data share much in common, e.g., w.r.t. the use of `plink2.sh`.

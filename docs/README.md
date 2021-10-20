@@ -53,7 +53,6 @@ graph TB
 2021.sh
 2021.sh --> eSet.R
 2021.sh --> 2021.R
-2021.R --> plink2.sh
 eSet.R --> 2021.R
 eSet.R --> UDP.R
 2021.sh --> UDP.R

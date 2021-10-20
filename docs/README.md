@@ -23,7 +23,7 @@
 
 ## Coding
 
-There are apparent commonalities between batches from the list of programs and diagrams.
+There are apparent commonalities between batches from the list of programs and diagrams; many of which are activated as subroutines.
 
 * Pilot
     - [caprion.R](caprion.R) and [caprion.ini](caprion.ini) are for data processing. Their derivatives are in the utils/ subdirectory:

@@ -58,8 +58,8 @@ eSet.R --> UDP.R
 2021.sh --> UDP.R
 UDP.R --> qctool.sb
 qctool.sb --> qctool.sh
-qctool.sh --> plink2.sh
-2021.sh --> plink2.sh
+qctool.sh --> plink2.sh/plink2.sb
+2021.sh --> plink2.sh/plink2.sb
 ```
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3.

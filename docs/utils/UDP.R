@@ -55,6 +55,9 @@ dr_protein <- function(eset,out)
   names(d) <- c("FID","IID",gsub("HUMAN","invn",featureNames(eset)))
   write.table(d,file=file.path(caprion,"data3",out),quote=FALSE,row.names=FALSE)
   write.table(d["IID"],file=file.path(caprion,"data3",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
+  snptest_sample <- right_join(read.table(file.path(caprion,"data","merged_imputation.missing"),col.names=c("IID","missing")),d) %>%
+                    rename(ID_1=FID,ID_2=IID)
+  gap::snptest_sample(snptest_sample,file.path(caprion,"data3",paste0(gsub("pheno","",out),"sample")),P=names(snptest_sample[,-(1:3)]))
 }
 
 dr_protein(protein_UDP,"protein.pheno")
@@ -122,6 +125,9 @@ peptide <- function(eset,out)
   names(d) <- c("FID","IID",paste0(featureNames(eset),"_invn"))
   write.table(d,file=file.path(caprion,"data3",out),quote=FALSE,row.names=FALSE)
   write.table(d["IID"],file=file.path(caprion,"data3",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
+  snptest_sample <- right_join(read.table(file.path(caprion,"data","merged_imputation.missing"),col.names=c("IID","missing")),d) %>%
+                    rename(ID_1=FID,ID_2=IID)
+  gap::snptest_sample(snptest_sample,file.path(caprion,"data3",paste0(gsub("pheno","",out),"sample")),P=names(snptest_sample[,-(1:3)]))
 }
 
 peptide(peptide_UDP,"peptide.pheno")

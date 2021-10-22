@@ -98,6 +98,22 @@ function phase2_All()
   done
 }
 
-epcr_proc
-# epcr_proc_group
-# phase2_All
+function phase3()
+{
+  export data=${1}
+  export col=$(head -1 ${caprion}/data3/${data}.pheno | sed 's/ /\n/g' | grep "_invn$" | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
+  for v in ${col};
+  do
+      echo ${v}
+      plink2 \
+             --bgen ${caprion}/data3/caprion.01.bgen --sample ${caprion}/data3/${data}.sample \
+             --glm hide-covar --input-missing-phenotype -999 --covar-variance-standardize \
+             --pheno ${caprion}/data3/${data}.pheno --pheno-name ${v} \
+             --out ${caprion}/work/${v}
+      grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
+      gzip -f > ${caprion}/bgen2/${data}-${v}-plink2.gz
+      rm ${caprion}/work/${v}.${v}.glm.linear
+  done
+}
+
+phase3

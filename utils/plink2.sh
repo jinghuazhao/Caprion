@@ -69,20 +69,20 @@ parallel -C' ' --env caprion '
 function bgen3()
 {
 if [ ! -d ${caprion}/bgen3 ]; then mkdir ${caprion}/bgen3; fi
-export data=${1}.tsv
-seq 39 | \
+export data=${1}
+seq 984 | \
 parallel -C' ' --env caprion '
-  export col=$(head -1 ${caprion}/data3/${data}.tsv | cut -f1,2 --complement | cut -f {})
+  export col=$(head -1 ${caprion}/data3/${data}.pheno | cut -d" " -f1,2 --complement | cut -f {})
   for v in ${col};
   do
       echo ${v}
       plink2 \
-             --bgen ${caprion}/data3/caprion.01.bgen --sample ${caprion}/data3/caprion.sample \
+             --bgen ${caprion}/data3/caprion.01.bgen --sample ${caprion}/data3/${data}.sample \
              --glm hide-covar --input-missing-phenotype -9 --covar-variance-standardize \
-             --pheno ${caprion}/data3/caprion.pheno --pheno-name ${v} \
+             --pheno ${caprion}/data3/${data}.pheno --pheno-name ${v} \
              --out ${caprion}/work/${v}
       grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
-      gzip -f > ${caprion}/bgen3/${v}-plink3.gz
+      gzip -f > ${caprion}/bgen3/${data}-${v}-plink2.gz
       rm ${caprion}/work/${v}.${v}.glm.linear
   done
 '

@@ -4,7 +4,7 @@
 #SBATCH --account CARDIO-SL0-CPU
 #SBATCH --partition cardio
 #SBATCH --qos=cardio
-#SBATCH --array=1-39
+#SBATCH --array=1-984
 #SBATCH --mem=50000
 #SBATCH --time=5-00:00:00
 #SBATCH --output=/rds/user/jhz22/hpc-work/work/_plink2_%A_%a.out
@@ -111,9 +111,11 @@ function phase3()
              --pheno ${caprion}/data3/${data}.pheno --pheno-name ${v} \
              --out ${caprion}/work/${v}
       grep -v NA ${caprion}/work/${v}.${v}.glm.linear | \
-      gzip -f > ${caprion}/bgen2/${data}-${v}-plink2.gz
+      gzip -f > ${caprion}/bgen3/${data}-${v}-plink2.gz
       rm ${caprion}/work/${v}.${v}.glm.linear
   done
 }
 
-phase3
+phase3 protein # 984
+# phase3 dr # 975
+# phase3 peptide # 17875

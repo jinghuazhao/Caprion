@@ -120,13 +120,54 @@ function _HLA2group()
   done
 }
 
-export tag=_nold
-export src=bgen
-export dest=sentinels
-export p=1e-5
 
-pgz2
-_HLA2
+function pgz3()
+# 1. extract all significant SNPs
+{
+  ls ${src}/*.gz | grep invn | \
+  sed "s|${src}/||g;s/-plink2//g;s/.gz//g" | \
+  parallel -j6 -C' ' --env src --env dest --env p '
+  (
+    zcat ${src}/{}-plink2.gz | head -1
+    zcat ${src}/{}-plink2.gz | awk -v p=${p} "NR>1 && \$12 <=p" | sort -k1,1n -k2,2n
+  ) | gzip -f > ${dest}/{}.p.gz'
+}
+
+function _HLA3()
+# 2. handling HLA
+{
+  for p in $(ls ${src}/*.gz | grep invn | sed "s|${src}/||g;s/-plink2//g;s/.gz//g")
+  do
+    (
+      zcat ${src}/${p}-plink2.gz | head -1 | awk -vOFS="\t" '{$1="Chrom";$2="Start" "\t" "End";print}'
+      (
+        zcat ${dest}/${p}.p.gz | \
+        awk -vOFS="\t" '{start=$2-1;$2=start "\t" $2};1' | \
+        awk 'NR>1 && !($1 == "6" && $3 >= 25392021 && $3 < 33392022)'
+        zcat ${dest}/${p}.p.gz | \
+        awk -vOFS="\t" '{start=$2-1;$2=start "\t" $2};1' | \
+        awk '$1 == "6" && $3 >= 25392021 && $3 < 33392022' | \
+        sort -k13,13g | \
+        awk 'NR==1'
+      ) | \
+      sort -k1,1n -k2,2n -k3,3n | \
+      awk -v OFS="\t" '{$1="chr" $1};1'
+    ) > ${dest}/${p}${tag}.p
+    export lines=$(wc -l ${dest}/${p}${tag}.p | cut -d' ' -f1)
+    if [ $lines -eq 1 ]; then
+      echo removing ${p}${tag} with $lines lines
+      rm ${dest}/${p}${tag}.p
+    fi
+  done
+}
+
+export tag=_nold
+export src=bgen3
+export dest=sentinels
+export p=5e-8
 
 if [ ! -d ${dest} ]; then mkdir -p ${dest}; fi
 # for group in group1 group2; do export group=${group}; pgz2group; _HLA2group; done
+
+pgz3
+_HLA3

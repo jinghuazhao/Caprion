@@ -44,7 +44,7 @@ tensoqtl.sh
 2020.sh --> data2/affymetrix.id
 qctool.sb --> qctool.sh
 qctool.sh --> plink2.sh
-plink2.sh --> sentinels_nold.sh,merge.sh
+plink2.sh --> sentinels_nold.sh+merge.sh
 ```
 * Batch 3 (prefix=utils/)
 ```mermaid
@@ -59,7 +59,7 @@ UDP.R --> qctool.sb
 qctool.sb --> qctool.sh
 qctool.sh --> plink2.*
 2021.sh --> plink2.*
-plink2.* --> sentinels_nold.sh,merge.sh
+plink2.* --> sentinels_nold.sh+merge.sh
 ```
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3.

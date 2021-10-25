@@ -44,8 +44,7 @@ tensoqtl.sh
 2020.sh --> data2/affymetrix.id
 qctool.sb --> qctool.sh
 qctool.sh --> plink2.sh
-plink2.sh --> sentinels_nold.sh
-sentinels_nold.sh --> merge.sh
+plink2.sh --> sentinels_nold.sh, merge.sh
 ```
 * Batch 3 (prefix=utils/)
 ```mermaid

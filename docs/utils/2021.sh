@@ -53,12 +53,13 @@ function run_overlap()
     echo Replicated pQTLs
     overlap ${p} | cut -f1-7 | uniq | wc -l
   done
-
   overlap ${p} | cut -f2-3,9-10 --complement | sed 's/chr//g;s/[0-9]*://g' | awk '{$1=$1":"$4;$6=$6":"$9};1' | cut -d' ' -f4,9 --complement | tr ' ' '|'
   overlap ${p} | awk '(NR>1&&$7==$14){print $5,$NF}' | \
-  parallel -C' --env caprion ' '
-    zgrep -w {2} ${caprion}/bgen2/{1}_All_invn-plink2.gz | awk "{print \$4,\$5,\$6,\$9,\$10}"
-    zgrep -w {2} {caprion}/bgen3/protein/protein-{1}_invn-plink2.gz | awk "{print \$4,\$5,\$6,\$9,\$10}"
+  parallel -C' ' --env caprion '
+    zgrep -w {2} ${caprion}/bgen2/{1}_All_invn-plink2.gz | \
+    awk -v protein={1} -v OFS="|" "{print protein,\$3,\$4,\$5,\$6,\$9,\$10,\$12}"
+    zgrep -w {2} ${caprion}/bgen3/protein-{1}_invn-plink2.gz | \
+    awk -v protein={1} -v OFS="|" "{print protein,\$3,\$4,\$5,\$6,\$9,\$10,\$12}"
   '
 }
 

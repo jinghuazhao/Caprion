@@ -15,7 +15,7 @@
          * 5e-8
     - Comparison of pilot and batch 2
          * miamiplot
-* Batch 3 data (N=815)
+* Batch 3 data (N=807)
     - data3/ .bgen data
     - bgen3/ PLINK2 results
          * 1e-5

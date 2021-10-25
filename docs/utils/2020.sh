@@ -268,12 +268,16 @@ do
   overlap ${p} | cut -f1-7 | uniq | wc -l
 done
 
-overlap ${p} | cut -f2-3,9-10 --complement | sed 's/chr//g;s/[0-9]*://g' | awk '{$1=$1":"$3;$6=$6":"$9};1' | cut -d' ' -f3,9 --complement | tr ' ' '|'
+overlap ${p} | cut -f2-3,9-10 --complement | sed 's/chr//g;s/[0-9]*://g' | \
+awk '{$1=$1":"$3;$6=$6":"$9};1' | cut -d' ' -f3,9 --complement | \
+awk '{print $1,$2,$4"-"$3,$5,$6,$7"-"$8}' | tr ' ' '|'
 overlap ${p} | awk '(NR>1&&$6==$14){print $7,$NF}' | \
 parallel -C' ' --env caprion '
   export protein=$(grep -w {1} ${caprion}/2019.id | awk "{print \$2}")
-  zgrep -w {2} ${caprion}/bgen/${protein}_invn-plink2.gz | awk -v protein=${protein} -vOFS="|" "{print protein,\$3,\$4,\$5,\$6,\$9,\$10,\$12}"
-  zgrep -w {2} ${caprion}/bgen2/{1}_All_invn-plink2.gz | awk -v protein={1} -vOFS="|" "{print protein,\$3,\$4,\$5,\$6,\$9,\$10,\$12}"
+  zgrep -w {2} ${caprion}/bgen/${protein}_invn-plink2.gz | \
+  awk -v protein=${protein} -vOFS="|" "{print protein\"-\"\$3,\$4\"/\"\$5,\$9,\$10,\$12}"
+  zgrep -w {2} ${caprion}/bgen2/{1}_All_invn-plink2.gz | \
+  awk -v protein={1} -vOFS="|" "{print protein\"-\"\$3,\$4\"/\"\$5,\$9,\$10,\$12}"
 '
 
 csv <- function()

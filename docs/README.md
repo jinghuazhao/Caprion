@@ -67,8 +67,8 @@ Note that `eSet.R` actually covers data from pilot, batches 2 and 3.
 
 ## Markdown documents
 
-* [ppr][utils/ppr.Rmd]
-* [EPCR-PROC][utils/EPCR-PROC.Rmd]
+* [ppr](utils/ppr.Rmd)
+* [EPCR-PROC](utils/EPCR-PROC.Rmd)
 * 2021.md
 
 ## Reference

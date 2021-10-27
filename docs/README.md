@@ -65,9 +65,11 @@ plink2.* --> sentinels_nold.sh+merge.sh
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3.
 
-## Specific analyses
+## Markdown documents
 
-* []
+* [ppr][utils/ppr.Rmd]
+* [EPCR-PROC][utils/EPCR-PROC.Rmd]
+* 2021.md
 
 ## Reference
 

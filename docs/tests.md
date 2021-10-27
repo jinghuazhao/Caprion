@@ -17,19 +17,19 @@ Additional work will be on variatinoal autoencoder (VAE) as indicated in the ref
 
 ### REFERENCES
 
-Bludau I, Frank M, Dörig C. et al. Systematic detection of functional proteoform groups from bottom-up proteomic datasets. Nat Commun 12, 3810 (2021). https://doi.org/10.1038/s41467-021-24030-x
+Bludau I, Frank M, Dörig C. et al. Systematic detection of functional proteoform groups from bottom-up proteomic datasets. Nat Commun 12, 3810 (2021). [https://doi.org/10.1038/s41467-021-24030-x](https://doi.org/10.1038/s41467-021-24030-x).
 
-Hofert M, Prasad A, Zhu M (2019). Quasi-Monte Carlo for multivariate distributions viagenerative neural networks. https://arxiv.org/abs/1811.00683, https://CRAN.R-project.org/package=gnn.
+Hofert M, Prasad A, Zhu M (2019). Quasi-Monte Carlo for multivariate distributions viagenerative neural networks. [https://arxiv.org/abs/1811.00683](https://arxiv.org/abs/1811.00683), [https://CRAN.R-project.org/package=gnn](https://CRAN.R-project.org/package=gnn).
 
-Kingma DP, Welling M (2014). Auto-Encoding Variational Bayes. https://arxiv.org/abs/1312.6114, https://keras.rstudio.com/articles/examples/variational_autoencoder.html.
+Kingma DP, Welling M (2014). Auto-Encoding Variational Bayes. [https://arxiv.org/abs/1312.6114](https://arxiv.org/abs/1312.6114), [https://keras.rstudio.com/articles/examples/variational_autoencoder.html](https://keras.rstudio.com/articles/examples/variational_autoencoder.html).
 
-Trivadis SK (2017). Variational autoencoders for anomaly detection. https://rpubs.com/zkajdan/308801.
+Trivadis SK (2017). Variational autoencoders for anomaly detection. [https://rpubs.com/zkajdan/308801](https://rpubs.com/zkajdan/308801).
 
 ### URLs
 
-https://github.com/diazale/gt-dimred,
-https://github.com/lmcinnes/umap,
-https://umap-learn.readthedocs.io/en/latest/.
+[https://github.com/diazale/gt-dimred](https://github.com/diazale/gt-dimred),
+[https://github.com/lmcinnes/umap](https://github.com/lmcinnes/umap),
+[https://umap-learn.readthedocs.io/en/latest/](https://umap-learn.readthedocs.io/en/latest/).
 
 ---
 

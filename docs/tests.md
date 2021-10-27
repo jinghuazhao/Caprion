@@ -28,8 +28,7 @@ Trivadis SK (2017). Variational autoencoders for anomaly detection. [https://rpu
 ### URLs
 
 [https://github.com/diazale/gt-dimred](https://github.com/diazale/gt-dimred),
-[https://github.com/lmcinnes/umap](https://github.com/lmcinnes/umap),
-[https://umap-learn.readthedocs.io/en/latest/](https://umap-learn.readthedocs.io/en/latest/).
+[https://github.com/lmcinnes/umap](https://github.com/lmcinnes/umap) ([https://umap-learn.readthedocs.io/en/latest/](https://umap-learn.readthedocs.io/en/latest/)).
 
 ---
 

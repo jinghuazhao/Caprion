@@ -65,6 +65,10 @@ plink2.* --> sentinels_nold.sh+merge.sh
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3.
 
+## Specific analyses
+
+* []
+
 ## Reference
 
 Klaus B, Reisenauer S (2018). [An end to end workflow for differential gene expression using Affymetrix microarrays](https://bioconductor.org/packages/devel/workflows/vignettes/maEndToEnd/inst/doc/MA-Workflow.html).

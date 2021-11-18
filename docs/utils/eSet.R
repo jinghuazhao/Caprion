@@ -4,9 +4,9 @@ rm(list=ls())
 caprion <- Sys.getenv("caprion")
 caprion <- ifelse(caprion=="",".",caprion)
 
-library(Biobase)
-library(openxlsx)
-library(pQTLtools)
+suppressMessages(library(Biobase))
+suppressMessages(library(openxlsx))
+suppressMessages(library(pQTLtools))
 
 array_data <- function(data_frame,id,id_end_col)
 {
@@ -29,7 +29,8 @@ zwk <- function()
   protein_ZWK <- ExpressionSet(proteinData,phenoData)
   dr_ZWK <- ExpressionSet(drData,phenoData)
   peptide_ZWK <- ExpressionSet(peptideData,phenoData)
-  save(protein_ZWK,dr_ZWK,peptide_ZWK,file="ZWK.rda")
+  mapping_ZWK <- rawIGs
+  save(protein_ZWK,dr_ZWK,peptide_ZWK,mapping_ZWK,file="ZWK.rda")
 }
 
 zyq <- function()
@@ -57,7 +58,8 @@ zyq <- function()
   protein_ZYQ <- ExpressionSet(proteinData,phenoData)
   dr_ZYQ <- ExpressionSet(drData,phenoData)
   peptide_ZYQ <- ExpressionSet(peptideData,phenoData)
-  save(Legend,Samples,Mapping,Annotations,Comp_Neq1,Normalized_All,Protein_DR_Filt,protein_ZYQ,dr_ZYQ,peptide_ZYQ,file="ZYQ.rda")
+  mapping_ZYQ <- Mapping
+  save(protein_ZYQ,dr_ZYQ,peptide_ZYQ,mapping_ZYQ,file="ZYQ.rda")
 }
 
 udp <- function()
@@ -90,7 +92,8 @@ udp <- function()
   protein_UDP <- make_ExpressionSet(proteinData,phenoData,experimentData=experimentData)
   dr_UDP <- make_ExpressionSet(drData,phenoData,experimentData=experimentData)
   peptide_UDP <- make_ExpressionSet(peptideData,phenoData,experimentData=experimentData)
-  save(protein_UDP,dr_UDP,peptide_UDP,file="UDP.rda")
+  mapping_UDP <- Mapping
+  save(protein_UDP,dr_UDP,peptide_UDP,mapping_UDP,file="UDP.rda")
 }
 
 zwk();

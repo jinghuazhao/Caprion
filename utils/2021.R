@@ -1,16 +1,37 @@
 # Summary statistics
 
-library(arrayQualityMetrics)
-list_outliers <- function(es, method="upperquartile") outliers(exprs(es),method=method)
-sumstats <- function(es,FUN=median) as.data.frame(t(apply(exprs(es),1,FUN)))
+options(width=200)
+suppressMessages(library(Biobase))
+suppressMessages(library(arrayQualityMetrics))
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(cowplot))
+suppressMessages(library(VennDiagram))
 
 load("ZWK.rda")
 load("ZYQ.rda")
 load("UDP.rda")
 
+check <- function(suffix)
+{
+  cat(suffix,",",sep="")
+  protein_suffix <- get(paste0("protein_",suffix))
+  mapping_suffix <- get(paste0("mapping_",suffix))
+  peptide_suffix <- get(paste0("peptide_",suffix))
+  cat("Protein:",length(featureNames(protein_suffix)),",",sep="")
+  cat("Protein in mapping:",nrow(subset(mapping_suffix,featureNames(protein_suffix)%in%Protein)),",",sep="")
+  cat("Peptide:",length(featureNames(peptide_suffix)),",",sep="")
+  cat("Peptide in mapping:",nrow(subset(mapping_suffix,featureNames(peptide_suffix)%in%Isotope.Group.ID)),"\n")
+}
+
+check("ZWK")
+check("ZYQ")
+check("UDP")
+
 # outliers
 
-options(width=200)
+list_outliers <- function(es, method="upperquartile") outliers(exprs(es),method=method)
+
 for (method in c("KS","sum","upperquartile"))
 {
   ZWK_outliers <- list_outliers(protein_ZWK,method=method)
@@ -18,9 +39,7 @@ for (method in c("KS","sum","upperquartile"))
 }
 
 # sumstats
-library(dplyr)
-library(ggplot2)
-library(cowplot)
+sumstats <- function(es,FUN=median) as.data.frame(t(apply(exprs(es),1,FUN)))
 stat_test <- function(FUN)
 {
   types <- c("protein","peptide")
@@ -59,7 +78,8 @@ medians <- stat_test("median")
 dev.off()
 
 # overlap
-library(VennDiagram)
+
+## by protein and peptide
 overlap <- function(A,B) unlist(lapply(calculate.overlap(list(featureNames(A),featureNames(B))),length))
 
 overlap(protein_ZWK,protein_ZYQ)
@@ -78,3 +98,28 @@ VennDiagram::venn.diagram(protein,"protein_ZWK-ZQY-UDP.png")
 VennDiagram::venn.diagram(peptide,"peptide_ZWK-ZQY-UDP.png")
 unlist(lapply(calculate.overlap(dr),length))
 VennDiagram::venn.diagram(dr,"dr_ZWK-ZQY-UDP.png")
+
+## by protein_peptide
+
+protein_peptide <- function(suffix)
+{
+  mapping <- get(paste0("mapping_",suffix))
+  protein_peptide <- select(mapping,Protein,Isotope.Group.ID,Modified.Peptide.Sequence) %>%
+                     mutate(protein_peptide=paste0(gsub("_HUMAN","",Protein),"-",Isotope.Group.ID))
+}
+
+protein_peptide_ZWK <- protein_peptide("ZWK")
+protein_peptide_ZYQ <- protein_peptide("ZYQ")
+protein_peptide_UDP <- protein_peptide("UDP")
+
+overlap_protein_peptide <- function(A,B) unlist(lapply(calculate.overlap(list(A$protein_peptide,B$protein_peptide)),length))
+
+overlap_protein_peptide(protein_peptide_ZWK,protein_peptide_ZYQ)
+overlap_protein_peptide(protein_peptide_ZWK,protein_peptide_UDP)
+overlap_protein_peptide(protein_peptide_ZYQ,protein_peptide_UDP)
+
+protein_peptide_all <- list(pilot=filter(protein_peptide_ZWK,Protein%in%featureNames(protein_ZWK))$protein_peptide,
+                            batch2=protein_peptide_ZYQ$protein_peptide,
+                            batch3=protein_peptide_UDP$protein_peptide)
+unlist(lapply(calculate.overlap(protein_peptide_all),length))
+VennDiagram::venn.diagram(protein_peptide_all,"protein_peptide_ZWK-ZQY-UDP.png")

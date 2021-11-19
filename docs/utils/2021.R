@@ -128,7 +128,8 @@ protein_peptide_12 <- right_join(subset(protein_peptide_ZWK,Protein!="-"),protei
 protein_peptide_23 <- right_join(subset(protein_peptide_ZYQ,Protein!="-"),protein_peptide_UDP,by="protein_peptide")
 mapping_12 <- right_join(mapping_ZWK[,1:3],mapping_ZYQ,by="Isotope.Group.ID")
 ## correct report
+## [1] 1578    7
 dim(subset(protein_peptide_12,is.na(Protein.x)))
 ## wrong report
+## [1] 0 7
 dim(subset(protein_peptide_12,Protein.x!=Protein.y))
-

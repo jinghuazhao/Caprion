@@ -94,10 +94,10 @@ dr <- list(pilot=featureNames(dr_ZWK),batch2=featureNames(dr_ZYQ),batch3=feature
 peptide <- list(pilot=featureNames(peptide_ZWK),batch2=featureNames(peptide_ZYQ),batch3=featureNames(peptide_UDP))
 unlist(lapply(calculate.overlap(protein),length))
 unlist(lapply(calculate.overlap(peptide),length))
-VennDiagram::venn.diagram(protein,"protein_ZWK-ZQY-UDP.png")
-VennDiagram::venn.diagram(peptide,"peptide_ZWK-ZQY-UDP.png")
+VennDiagram::venn.diagram(protein,"protein_ZWK-ZQY-UDP.png",disable.logging=TRUE,height=5,width=5,units="in")
+VennDiagram::venn.diagram(peptide,"peptide_ZWK-ZQY-UDP.png",disable.logging=TRUE,height=5,width=5,units="in")
 unlist(lapply(calculate.overlap(dr),length))
-VennDiagram::venn.diagram(dr,"dr_ZWK-ZQY-UDP.png")
+VennDiagram::venn.diagram(dr,"dr_ZWK-ZQY-UDP.png",disable.logging=TRUE,height=5,width=5,units="in")
 
 ## by protein_peptide
 
@@ -122,4 +122,13 @@ protein_peptide_all <- list(pilot=filter(protein_peptide_ZWK,Protein%in%featureN
                             batch2=protein_peptide_ZYQ$protein_peptide,
                             batch3=protein_peptide_UDP$protein_peptide)
 unlist(lapply(calculate.overlap(protein_peptide_all),length))
-VennDiagram::venn.diagram(protein_peptide_all,"protein_peptide_ZWK-ZQY-UDP.png")
+VennDiagram::venn.diagram(protein_peptide_all,"protein_peptide_ZWK-ZYQ-UDP.png",cat.pos=c(0,45,-45),disable.logging=TRUE,height=5,width=5,units="in")
+
+protein_peptide_12 <- right_join(subset(protein_peptide_ZWK,Protein!="-"),protein_peptide_ZYQ,by="protein_peptide")
+protein_peptide_23 <- right_join(subset(protein_peptide_ZYQ,Protein!="-"),protein_peptide_UDP,by="protein_peptide")
+mapping_12 <- right_join(mapping_ZWK[,1:3],mapping_ZYQ,by="Isotope.Group.ID")
+## correct report
+dim(subset(protein_peptide_12,is.na(Protein.x)))
+## wrong report
+dim(subset(protein_peptide_12,Protein.x!=Protein.y))
+

@@ -122,7 +122,8 @@ protein_peptide_all <- list(pilot=filter(protein_peptide_ZWK,Protein%in%featureN
                             batch2=protein_peptide_ZYQ$protein_peptide,
                             batch3=protein_peptide_UDP$protein_peptide)
 unlist(lapply(calculate.overlap(protein_peptide_all),length))
-VennDiagram::venn.diagram(protein_peptide_all,"protein_peptide_ZWK-ZYQ-UDP.png",cat.pos=c(0,45,-45),disable.logging=TRUE,height=5,width=5,units="in")
+VennDiagram::venn.diagram(protein_peptide_all,"protein_peptide_ZWK-ZYQ-UDP.png",cat.pos=c(0,45,-45),
+                          disable.logging=TRUE,height=5,width=5,units="in")
 
 protein_peptide_12 <- right_join(subset(protein_peptide_ZWK,Protein!="-"),protein_peptide_ZYQ,by="protein_peptide")
 protein_peptide_23 <- right_join(subset(protein_peptide_ZYQ,Protein!="-"),protein_peptide_UDP,by="protein_peptide")

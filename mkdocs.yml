@@ -1,4 +1,6 @@
 site_name: Caprion
+repo_url: https://github.com/jinghuazhao/Caprion
+edit_uri: ""
 nav:
   - "": README.md
   - gwas2: gwas2.md

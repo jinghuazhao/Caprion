@@ -20,6 +20,8 @@ git add gwas2.md
 git commit -m "gwas2"
 git add tests.md
 git commit -m "tests"
+git add utils docs.sh
+git commit -m "utils"
 git add mkdocs.yml
 git commit -m "mkdocs.yml"
 git push

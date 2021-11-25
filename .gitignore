@@ -6,9 +6,11 @@
 2020.left
 2020.rda
 2021.log
+2021.docx
 2021.md
 2021.rda
 Caprionpilotmass-specproteomicsdata.txt
+Caprion pilot mass-spec proteomics data.txt
 Caprion_pilot_protein_list.xlsx
 EPCR-PROC.Rmd
 EPCR-PROC.docx
@@ -42,6 +44,7 @@ UDP_EDR_20210423_samples.xlsx
 ZWK.rda
 ZWK_EDR_20191002.xlsx
 ZYQ.rda
+ZYQ_EDR_28AUG2020_Updated.xlsx
 ZYQ_PC1_groups_20200703.csv
 ae.pdf
 ae.rda
@@ -104,6 +107,7 @@ mclust.pdf
 miamiplot/
 o5000-inf1-outlier_in-r2.sample
 olink.inf.panel.annot.tsv
+Olink validation data all panels.xlsx
 overlap.docx
 packages.bib
 pca-2020.pdf
@@ -116,6 +120,7 @@ ppr.Rmd
 ppr.bib
 ppr.docx
 ppr.md
+protein_peptide_ZWK-ZYQ-UDP.png
 qq.pdf
 qqman.list
 rle.pdf

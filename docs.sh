@@ -16,9 +16,11 @@ git add README.md
 git commit -m "README"
 git add caprion.ini caprion.R caprion.ipynb
 git commit -m "Primary Code"
-git add docs
-git commit -m "docs"
+git add gwas2.md
+git commit -m "gwas2"
+git add tests.md
+git commit -m "tests"
 git add mkdocs.yml
-git commit -m "mkdocs.ytml"
+git commit -m "mkdocs.yml"
 git push
 # git remote set-url origin https://github.com/jinghuazhao/Caprion.git

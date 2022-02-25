@@ -1,6 +1,14 @@
 # Caprion work
 
-## Site map
+## Analysis
+
+This is now done in sequence.
+
+* 0_data.sh. Data handling
+
+## Pilot studies
+
+### Site map
 
 * Pilot (N=196)
     - data/ contains genotype files in .bgen format
@@ -21,7 +29,7 @@
          * 1e-5
          * 5e-8
 
-## Coding
+### Coding
 
 There are apparent commonalities between batches from the list of programs and diagrams; many of which are activated as subroutines.
 
@@ -65,7 +73,7 @@ plink2.* --> sentinels_nold.sh+merge.sh
 
 Note that `eSet.R` actually covers data from pilot, batches 2 and 3.
 
-## Documents
+### Documents
 
 * [ppr](utils/ppr.Rmd)
 * [EPCR-PROC](utils/EPCR-PROC.Rmd)

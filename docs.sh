@@ -14,6 +14,8 @@ git add .gitignore
 git commit -m ".gitignore"
 git add README.md
 git commit -m "README"
+git add 0_data.sh
+git commit -m "Analysis"
 git add caprion.ini caprion.R caprion.ipynb
 git commit -m "Primary Code"
 git add gwas2.md

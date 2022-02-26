@@ -4,7 +4,7 @@
 
 This is now done in sequence.
 
-* 0_data.sh. Data handling
+* 0_data.sh. Data handling and PCA projection.
 
 ## Pilot studies
 

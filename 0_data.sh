@@ -47,24 +47,30 @@ awk '
     if (NR==1) $1="#FID IID"
     else $1=0" "$1
     print
-  }' ${dir}/caprion.sscore > ${dir}/snpid.sscore
-ln -sf ${dir}/caprion.sscore.vars ${dir}/snpid.sscore.vars
+  }' ${dir}/caprion.sscore > ${dir}/rsid.sscore
+ln -sf ${dir}/caprion.sscore.vars ${dir}/rsid.sscore.vars
 
-stata -b do ${HGI}/ethnic.do
+cat <(echo FID IID dummy | tr ' ' '\t') \
+    <(sed '1d' ${dir}/caprion.psam | awk -v OFS='\t' '{print 0,$1,0}') > ${dir}/rsid.pheno
+
+export ethnic_file=${HGI}/ethnic.txt
+cat <(head -1  ${ethnic_file}) \
+    <(cut -f1 ${dir}/caprion.psam | grep -f - ${ethnic_file}) > ${dir}/ethnic.txt
+export covar_file=${HGI}/work/snpid.covars
+cat <(head -1  ${covar_file}) \
+    <(cut -f1 ${dir}/caprion.psam | grep -f - ${covar_file}) > ${dir}/covars.txt
 
 Rscript ${PCA_projection}/plot_projected_pc.R \
-        --sscore ${dir}/snpid.sscore \
-        --phenotype-file ${dir}/snpid.pheno \
-        --phenotype-col SARS_CoV \
-        --covariate-file ${dir}/snpid.covars \
+        --sscore ${dir}/rsid.sscore \
+        --phenotype-file ${dir}/rsid.pheno \
+        --phenotype-col dummy \
+        --covariate-file ${dir}/covars.txt \
         --pc-prefix PC \
         --pc-num 20 \
-        --ancestry-file ethnic.txt \
+        --ancestry-file ${dir}/ethnic.txt \
         --ancestry-col ethnic \
-        --study INTERVAL \
-        --out ${dir}/INTERVAL
-
-project_pc
+        --study phase1 \
+        --out ${dir}/caprion
 
 # qctool to combine bgen, extract ids
 # PCA projection
@@ -77,3 +83,4 @@ project_pc
 # ${caprion}/data/caprion.sample
 # ${caprion}/data/phase2.sample
 # ${caprion}/data3/protein.sample
+# stata -b do ${HGI}/ethnic.do

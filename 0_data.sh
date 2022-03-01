@@ -2,9 +2,10 @@
 
 export autosomes=~/rds/post_qc_data/interval/imputed/uk10k_1000g_b37/
 export ref=~/rds/post_qc_data/interval/reference_files/genetic/reference_files_genotyped_imputed/
-export caprion=${HOME}/Caprion/pilot
+export caprion=${HOME}/Caprion
+export pilot=${caprion}/pilot
 export TMPDIR=${HPC_WORK}/work
-export work=${caprion}/work
+export work=${pilot}/work
 export HGI=~/COVID-19/HGI
 export PCA_projection=${HGI}/pca_projection
 export PCA_loadings=${PCA_projection}/hgdp_tgp_pca_covid19hgi_snps_loadings.rsid.plink.tsv
@@ -19,11 +20,11 @@ function pca_project()
 # PCA projection
 {
 export dir=${1}
-export phase=${2}
-bgenix -g ${caprion}/${dir}/caprion.01.bgen -incl-rsids ${work}/variants.extract > ${work}/${phase}.bgen
-bgenix -g ${work}/${phase}.bgen -index -clobber
+export batch=${2}
+bgenix -g ${pilot}/${dir}/caprion.01.bgen -incl-rsids ${work}/variants.extract > ${work}/${batch}.bgen
+bgenix -g ${work}/${batch}.bgen -index -clobber
 
-sqlite3 ${work}/${phase}.bgen.bgi <<END
+sqlite3 ${work}/${batch}.bgen.bgi <<END
 .tables
 .separator "\t"
 .header on
@@ -33,12 +34,12 @@ select * from metadata;
 select * from Variant;
 END
 
-plink2 --bgen ${work}/${phase}.bgen ref-first --make-pfile --out ${work}/${phase}
+plink2 --bgen ${work}/${batch}.bgen ref-first --make-pfile --out ${work}/${batch}
 
 set -eu
 
 plink2 \
-    --pfile ${work}/${phase} \
+    --pfile ${work}/${batch} \
     --score ${PCA_loadings} \
             variance-standardize \
             cols=-scoreavgs,+scoresums \
@@ -46,50 +47,57 @@ plink2 \
             header-read \
     --score-col-nums 3-12 \
     --read-freq ${PCA_af} \
-    --out ${work}/${phase}
+    --out ${work}/${batch}
 
 awk '
   {
     if (NR==1) $1="#FID IID"
     else $1=0" "$1
     print
-  }' ${work}/${phase}.sscore > ${work}/${phase}-rsid.sscore
-ln -sf ${work}/${phase}.sscore.vars ${work}/${phase}-rsid.sscore.vars
+  }' ${work}/${batch}.sscore > ${work}/${batch}-rsid.sscore
+ln -sf ${work}/${batch}.sscore.vars ${work}/${batch}-rsid.sscore.vars
 
 cat <(echo FID IID dummy | tr ' ' '\t') \
-    <(sed '1d' ${work}/${phase}.psam | awk -v OFS='\t' '{print 0,$1,0}') > ${work}/${phase}-rsid.pheno
+    <(sed '1d' ${work}/${batch}.psam | awk -v OFS='\t' '{print 0,$1,0}') > ${work}/${batch}-rsid.pheno
 
 export ethnic_file=${HGI}/ethnic.txt
 cat <(head -1  ${ethnic_file}) \
-    <(cut -f1 ${work}/${phase}.psam | grep -f - ${ethnic_file}) > ${work}/${phase}-ethnic.txt
+    <(cut -f1 ${work}/${batch}.psam | grep -f - ${ethnic_file}) > ${work}/${batch}-ethnic.txt
 export covar_file=${HGI}/work/snpid.covars
 cat <(head -1  ${covar_file}) \
-    <(cut -f1 ${work}/${phase}.psam | grep -f - ${covar_file}) > ${work}/${phase}-covars.txt
+    <(cut -f1 ${work}/${batch}.psam | grep -f - ${covar_file}) > ${work}/${batch}-covars.txt
+
+cut -f1 ${work}/${batch}.psam | \
+grep -f - ${caprion}/INTERVAL_OmicsMap_20210915.csv | \
+cut -d, -f1 | \
+grep -f - ${caprion}/INTERVALdata_15SEP2021.csv | \
+cut -d, -f1,7
 
 Rscript ${PCA_projection}/plot_projected_pc.R \
-        --sscore ${work}/${phase}-rsid.sscore \
-        --phenotype-file ${work}/${phase}-rsid.pheno \
+        --sscore ${work}/${batch}-rsid.sscore \
+        --phenotype-file ${work}/${batch}-rsid.pheno \
         --phenotype-col dummy \
-        --covariate-file ${work}/${phase}-covars.txt \
+        --covariate-file ${work}/${batch}-covars.txt \
         --pc-prefix PC \
         --pc-num 20 \
-        --ancestry-file ${work}/${phase}-ethnic.txt \
+        --ancestry-file ${work}/${batch}-ethnic.txt \
         --ancestry-col ethnic \
-        --study phase1 \
-        --out ${work}/${phase}
+        --study ${batch} \
+        --out ${work}/${batch}
 }
 
-pca_project data phase1
-pca_project data2 phase2
-pca_project data3 phase3
+pca_project data batch1
+pca_project data2 batch2
+pca_project data3 batch3
 
-# qctool to combine bgen -- handling MAF<=0.01
-# fine-mapping
-
-# 196, 1488, 807 ==> 2491
+# data handling with MAF<=0.01
 # [data|data2|data3]/caprion.fam, caprion.bgen.bed/bim/fam, caprion.01.bgen/bgen.bgi
-# [data|data2]/interval.sample
+# [data|data2]/interval.sample, [data3]/[dr|peptide|protein].sample
 
-# ${caprion}/data/caprion.sample
-# ${caprion}/data/phase2.sample
-# ${caprion}/data3/protein.sample
+# expr 196 + 1488 + 807
+# ==> 2491
+
+# ${pilot}/data/caprion.sample
+# ${pilot}/data/phase2.sample
+# ${pilot}/data3/protein.sample
+# qctool to combine bgen fine-mapping?

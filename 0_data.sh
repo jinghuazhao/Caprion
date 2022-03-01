@@ -71,7 +71,7 @@ cut -f1 ${work}/${batch}.psam | \
 grep -f - ${caprion}/INTERVAL_OmicsMap_20210915.csv | \
 cut -d, -f1 | \
 grep -f - ${caprion}/INTERVALdata_15SEP2021.csv | \
-cut -d, -f1,7
+cut -d, -f1,6
 
 Rscript ${PCA_projection}/plot_projected_pc.R \
         --sscore ${work}/${batch}-rsid.sscore \

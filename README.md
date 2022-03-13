@@ -5,7 +5,7 @@
 This is now done in sequence.
 
 * 1_pca_projection.sh. Data handling and PCA projection.
-* 2_ggm.sh. GGM experiment.
+* 2_ggm.R. GGM experiment.
 
 ## Pilot studies
 

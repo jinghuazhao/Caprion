@@ -1,25 +1,53 @@
 #!/usr/bin/bash
 
-library("GeneNet")
+options(width=200)
+suppressMessages(library(Biobase))
+suppressMessages(library(arrayQualityMetrics))
+suppressMessages(library(corpcor))
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(cowplot))
+suppressMessages(library(VennDiagram))
 
-# A random network with 20 nodes and 10 percent (=19) edges
-true.pcor <- ggm.simulate.pcor(20, 0.1)
+load("ZWK.rda")
+load("ZYQ.rda")
+load("UDP.rda")
 
-# convert to edge list
-test.results <- ggm.list.edges(true.pcor)[1:19,]
+sumstats <- function(type,suffix,batch,method="cor.shrink")
+{
+  es <- get(paste(type,suffix,sep="_"))
+  cat(type,batch,"No. features =",length(featureNames(es)),"\n")
+  d <- t(exprs(es))
+  match.type <- match(method,c("cor","cor.shrink"))
+  r <- switch(match.type,{estimate.lambda(d);cor(d,use="everything",method="pearson")},cor.shrink(d))
+  p <- cor2pcor(r)
+  colnames(p) <- colnames(r)
+  rownames(p) <- rownames(r)
+  data.frame(p,batch=batch)
+}
 
-# Rgraphviz
-nlab <- LETTERS[1:20]
-gr <- network.make.graph( test.results, nlab)
-gr
-num.nodes(gr)
-edge.info(gr)
-gr2 <- network.make.graph( test.results, nlab, drop.singles=TRUE)
-gr2
-num.nodes(gr2)
-edge.info(gr2)
+cors <- function(n=1)
+{
+  z <- list()
+  for (pp in c("protein","peptide")[1:n])
+  {
+    pcor_ZWK <- sumstats(pp,"ZWK","batch1")
+    pcor_ZYQ <- sumstats(pp,"ZYQ","batch2")
+    pcor_UDP <- sumstats(pp,"UDP","batch3")
+    pcor <- bind_rows(pcor_ZWK,pcor_ZYQ,pcor_UDP)
+    z[[pp]] <- pcor
+  }
+  z
+}
+stats <- cors()
+lapply(stats,dim)
 
-# plot network
-library("Rgraphviz")
-plot(gr, "fdp")
-plot(gr2, "fdp")
+suppressMessages(library("GeneNet"))
+suppressMessages(library("Rgraphviz"))
+pcor_ZWK <- subset(stats$protein,batch=="batch1") %>%
+            select(sub("\\b(^[0-9])","\\X\\1",featureNames(protein_ZWK))) %>%
+            as.matrix()
+label_ZWK <- colnames(pcor_ZWK)
+edges_ZWK <- ggm.list.edges(pcor_ZWK)
+graph_ZWK <- network.make.graph(edges_ZWK,label_ZWK)
+plot(graph_ZWK,"fdp")

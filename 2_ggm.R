@@ -39,15 +39,23 @@ cors <- function(n=1)
   }
   z
 }
+
 stats <- cors()
 lapply(stats,dim)
 
-suppressMessages(library("GeneNet"))
-suppressMessages(library("Rgraphviz"))
-pcor_ZWK <- subset(stats$protein,batch=="batch1") %>%
-            select(sub("\\b(^[0-9])","\\X\\1",featureNames(protein_ZWK))) %>%
-            as.matrix()
-label_ZWK <- colnames(pcor_ZWK)
-edges_ZWK <- ggm.list.edges(pcor_ZWK)
-graph_ZWK <- network.make.graph(edges_ZWK,label_ZWK)
-plot(graph_ZWK,"fdp")
+ggm <- function(type,suffix)
+{
+  suppressMessages(library("GeneNet"))
+  suppressMessages(library("Rgraphviz"))
+  pcor <- subset(stats$protein,batch==batch) %>%
+          select(sub("\\b(^[0-9])","\\X\\1",featureNames(get(paste(type,suffix,sep="_"))))) %>%
+          as.matrix()
+  labels <- colnames(pcor)
+  edges <- ggm.list.edges(pcor) %>%
+           filter(node1!=node2)
+  print(head(edges))
+  graph <- network.make.graph(edges,labels)
+  plot(graph,"fdp")
+}
+
+ggm("protein","ZWK")

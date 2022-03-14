@@ -46,16 +46,27 @@ cors <- function(n=1)
 stats <- cors()
 lapply(stats,dim)
 
-ggm <- function(type,suffix)
+graph_all <- function()
 {
-  pcor <- subset(stats$protein,batch==batch) %>%
-          select(sub("\\b(^[0-9])","\\X\\1",featureNames(get(paste(type,suffix,sep="_"))))) %>%
-          as.matrix()
-  labels <- colnames(pcor)
   edges <- ggm.list.edges(pcor) %>%
            filter(node1!=node2)
   print(head(edges))
   graph <- network.make.graph(edges,labels)
+  plot(graph,"fdp")
+}
+
+ggm <- function(type,suffix)
+{
+  match.suffix <- match(suffix,c("ZWK","ZYQ","UDP"))
+  pcor <- subset(stats$protein,batch==switch(match.suffix,"batch1","batch2","batch3")) %>%
+          select(sub("\\b(^[0-9])","\\X\\1",featureNames(get(paste(type,suffix,sep="_"))))) %>%
+          as.matrix()
+  labels <- colnames(pcor)
+# graph_all()
+  nodes <- ncol(pcor)
+  tests <- network.test.edges(pcor)
+  net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
+  graph <- network.make.graph(net,labels)
   plot(graph,"fdp")
 }
 

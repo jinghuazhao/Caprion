@@ -7,22 +7,25 @@ suppressMessages(library(corpcor))
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
 suppressMessages(library(cowplot))
+suppressMessages(library(GeneNet))
+suppressMessages(library(Rgraphviz))
 suppressMessages(library(VennDiagram))
 
 load("ZWK.rda")
 load("ZYQ.rda")
 load("UDP.rda")
 
-sumstats <- function(type,suffix,batch,method="cor.shrink")
+sumstats <- function(type,suffix,batch,method="ggm")
 {
   es <- get(paste(type,suffix,sep="_"))
   cat(type,batch,"No. features =",length(featureNames(es)),"\n")
   d <- t(exprs(es))
-  match.type <- match(method,c("cor","cor.shrink"))
-  r <- switch(match.type,{estimate.lambda(d);cor(d,use="everything",method="pearson")},cor.shrink(d))
-  p <- cor2pcor(r)
-  colnames(p) <- colnames(r)
-  rownames(p) <- rownames(r)
+  match.type <- match(method,c("cor","cor.shrink","ggm"))
+  p <- switch(match.type,
+              {estimate.lambda(d);cor2pcor(cor(d,use="everything",method="pearson"))},
+              cor2pcor(cor.shrink(d)),
+              unclass(ggm.estimate.pcor(d)))
+  colnames(p) <- rownames(p) <- sub("\\b(^[0-9])","\\X\\1",featureNames(es))
   data.frame(p,batch=batch)
 }
 
@@ -45,8 +48,6 @@ lapply(stats,dim)
 
 ggm <- function(type,suffix)
 {
-  suppressMessages(library("GeneNet"))
-  suppressMessages(library("Rgraphviz"))
   pcor <- subset(stats$protein,batch==batch) %>%
           select(sub("\\b(^[0-9])","\\X\\1",featureNames(get(paste(type,suffix,sep="_"))))) %>%
           as.matrix()

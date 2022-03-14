@@ -2,7 +2,6 @@
 
 options(width=200)
 suppressMessages(library(Biobase))
-suppressMessages(library(arrayQualityMetrics))
 suppressMessages(library(corpcor))
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
@@ -67,7 +66,7 @@ ggm <- function(type,suffix)
   tests <- network.test.edges(pcor)
   net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
   graph <- network.make.graph(net,labels)
-  plot(graph,"fdp")
+  save(graph,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
 }
 
-ggm("protein","ZWK")
+ggm("protein","ZYQ")

@@ -61,6 +61,16 @@ graph_make <- function()
   plot(graph,"fdp")
 }
 
+graph_RCy3 <- function()
+{
+  suid_corrIGraph <- createNetworkFromIgraph(g,"corrIGraph")
+  layoutNetwork("attribute-circle")
+  exportImage(file.path("~/Caprion/pilot/work","corrIGraph.pdf"),type="PDF",resolution=300,height=8,width=12,units="in",overwriteFile=TRUE)
+  exportNetwork(file.path("~/Caprion/pilot/work","corrIGraph.sif"))
+  saveSession(file.path("~/Caprion/pilot/work","corrIGraph.cys"),overwriteFile=TRUE)
+  deleteNetwork(suid_corrIGraph)
+}
+
 ggm_batch <- function(type,suffix)
 {
   match.suffix <- match(suffix,c("ZWK","ZYQ","UDP"))
@@ -77,13 +87,8 @@ ggm_batch <- function(type,suffix)
   save(graph,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
   g <- graph_from_graphnel(graph)
   plot(g)
-  suid_corrIGraph <- createNetworkFromIgraph(g,"corrIGraph")
-  layoutNetwork("attribute-circle")
-  exportImage(file.path("~/Caprion/pilot/work","corrIGraph.pdf"),type="PDF",resolution=300,height=8,width=12,units="in",overwriteFile=TRUE)
-  exportNetwork(file.path("~/Caprion/pilot/work","corrIGraph.sif"))
-  saveSession(file.path("~/Caprion/pilot/work","corrIGraph.cys"),overwriteFile=TRUE)
-  deleteNetwork(suid_corrIGraph)
   dev.off()
+# graph_RCy3()
 }
 
 ggm_batch("protein","ZYQ")

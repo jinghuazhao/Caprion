@@ -11,6 +11,7 @@ suppressMessages(library(igraph))
 suppressMessages(library(RCy3))
 suppressMessages(library(Rgraphviz))
 suppressMessages(library(VennDiagram))
+suppressMessages(library(visNetwork))
 
 load("ZWK.rda")
 load("ZYQ.rda")
@@ -107,10 +108,18 @@ ggm_all <- function(type,suffix)
   tests <- network.test.edges(p)
   net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
   graph <- network.make.graph(net,labels)
-  save(graph,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
   g <- graph_from_graphnel(graph)
+  save(net,graph,g,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
   plot(g)
   dev.off()
+
 }
 
 ggm_all("protein","all")
+
+load("~/Caprion/pilot/work/protein_all.graph")
+nodes <- data.frame(id=unique(c(net[["node1"]],net[["node2"]])))
+edges <- with(net,data.frame(from=node1,to=node2))
+network <- visNetwork(nodes,edges) %>%
+           visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+visSave(network,file=file.path("~/Caprion/pilot","protein_all.html"))

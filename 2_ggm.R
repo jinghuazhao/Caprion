@@ -50,9 +50,6 @@ cor_batch <- function(n=1)
   z
 }
 
-stats_batch <- cor_batch()
-lapply(stats_batch,dim)
-
 graph_make <- function()
 {
   edges <- ggm.list.edges(pcor) %>%
@@ -115,6 +112,9 @@ ggm_all <- function(type,suffix)
 
 }
 
+stats_batch <- cor_batch()
+lapply(stats_batch,dim)
+
 ggm_all("protein","all")
 
 load("~/Caprion/pilot/work/protein_all.graph")
@@ -123,3 +123,19 @@ edges <- with(net,data.frame(from=node1,to=node2))
 network <- visNetwork(nodes,edges) %>%
            visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
 visSave(network,file=file.path("~/Caprion/pilot","protein_all.html"))
+
+###
+
+nodes <- data.frame(id = 1:3, group = c("B", "A", "B"))
+edges <- data.frame(from = c(1,2), to = c(2,3))
+
+visNetwork(nodes, edges) %>%
+ visGroups(groupname = "A", color = "red") %>%
+ visGroups(groupname = "B", color = "lightblue") %>%
+ visLegend() %>% visExport()
+
+visNetwork(nodes, edges) %>%
+ visGroups(groupname = "A", color = "red") %>%
+ visGroups(groupname = "B", color = "lightblue") %>%
+ visLegend() %>% visExport(type = "jpeg", name = "export-network",
+   float = "left", label = "Save network", background = "purple", style= "")

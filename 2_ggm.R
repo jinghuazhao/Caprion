@@ -16,7 +16,12 @@ load("ZWK.rda")
 load("ZYQ.rda")
 load("UDP.rda")
 
-sumstats <- function(type,suffix,batch,method="ggm")
+protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
+               Biobase::combine(protein_UDP)
+peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
+               Biobase::combine(peptide_UDP)
+
+sumstat_batch <- function(type,suffix,batch,method="ggm")
 {
   es <- get(paste(type,suffix,sep="_"))
   cat(type,batch,"No. features =",length(featureNames(es)),"\n")
@@ -30,24 +35,24 @@ sumstats <- function(type,suffix,batch,method="ggm")
   data.frame(p,batch=batch)
 }
 
-cors <- function(n=1)
+cor_batch <- function(n=1)
 {
   z <- list()
   for (pp in c("protein","peptide")[1:n])
   {
-    pcor_ZWK <- sumstats(pp,"ZWK","batch1")
-    pcor_ZYQ <- sumstats(pp,"ZYQ","batch2")
-    pcor_UDP <- sumstats(pp,"UDP","batch3")
+    pcor_ZWK <- sumstat_batch(pp,"ZWK","batch1")
+    pcor_ZYQ <- sumstat_batch(pp,"ZYQ","batch2")
+    pcor_UDP <- sumstat_batch(pp,"UDP","batch3")
     pcor <- bind_rows(pcor_ZWK,pcor_ZYQ,pcor_UDP)
     z[[pp]] <- pcor
   }
   z
 }
 
-stats <- cors()
-lapply(stats,dim)
+stats_batch <- cor_batch()
+lapply(stats_batch,dim)
 
-graph_all <- function()
+graph_make <- function()
 {
   edges <- ggm.list.edges(pcor) %>%
            filter(node1!=node2)
@@ -56,15 +61,16 @@ graph_all <- function()
   plot(graph,"fdp")
 }
 
-ggm <- function(type,suffix)
+ggm_batch <- function(type,suffix)
 {
   match.suffix <- match(suffix,c("ZWK","ZYQ","UDP"))
-  pcor <- subset(stats$protein,batch==switch(match.suffix,"batch1","batch2","batch3")) %>%
+  pcor <- subset(stats_batch$protein,batch==switch(match.suffix,"batch1","batch2","batch3")) %>%
           select(sub("\\b(^[0-9])","\\X\\1",featureNames(get(paste(type,suffix,sep="_"))))) %>%
           as.matrix()
   labels <- colnames(pcor)
-# graph_all()
+# graph_make()
   nodes <- ncol(pcor)
+  pdf(file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".pdf")))
   tests <- network.test.edges(pcor)
   net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
   graph <- network.make.graph(net,labels)
@@ -77,7 +83,29 @@ ggm <- function(type,suffix)
   exportNetwork(file.path("~/Caprion/pilot/work","corrIGraph.sif"))
   saveSession(file.path("~/Caprion/pilot/work","corrIGraph.cys"),overwriteFile=TRUE)
   deleteNetwork(suid_corrIGraph)
-
+  dev.off()
 }
 
-ggm("protein","ZYQ")
+ggm_batch("protein","ZYQ")
+
+ggm_all <- function(type,suffix)
+{
+  es <- get(paste(type,suffix,sep="_"))
+  d_raw <- t(exprs(es))
+  exclude <- names(apply(d_raw,2,sum))[is.na(apply(d_raw,2,sum))]
+  d <- d_raw[, !colnames(d_raw) %in% exclude]
+  p <- unclass(ggm.estimate.pcor(d))
+  colnames(p) <- rownames(p) <- sub("\\b(^[0-9])","\\X\\1",colnames(d))
+  labels <- colnames(p)
+  nodes <- ncol(p)
+  pdf(file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".pdf")))
+  tests <- network.test.edges(p)
+  net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
+  graph <- network.make.graph(net,labels)
+  save(graph,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
+  g <- graph_from_graphnel(graph)
+  plot(g)
+  dev.off()
+}
+
+ggm_all("protein","all")

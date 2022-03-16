@@ -43,11 +43,22 @@ ggm_all <- function(type,suffix)
   save(tests,net,graph,g,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
   plot(g)
   dev.off()
-  nodes <- data.frame(id,label=labels[id])
-  edges <- with(net,data.frame(from=node1,to=node2,label=paste0("r=",round(pcor,2))))
+  title <- list(text="Gaussian graphical models of proteins",
+                style="font-family:Arial;color:black;font-size:30px;text-align:center;")
+  nodes <- data.frame(id,label=labels[id],shape="box")
+  edges <- with(net,data.frame(from=node1,to=node2,value=30*pcor))
+  nodesId <- list(enabled = TRUE,
+                  style='width: 200px; height: 26px;
+                         background: #f8f8f8;
+                         color: darkblue;
+                         border:none;
+                         outline:none;')
   network <- visNetwork(nodes,edges,width=1500,height=1250) %>%
-             visOptions(highlightNearest=TRUE, nodesIdSelection=TRUE)
-  visSave(network,file=file.path("~/Caprion/pilot/work","protein_all.html"))
+             visOptions(highlightNearest=TRUE, nodesIdSelection=nodesId) %>%
+             visInteraction(navigationButtons=TRUE) %>%
+             visIgraphLayout(type="full") %>%
+             visNodes(size=30)
+  visSave(network,file=file.path("~/Caprion/pilot/work","protein_all.html"),selfcontained=TRUE)
 }
 
 ggm_all("protein","all")

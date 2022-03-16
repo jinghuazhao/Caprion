@@ -26,24 +26,27 @@ ggm_all <- function(type,suffix)
 {
   es <- get(paste(type,suffix,sep="_"))
   d_raw <- t(exprs(es))
-  exclude <- names(apply(d_raw,2,sum))[is.na(apply(d_raw,2,sum))]
+  d_sum <- apply(d_raw,2,sum)
+  exclude <- names(d_sum)[is.na(d_sum)]
   d <- d_raw[, !colnames(d_raw) %in% exclude]
   p <- unclass(ggm.estimate.pcor(d))
   colnames(p) <- rownames(p) <- sub("\\b(^[0-9])","\\X\\1",colnames(d))
   labels <- colnames(p)
-  nodes <- ncol(p)
+  nnodes <- ncol(p)
   pdf(file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".pdf")))
   tests <- network.test.edges(p)
-  net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
+  e <- extract.network(tests, cutoff.ggm=0.05/(nnodes*(nnodes-1)/2))
+  id=sort(unique(c(e[["node1"]],e[["node2"]])))
+  net <- mutate(e,label1=labels[node1],label2=labels[node2])
   graph <- network.make.graph(net,labels)
   g <- graph_from_graphnel(graph)
   save(tests,net,graph,g,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
   plot(g)
   dev.off()
-  nodes <- data.frame(id=unique(c(net[["node1"]],net[["node2"]])))
-  edges <- with(net,data.frame(from=node1,to=node2))
-  network <- visNetwork(nodes,edges) %>%
-             visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+  nodes <- data.frame(id,label=labels[id])
+  edges <- with(net,data.frame(from=node1,to=node2,label=paste0("r=",round(pcor,2))))
+  network <- visNetwork(nodes,edges,width=1500,height=1250) %>%
+             visOptions(highlightNearest=TRUE, nodesIdSelection=TRUE)
   visSave(network,file=file.path("~/Caprion/pilot/work","protein_all.html"))
 }
 

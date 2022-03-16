@@ -13,14 +13,41 @@ suppressMessages(library(Rgraphviz))
 suppressMessages(library(VennDiagram))
 suppressMessages(library(visNetwork))
 
-load("ZWK.rda")
-load("ZYQ.rda")
-load("UDP.rda")
+load("~/Caprion/pilot/ZWK.rda")
+load("~/Caprion/pilot/ZYQ.rda")
+load("~/Caprion/pilot/UDP.rda")
 
 protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
                Biobase::combine(protein_UDP)
 peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
                Biobase::combine(peptide_UDP)
+
+ggm_all <- function(type,suffix)
+{
+  es <- get(paste(type,suffix,sep="_"))
+  d_raw <- t(exprs(es))
+  exclude <- names(apply(d_raw,2,sum))[is.na(apply(d_raw,2,sum))]
+  d <- d_raw[, !colnames(d_raw) %in% exclude]
+  p <- unclass(ggm.estimate.pcor(d))
+  colnames(p) <- rownames(p) <- sub("\\b(^[0-9])","\\X\\1",colnames(d))
+  labels <- colnames(p)
+  nodes <- ncol(p)
+  pdf(file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".pdf")))
+  tests <- network.test.edges(p)
+  net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
+  graph <- network.make.graph(net,labels)
+  g <- graph_from_graphnel(graph)
+  save(tests,net,graph,g,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
+  plot(g)
+  dev.off()
+  nodes <- data.frame(id=unique(c(net[["node1"]],net[["node2"]])))
+  edges <- with(net,data.frame(from=node1,to=node2))
+  network <- visNetwork(nodes,edges) %>%
+             visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+  visSave(network,file=file.path("~/Caprion/pilot/work","protein_all.html"))
+}
+
+ggm_all("protein","all")
 
 sumstat_batch <- function(type,suffix,method="ggm")
 {
@@ -54,37 +81,7 @@ ggm_batch <- function(type,suffix)
 # graph_RCy3()
 }
 
-ggm_all <- function(type,suffix)
-{
-  es <- get(paste(type,suffix,sep="_"))
-  d_raw <- t(exprs(es))
-  exclude <- names(apply(d_raw,2,sum))[is.na(apply(d_raw,2,sum))]
-  d <- d_raw[, !colnames(d_raw) %in% exclude]
-  p <- unclass(ggm.estimate.pcor(d))
-  colnames(p) <- rownames(p) <- sub("\\b(^[0-9])","\\X\\1",colnames(d))
-  labels <- colnames(p)
-  nodes <- ncol(p)
-  pdf(file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".pdf")))
-  tests <- network.test.edges(p)
-  net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
-  graph <- network.make.graph(net,labels)
-  g <- graph_from_graphnel(graph)
-  save(tests,net,graph,g,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
-  plot(g)
-  dev.off()
-}
-
 ggm_batch("protein","ZYQ")
-ggm_all("protein","all")
-load("~/Caprion/pilot/work/protein_all.graph")
-nodes <- data.frame(id=unique(c(net[["node1"]],net[["node2"]])))
-edges <- with(net,data.frame(from=node1,to=node2))
-network <- visNetwork(nodes,edges) %>%
-           visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
-visSave(network,file=file.path("~/Caprion/pilot/work","protein_all.html"))
-
-###
-
 graph_make <- function()
 {
   edges <- ggm.list.edges(pcor) %>%

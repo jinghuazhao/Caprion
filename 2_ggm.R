@@ -53,7 +53,7 @@ ggm_all <- function(type,suffix)
                          color: darkblue;
                          border:none;
                          outline:none;')
-  network <- visNetwork(nodes,edges,width=1500,height=1250) %>%
+  network <- visNetwork(nodes,edges,width=1500,height=1250,main=title) %>%
              visOptions(highlightNearest=TRUE, nodesIdSelection=nodesId) %>%
              visInteraction(navigationButtons=TRUE) %>%
              visIgraphLayout(type="full") %>%

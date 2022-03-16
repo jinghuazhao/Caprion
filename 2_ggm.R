@@ -30,7 +30,7 @@ ggm_all <- function(type,suffix)
   exclude <- names(d_sum)[is.na(d_sum)]
   d <- d_raw[, !colnames(d_raw) %in% exclude]
   p <- unclass(ggm.estimate.pcor(d))
-  colnames(p) <- rownames(p) <- sub("\\b(^[0-9])","\\X\\1",colnames(d))
+  colnames(p) <- rownames(p) <- gsub("_HUMAN","",colnames(d))
   labels <- colnames(p)
   nnodes <- ncol(p)
   pdf(file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".pdf")))
@@ -73,14 +73,13 @@ sumstat_batch <- function(type,suffix,method="ggm")
               {estimate.lambda(d);cor2pcor(cor(d,use="everything",method="pearson"))},
               cor2pcor(cor.shrink(d)),
               unclass(ggm.estimate.pcor(d)))
-  colnames(p) <- rownames(p) <- sub("\\b(^[0-9])","\\X\\1",featureNames(es))
-  data.frame(p)
+  colnames(p) <- rownames(p) <- featureNames(es)
+  p
 }
 
 ggm_batch <- function(type,suffix)
 {
-  pcor <- sumstat_batch(type,suffix) %>%
-          as.matrix()
+  pcor <- sumstat_batch(type,suffix)
   labels <- colnames(pcor)
 # graph_make()
   nodes <- ncol(pcor)

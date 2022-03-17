@@ -22,6 +22,8 @@ protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
 peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
                Biobase::combine(peptide_UDP)
 
+save(protein_all,peptide_all,file=file.path("~/Caprion/pilot/work/es.rda"))
+
 ggm_all <- function(type,suffix)
 {
   es <- get(paste(type,suffix,sep="_"))

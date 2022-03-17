@@ -17,6 +17,7 @@ wgcna_etc <- function()
   enableWGCNAThreads()
 # Adjacency matrix using soft thresholding with beta=6
   prot <- t(exprs(protein_all))
+  names(prot) <- gsub("_HUMAN","",colnames(prot))
   ADJ <- abs(cor(prot, method="pearson", use="pairwise.complete.obs"))^6
 # histogram of k and a scale free topology plot
   k <- as.vector(apply(ADJ,2,sum,na.rm=TRUE))
@@ -48,17 +49,19 @@ wgcna_etc <- function()
   colorDynamicHybridADJ <- labels2colors(cutreeDynamic(hierADJ,distM=dissADJ,cutHeight=0.998,
                                          deepSplit=2,pamRespectsDendro=FALSE))
   colorADJ <- data.frame(pam5$clustering,colorStaticADJ,colorDynamicADJ,colorDynamicHybridADJ)
+  pdf("~/Caprion/pilot/work/pamADJ.pdf")
   sizeGrWindow(10,5)
   plotDendroAndColors(dendro=hierADJ,colors=colorADJ,
                       dendroLabels=FALSE,
                       marAll=c(0.2,8,2.7,0.2),
                       main="Gene dendrogram and module colors")
+  dev.off()
 # TOM
   hierTOM <- hclust(as.dist(dissTOM),method="average");
   colorStaticTOM <- as.character(cutreeStaticColor(hierTOM,cutHeight=.99,minSize=5))
   colorDynamicTOM <- labels2colors(cutreeDynamic(hierTOM,method="tree",minClusterSize=5))
   colorTOM <- data.frame(pamTOM5$clustering,colorStaticTOM,colorDynamicTOM)
-  pdf(file.path("~/Caprion/pilot/work/pamTOM.pdf"))
+  pdf("~/Caprion/pilot/work/pamTOM.pdf")
   plotDendroAndColors(hierTOM,colors=colorTOM,
                       dendroLabels=FALSE,
                       marAll=c(1,8,3,1),
@@ -92,12 +95,11 @@ wgcna_etc <- function()
            stringsAsFactors=FALSE) %>% filter(!is.na(weight))
   suid_wgnca <- createNetworkFromDataFrames(nodes,edges,title="turquoise", collection="DataFrame")
   layoutNetwork("attribute-circle")
-  nodedata <- getTableColumns("node")
-  selectNodes(subset(nodedata,group=="turquoise")$name, by='id', pre=FALSE)
-  createSubnetwork(subset(nodedata,group=="turquoise")$name,"name")
-  exportImage(file.path("~/Caprion/pilot/work/turquoise.pdf"),type="PDF",overwriteFile=TRUE)
-  exportNetwork(file.path("~/Caprion/pilot/work/turquoise.sif"))
-  saveSession(file.path("~/Caprion/pilot/work/turquoise.cys"))
+  exportImage("~/Caprion/pilot/work/turquoise.pdf",type="PDF",overwriteFile=TRUE)
+  exportNetwork("~/Caprion/pilot/work/turquoise.cyjs","cyjs")
+  exportNetwork("~/Caprion/pilot/work/turquoise.sif","SIF")
+  exportVisualStyles("~/Caprion/pilot/work/turquoise.json","JSON")
+  saveSession("~/Caprion/pilot/work/turquoise.cys")
 }
 
 wgcna_etc()

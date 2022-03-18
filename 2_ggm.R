@@ -21,8 +21,27 @@ protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
                Biobase::combine(protein_UDP)
 peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
                Biobase::combine(peptide_UDP)
-
 save(protein_all,peptide_all,file=file.path("~/Caprion/pilot/work/es.rda"))
+
+fcheck <- function(es)
+{
+  fn <- featureNames(es)
+  d <- exprs(es)
+  rs <- apply(d,1,sum)
+  nna <- names(rs[is.na(rs)])
+  list(fn=fn,nna=nna,band=d[nna,])
+}
+
+all <- check(protein_all)
+all$fn[grepl("PP2|^6|^1",all$fn)]
+zwk <- fcheck(protein_ZWK)
+zyq <- fcheck(protein_ZYQ)
+udp <- fcheck(protein_UDP)
+lapply(list(all$fn,zwk$fn,zyq$fn,udp$fn),length)
+setdiff(all$fn,zwk$fn)
+setdiff(zwk$fn,zyq$fn)
+setdiff(zwk$fn,udp$fn)
+setdiff(zyq$fn,udp$fn)
 
 ggm_all <- function(type,suffix)
 {
@@ -48,7 +67,10 @@ ggm_all <- function(type,suffix)
   title <- list(text="Gaussian graphical models of proteins",
                 style="font-family:Arial;color:black;font-size:30px;text-align:center;")
   nodes <- data.frame(id,label=labels[id],shape="box")
-  edges <- with(net,data.frame(from=node1,to=node2,value=30*pcor))
+  q4 <- with(net,quantile(pcor))
+  c4 <- with(net,cut(pcor,q4))
+  edges <- with(net,data.frame(from=node1,to=node2,value=30*pcor,
+                               color=c("#0000FF","#9999FF","#00FF00","#FF9999","#FF0000")[c4]))
   nodesId <- list(enabled = TRUE,
                   style='width: 200px; height: 26px;
                          background: #f8f8f8;

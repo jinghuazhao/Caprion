@@ -17,7 +17,7 @@ wgcna_etc <- function()
   enableWGCNAThreads()
 # Adjacency matrix using soft thresholding with beta=6
   prot <- t(exprs(protein_all))
-  names(prot) <- gsub("_HUMAN","",colnames(prot))
+  colnames(prot) <- gsub("_HUMAN","",colnames(prot))
   ADJ <- abs(cor(prot, method="pearson", use="pairwise.complete.obs"))^6
 # histogram of k and a scale free topology plot
   k <- as.vector(apply(ADJ,2,sum,na.rm=TRUE))
@@ -94,12 +94,13 @@ wgcna_etc <- function()
            weight=with(r_nogrey,value),
            stringsAsFactors=FALSE) %>% filter(!is.na(weight))
   suid_wgnca <- createNetworkFromDataFrames(nodes,edges,title="turquoise", collection="DataFrame")
-  layoutNetwork("attribute-circle")
-  exportImage("~/Caprion/pilot/work/turquoise.pdf",type="PDF",overwriteFile=TRUE)
-  exportNetwork("~/Caprion/pilot/work/turquoise.cyjs","cyjs")
-  exportNetwork("~/Caprion/pilot/work/turquoise.sif","SIF")
-  exportVisualStyles("~/Caprion/pilot/work/turquoise.json","JSON")
-  saveSession("~/Caprion/pilot/work/turquoise.cys")
+  getLayoutNames()
+  layoutNetwork("isom")
+  exportImage("turquoise.pdf",type="PDF",overwriteFile=TRUE)
+  exportNetwork("turquoise.cyjs","cyjs")
+  exportNetwork("turquoise.sif","SIF")
+  exportVisualStyles("turquoise.json","JSON")
+  saveSession("turquoise.cys")
 }
 
 wgcna_etc()

@@ -46,7 +46,6 @@ zyq <- function()
   Comp_Neq1 <- read.csv(file.path(dir,"ZYQ_Comp_Neq1_Norm_Int_20200812.csv"))
   Normalized_All <- read.csv(file.path(dir,"ZYQ_Protein_Norm_All_20200813_v1.csv"),check.names=FALSE)
   Protein_DR_Filt <- read.csv(file.path(dir,"ZYQ_Protein_Norm_DR_filt_20200813_v1.csv"),check.names=FALSE)
-
   rownames(Samples) <- Samples$"LIMS.ID"
   phenoData <- new("AnnotatedDataFrame", data=Samples)
   proteinData <- t(array_data(Normalized_All,"LIMS ID",1))

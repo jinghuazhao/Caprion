@@ -32,7 +32,7 @@ fcheck <- function(es)
   list(fn=fn,nna=nna,band=d[nna,])
 }
 
-all <- check(protein_all)
+all <- fcheck(protein_all)
 all$fn[grepl("PP2|^6|^1",all$fn)]
 zwk <- fcheck(protein_ZWK)
 zyq <- fcheck(protein_ZYQ)

@@ -1,5 +1,3 @@
-#!/usr/bin/bash
-
 options(width=200)
 suppressMessages(library(Biobase))
 

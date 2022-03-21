@@ -36,21 +36,20 @@ pca_clustering_plot <- function(pca,mc)
     showlegend = TRUE
   )
 
-  txt <- data.frame(x=with(pca,x[,2]),y=with(pca,x[,1]),z=with(pca,x[,3]),color=mc$classification,id=with(pca,rownames(x)))
-
   suppressMessages(library(ggplot2))
   p <- plot_ly() %>%
        add_trace(mode=trace$mode, name=trace$name, type=trace$type, x=trace$x, y=trace$y, z=trace$z, frame=trace$frame, marker=trace$marker) %>%
        layout(scene=layout$scene, xaxis=layout$xaxis, yaxis=layout$yaxis, margin=layout$margin, hovermode=layout$hovermode, showlegend=layout$showlegend)
 
-  p <- plot_ly(txt, x = ~x, y = ~y, z = ~z, color = ~color, colors=c("black","red")) %>%
-       add_markers(type="scatter3d", text=txt$id) %>%
+  p <- with(list(x=with(pca,x[,2]),y=with(pca,x[,1]),z=with(pca,x[,3]),color=mc$classification,id=with(pca,rownames(x))),
+       plot_ly(x = ~x, y = ~y, z = ~z, color = ~color, colors=c("black","red")) %>%
+       add_markers(type="scatter3d", text=id) %>%
        layout(scene = list(xaxis = list(title = "PC2", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)), 
                            yaxis = list(title = "PC1", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)),
                            zaxis = list(title = "PC3", tickfont = list(size = 10)),
                            aspectratio = list(x = 0.9, y = 1, z = 0.6)),
                            title = "3d plot",
-                           showlegend = TRUE)
+                           showlegend = TRUE))
 
   htmlwidgets::saveWidget(p,file="~/Caprion/pilot/work/pca_clustering.html")
 }

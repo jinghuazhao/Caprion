@@ -6,8 +6,6 @@ suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
 suppressMessages(library(cowplot))
 suppressMessages(library(igraph))
-suppressMessages(library(RCy3))
-suppressMessages(require(WGCNA))
 suppressMessages(require(cluster))
 
 load("~/Caprion/pilot/work/es.rda")
@@ -15,11 +13,15 @@ load("~/Caprion/pilot/work/es.rda")
 wgcna_etc <- function()
 # Weighted Correlation Network Analysis
 {
+  suppressMessages(require(WGCNA))
   enableWGCNAThreads()
 # Adjacency matrix using soft thresholding with beta=6
   prot <- t(exprs(protein_all))
   colnames(prot) <- gsub("_HUMAN","",colnames(prot))
   ADJ <- abs(cor(prot, method="pearson", use="pairwise.complete.obs"))^6
+# k <- softConnectivity(prot)
+# connectivity is the sum of the adjacency to the other nodes.
+# sizeGrWindow(10,5)
 # histogram of k and a scale free topology plot
   k <- as.vector(apply(ADJ,2,sum,na.rm=TRUE))
   pdf("~/Caprion/pilot/work/k.pdf")
@@ -49,7 +51,7 @@ wgcna_etc <- function()
   colorDynamicADJ <- labels2colors(cutreeDynamic(hierADJ,method="tree",minClusterSize=5))
   colorDynamicHybridADJ <- labels2colors(cutreeDynamic(hierADJ,distM=dissADJ,cutHeight=0.998,
                                          deepSplit=2,pamRespectsDendro=FALSE))
-  colorADJ <- data.frame(pam5$clustering,colorStaticADJ,colorDynamicADJ,colorDynamicHybridADJ)
+  colorADJ <- data.frame(pam6$clustering,colorStaticADJ,colorDynamicADJ,colorDynamicHybridADJ)
   pdf("~/Caprion/pilot/work/pamADJ.pdf")
   plotDendroAndColors(dendro=hierADJ,colors=colorADJ,
                       dendroLabels=FALSE,
@@ -60,7 +62,7 @@ wgcna_etc <- function()
   hierTOM <- hclust(as.dist(dissTOM),method="average");
   colorStaticTOM <- as.character(cutreeStaticColor(hierTOM,cutHeight=.99,minSize=5))
   colorDynamicTOM <- labels2colors(cutreeDynamic(hierTOM,method="tree",minClusterSize=5))
-  colorTOM <- data.frame(pamTOM5$clustering,colorStaticTOM,colorDynamicTOM)
+  colorTOM <- data.frame(pamTOM6$clustering,colorStaticTOM,colorDynamicTOM)
   pdf("~/Caprion/pilot/work/pamTOM.pdf")
   plotDendroAndColors(hierTOM,colors=colorTOM,
                       dendroLabels=FALSE,
@@ -68,11 +70,8 @@ wgcna_etc <- function()
                       main="Gene dendrogram and module colors, TOM dissimilarity")
   dev.off()
   options(width=200)
-  cytoscapePing()
-  cytoscapeVersionInfo()
-  deleteAllNetworks()
   colorADJTOM <- cbind(colorADJ,colorTOM)
-  table(colorADJTOM$pamTOM5.clustering)
+  table(colorADJTOM$pamTOM6.clustering)
   for(x in 1:5) print(subset(colorADJTOM,pamTOM5.clustering==x))
   table(colorADJTOM$colorDynamicTOM)
   Colors <- c("blue","brown","grey","turquoise","yellow")
@@ -102,9 +101,12 @@ wgcna_etc <- function()
   plotDendroAndColors(Tree, Colors, dendroLabels=FALSE, hang=0.03, addGuide=TRUE, guideHang=0.05)
   dev.off()
   meg <- moduleEigengenes(prot, color=1:ncol(prot), softPower=6)
-# Further correlations
+# Cytoscape
+  suppressMessages(library(RCy3))
+  cytoscapePing()
+  cytoscapeVersionInfo()
+  deleteAllNetworks()
   corRaw <- cor(prot,use='pairwise.complete.obs')
-  diag(corRaw) <- 0
   distance <- as.dist(1-abs(corRaw))
   colnames(corRaw) <- rownames(corRaw) <- colnames(prot)
   suppressMessages(require(reshape))

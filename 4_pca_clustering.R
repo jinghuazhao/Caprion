@@ -1,5 +1,6 @@
 options(width=200)
 suppressMessages(library(Biobase))
+suppressMessages(library(dplyr))
 
 load("~/Caprion/pilot/work/es.rda")
 prot <- t(exprs(protein_all))
@@ -63,51 +64,77 @@ pca_clustering <- function()
   eigenvec <- with(pca,rotation)[,1:2]
   cor(eigenvec)
   cor(pc1pc2)
-  pdf("~/Caprion/pilot/work/pca_clustering.pdf")
-  screeplot(pca, npcs=20, type="lines", main="PCA screeplot")
-  plot(eigenvec,pch=19,cex=0.6)
-  title("Eigenvectors")
-  plot(pc1pc2,pch=19,cex=0.6)
-  title("Principal components")
-  biplot(pca,cex=0.1)
-  title("biplot")
 # K-means clustering
   km <- kmeans(pc1pc2,2)
   table(with(km,cluster))
-  plot(pc1pc2, col = with(km,cluster), pch=19, cex=0.8)
-  points(with(km,centers), col = 1:2, pch = 8, cex = 2)
-  title("K-means clustering")
 # Model-based clustering
   library(mclust)
   mc <- Mclust(pc1pc2,G=2)
   summary(mc)
   table(with(mc,classification))
-  plot(mc, what=c("classification"))
-  title("Model-based clustering")
-  ZYQ_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
-  mc_ZYQ_mc <- cbind(ZYQ_mc,classification=with(mc,classification)[grepl("ZYQ",names(mc$classification))])
-  with(mc_ZYQ_mc,table(pc1_group,classification))
-  if (interactive()) with(mc,
-  {
+  if (interactive()) with(mc,{rgl::plot3d(with(pca,x[,c(2,1,3)]),col=classification)}) else {
      png(file.path("~/Caprion/pilot/work/3d.png"), res=300, width=12, height=10, units="in")
      scatterplot3d::scatterplot3d(with(pca,x[,c(2,1,3)]), color=c("blue","red")[classification], main="Plot of the PC1, PC2 and PC3", pch=16)
      legend("right", legend=levels(as.factor(classification)), col=c("blue", "red"), pch=16)
      dev.off()
-     rgl::plot3d(with(pca,x[,c(2,1,3)]),col=classification)
-  })
-  dev.off()
-  pca_clustering_plot(pca,mc)
+     pdf("~/Caprion/pilot/work/pca_clustering.pdf")
+     screeplot(pca, npcs=20, type="lines", main="PCA screeplot")
+     plot(eigenvec,pch=19,cex=0.6)
+     title("Eigenvectors")
+     plot(pc1pc2,pch=19,cex=0.6)
+     title("Principal components")
+     biplot(pca,cex=0.1)
+     title("biplot")
+     plot(pc1pc2, col = with(km,cluster), pch=19, cex=0.8)
+     points(with(km,centers), col = 1:2, pch = 8, cex = 2)
+     title("K-means clustering")
+     plot(mc, what=c("classification"))
+     title("Model-based clustering")
+     ZYQ_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
+     mc_ZYQ_mc <- cbind(ZYQ_mc,classification=with(mc,classification)[grepl("ZYQ",names(mc$classification))])
+     with(mc_ZYQ_mc,table(pc1_group,classification))
+     dev.off()
+     pca_clustering_plot(pca,mc)
+  }
 # Phenotype files
-  pilotsMap <- read.csv("pilotsMap_15SEP2021.csv")
+  data <- read.csv("~/Caprion/pilot/INTERVALdata_15SEP2021.csv")
+  eigenvec <- read.delim("~/Caprion/pilot/data/merged_imputation.eigenvec")
+  pilotsMap <- read.csv("~/Caprion/pilot/pilotsMap_15SEP2021.csv")
   OmicsMap <- read.csv("INTERVAL_OmicsMap_20210915.csv")
-  data <- read.csv("INTERVALdata_15SEP2021.csv")
+  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification)) %>%
+              left_join(data.frame(pc1pc2,caprion_id=rownames(pc1pc2))) %>%
+              rename(ppc1=PC1,ppc2=PC2)
   id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
   date <- c("attendanceDate","sexPulse","monthPulse","yearPulse","agePulse")
   covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl","classification")
-  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification))
   id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
   dim(id_date_covars)
   head(id_date_covars[c(id,date,covars)])
+  pheno <- select(OmicsMap,identifier,Affymetrix_gwasQC_bl,caprion_id) %>%
+           merge(eigenvec,by.x="Affymetrix_gwasQC_bl",by.y="X.FID",all.x=TRUE) %>%
+           left_join(grouping) %>%
+           left_join(data) %>%
+           right_join(data.frame(prot,caprion_id=rownames(prot))) %>%
+           mutate(batch=match(substr(sampleNames(protein_all),1,3),c("ZWK","ZYQ","UDP")))
+  edata <- exprs(protein_all)
+  rownames(edata) <- sub("_HUMAN","",rownames(edata))
+  edata <- edata[!rownames(edata)%in%union(ZYQ.na,UDP.na),]
+  batch <- pheno$batch
+
+  suppressMessages(library(sva))
+  mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse",paste0("PC",1:20)),collapse="+")), data=pheno)
+
+# 1. parametric adjustment
+  combat_edata1 <- ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE)
+
+# 2. non-parametric adjustment, mean-only version
+  combat_edata2 = ComBat(dat=edata, batch=batch, mod=NULL, par.prior=FALSE, mean.only=TRUE)
+
+  n <- 2491
+  edata <- edata[,1:n]
+  batch <- head(batch,n)
+# 3. reference-batch version, with covariates
+  combat_edata3 <- ComBat(dat=edata, batch=batch, mod=mod, par.prior=TRUE, ref.batch=3, prior.plots=TRUE)
 }
 
 pca_clustering()

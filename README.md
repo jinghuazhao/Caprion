@@ -8,6 +8,7 @@ This is now done in sequence.
 * 2_ggm.R. GGM experiment.
 * 3_wgcna.R WGCNA experiment.
 * 4_pca_clustering.R PCA and clustering.
+* 6_meta_analysis.sh
 
 ## Pilot studies
 

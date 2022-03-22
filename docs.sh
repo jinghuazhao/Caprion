@@ -14,7 +14,7 @@ git add .gitignore
 git commit -m ".gitignore"
 git add README.md
 git commit -m "README"
-git add 1_pca_projection.sh 2_ggm.R 3_wgcna.R 4_pca_clustering.R
+git add 1_pca_projection.sh 2_ggm.R 3_wgcna.R 4_pca_clustering.R 6_meta_analysis.sh
 git commit -m "Analysis"
 git add caprion.ini caprion.R caprion.ipynb
 git commit -m "Primary Code"

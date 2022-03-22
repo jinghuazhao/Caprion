@@ -69,7 +69,7 @@ library(mclust)
 mc <- Mclust(d)
 summary(mc)
 pdf("mc.pdf")
-plot(mc, what = "BIC")
+plot(mc, what=c("classification"))
 dev.off()
 
 # regression

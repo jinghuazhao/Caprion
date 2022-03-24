@@ -12,9 +12,9 @@ mkdocs gh-deploy
 
 git add .gitignore
 git commit -m ".gitignore"
-git add README.md analysis/README.md pilot/README.md
+git add README.md README.md pilot/README.md
 git commit -m "README"
-git add analysis/1_pca_projection.sh analysis/2_ggm.R analysis/3_wgcna.R analysis/4_pca_clustering.R analysis/5_pgwas.sh analysis/6_meta_analysis.sh
+git add 1_pca_projection.sh 2_ggm.R 3_wgcna.R 4_pca_clustering.R 5_pgwas.sh 6_meta_analysis.sh
 git commit -m "Analysis"
 git add pilot/caprion.ini pilot/caprion.R pilot/caprion.ipynb
 git commit -m "Primary Code"

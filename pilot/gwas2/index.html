@@ -5,15 +5,14 @@
 <meta charset="utf-8"/>
 <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="None" name="description"/>
-<link href="img/favicon.ico" rel="shortcut icon"/>
-<title>Caprion</title>
-<link href="css/bootstrap.min.css" rel="stylesheet"/>
-<link href="css/font-awesome.min.css" rel="stylesheet"/>
-<link href="css/base.css" rel="stylesheet"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>gwas2 - Caprion</title>
+<link href="../../css/bootstrap.min.css" rel="stylesheet"/>
+<link href="../../css/font-awesome.min.css" rel="stylesheet"/>
+<link href="../../css/base.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet"/>
-<script defer="" src="js/jquery-1.10.2.min.js"></script>
-<script defer="" src="js/bootstrap.min.js"></script>
+<script defer="" src="../../js/jquery-1.10.2.min.js"></script>
+<script defer="" src="../../js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/Bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/HTML.min.js"></script>
@@ -26,10 +25,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 </head>
-<body class="homepage">
+<body>
 <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
 <div class="container">
-<a class="navbar-brand" href=".">Caprion</a>
+<a class="navbar-brand" href="../..">Caprion</a>
 <!-- Expander button -->
 <button class="navbar-toggler" data-target="#navbar-collapse" data-toggle="collapse" type="button">
 <span class="navbar-toggler-icon"></span>
@@ -39,19 +38,19 @@
 <!-- Main navigation -->
 <ul class="nav navbar-nav">
 <li class="navitem">
-<a class="nav-link" href="."></a>
+<a class="nav-link" href="../.."></a>
+</li>
+<li class="navitem">
+<a class="nav-link" href="../..">Caprion analysis</a>
+</li>
+<li class="navitem">
+<a class="nav-link" href="../">Pilot analysis</a>
 </li>
 <li class="navitem active">
-<a class="nav-link" href=".">Caprion analysis</a>
+<a class="nav-link" href="./">gwas2</a>
 </li>
 <li class="navitem">
-<a class="nav-link" href="pilot/">Pilot analysis</a>
-</li>
-<li class="navitem">
-<a class="nav-link" href="pilot/gwas2/">gwas2</a>
-</li>
-<li class="navitem">
-<a class="nav-link" href="pilot/tests/">Tests</a>
+<a class="nav-link" href="../tests/">Tests</a>
 </li>
 </ul>
 <ul class="nav navbar-nav ml-auto">
@@ -61,12 +60,12 @@
                             </a>
 </li>
 <li class="nav-item">
-<a class="nav-link" href="." rel="prev">
+<a class="nav-link" href="../" rel="prev">
 <i class="fa fa-arrow-left"></i> Previous
                                 </a>
 </li>
 <li class="nav-item">
-<a class="nav-link" href="pilot/" rel="next">
+<a class="nav-link" href="../tests/" rel="next">
                                     Next <i class="fa fa-arrow-right"></i>
 </a>
 </li>
@@ -87,7 +86,7 @@
 </div>
 <div class="navbar-collapse collapse card bg-secondary" id="toc-collapse">
 <ul class="nav flex-column">
-<li class="nav-item" data-level="1"><a class="nav-link" href="#caprion-analysis">Caprion analysis</a>
+<li class="nav-item" data-level="1"><a class="nav-link" href="#gwas2">gwas2</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -95,16 +94,14 @@
 </div>
 </div></div>
 <div class="col-md-9" role="main">
-<h1 id="caprion-analysis">Caprion analysis</h1>
-<p>This is now done in sequence.</p>
-<ul>
-<li>1_pca_projection.sh. Data handling and PCA projection.</li>
-<li>2_ggm.R. GGM experiment.</li>
-<li>3_wgcna.R WGCNA experiment.</li>
-<li>4_pca_clustering.R PCA and clustering.</li>
-<li>5_pgwas.sh</li>
-<li>6_meta_analysis.sh</li>
-</ul></div>
+<h1 id="gwas2">gwas2</h1>
+<p>This is a promising alternative showing through RCN3/FCGRN with <a href="../utils/gwas2.sh">gwas2.sh</a> (all with prefix=utils/).</p>
+<div class="mermaid">graph TB;
+gwas2.sh --&gt; gwas.do
+gwas2.sh --&gt; gwas2.do
+</div>
+<p>where <code>gwas.do</code> (<code>caprion.dat</code> also contains _invn data) and <code>gwas2.do</code> (<code>gwas2_invn.do</code> for _invn data) are for the pilot and batch 2 data, respectively.</p>
+<p>See <a href="https://jinghuazhao.github.io/gwas2/">gwas2</a> repository for additional information.</p></div>
 </div>
 </div>
 <footer class="col-md-12">
@@ -112,14 +109,14 @@
 <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
 </footer>
 <script>
-            var base_url = ".",
+            var base_url = "../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-<script defer="" src="js/base.js"></script>
-<script defer="" src="javascripts/config.js"></script>
+<script defer="" src="../../js/base.js"></script>
+<script defer="" src="../../javascripts/config.js"></script>
 <script defer="" src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script defer="" src="search/main.js"></script>
+<script defer="" src="../../search/main.js"></script>
 <div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
 <div class="modal-dialog modal-lg">
 <div class="modal-content">
@@ -183,9 +180,5 @@
 </div>
 </div>
 </div>
-</body>
+<script src="https://unpkg.com/mermaid@8.8.0/dist/mermaid.min.js"></script><script>mermaid.initialize({});</script></body>
 </html>
-<!--
-MkDocs version : 1.1.2
-Build Date UTC : 2022-03-24 19:33:26.305232+00:00
--->

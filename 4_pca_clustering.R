@@ -138,6 +138,15 @@ pca_clustering <- function()
   suppressMessages(library(doParallel))
   registerDoParallel(cores=10)
   quantro(edata,batch,B=10000)
+  png("~/Caprion/pilot/work/matboxplot.png",width=12,height=10,unit="in",res=300)
+  par(cex=0.4,cex.lab=0.4)
+  matboxplot(edata,batch)
+  dev.off()
+  png("~/Caprion/pilot/work/matdensity.png",width=12,height=10,unit="in",res=300)
+  matdensity(edata, batch, xlab = " ", ylab = "density", ylim=c(0,2),
+             main = "Protein levels", brewer.n = 8, brewer.name = "Dark2")
+  legend('top', c("ZWK", "ZYQ", "UDP"), col = c(1, 2, 3), lty = 1, lwd = 3)
+  dev.off()
 }
 
 pca_clustering()

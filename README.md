@@ -1,4 +1,4 @@
-# Caprion pilot study
+# Caprion study
 
 This directory contains data for the work titled above as with the following directory.
 

@@ -3,11 +3,9 @@ repo_url: https://github.com/jinghuazhao/Caprion
 edit_uri: ""
 nav:
   - "": README.md
-  - analysis:
-    - analysis/README.md  
-  - pilot:
-    - gwas2: pilot/gwas2.md
-    - tests: pilot/tests.md
+  - analysis/README.md  
+  - pilot/gwas2.md
+  - pilot/tests.md
 theme:
     name: mkdocs
     nav_style: dark

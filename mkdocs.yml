@@ -4,6 +4,7 @@ edit_uri: ""
 nav:
   - "": README.md
   - analysis/README.md  
+  - pilot/README.md
   - pilot/gwas2.md
   - pilot/tests.md
 theme:

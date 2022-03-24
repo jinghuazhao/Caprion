@@ -1,11 +1,11 @@
-# Caprion study
+# Analysis
 
-This directory contains data for the work titled above as with the following directory.
+This is now done in sequence.
 
-* doc/ contains initial information regarding the project and the Solomon paper.
-* pilot/ contains phase 1 and (partial) phase 2 pilot analysis (another README.md).
-* analysis/ was added on 24/3/2022 after phase 3 pilot analysis was also done.
+* 1_pca_projection.sh. Data handling and PCA projection.
+* 2_ggm.R. GGM experiment.
+* 3_wgcna.R WGCNA experiment.
+* 4_pca_clustering.R PCA and clustering.
+* 5_pgwas.sh
+* 6_meta_analysis.sh
 
-Jing Hua Zhao
-
-Created on 2/3/2021, last modified on 24/3/2022.

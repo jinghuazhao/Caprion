@@ -1,4 +1,4 @@
-# Pilot analysis
+# Pilot studies
 
 ### Site map
 

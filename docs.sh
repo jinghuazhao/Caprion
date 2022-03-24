@@ -12,7 +12,7 @@ mkdocs gh-deploy
 
 git add .gitignore
 git commit -m ".gitignore"
-git add README.md README.md pilot/README.md
+git add README.md pilot/README.md
 git commit -m "README"
 git add 1_pca_projection.sh 2_ggm.R 3_wgcna.R 4_pca_clustering.R 5_pgwas.sh 6_meta_analysis.sh
 git commit -m "Analysis"

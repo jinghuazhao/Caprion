@@ -1,6 +1,4 @@
-# Caprion work
-
-## Analysis
+# Analysis
 
 This is now done in sequence.
 

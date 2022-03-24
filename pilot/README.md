@@ -1,6 +1,4 @@
-# Caprion work
-
-## Pilot studies
+# Pilot analysis
 
 ### Site map
 

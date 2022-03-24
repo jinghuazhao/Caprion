@@ -133,6 +133,11 @@ pca_clustering <- function()
   batch <- head(batch,n)
 # 3. reference-batch version, with covariates
   combat_edata3 <- ComBat(dat=edata, batch=batch, mod=mod, par.prior=TRUE, ref.batch=3, prior.plots=TRUE)
+
+  suppressMessages(library(quantro))
+  suppressMessages(library(doParallel))
+  registerDoParallel(cores=10)
+  quantro(edata,batch,B=10000)
 }
 
 pca_clustering()

@@ -9,53 +9,7 @@ colnames(prot) <- gsub("_HUMAN","",colnames(prot))
 ZYQ.na <- c("BROX","CT027","GHRL","PSB6")
 UDP.na <- c("BROX","NCF2","SEM7A")
 
-pca_clustering_plot <- function(pca,mc)
-{
-  suppressMessages(library(plotly))
-  trace <- list(
-    mode = "markers", 
-    name = "f", 
-    type = "scatter3d", x = with(pca,x[,2]),y = with(pca,x[,1]), z = with(pca,x[,3]),
-    frame = NULL, 
-    marker = list(
-      line = list(color = "transparent"), 
-      color = "rgba(102,194,165,1)", 
-      fillcolor = "rgba(102,194,165,0.5)"
-    )
-  )
-  layout <- list(
-    scene = list(xaxis = list(title = "PC1"), yaxis = list(title = "PC2"), zaxis = list(title = "PC3")), 
-    xaxis = list(domain = c(0, 1)), 
-    yaxis = list(domain = c(0, 1)), 
-    margin = list(
-      b = 40, 
-      l = 60, 
-      r = 10, 
-      t = 25
-    ), 
-    hovermode = "closest", 
-    showlegend = TRUE
-  )
-
-  suppressMessages(library(ggplot2))
-  p <- plot_ly() %>%
-       add_trace(mode=trace$mode, name=trace$name, type=trace$type, x=trace$x, y=trace$y, z=trace$z, frame=trace$frame, marker=trace$marker) %>%
-       layout(scene=layout$scene, xaxis=layout$xaxis, yaxis=layout$yaxis, margin=layout$margin, hovermode=layout$hovermode, showlegend=layout$showlegend)
-
-  p <- with(list(x=with(pca,x[,2]),y=with(pca,x[,1]),z=with(pca,x[,3]),color=mc$classification,id=with(pca,rownames(x))),
-       plot_ly(x = ~x, y = ~y, z = ~z, color = ~color, colors=c("black","red")) %>%
-       add_markers(type="scatter3d", text=id) %>%
-       layout(scene = list(xaxis = list(title = "PC2", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)), 
-                           yaxis = list(title = "PC1", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)),
-                           zaxis = list(title = "PC3", tickfont = list(size = 10)),
-                           aspectratio = list(x = 0.9, y = 1, z = 0.6)),
-                           title = "3d plot",
-                           showlegend = TRUE))
-
-  htmlwidgets::saveWidget(p,file="~/Caprion/pilot/work/pca_clustering.html")
-}
-
-pca_clustering <- function()
+pca_clustering <- function(prot)
 {
   all <- prot[,!colnames(prot)%in%union(ZYQ.na,UDP.na)]
   pca <- prcomp(all, rank=50, scale=TRUE)
@@ -72,6 +26,73 @@ pca_clustering <- function()
   mc <- Mclust(pc1pc2,G=2)
   summary(mc)
   table(with(mc,classification))
+  list(pca=pca,pc1pc2=pc1pc2,eigenvec=eigenvec,km=km,mc=mc)
+}
+
+pca_clustering_plot <- function(pca,mc,out)
+{
+  suppressMessages(library(plotly))
+  trace <- list(
+    mode = "markers", 
+    name = "f", 
+    type = "scatter3d", x = with(pca,x[,2]),y = with(pca,x[,1]), z = with(pca,x[,3]),
+    frame = NULL, 
+    marker = list(line = list(color = "transparent"), color = "rgba(102,194,165,1)", fillcolor = "rgba(102,194,165,0.5)")
+  )
+  layout <- list(
+    scene = list(xaxis = list(title = "PC1"), yaxis = list(title = "PC2"), zaxis = list(title = "PC3")), 
+    xaxis = list(domain = c(0, 1)), 
+    yaxis = list(domain = c(0, 1)), 
+    margin = list(b = 40, l = 60, r = 10, t = 25),
+    hovermode = "closest",
+    showlegend = TRUE
+  )
+  suppressMessages(library(ggplot2))
+  p <- plot_ly() %>%
+       add_trace(mode=trace$mode, name=trace$name, type=trace$type, x=trace$x, y=trace$y, z=trace$z, frame=trace$frame, marker=trace$marker) %>%
+       layout(scene=layout$scene, xaxis=layout$xaxis, yaxis=layout$yaxis, margin=layout$margin, hovermode=layout$hovermode, showlegend=layout$showlegend)
+  p <- with(list(x=with(pca,x[,2]),y=with(pca,x[,1]),z=with(pca,x[,3]),color=mc$classification,id=with(pca,rownames(x))),
+       plot_ly(x = ~x, y = ~y, z = ~z, color = ~color, colors=c("black","red")) %>%
+       add_markers(type="scatter3d", text=id) %>%
+       layout(scene = list(xaxis = list(title = "PC2", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)), 
+                           yaxis = list(title = "PC1", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)),
+                           zaxis = list(title = "PC3", tickfont = list(size = 10)),
+                           aspectratio = list(x = 0.9, y = 1, z = 0.6)),
+                           title = "3d plot",
+                           showlegend = TRUE))
+
+  htmlwidgets::saveWidget(p,file=out)
+}
+
+quantro_sparsenetgls <- function(edata,batch,mod)
+{
+  suppressMessages(library(quantro))
+  suppressMessages(library(doParallel))
+
+  registerDoParallel(cores=10)
+  quantro(edata,batch,B=10000)
+  png("~/Caprion/pilot/work/matboxplot.png",width=12,height=10,unit="in",res=300)
+  par(cex=0.6,cex.lab=0.6)
+  matboxplot(edata,batch)
+  dev.off()
+  png("~/Caprion/pilot/work/matdensity.png",width=12,height=10,unit="in",res=300)
+  matdensity(edata, batch, xlab = " ", ylab = "density", ylim=c(0,2),
+             main = "Protein levels", brewer.n = 8, brewer.name = "Dark2")
+  legend('top', c("ZWK", "ZYQ", "UDP"), col = c(1, 2, 3), lty = 1, lwd = 3)
+  dev.off()
+  suppressMessages(library(sparsenetgls))
+  if (FALSE) {
+     y <- t(edata)
+     sngls <- sparsenetgls(y,mod)
+     save(sngls,file="~/Caprion/pilot/work/sparsenetgls.rda")
+     plotsngls(sngls,ith_lambda=5)
+  }
+}
+
+normalise <- function(prot)
+{
+  pca_km_mc <- pca_clustering(prot)
+  attach(pca_km_mc)
   with(mc, if (interactive()) {rgl::plot3d(with(pca,x[,c(2,1,3)]),col=classification)} else {
      pdf("~/Caprion/pilot/work/pca_clustering.pdf")
      scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]), color=c("blue","red")[classification], main="Plot of the PC1, PC2 and PC3", pch=16)
@@ -88,11 +109,11 @@ pca_clustering <- function()
      title("K-means clustering")
      plot(mc, what=c("classification"))
      title("Model-based clustering")
-     ZYQ_mc <- read.csv("~/Caprion/ZYQ_PC1_groups_20200703.csv")
+     dev.off()
+     ZYQ_mc <- read.csv("~/Caprion/pilot/ZYQ_PC1_groups_20200703.csv")
      mc_ZYQ_mc <- cbind(ZYQ_mc,classification=with(mc,classification)[grepl("ZYQ",names(mc$classification))])
      with(mc_ZYQ_mc,table(pc1_group,classification))
-     dev.off()
-     pca_clustering_plot(pca,mc)
+     pca_clustering_plot(pca,mc,"~/Caprion/pilot/work/pca_clustering.html")
   })
 # Phenotype files
   data <- read.csv("~/Caprion/INTERVALdata_15SEP2021.csv")
@@ -100,8 +121,8 @@ pca_clustering <- function()
   pilotsMap <- read.csv("~/Caprion/pilotsMap_15SEP2021.csv")
   OmicsMap <- read.csv("~/Caprion/INTERVAL_OmicsMap_20210915.csv")
   grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification)) %>%
-              left_join(data.frame(pc1pc2,caprion_id=rownames(pc1pc2))) %>%
-              rename(ppc1=PC1,ppc2=PC2)
+              left_join(data.frame(with(pca,x)[,1:3],caprion_id=rownames(with(pca,x)))) %>%
+              rename(ppc1=PC1,ppc2=PC2,ppc3=PC3)
   id <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
   date <- c("attendanceDate","sexPulse","monthPulse","yearPulse","agePulse")
   covars <- c("ethnicPulse","ht_bl","wt_bl","CRP_bl","TRANSF_bl","processDate_bl","processTime_bl","classification")
@@ -118,9 +139,14 @@ pca_clustering <- function()
   rownames(edata) <- sub("_HUMAN","",rownames(edata))
   edata <- edata[!rownames(edata)%in%union(ZYQ.na,UDP.na),]
   batch <- pheno$batch
+  detach(pca_km_mc)
 
   suppressMessages(library(sva))
-  mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse","classification",paste0("PC",1:20)),collapse="+")), data=pheno)
+  mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse","ppc1","ppc2","ppc3",paste0("PC",1:20)),collapse="+")), data=pheno)
+  mnames <- colnames(mod)[-1]
+  mdat <- pheno[mnames]
+  mcol <- apply(mdat,2,is.na)
+  many <- !apply(mcol,1,any)
 
 # 1. parametric adjustment
   combat_edata1 <- ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE)
@@ -128,29 +154,19 @@ pca_clustering <- function()
 # 2. non-parametric adjustment, mean-only version
   combat_edata2 = ComBat(dat=edata, batch=batch, mod=NULL, par.prior=FALSE, mean.only=TRUE)
 
-  n <- 2491
-  edata <- edata[,1:n]
-  batch <- head(batch,n)
+  edata <- edata[,many]
+  batch <- batch[many]
+  quantro_sparsenetgls(edata,batch,mod)
 # 3. reference-batch version, with covariates
   combat_edata3 <- ComBat(dat=edata, batch=batch, mod=mod, par.prior=TRUE, ref.batch=3, prior.plots=TRUE)
-
-  suppressMessages(library(quantro))
-  suppressMessages(library(doParallel))
-  registerDoParallel(cores=10)
-  quantro(edata,batch,B=10000)
-  png("~/Caprion/pilot/work/matboxplot.png",width=12,height=10,unit="in",res=300)
-  par(cex=0.6,cex.lab=0.6)
-  matboxplot(edata,batch)
-  dev.off()
-  png("~/Caprion/pilot/work/matdensity.png",width=12,height=10,unit="in",res=300)
-  matdensity(edata, batch, xlab = " ", ylab = "density", ylim=c(0,2),
-             main = "Protein levels", brewer.n = 8, brewer.name = "Dark2")
-  legend('top', c("ZWK", "ZYQ", "UDP"), col = c(1, 2, 3), lty = 1, lwd = 3)
-  dev.off()
-  suppressMessages(library(sparsenetgls))
-  y <- t(edata)
-  sngls <- sparsenetgls(y,mod)
-  plotsngls(sngls,ith_lambda=5)
+  list(edata=t(combat_edata3),batch=batch)
 }
 
-pca_clustering()
+edata_batch <- normalise(prot)
+attach(edata_batch)
+pca_km_mc <- pca_clustering(edata)
+detach(edata_batch)
+attach(pca_km_mc)
+with(mc, if (interactive()) {rgl::plot3d(with(pca,x[,c(2,1,3)]),col=classification)})
+pca_clustering_plot(pca,mc,"~/Caprion/pilot/work/pca_clustering_combat.html")
+detach(pca_km_mc)

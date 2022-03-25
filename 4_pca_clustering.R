@@ -88,17 +88,17 @@ pca_clustering <- function()
      title("K-means clustering")
      plot(mc, what=c("classification"))
      title("Model-based clustering")
-     ZYQ_mc <- read.csv("ZYQ_PC1_groups_20200703.csv")
+     ZYQ_mc <- read.csv("~/Caprion/ZYQ_PC1_groups_20200703.csv")
      mc_ZYQ_mc <- cbind(ZYQ_mc,classification=with(mc,classification)[grepl("ZYQ",names(mc$classification))])
      with(mc_ZYQ_mc,table(pc1_group,classification))
      dev.off()
      pca_clustering_plot(pca,mc)
   })
 # Phenotype files
-  data <- read.csv("~/Caprion/pilot/INTERVALdata_15SEP2021.csv")
+  data <- read.csv("~/Caprion/INTERVALdata_15SEP2021.csv")
   eigenvec <- read.delim("~/Caprion/pilot/data/merged_imputation.eigenvec")
-  pilotsMap <- read.csv("~/Caprion/pilot/pilotsMap_15SEP2021.csv")
-  OmicsMap <- read.csv("INTERVAL_OmicsMap_20210915.csv")
+  pilotsMap <- read.csv("~/Caprion/pilotsMap_15SEP2021.csv")
+  OmicsMap <- read.csv("~/Caprion/INTERVAL_OmicsMap_20210915.csv")
   grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification)) %>%
               left_join(data.frame(pc1pc2,caprion_id=rownames(pc1pc2))) %>%
               rename(ppc1=PC1,ppc2=PC2)
@@ -120,7 +120,7 @@ pca_clustering <- function()
   batch <- pheno$batch
 
   suppressMessages(library(sva))
-  mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse",paste0("PC",1:20)),collapse="+")), data=pheno)
+  mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse","classification",paste0("PC",1:20)),collapse="+")), data=pheno)
 
 # 1. parametric adjustment
   combat_edata1 <- ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE)
@@ -147,6 +147,10 @@ pca_clustering <- function()
              main = "Protein levels", brewer.n = 8, brewer.name = "Dark2")
   legend('top', c("ZWK", "ZYQ", "UDP"), col = c(1, 2, 3), lty = 1, lwd = 3)
   dev.off()
+  suppressMessages(library(sparsenetgls))
+  y <- t(edata)
+  sngls <- sparsenetgls(y,mod)
+  plotsngls(sngls,ith_lambda=5)
 }
 
 pca_clustering()

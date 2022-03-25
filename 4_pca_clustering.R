@@ -164,6 +164,7 @@ normalise <- function(prot)
 
 edata_batch <- normalise(prot)
 attach(edata_batch)
+quantro(t(edata),batch,B=10000)
 pca_km_mc <- pca_clustering(edata)
 detach(edata_batch)
 attach(pca_km_mc)

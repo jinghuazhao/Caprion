@@ -30,7 +30,7 @@ Trivadis SK (2017). Variational autoencoders for anomaly detection. [https://rpu
 
 ---
 
-## Proteomics Proteoform Analysis
+## Proteoform Analysis
 
 ### ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis
 

@@ -6,7 +6,7 @@ nav:
   - README.md  
   - pilot/README.md
   - pilot/gwas2.md
-  - pilot/tests.md
+  - pilot/antoencoder.md
 theme:
     name: mkdocs
     nav_style: dark

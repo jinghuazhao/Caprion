@@ -4,7 +4,7 @@ function setup()
 {
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
-  for f in README.md autoencoder.md caprion.ini caprion.ipynb caprion.R docs.sh gwas2.md mkdocs.yml utils;do cp -r -p ../pilot/${f} pilot; done
+  for f in .gitignore README.md autoencoder.md caprion.ini caprion.ipynb caprion.R docs.sh gwas2.md mkdocs.yml utils;do cp -r -p ../pilot/${f} pilot; done
 }
 
 setup

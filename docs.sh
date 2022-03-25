@@ -4,7 +4,7 @@ function setup()
 {
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
-  for f in README.md caprion.ini caprion.ipynb caprion.R docs.sh gwas2.md mkdocs.yml tests.md utils;do cp -r -p ../pilot/${f} pilot; done
+  for f in README.md autoencoder.md caprion.ini caprion.ipynb caprion.R docs.sh gwas2.md mkdocs.yml utils;do cp -r -p ../pilot/${f} pilot; done
 }
 
 setup
@@ -21,8 +21,8 @@ git add pilot/caprion.ini pilot/caprion.R pilot/caprion.ipynb
 git commit -m "Primary Code"
 git add pilot/gwas2.md
 git commit -m "gwas2"
-git add pilot/tests.md
-git commit -m "tests"
+git add pilot/autoencoder.md
+git commit -m "autoencoder"
 git add docs.sh pilot/utils pilot/docs.sh
 git commit -m "utils"
 git add mkdocs.yml pilot/mkdocs.yml

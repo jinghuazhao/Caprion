@@ -20,8 +20,8 @@ git add caprion.ini caprion.R caprion.ipynb
 git commit -m "Primary Code"
 git add gwas2.md
 git commit -m "gwas2"
-git add tests.md
-git commit -m "tests"
+git add autoencoder.md
+git commit -m "autoencoder"
 git add utils docs.sh
 git commit -m "utils"
 git add mkdocs.yml

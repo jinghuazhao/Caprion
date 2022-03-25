@@ -4,7 +4,7 @@ edit_uri: ""
 nav:
   - "": README.md
   - gwas2: gwas2.md
-  - tests: tests.md
+  - tests: autoencoder.md
 theme:
     name: mkdocs
     nav_style: dark

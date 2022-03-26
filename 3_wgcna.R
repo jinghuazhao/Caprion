@@ -5,6 +5,23 @@ load("~/Caprion/pilot/work/es.rda")
 prot <- t(exprs(protein_all))
 colnames(prot) <- gsub("_HUMAN","",colnames(prot))
 
+mcol <- apply(prot,2,is.na)
+many <- !apply(mcol,1,any)
+s <- prot[many,]
+r <- cor(s,s)
+g <- as.matrix(r>=0.7)+0
+
+suppressMessages(library(RColorBrewer))
+suppressMessages(library(heatmaply))
+heatmaply(r,k_col=5,k_row=5,colors = colorRampPalette(brewer.pal(3, "RdBu"))(256),file="~/Caprion/pilot/work/corr.html")
+
+suppressMessages(library(ComplexHeatmap))
+f1 <- Heatmap(r,row_names_gp = gpar(fontsize = 3),column_names_gp = gpar(fontsize = 3))
+f2 <- Heatmap(g,row_names_gp = gpar(fontsize = 3),column_names_gp = gpar(fontsize = 3))
+f <- f1
+f
+ggplot2::ggsave("heatmap.pdf")
+
 wgcna_etc <- function()
 # Weighted Correlation Network Analysis
 {
@@ -130,3 +147,5 @@ cytoscape <- function()
   exportVisualStyles("turquoise.json","JSON")
   saveSession("turquoise.cys")
 }
+
+# https://www.datanovia.com/en/blog/how-to-create-a-beautiful-interactive-heatmap-in-r/

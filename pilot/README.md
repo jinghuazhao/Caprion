@@ -1,6 +1,6 @@
 # Pilot studies
 
-### Site map
+## Site map
 
 * Pilot (N=196)
     - data/ contains genotype files in .bgen format
@@ -21,7 +21,7 @@
          * 1e-5
          * 5e-8
 
-### Coding
+## Coding
 
 There are apparent commonalities between batches from the list of programs and diagrams; many of which are activated as subroutines.
 

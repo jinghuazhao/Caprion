@@ -12,7 +12,7 @@ bcftools query -l ${caprion}/work/INTERVAL-X.vcf.gz | \
 tr '_' ' ' | \
 awk '{print $1}' | \
 bcftools reheader -s - ${caprion}/work/INTERVAL-X.vcf.gz -o ${caprion}/work/X.vcf.gz --threads 12
-bcftools index -tf ${caprion}/X.vcf.gz
+bcftools index -tf ${caprion}/work/X.vcf.gz
 
 function bgen()
 {
@@ -31,10 +31,10 @@ function fastGWAsetup()
   gcta-1.9 --grm ${caprion}/work/caprion --make-bK-sparse 0.05 --out ${caprion}/work/caprion-spgrm
   echo ${caprion}/work/chr{1..22}.bgen | tr ' ' '\n' > ${caprion}/work/caprion.bgenlist
   (
-    head -2 ${SEQ}/work/${weswgs}-chrX.sample
-    sed '1,2d' ${SEQ}/work/${weswgs}-chrX.sample | \
+    head -2 ${caprion}/work/chrX.sample
+    sed '1,2d' ${caprion}/work/chrX.sample | \
     cut -d' ' -f1-3 | \
-    join -a1 -e NA -o1.1,1.2,1.3,2.2 - ${SEQ}/work/${weswgs}.sex
+    join -a1 -e NA -o1.1,1.2,1.3,2.2 - ${caprion}/work/caprion.sex
   ) > ${caprion}/work/caprion.sample
 
   bcftools query -l ${caprion}/work/chrX.vcf.gz | awk '{print $1,$1}' > ${caprion}/work/-chrX.idlist
@@ -45,13 +45,11 @@ function fastGWAsetup()
   sed -i '1d' ${caprion}/work/caprion-lr.pheno
 }
 
-export weswgs=${weswgs}
-bgen
 if [ ! -f ${caprion}/work/caprion.varlist ]; then
    cut -f1,2 --complement ${caprion}/work/${caprion}.pheno | head -1 | tr '\t' '\n' > ${caprion}/work/caprion.varlist
 fi
 fastGWAsetup
-sbatch --export=ALL ${SEQ}/spa.sb
+sbatch --export=ALL ${caprion}/5_pgwas.sb
 
 ls ${caprion}/work/*.fastGWA.gz | \
 xargs -l basename | \
@@ -65,9 +63,9 @@ parallel -j10 --env caprion -C' ' '
      export out=${olink_protein}.txt.bgz
      (
        echo -e "CHR\tSNP\tPOS\tEFF_ALLELE\tOTHER_ALLELE\tN\tEFF_ALLELE_FREQ\tBETA\tSE\tP"
-       gunzip -c ${SEQ}/work/spa/{2}-{1}.fastGWA.gz | \
+       gunzip -c ${caprion}/work/spa/{2}-{1}.fastGWA.gz | \
        sed "1d"
-       gunzip -c ${SEQ}/work/spa/{2}-{1}-chrX.fastGWA.gz | \
+       gunzip -c ${caprion}/work/spa/{2}-{1}-chrX.fastGWA.gz | \
        sed "1d"
      ) | \
      awk -vOFS="\t" "{print \$2,\$1,\$3,\$6,\$4,\$5,\$7,\$8,\$9,\$10}" | \
@@ -75,9 +73,10 @@ parallel -j10 --env caprion -C' ' '
      tabix -f -S1 -s2 -b3 -e3 {caprion}/work/${out}
   fi
 ' ::: $(cat ${caprion}/work/caprion.varlist)
-# ::: $(grep -f ${SEQ}/work/wes.lrlist ${SEQ}/work/wes.varlist) ::: wes
+# ::: $(grep -f ${caprion}/work/wes.lrlist ${caprion}/work/wes.varlist) ::: wes
 
-# bcftools annotate --set-id '%CHROM:%POS\_%REF\/%FIRST_ALT' ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o work/INTERVAL-X-src.vcf.gz
+# Rscript -e 'library(HIBAG)'
+# bcftools annotate --set-id '%CHROM:%POS\_%REF\/%FIRST_ALT' ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o work/INTERVAL-X-vcf.gz
 
 seq 22 | \
 xargs -I {} cut -f15 ${ref}/impute_{}_interval.snpstats | \

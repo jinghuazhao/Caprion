@@ -140,6 +140,7 @@ normalise <- function(prot)
   edata <- edata[!rownames(edata)%in%union(ZYQ.na,UDP.na),]
   batch <- pheno$batch
   detach(pca_km_mc)
+  write.table(select(pheno,Affymetrix_gwasQC_bl),file="~/Caprion/pilot/work/caprion.id",quote=FALSE,row.names=FALSE,col.names=FALSE)
 
   suppressMessages(library(sva))
   mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse","ppc1","ppc2","ppc3",paste0("PC",1:20)),collapse="+")), data=pheno)

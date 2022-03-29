@@ -1,0 +1,65 @@
+#!/usr/bin/bash
+
+#SBATCH --job-name=_fastGWA
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --qos=cardio
+#SBATCH --array=1
+#SBATCH --mem=28800
+#SBATCH --time=5-00:00:00
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_weswgs_fastGWA_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_weswgs_fastGWA_%A_%a.e
+#SBATCH --export ALL
+
+export TMPDIR=${HPC_WORK}/work
+export caprion=~/Caprion/pilot
+export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/work/caprion.varlist)
+
+function fastGWA()
+# fastGWA mixed model
+{
+  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --grm-sparse ${caprion}/work/caprion-spgrm \
+           --sample ${caprion}/work/caprion-chr1.sample \
+           --fastGWA-mlm --pheno ${caprion}/work/caprion.pheno --mpheno ${SLURM_ARRAY_TASK_ID} --threads 10 \
+           --out ${caprion}/work/caprion-${phenoname}
+
+  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --grm-sparse ${caprion}/work/caprion-spgrm \
+           --sample ${caprion}/work/caprion.sample \
+           --fastGWA-mlm --model-only --pheno ${caprion}/work/caprion.pheno --mpheno ${SLURM_ARRAY_TASK_ID} \
+           --keep ${caprion}/work/caprion-chrX.idlist --threads 10 \
+           --out ${caprion}/work/caprion-${phenoname}
+
+  gcta-1.9 --bgen ${caprion}/work/caprion-chrX.bgen \
+           --sample ${caprion}/work/caprion.sample \
+           --load-model ${caprion}/work/caprion-${phenoname}.fastGWA \
+           --extract ${caprion}/work/caprion-chrX.snplist --geno 0.1 --threads 10 \
+           --out ${caprion}/work/caprion-${phenoname}-chrX
+  gzip -f ${caprion}/work/caprion-${phenoname}*fastGWA
+}
+
+function fastLR()
+# fastGWA without --grm-sparse
+{
+  export phenocol=$(grep -n -f ${caprion}/work/caprion.lrlist ${caprion}/work/caprion.varlist | \
+                    tr ':' '\t' | cut -f1 | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
+  export phenoname=$(awk 'NR==ENVIRON["phenocol"]{print $1}' ${caprion}/work/caprion.varlist)
+  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
+           --fastGWA-lr --sample ${caprion}/work/caprion-chr1.sample \
+           --pheno ${caprion}/work/caprion-lr.pheno --mpheno ${phenocol} --threads 10 \
+           --out ${caprion}/work/caprion-${phenoname}
+
+  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
+           --sample ${caprion}/work/caprion.sample \
+           --fastGWA-lr --model-only --pheno ${caprion}/work/caprion-lr.pheno --mpheno ${phenocol} \
+           --keep ${caprion}/work/caprion-chrX.idlist --threads 10 \
+           --out ${caprion}/work/caprion-${phenoname}
+
+  gcta-1.9 --bgen ${caprion}/work/caprion-chrX.bgen \
+           --sample ${caprion}/work/caprion.sample \
+           --load-model ${caprion}/work/caprion-${phenoname}.fastGWA \
+           --extract ${caprion}/work/caprion-chrX.snplist --geno 0.1 --threads 10 \
+           --out ${caprion}/work/caprion-${phenoname}-chrX
+  gzip -f ${caprion}/work/caprion-${phenoname}*fastGWA
+}
+
+fastLR

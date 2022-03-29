@@ -1,6 +1,83 @@
 #!/usr/bin/bash
 
-export ref=/rds/project/jmmh2/rds-jmmh2-post_qc_data/interval/reference_files/genetic/reference_files_genotyped_imputed/
+export caprion=~/Caprion/pilot
+export autosomes=~/rds/post_qc_data/interval/imputed/uk10k_1000g_b37
+export X=~/rds/projects/covid/ace2/interval_genetic_data/interval_imputed_data/
+export ref=~/rds/post_qc_data/interval/reference_files/genetic/reference_files_genotyped_imputed/
+export TMPDIR=${HPC_WORK}/work
+
+awk '!/NA/{print $1"_"$1}' ~/Caprion/pilot/work/caprion.id | \
+bcftools view -S - --force-samples ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o ${caprion}/work/INTERVAL-X.vcf.gz
+bcftools query -l ${caprion}/work/INTERVAL-X.vcf.gz | \
+tr '_' ' ' | \
+awk '{print $1}' | \
+bcftools reheader -s - ${caprion}/work/INTERVAL-X.vcf.gz -o ${caprion}/work/X.vcf.gz --threads 12
+bcftools index -tf ${caprion}/X.vcf.gz
+
+function bgen()
+{
+  for chr in chr{{1..22},X}
+  do
+     plink2 --vcf ${caprion}/work/${chr}.vcf.gz --export bgen-1.2 bits=8 --double-id --dosage-erase-threshold 0.001 \
+            --out ${caprion}/work/${chr}
+     bgenix -g ${caprion}/work/${chr}.bgen -index -clobber
+  done
+}
+
+function fastGWAsetup()
+{
+# a sparse GRM from SNP data
+  gcta-1.9 --bfile ${caprion}/work/caprion --make-grm --out ${caprion}/work/caprion
+  gcta-1.9 --grm ${caprion}/work/caprion --make-bK-sparse 0.05 --out ${caprion}/work/caprion-spgrm
+  echo ${caprion}/work/chr{1..22}.bgen | tr ' ' '\n' > ${caprion}/work/caprion.bgenlist
+  (
+    head -2 ${SEQ}/work/${weswgs}-chrX.sample
+    sed '1,2d' ${SEQ}/work/${weswgs}-chrX.sample | \
+    cut -d' ' -f1-3 | \
+    join -a1 -e NA -o1.1,1.2,1.3,2.2 - ${SEQ}/work/${weswgs}.sex
+  ) > ${caprion}/work/caprion.sample
+
+  bcftools query -l ${caprion}/work/chrX.vcf.gz | awk '{print $1,$1}' > ${caprion}/work/-chrX.idlist
+  bcftools query -f "%ID\n" ${caprion}/work/chrX.vcf.gz > ${caprion}/work/chrX.snplist
+
+# fastGWA mixed model
+  sed -i '1d' ${caprion}/work/caprion.pheno
+  sed -i '1d' ${caprion}/work/caprion-lr.pheno
+}
+
+export weswgs=${weswgs}
+bgen
+if [ ! -f ${caprion}/work/caprion.varlist ]; then
+   cut -f1,2 --complement ${caprion}/work/${caprion}.pheno | head -1 | tr '\t' '\n' > ${caprion}/work/caprion.varlist
+fi
+fastGWAsetup
+sbatch --export=ALL ${SEQ}/spa.sb
+
+ls ${caprion}/work/*.fastGWA.gz | \
+xargs -l basename | \
+sed 's/wes-//g;s/wgs-//g;s/.fastGWA.gz//g' | \
+grep -v chrX | \
+grep -v -f - ${caprion}/work/caprion.varlist > ${caprion}/work/caprion.lrlist
+
+parallel -j10 --env caprion -C' ' '
+  export olink_protein={1}
+  if [ -f ${caprion}/work/{2}-{1}.fastGWA.gz ] && [ -f ${caprion}/work/{2}-{1}-chrX.fastGWA.gz ]; then
+     export out=${olink_protein}.txt.bgz
+     (
+       echo -e "CHR\tSNP\tPOS\tEFF_ALLELE\tOTHER_ALLELE\tN\tEFF_ALLELE_FREQ\tBETA\tSE\tP"
+       gunzip -c ${SEQ}/work/spa/{2}-{1}.fastGWA.gz | \
+       sed "1d"
+       gunzip -c ${SEQ}/work/spa/{2}-{1}-chrX.fastGWA.gz | \
+       sed "1d"
+     ) | \
+     awk -vOFS="\t" "{print \$2,\$1,\$3,\$6,\$4,\$5,\$7,\$8,\$9,\$10}" | \
+     bgzip -f > ${caprion}/work/${out}
+     tabix -f -S1 -s2 -b3 -e3 {caprion}/work/${out}
+  fi
+' ::: $(cat ${caprion}/work/caprion.varlist)
+# ::: $(grep -f ${SEQ}/work/wes.lrlist ${SEQ}/work/wes.varlist) ::: wes
+
+# bcftools annotate --set-id '%CHROM:%POS\_%REF\/%FIRST_ALT' ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o work/INTERVAL-X-src.vcf.gz
 
 seq 22 | \
 xargs -I {} cut -f15 ${ref}/impute_{}_interval.snpstats | \

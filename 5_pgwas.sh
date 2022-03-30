@@ -6,17 +6,23 @@ export X=~/rds/projects/covid/ace2/interval_genetic_data/interval_imputed_data/
 export ref=~/rds/post_qc_data/interval/reference_files/genetic/reference_files_genotyped_imputed/
 export TMPDIR=${HPC_WORK}/work
 
-awk '!/NA/{print $1"_"$1}' ~/Caprion/pilot/work/caprion.id | \
-bcftools view -S - --force-samples ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o ${caprion}/work/INTERVAL-X.vcf.gz
-bcftools query -l ${caprion}/work/INTERVAL-X.vcf.gz | \
-tr '_' ' ' | \
-awk '{print $1}' | \
-bcftools reheader -s - ${caprion}/work/INTERVAL-X.vcf.gz -o ${caprion}/work/X.vcf.gz --threads 12
-bcftools index -tf ${caprion}/work/X.vcf.gz
+function X()
+{
+  awk '!/NA/{print $1"_"$1}' ${caprion}/work/caprion.id | \
+  bcftools view -S - --force-samples ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o ${caprion}/work/INTERVAL-X.vcf.gz
+  bcftools query -l ${caprion}/work/INTERVAL-X.vcf.gz | \
+  tr '_' ' ' | \
+  awk '{print $1}' | \
+  bcftools reheader -s - ${caprion}/work/INTERVAL-X.vcf.gz -o ${caprion}/work/X.vcf.gz --threads 12
+  bcftools index -tf ${caprion}/work/X.vcf.gz
+  plink2 --vcf ${caprion}/work/X.vcf.gz --export bgen-1.2 bits=8 --double-id --dosage-erase-threshold 0.001 \
+         --out ~/Caprion/analysis/work/X
+  bgenix -g ~/Caprion/analysis/work/X.bgen -index -clobber
+}
 
 function bgen()
 {
-  for chr in chr{{1..22},X}
+  for chr in chr{1..22}
   do
      plink2 --vcf ${caprion}/work/${chr}.vcf.gz --export bgen-1.2 bits=8 --double-id --dosage-erase-threshold 0.001 \
             --out ${caprion}/work/${chr}

@@ -26,7 +26,6 @@ function X()
 
 function fastGWAsetup()
 {
-# a sparse GRM from SNP data
 # echo ${caprion}/work/chr{1..22}.bgen | tr ' ' '\n' > ${caprion}/work/caprion.bgenlist
   seq 22 | \
   xargs -I {} echo ${caprion}/work/chr{}.bgen > ${caprion}/work/caprion.bgenlist
@@ -34,7 +33,8 @@ function fastGWAsetup()
       <(grep -f ${caprion}/work/caprion.id -w ${caprion}/data/merged_imputation.sample | \
         cut -d' ' -f1-2 | join - ${caprion}/data/merged_imputation.missing | \
         awk '{print $0, "NA"}') > ${caprion}/work/caprion.sample
-  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --sample ${caprion}/work/caprion.sample --make-grm --out ${caprion}/work/caprion --threads 10
+  gcta-1.9 --bfile ${caprion}/data/merged_imputation --keep ${caprion}/work/caprion.id2 --make-grm --out ${caprion}/work/caprion --threads 10
+# a sparse GRM from SNP data
   gcta-1.9 --grm ${caprion}/work/caprion --make-bK-sparse 0.05 --out ${caprion}/work/caprion-spgrm --threads 10
 # fastGWA mixed model
   sed -i '1d' ${caprion}/work/caprion.pheno
@@ -43,21 +43,26 @@ function fastGWAsetup()
   head -1 | \
   tr '\t' '\n' > ${caprion}/work/caprion.varlist
 }
+# slow but unnecessary
+# gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --sample ${caprion}/work/caprion.sample --make-grm --out ${caprion}/work/caprion --threads 10
 
 # sbatch --export=ALL ${caprion}/5_pgwas.sb
 
-function collect()
+function lrlist()
 {
   ls ${caprion}/work/*.fastGWA.gz | \
   xargs -l basename | \
-  sed 's/wes-//g;s/wgs-//g;s/.fastGWA.gz//g' | \
+  sed 's/.fastGWA.gz//g' | \
   grep -v chrX | \
   grep -v -f - ${caprion}/work/caprion.varlist > ${caprion}/work/caprion.lrlist
+}
 
+function collect()
+{
   parallel -j10 --env caprion -C' ' '
-    export olink_protein={1}
+    export caprion_protein={1}
     if [ -f ${caprion}/work/{2}-{1}.fastGWA.gz ] && [ -f ${caprion}/work/{2}-{1}-chrX.fastGWA.gz ]; then
-       export out=${olink_protein}.txt.bgz
+       export out=${caprion_protein}.txt.bgz
        (
          echo -e "CHR\tSNP\tPOS\tEFF_ALLELE\tOTHER_ALLELE\tN\tEFF_ALLELE_FREQ\tBETA\tSE\tP"
          gunzip -c ${caprion}/work/spa/{2}-{1}.fastGWA.gz | \

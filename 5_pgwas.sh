@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 export caprion=~/Caprion/pilot
+export interval=${HPC_WORK}/data/interval
 export autosomes=~/rds/post_qc_data/interval/imputed/uk10k_1000g_b37
 export X=~/rds/projects/covid/ace2/interval_genetic_data/interval_imputed_data/
 export ref=~/rds/post_qc_data/interval/reference_files/genetic/reference_files_genotyped_imputed/
@@ -15,32 +16,29 @@ function X()
   awk '{print $1}' | \
   bcftools reheader -s - ${caprion}/work/INTERVAL-X.vcf.gz -o ${caprion}/work/X.vcf.gz --threads 12
   bcftools index -tf ${caprion}/work/X.vcf.gz
+  bcftools query -l ${caprion}/work/X.vcf.gz | awk '{print $1,$1}' > ${caprion}/work/X.idlist
+  bcftools query -f "%ID\n" ${caprion}/work/X.vcf.gz > ${caprion}/work/X.snplist
   plink2 --vcf ${caprion}/work/X.vcf.gz --export bgen-1.2 bits=8 --double-id --dosage-erase-threshold 0.001 \
-         --out ~/Caprion/analysis/work/X
-  bgenix -g ~/Caprion/analysis/work/X.bgen -index -clobber
+         --out ${caprion}/work/chrX
+  bgenix -g ${caprion}/work/chrX.bgen -index -clobber
 }
 # bcftools annotate --set-id '%CHROM:%POS\_%REF\/%FIRST_ALT' ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o work/INTERVAL-X-vcf.gz
 
 function fastGWAsetup()
 {
 # a sparse GRM from SNP data
-  gcta-1.9 --bfile ${caprion}/work/caprion --make-grm --out ${caprion}/work/caprion
-  gcta-1.9 --grm ${caprion}/work/caprion --make-bK-sparse 0.05 --out ${caprion}/work/caprion-spgrm
-  echo ${caprion}/work/chr{1..22}.bgen | tr ' ' '\n' > ${caprion}/work/caprion.bgenlist
-  (
-    head -2 ${caprion}/work/chrX.sample
-    sed '1,2d' ${caprion}/work/chrX.sample | \
-    cut -d' ' -f1-3 | \
-    join -a1 -e NA -o1.1,1.2,1.3,2.2 - ${caprion}/work/caprion.sex
-  ) > ${caprion}/work/caprion.sample
-
-  bcftools query -l ${caprion}/work/chrX.vcf.gz | awk '{print $1,$1}' > ${caprion}/work/chrX.idlist
-  bcftools query -f "%ID\n" ${caprion}/work/chrX.vcf.gz > ${caprion}/work/chrX.snplist
-
+# echo ${caprion}/work/chr{1..22}.bgen | tr ' ' '\n' > ${caprion}/work/caprion.bgenlist
+  seq 22 | \
+  xargs -I {} echo ${caprion}/work/chr{}.bgen > ${caprion}/work/caprion.bgenlist
+  cat <(head -2 ${caprion}/data/merged_imputation.sample | awk '{if(NR==1) {print $0, "sex"} else {print $0, "D"}}') \
+      <(grep -f ${caprion}/work/caprion.id -w ${caprion}/data/merged_imputation.sample | \
+        cut -d' ' -f1-2 | join - ${caprion}/data/merged_imputation.missing | \
+        awk '{print $0, "NA"}') > ${caprion}/work/caprion.sample
+  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --sample ${caprion}/work/caprion.sample --make-grm --out ${caprion}/work/caprion --threads 10
+  gcta-1.9 --grm ${caprion}/work/caprion --make-bK-sparse 0.05 --out ${caprion}/work/caprion-spgrm --threads 10
 # fastGWA mixed model
   sed -i '1d' ${caprion}/work/caprion.pheno
   sed -i '1d' ${caprion}/work/caprion-lr.pheno
-
   cut -f1,2 --complement ${caprion}/work/${caprion}.pheno | \
   head -1 | \
   tr '\t' '\n' > ${caprion}/work/caprion.varlist
@@ -78,9 +76,11 @@ function collect()
 
 function bgen()
 {
+  paste -d' ' ${caprion}/work/caprion.id ${caprion}/work/caprion.id | grep -v NA > ${caprion}/work/caprion.id2
   for chr in chr{1..22}
   do
-     plink2 --vcf ${caprion}/work/${chr}.vcf.gz --export bgen-1.2 bits=8 --double-id --dosage-erase-threshold 0.001 \
+     plink2 --bgen ${interval}/${chr}.bgen ref-unknown --sample ${interval}/interval.sample --keep ${caprion}/work/caprion.id2 \
+            --export bgen-1.2 bits=8 --dosage-erase-threshold 0.001 \
             --out ${caprion}/work/${chr}
      bgenix -g ${caprion}/work/${chr}.bgen -index -clobber
   done

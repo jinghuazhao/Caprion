@@ -9,6 +9,10 @@ colnames(prot) <- gsub("_HUMAN","",colnames(prot))
 ZYQ.na <- c("BROX","CT027","GHRL","PSB6")
 UDP.na <- c("BROX","NCF2","SEM7A")
 
+digitalnames <- colnames(prot)[grepl("^[0-9]",colnames(prot))]
+cat("digital names:",digitalnames,"\n")
+cat("X-prefixed names:",gsub("(^[0-9])","X\\1",digitalnames),"\n")
+
 pca_clustering <- function(prot)
 {
   all <- prot[,!colnames(prot)%in%union(ZYQ.na,UDP.na)]
@@ -142,7 +146,10 @@ normalise <- function(prot)
   detach(pca_km_mc)
   write.table(select(pheno,Affymetrix_gwasQC_bl),file="~/Caprion/pilot/work/caprion.id",quote=FALSE,row.names=FALSE,col.names=FALSE)
 # invnormal
-  write.table(pheno,file="~/Caprion/pilot/work/caprion.pheno",quote=FALSE,row.names=FALSE)
+  caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl) %>%
+                   select(FID,IID,gsub("(^[0-9])","X\\1",colnames(prot)))
+  names(caprion_pheno) <- gsub("^X([0-9])","\\1",names(caprion_pheno))
+  write.table(caprion_pheno,file="~/Caprion/pilot/work/caprion.pheno",quote=FALSE,row.names=FALSE)
 
   suppressMessages(library(sva))
   mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse","ppc1","ppc2","ppc3",paste0("PC",1:20)),collapse="+")), data=pheno)

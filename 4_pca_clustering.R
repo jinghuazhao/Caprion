@@ -1,6 +1,7 @@
 options(width=200)
 suppressMessages(library(Biobase))
 suppressMessages(library(dplyr))
+suppressMessages(library(gap))
 
 load("~/Caprion/pilot/work/es.rda")
 prot <- t(exprs(protein_all))
@@ -93,6 +94,26 @@ quantro_sparsenetgls <- function(edata,batch,mod)
   }
 }
 
+normalise_sapply <- function(d)
+{
+  normfun <- function(col,verbose=FALSE)
+  {
+    if (verbose) cat(names(d[col]),col,"\n")
+    y <- invnormal(d[[col]])
+    mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse",paste0("ppc",1:3),paste0("PC",1:20)),collapse="+")), data=d)
+    mnames <- colnames(mod)[-1]
+    l <- lm(y~mod,data=d[mnames])
+    r <- y-predict(l,na.action=na.pass)
+    invnormal(r)
+  }
+  covars <- c(names(d)[grep("agePulse|sexPulse",names(d))],paste0("ppc",1:3),paste0("PC",1:20))
+  proteins <- setdiff(names(d),c("FID","IID",covars))
+  z <- sapply(names(d[proteins]), normfun)
+  colnames(z) <- names(d[proteins])
+  rownames(z) <- d[["IID"]]
+  data.frame(id=d[["IID"]],z)
+}
+
 normalise <- function(prot)
 {
   pca_km_mc <- pca_clustering(prot)
@@ -145,7 +166,6 @@ normalise <- function(prot)
   batch <- pheno$batch
   detach(pca_km_mc)
   write.table(select(pheno,Affymetrix_gwasQC_bl),file="~/Caprion/pilot/work/caprion.id",quote=FALSE,row.names=FALSE,col.names=FALSE)
-# invnormal
   caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl) %>%
                    select(FID,IID,gsub("(^[0-9])","X\\1",colnames(prot)))
   names(caprion_pheno) <- gsub("^X([0-9])","\\1",names(caprion_pheno))
@@ -169,6 +189,13 @@ normalise <- function(prot)
   quantro_sparsenetgls(edata,batch,mod)
 # 3. reference-batch version, with covariates
   combat_edata3 <- ComBat(dat=edata, batch=batch, mod=mod, par.prior=TRUE, ref.batch=3, prior.plots=TRUE)
+
+# invnormal normalisation
+  d <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl) %>%
+       select(FID,IID,agePulse,sexPulse,paste0("ppc",1:3),paste0("PC",1:20),gsub("(^[0-9])","X\\1",colnames(prot)))
+  d <- d[many,]
+  prot_sapply <- normalise_sapply(d)
+  write.table(prot_sapply,file="~/Caprion/pilot/work/caprion-lr.pheno",quote=FALSE,row.names=FALSE,sep="\t")
   list(edata=t(combat_edata3),batch=batch)
 }
 

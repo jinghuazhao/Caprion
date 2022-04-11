@@ -31,7 +31,7 @@ function fastLR()
 
   gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
            --sample ${caprion}/work/caprion.sample \
-           --keep ${caprion}/work/chrX-${batch}.id \
+           --keep ${caprion}/work/caprion-${batch}.id \
            --fastGWA-lr --model-only \
            --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} \
            --threads 10 \
@@ -40,7 +40,7 @@ function fastLR()
   gcta-1.9 --bgen ${caprion}/work/chrX.bgen \
            --sample ${caprion}/work/chrX.sample \
            --keep ${caprion}/work/chrX-${batch}.id \
-           --load-model ${caprion}/work/chrX-${batch}-${phenoname}.fastGWA \
+           --load-model ${caprion}/work/caprion-${batch}-${phenoname}.fastGWA \
            --extract ${caprion}/work/chrX.snplist --geno 0.1 --threads 10 \
            --out ${caprion}/work/caprion-${batch}-${phenoname}-chrX
   gzip -f ${caprion}/work/caprion-${batch}-${phenoname}*fastGWA

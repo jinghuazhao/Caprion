@@ -117,9 +117,9 @@ normalise_lr <- function(d,batches)
   z <- sapply(names(d[proteins]), normfun)
   colnames(z) <- names(d[proteins])
   rownames(z) <- d[["IID"]]
-  caprion_lr <- data.frame(IID=d[["IID"]],z)
+  caprion_lr <- data.frame(d[c("FID","IID")],z)
   names(caprion_lr) <- gsub("^X([0-9])","\\1",names(caprion_lr))
-  write.table(caprion_lr,file=paste0("~/Caprion/pilot/work/caprion-lr-",batches,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
+  write.table(caprion_lr,file=paste0("~/Caprion/pilot/work/caprion-",batches,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
 }
 
 normalise <- function(prot)
@@ -177,7 +177,7 @@ normalise <- function(prot)
   caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl) %>%
                    select(FID,IID,gsub("(^[0-9])","X\\1",colnames(prot)))
   names(caprion_pheno) <- gsub("^X([0-9])","\\1",names(caprion_pheno))
-  write.table(caprion_pheno,file="~/Caprion/pilot/work/caprion.pheno",quote=FALSE,row.names=FALSE)
+  write.table(caprion_pheno,file="~/Caprion/pilot/work/caprion.pheno",quote=FALSE,row.names=FALSE,sep="\t")
 
   suppressMessages(library(sva))
   mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse","ppc1","ppc2","ppc3",paste0("PC",1:20)),collapse="+")), data=pheno)
@@ -205,6 +205,7 @@ normalise <- function(prot)
   {
     d <- filter(dat[many,],batch==batches)
     normalise_lr(d,batches)
+    write.table(d[c("FID","IID")],file=paste0("~/Caprion/pilot/work/caprion-",batches,".id"),col.names=FALSE,row.names=FALSE)
   }
 # return normalised data from above
   list(edata=t(combat_edata3),batch=batch)

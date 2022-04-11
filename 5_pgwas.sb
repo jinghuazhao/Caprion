@@ -22,27 +22,28 @@ function fastLR()
   export phenoname=$(awk 'NR==ENVIRON["phenocol"]{print $1}' ${caprion}/work/caprion.varlist)
   export batch=${1}
   gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
-           --fastGWA-lr --sample ${caprion}/work/caprion.sample \
+           --sample ${caprion}/work/caprion.sample \
            --keep ${caprion}/work/caprion-${batch}.id \
+           --fastGWA-lr \
            --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} \
            --threads 10 \
            --out ${caprion}/work/caprion-${batch}-${phenoname}
 
-  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
-           --sample ${caprion}/work/caprion.sample \
+  gcta-1.9 --mbgen ${caprion}/work/chrX.bgen \
+           --sample ${caprion}/work/chrX.sample \
            --keep ${caprion}/work/chrX-${batch}.id \
            --fastGWA-lr --model-only \
            --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} \
            --threads 10 \
-           --out ${caprion}/work/caprion-${batch}-${phenoname}
+           --out ${caprion}/work/chrX-${batch}-${phenoname}
 
   gcta-1.9 --bgen ${caprion}/work/chrX.bgen \
-           --sample ${caprion}/work/caprion.sample \
+           --sample ${caprion}/work/chrX.sample \
            --keep ${caprion}/work/chrX-${batch}.id \
-           --load-model ${caprion}/work/caprion-${phenoname}.fastGWA \
+           --load-model ${caprion}/work/chrX-${batch}-${phenoname}.fastGWA \
            --extract ${caprion}/work/chrX.snplist --geno 0.1 --threads 10 \
-           --out ${caprion}/work/caprion-${batch}-${phenoname}-chrX
-  gzip -f ${caprion}/work/caprion-${batch}-${phenoname}*fastGWA
+           --out ${caprion}/work/chrX-${batch}-${phenoname}
+  gzip -f ${caprion}/work/caprion-${batch}-${phenoname}*fastGWA chrX-${batch}-${phenoname}*fastGWA
 }
 
 # export phenocol=$(grep -n -f ${caprion}/work/caprion.lrlist ${caprion}/work/caprion.varlist | \

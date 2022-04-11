@@ -41,7 +41,8 @@ function fastLR()
            --sample ${caprion}/work/chrX.sample \
            --keep ${caprion}/work/chrX-${batch}.id \
            --load-model ${caprion}/work/caprion-${batch}-${phenoname}.fastGWA \
-           --extract ${caprion}/work/chrX.snplist --geno 0.1 --threads 10 \
+           --extract ${caprion}/work/chrX.snplist --geno 0.1 \
+           --threads 10 \
            --out ${caprion}/work/caprion-${batch}-${phenoname}-chrX
   gzip -f ${caprion}/work/caprion-${batch}-${phenoname}*fastGWA
 }

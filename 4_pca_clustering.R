@@ -94,24 +94,32 @@ quantro_sparsenetgls <- function(edata,batch,mod)
   }
 }
 
-normalise_sapply <- function(d)
+normalise_lr <- function(d,batches)
 {
   normfun <- function(col,verbose=FALSE)
   {
     if (verbose) cat(names(d[col]),col,"\n")
     y <- invnormal(d[[col]])
-    mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse",paste0("ppc",1:3),paste0("PC",1:20)),collapse="+")), data=d)
-    mnames <- colnames(mod)[-1]
     l <- lm(y~mod,data=d[mnames])
     r <- y-predict(l,na.action=na.pass)
     invnormal(r)
   }
-  covars <- c(names(d)[grep("agePulse|sexPulse",names(d))],paste0("ppc",1:3),paste0("PC",1:20))
-  proteins <- setdiff(names(d),c("FID","IID",covars))
+  if (batches==1) {
+     mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse",paste0("PC",1:20)),collapse="+")), data=d)
+     covars <- c(names(d)[grep("agePulse|sexPulse",names(d))],paste0("PC",1:20))
+     proteins <- setdiff(names(d),c("FID","IID","batch",paste0("ppc",1:3),covars))
+  } else {
+     mod <- model.matrix(as.formula(paste0(c("~agePulse","sexPulse",paste0("ppc",1:3),paste0("PC",1:20)),collapse="+")), data=d)
+     covars <- c(names(d)[grep("agePulse|sexPulse",names(d))],paste0("ppc",1:3),paste0("PC",1:20))
+     proteins <- setdiff(names(d),c("FID","IID","batch",covars))
+  }
+  mnames <- colnames(mod)[-1]
   z <- sapply(names(d[proteins]), normfun)
   colnames(z) <- names(d[proteins])
   rownames(z) <- d[["IID"]]
-  data.frame(id=d[["IID"]],z)
+  caprion_lr <- data.frame(IID=d[["IID"]],z)
+  names(caprion_lr) <- gsub("^X([0-9])","\\1",names(caprion_lr))
+  write.table(caprion_lr,file=paste0("~/Caprion/pilot/work/caprion-lr-",batches,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
 }
 
 normalise <- function(prot)
@@ -190,12 +198,15 @@ normalise <- function(prot)
 # 3. reference-batch version, with covariates
   combat_edata3 <- ComBat(dat=edata, batch=batch, mod=mod, par.prior=TRUE, ref.batch=3, prior.plots=TRUE)
 
-# invnormal normalisation
-  d <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl) %>%
-       select(FID,IID,agePulse,sexPulse,paste0("ppc",1:3),paste0("PC",1:20),gsub("(^[0-9])","X\\1",colnames(prot)))
-  d <- d[many,]
-  prot_sapply <- normalise_sapply(d)
-  write.table(prot_sapply,file="~/Caprion/pilot/work/caprion-lr.pheno",quote=FALSE,row.names=FALSE,sep="\t")
+# invnormal transformation
+  allvars <- c("FID","IID","agePulse","sexPulse","batch",paste0("ppc",1:3),paste0("PC",1:20),gsub("(^[0-9])","X\\1",colnames(prot)))
+  dat <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl)[allvars]
+  for(batches in 1:3)
+  {
+    d <- filter(dat[many,],batch==batches)
+    normalise_lr(d,batches)
+  }
+# return normalised data from above
   list(edata=t(combat_edata3),batch=batch)
 }
 

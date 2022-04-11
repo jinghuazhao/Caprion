@@ -21,6 +21,9 @@ function X()
   plink2 --vcf ${caprion}/work/X.vcf.gz --export bgen-1.2 bits=8 --double-id --dosage-erase-threshold 0.001 \
          --out ${caprion}/work/chrX
   bgenix -g ${caprion}/work/chrX.bgen -index -clobber
+  cut -d' ' -f1 ${caprion}/work/caprion-1.id | grep -f - ${caprion}/work/chrX.idlist > ${caprion}/work/chrX-1.id
+  cut -d' ' -f1 ${caprion}/work/caprion-2.id | grep -f - ${caprion}/work/chrX.idlist > ${caprion}/work/chrX-2.id
+  cut -d' ' -f1 ${caprion}/work/caprion-3.id | grep -f - ${caprion}/work/chrX.idlist > ${caprion}/work/chrX-3.id
 }
 # bcftools annotate --set-id '%CHROM:%POS\_%REF\/%FIRST_ALT' ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o ${caprion}/work/INTERVAL-X-vcf.gz
 

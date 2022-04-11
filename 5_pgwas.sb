@@ -24,19 +24,21 @@ function fastLR()
   gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
            --fastGWA-lr --sample ${caprion}/work/caprion.sample \
            --keep ${caprion}/work/caprion-${batch}.id \
-           --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} --threads 10 \
+           --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} \
+           --threads 10 \
            --out ${caprion}/work/caprion-${batch}-${phenoname}
 
   gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
            --sample ${caprion}/work/caprion.sample \
-           --keep ${caprion}/work/caprion-${batch}.id \
-           --fastGWA-lr --model-only --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} \
-           --keep ${caprion}/work/chrX.idlist --threads 10 \
+           --keep ${caprion}/work/chrX-${batch}.id \
+           --fastGWA-lr --model-only \
+           --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} \
+           --threads 10 \
            --out ${caprion}/work/caprion-${batch}-${phenoname}
 
   gcta-1.9 --bgen ${caprion}/work/chrX.bgen \
            --sample ${caprion}/work/caprion.sample \
-           --keep ${caprion}/work/caprion-${batch}.id \
+           --keep ${caprion}/work/chrX-${batch}.id \
            --load-model ${caprion}/work/caprion-${phenoname}.fastGWA \
            --extract ${caprion}/work/chrX.snplist --geno 0.1 --threads 10 \
            --out ${caprion}/work/caprion-${batch}-${phenoname}-chrX

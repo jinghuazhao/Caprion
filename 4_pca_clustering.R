@@ -17,19 +17,19 @@ pca_clustering_plot <- function(pca,mc,out)
     showlegend = TRUE
   )
   suppressMessages(library(ggplot2))
-  p <- plot_ly() %>%
-       add_trace(mode=trace$mode, name=trace$name, type=trace$type, x=trace$x, y=trace$y, z=trace$z, frame=trace$frame, marker=trace$marker) %>%
-       layout(scene=layout$scene, xaxis=layout$xaxis, yaxis=layout$yaxis, margin=layout$margin, hovermode=layout$hovermode, showlegend=layout$showlegend)
-  p <- with(list(x=with(pca,x[,2]),y=with(pca,x[,1]),z=with(pca,x[,3]),color=mc$classification,id=with(pca,rownames(x))),
-       plot_ly(x = ~x, y = ~y, z = ~z, color = ~color, colors=c("black","red")) %>%
-       add_markers(type="scatter3d", text=id) %>%
-       layout(scene = list(xaxis = list(title = "PC2", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)), 
-                           yaxis = list(title = "PC1", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)),
-                           zaxis = list(title = "PC3", tickfont = list(size = 10)),
-                           aspectratio = list(x = 0.9, y = 1, z = 0.6)),
-                           title = "3d plot",
-                           showlegend = TRUE))
-  if (interactive()) rgl::plot3d(with(pca,x[,c(2,1,3)]),col=with(mc,classification)) else htmlwidgets::saveWidget(p,file=out)
+  p <- plot_ly()
+  p <- with(trace,add_trace(p,mode=mode, name=name, type=type, x=x, y=y, z=z, frame=frame, marker=marker))
+  p <- with(layout,layout(p,scene=scene, xaxis=xaxis, yaxis=yaxis, margin=margin, hovermode=hovermode, showlegend=showlegend))
+  p2 <- with(list(x=with(pca,x[,2]),y=with(pca,x[,1]),z=with(pca,x[,3]),color=mc$classification,id=with(pca,rownames(x))),
+        plot_ly(x = ~x, y = ~y, z = ~z, color = ~color, colors=c("black","red")) %>%
+        add_markers(type="scatter3d", text=id) %>%
+        layout(scene = list(xaxis = list(title = "PC2", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)), 
+                            yaxis = list(title = "PC1", tickmode = "array", autotick = TRUE, tickfont = list(size = 10)),
+                            zaxis = list(title = "PC3", tickfont = list(size = 10)),
+                            aspectratio = list(x = 0.9, y = 1, z = 0.6)),
+                            title = "3d plot",
+                            showlegend = TRUE))
+  if (interactive()) rgl::plot3d(with(pca,x[,c(2,1,3)]),col=with(mc,classification)) else htmlwidgets::saveWidget(p2,file=out)
 }
 
 pca_clustering <- function(prot)
@@ -78,7 +78,6 @@ quantro_sparsenetgls <- function(edata,batch,mod)
 {
   suppressMessages(library(quantro))
   suppressMessages(library(doParallel))
-
   registerDoParallel(cores=10)
   quantro(edata,batch,B=10000)
   png("~/Caprion/pilot/work/matboxplot.png",width=12,height=10,unit="in",res=300)
@@ -90,31 +89,32 @@ quantro_sparsenetgls <- function(edata,batch,mod)
              main = "Protein levels", brewer.n = 8, brewer.name = "Dark2")
   legend('top', c("ZWK", "ZYQ", "UDP"), col = c(1, 2, 3), lty = 1, lwd = 3)
   dev.off()
-  suppressMessages(library(sparsenetgls))
-  if (FALSE) {
-     y <- t(edata)
-     sngls <- sparsenetgls(y,mod)
-     save(sngls,file="~/Caprion/pilot/work/sparsenetgls.rda")
-     plotsngls(sngls,ith_lambda=5)
+  if (FALSE)
+  {
+    suppressMessages(library(sparsenetgls))
+    y <- t(edata)
+    sngls <- sparsenetgls(y,mod)
+    save(sngls,file=paste0("~/Caprion/pilot/work/sparsenetgls-",batch,".rda"))
+    plotsngls(sngls,ith_lambda=5)
   }
 }
 
 normalise_lr <- function(d,batches)
 {
-  normfun <- function(col,verbose=FALSE)
-  {
-    if (verbose) cat(names(d[col]),col,"\n")
-    y <- invnormal(d[[col]])
-    x <- cbind(mod["sexPulse"],scale(mod[,-(1:2)]))
-    l <- lm(y~x)
-    r <- y-predict(l,na.action=na.pass)
-    invnormal(r)
-  }
   covars <- c("sexPulse","agePulse",paste0("PC",1:20))
   proteins <- setdiff(names(d),c("FID","IID","batch",pcs,covars))
   if (batches!=1) covars <- c(covars,pcs)
   mod <- model.matrix(as.formula(paste0("~",paste(covars,collapse="+"))), data=d)
-  z <- sapply(names(d[proteins]), normfun)
+  z <- sapply(names(d[proteins]),
+              function(col,verbose=FALSE)
+              {
+                if (verbose) cat(names(d[col]),col,"\n")
+                y <- invnormal(d[[col]])
+                x <- cbind(mod["sexPulse"],scale(mod[,-(1:2)]))
+                l <- lm(y~x)
+                r <- y-predict(l,na.action=na.pass)
+                invnormal(r)
+              })
   colnames(z) <- names(d[proteins])
   rownames(z) <- d[["IID"]]
   caprion_lr <- data.frame(d[c("FID","IID")],z)

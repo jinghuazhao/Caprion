@@ -25,7 +25,6 @@ function X()
   cut -d' ' -f1 ${caprion}/work/caprion-2.id | grep -f - ${caprion}/work/chrX.idlist > ${caprion}/work/chrX-2.id
   cut -d' ' -f1 ${caprion}/work/caprion-3.id | grep -f - ${caprion}/work/chrX.idlist > ${caprion}/work/chrX-3.id
 }
-# bcftools annotate --set-id '%CHROM:%POS\_%REF\/%FIRST_ALT' ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o ${caprion}/work/INTERVAL-X-vcf.gz
 
 function fastGWAsetup()
 {

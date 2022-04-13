@@ -31,7 +31,7 @@ The phenotypic data is generated in accordance with the double transformations a
 
 ## 5. pGWAS
 
-Note that GCTA/fastGWA employs MAF>=0.0001 and geno=0.1 so potentially we can have .bgen files as such to speed up.
+Note that GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
 
 It looked to take 4.5 days on Cardio without unfiltered genotypes and once these are taken care of the analysis can be propagated.
 

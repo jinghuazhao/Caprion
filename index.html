@@ -89,6 +89,30 @@
 <ul class="nav flex-column">
 <li class="nav-item" data-level="1"><a class="nav-link" href="#analysis">Analysis</a>
 <ul class="nav flex-column">
+<li class="nav-item" data-level="2"><a class="nav-link" href="#1-data-handling-and-pca-projection">1. Data handling and PCA projection</a>
+<ul class="nav flex-column">
+</ul>
+</li>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#2-ggm-experiment">2. GGM experiment</a>
+<ul class="nav flex-column">
+</ul>
+</li>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#3-wgcna-experiment">3. WGCNA experiment</a>
+<ul class="nav flex-column">
+</ul>
+</li>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#4-pca-and-clustering">4. PCA and clustering</a>
+<ul class="nav flex-column">
+</ul>
+</li>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#5-pgwas">5. pGWAS</a>
+<ul class="nav flex-column">
+</ul>
+</li>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#6-meta-analysis">6. Meta-analysis</a>
+<ul class="nav flex-column">
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -96,15 +120,29 @@
 </div></div>
 <div class="col-md-9" role="main">
 <h1 id="analysis">Analysis</h1>
-<p>This is now done in sequence.</p>
+<p>This is now done in a named sequence.</p>
 <ul>
-<li>1_pca_projection.sh. Data handling and PCA projection.</li>
-<li>2_ggm.R. GGM experiment.</li>
-<li>3_wgcna.R WGCNA experiment.</li>
-<li>4_pca_clustering.R PCA and clustering.</li>
+<li>1_pca_projection.sh</li>
+<li>2_ggm.R</li>
+<li>3_wgcna.R</li>
+<li>4_pca_clustering.R</li>
 <li>5_pgwas.sh</li>
 <li>6_meta_analysis.sh</li>
-</ul></div>
+</ul>
+<h2 id="1-data-handling-and-pca-projection">1. Data handling and PCA projection</h2>
+<p>The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected. </p>
+<h2 id="2-ggm-experiment">2. GGM experiment</h2>
+<p>The results are ready to report.</p>
+<h2 id="3-wgcna-experiment">3. WGCNA experiment</h2>
+<p>This can be finalised according to the Science paper.</p>
+<h2 id="4-pca-and-clustering">4. PCA and clustering</h2>
+<p>The groupings based on proteins can be made on three phases altogether. and instead of a classification indicator the first three PCs are used.</p>
+<p>The PLINK2 has been consistent in the pilot studies, so <code>scale()</code> operaions can be used in the inverse normal transformations.</p>
+<p>The phenotypic data is generated in accordance with the double transformations as in SCALLOP-Seq analysis.</p>
+<h2 id="5-pgwas">5. pGWAS</h2>
+<p>Note that GCTA/fastGWA employs MAF&gt;=0.0001 and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
+<p>It looked to take 4.5 days on Cardio without unfiltered genotypes and once these are taken care of the analysis can be propagated.</p>
+<h2 id="6-meta-analysis">6. Meta-analysis</h2></div>
 </div>
 </div>
 <footer class="col-md-12">
@@ -187,5 +225,5 @@
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-13 16:39:21.643376+00:00
+Build Date UTC : 2022-04-13 20:42:08.527249+00:00
 -->

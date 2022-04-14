@@ -45,8 +45,7 @@ function METAL_files_suffix()
      echo GENOMICCONTROL OFF
      echo LOGPVALUE ON
      echo OUTFILE ${caprion}/analysis/METAL/$p${suffix}- .tbl
-     awk '$2==token' token=${p}${suffix} ${caprion}/analysis/METAL/METAL.list | \
-     awk '{print "PROCESS", $3}'
+     awk '$2==token {print "PROCESS", $3}' token=${p}${suffix} ${caprion}/analysis/METAL/METAL.list
      echo ANALYZE HETEROGENEITY
      echo CLEAR
   ) > ${caprion}/analysis/METAL/${p}${suffix}.metal

@@ -40,8 +40,8 @@ It looked to take 4.5 days on Cardio without unfiltered genotypes and once these
 This follows from the SCALLOP/INF implementation, as designed in the logic of a Makefile, i.e.,
 
 ```bash
-6_meta_analysis task
+6_meta_analysis <task>
 ```
-where task=METAL_list, METAL_files, METAL_analysis.
+where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.
 
 To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log(10)' 1433B-1.tbl`, say.

@@ -72,9 +72,4 @@ function METAL_analysis()
   '
 }
 
-# awk 'NR==1||$12<log(1e-6)/log(10)' 1433B-1.tbl
-# The script runs as a Makefile
-# Usage: 6_meta_analysis task
-# where task=METAL_list, METAL_files, METAL_analysis
-
 $1

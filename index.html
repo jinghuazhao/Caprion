@@ -144,9 +144,9 @@
 <p>It looked to take 4.5 days on Cardio without unfiltered genotypes and once these are taken care of the analysis can be propagated.</p>
 <h2 id="6-meta-analysis">6. Meta-analysis</h2>
 <p>This follows from the SCALLOP/INF implementation, as designed in the logic of a Makefile, i.e.,</p>
-<pre><code class="language-bash">6_meta_analysis task
+<pre><code class="language-bash">6_meta_analysis &lt;task&gt;
 </code></pre>
-<p>where task=METAL_list, METAL_files, METAL_analysis.</p>
+<p>where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.</p>
 <p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p></div>
 </div>
 </div>
@@ -230,5 +230,5 @@
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-14 16:27:26.046559+00:00
+Build Date UTC : 2022-04-14 16:39:03.617477+00:00
 -->

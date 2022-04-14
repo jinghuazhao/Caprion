@@ -142,7 +142,12 @@
 <h2 id="5-pgwas">5. pGWAS</h2>
 <p>Note that GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
 <p>It looked to take 4.5 days on Cardio without unfiltered genotypes and once these are taken care of the analysis can be propagated.</p>
-<h2 id="6-meta-analysis">6. Meta-analysis</h2></div>
+<h2 id="6-meta-analysis">6. Meta-analysis</h2>
+<p>This follows from the SCALLOP/INF implementation, as designed in the logic of a Makefile, i.e.,</p>
+<pre><code class="language-bash">6_meta_analysis task
+</code></pre>
+<p>where task=METAL_list, METAL_files, METAL_analysis.</p>
+<p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p></div>
 </div>
 </div>
 <footer class="col-md-12">
@@ -225,5 +230,5 @@
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-14 16:23:07.869354+00:00
+Build Date UTC : 2022-04-14 16:27:26.046559+00:00
 -->

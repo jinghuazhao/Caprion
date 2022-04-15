@@ -110,7 +110,7 @@ normalise_lr <- function(d,batches)
               {
                 if (verbose) cat(names(d[col]),col,"\n")
                 y <- invnormal(d[[col]])
-                x <- cbind(mod["sexPulse"],scale(mod[,-(1:2)]))
+                x <- scale(mod[,-1])
                 l <- lm(y~x)
                 r <- y-predict(l,na.action=na.pass)
                 invnormal(r)
@@ -181,7 +181,7 @@ normalise <- function(prot)
     z <- d
     names(z) <- gsub("^X([0-9])","\\1",names(z))
     write.table(z,file=paste0("~/Caprion/pilot/work/caprion-",batches,".tsv"),quote=FALSE,row.names=FALSE,sep="\t")
-#   normalise_lr(d,batches)
+    normalise_lr(d,batches)
   }
   list(edata=t(combat_edata3),batch=batch)
 }

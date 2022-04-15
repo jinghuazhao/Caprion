@@ -140,7 +140,14 @@
 <p>The PLINK2 has been consistent in the pilot studies, so <code>scale()</code> operaions can be used in the inverse normal transformations.</p>
 <p>The phenotypic data is generated in accordance with the double transformations as in SCALLOP-Seq analysis.</p>
 <h2 id="5-pgwas">5. pGWAS</h2>
-<p>Note that GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
+<p>Note that</p>
+<pre><code>A. GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
+B. GCTA uses headerless phenotype files, so the following section is run from `5_pgwas.sh` in preparation.
+</code></pre>
+<pre><code class="language-bash">  sed -i '1d' ${caprion}/work/caprion-1.pheno
+  sed -i '1d' ${caprion}/work/caprion-2.pheno
+  sed -i '1d' ${caprion}/work/caprion-3.pheno
+</code></pre>
 <p>It looked to take 4.5 days on Cardio without unfiltered genotypes and once these are taken care of the analysis can be propagated.</p>
 <h2 id="6-meta-analysis">6. Meta-analysis</h2>
 <p>This follows from the SCALLOP/INF implementation, as designed in the logic of a Makefile, i.e.,</p>
@@ -230,5 +237,5 @@
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-14 16:39:03.617477+00:00
+Build Date UTC : 2022-04-15 21:35:30.528433+00:00
 -->

@@ -8,6 +8,15 @@ if [ ! -d ${caprion}/analysis/METAL ]; then mkdir ${caprion}/analysis/METAL; fi
 function METAL_list()
 # build the complete list of files
 {
+  ls ${caprion}/analysis/work/pgwas/caprion-?-*.fastGWA.gz | \
+  xargs -l basename -s .fastGWA.gz | \
+  awk -vdir=${caprion}/analysis/work/pgwas -vOFS="\t" '{s=substr($1,9,1);p=$1;gsub("caprion-[0-9]-","",p);print s, p, dir"/"$1".fastGWA.gz"}' | \
+  sort -k2,2 -k1,1n > ${caprion}/analysis/METAL/METAL.list
+}
+
+function METAL_list_pilot()
+# build the complete list of files
+{
   ls ${caprion}/pilot/work/caprion-?-*.fastGWA.gz | \
   xargs -l basename -s .fastGWA.gz | \
   awk -vdir=${caprion}/pilot/work -vOFS="\t" '{s=substr($1,9,1);p=$1;gsub("caprion-[0-9]-","",p);print s, p, dir"/"$1".fastGWA.gz"}' | \
@@ -65,7 +74,7 @@ function METAL_analysis()
   export rt=${caprion}/analysis/METAL
   ls $rt/*.metal | \
   xargs -l basename -s .metal | \
-  parallel -j10 --env rt -C' ' '
+  parallel -j1 --env rt -C' ' '
     metal ${rt}/{}.metal 2>&1 | \
     tee ${rt}/{}-1.tbl.log;
     gzip -f ${rt}/{}-1.tbl

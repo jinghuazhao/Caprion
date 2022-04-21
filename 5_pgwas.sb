@@ -1,19 +1,41 @@
 #!/usr/bin/bash
 
-#SBATCH --job-name=_fastGWA
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --qos=cardio
-#SBATCH --array=1-987
+##SBATCH --job-name=_bgen
+
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake
 #SBATCH --mem=28800
-#SBATCH --time=5-00:00:00
+#SBATCH --time=12:00:00
+
+##SBATCH --array=1-22
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
+
+#SBATCH --job-name=_fastGWA
+
+##SBATCH --account CARDIO-SL0-CPU
+##SBATCH --partition cardio
+##SBATCH --qos=cardio
+
+#SBATCH --array=1-987
+#SBATCH --export ALL
 #SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
 #SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
-#SBATCH --export ALL
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
 export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/work/caprion.varlist)
+export interval=${HPC_WORK}/data/interval
+
+function bgen()
+{
+  export chr=chr${SLURM_ARRAY_TASK_ID}
+  plink2 --bgen ${interval}/${chr}.bgen ref-unknown --sample ${interval}/interval.sample --keep ${caprion}/work/caprion.id2 \
+         --export bgen-1.2 bits=8 --dosage-erase-threshold 0.001 \
+         --set-missing-var-ids @:#_\$r_\$a --new-id-max-allele-len 680 \
+         --out ${caprion}/work/${chr}
+  bgenix -g ${caprion}/work/${chr}.bgen -index -clobber
+}
 
 function fastLR()
 # fastGWA without --grm-sparse

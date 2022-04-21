@@ -19,6 +19,7 @@ function X()
   bcftools query -l ${caprion}/work/X.vcf.gz | awk '{print $1,$1}' > ${caprion}/work/chrX.idlist
   bcftools query -f "%ID\n" ${caprion}/work/X.vcf.gz > ${caprion}/work/chrX.snplist
   plink2 --vcf ${caprion}/work/X.vcf.gz --export bgen-1.2 bits=8 --double-id --dosage-erase-threshold 0.001 \
+         --set-missing-var-ids @:#_\$r_\$a --new-id-max-allele-len 680 \
          --out ${caprion}/work/chrX
   bgenix -g ${caprion}/work/chrX.bgen -index -clobber
   cut -d' ' -f1 ${caprion}/work/caprion-1.id | grep -f - ${caprion}/work/chrX.idlist > ${caprion}/work/chrX-1.id
@@ -28,6 +29,7 @@ function X()
 
 function fastGWAsetup()
 {
+  paste -d' ' ${caprion}/work/caprion.id ${caprion}/work/caprion.id | grep -v NA > ${caprion}/work/caprion.id2
 # echo ${caprion}/work/chr{1..22}.bgen | tr ' ' '\n' > ${caprion}/work/caprion.bgenlist
   seq 22 | \
   xargs -I {} echo ${caprion}/work/chr{}.bgen > ${caprion}/work/caprion.bgenlist
@@ -82,18 +84,6 @@ function collect()
 }
 
 # Rscript -e 'library(HIBAG)'
-
-function bgen()
-{
-  paste -d' ' ${caprion}/work/caprion.id ${caprion}/work/caprion.id | grep -v NA > ${caprion}/work/caprion.id2
-  for chr in chr{1..22}
-  do
-     plink2 --bgen ${interval}/${chr}.bgen ref-unknown --sample ${interval}/interval.sample --keep ${caprion}/work/caprion.id2 \
-            --export bgen-1.2 bits=8 --dosage-erase-threshold 0.001 \
-            --out ${caprion}/work/${chr}
-     bgenix -g ${caprion}/work/${chr}.bgen -index -clobber
-  done
-}
 
 function tableMAF()
 {

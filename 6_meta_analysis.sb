@@ -1,12 +1,17 @@
 #!/usr/bin/bash
 
 #SBATCH --job-name=_METAL
+
 #SBATCH --account CARDIO-SL0-CPU
 #SBATCH --partition cardio
 #SBATCH --qos=cardio
-#SBATCH --array=1-987
+
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake
 #SBATCH --mem=28800
-#SBATCH --time=5-00:00:00
+#SBATCH --time=12:00:00
+
+#SBATCH --array=1-987
 #SBATCH --output=/rds/user/jhz22/hpc-work/work/_metal_%A_%a.o
 #SBATCH --error=/rds/user/jhz22/hpc-work/work/_metal_%A_%a.e
 #SBATCH --export ALL
@@ -18,12 +23,8 @@ export rt=${caprion}/analysis/METAL
 
 function METAL_analysis()
 {
-  metal ${rt}/${phenoname}.metal 2>&1 | \
-  tee ${rt}/${phenoname}-1.tbl.log;
-  gzip -f ${rt}/${phenoname}-1.tbl
-  metal ${rt}/${phenoname}-chrX.metal 2>&1 | \
-  tee ${rt}/${phenoname}-chrX-1.tbl.log;
-  gzip -f ${rt}/${phenoname}-chrX-1.tbl
+  metal ${rt}/${phenoname}.metal 2>&1 | tee ${rt}/${phenoname}-1.tbl.log;gzip -f ${rt}/${phenoname}-1.tbl
+# metal ${rt}/${phenoname}-chrX.metal 2>&1 | tee ${rt}/${phenoname}-chrX-1.tbl.log; gzip -f ${rt}/${phenoname}-chrX-1.tbl
 }
 
 METAL_analysis

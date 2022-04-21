@@ -147,9 +147,10 @@
 <h2 id="5-pgwas">5. pGWAS</h2>
 <p>The bgen files were extracted from a list of all samples, the variant IDs of which were replaced when RSid is missing (.).</p>
 <p>The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH. Also note that</p>
-<pre><code>* GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
-* GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
-</code></pre>
+<ul>
+<li>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</li>
+<li>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</li>
+</ul>
 <pre><code class="language-bash">    sed -i '1d' ${caprion}/work/caprion-1.pheno
     sed -i '1d' ${caprion}/work/caprion-2.pheno
     sed -i '1d' ${caprion}/work/caprion-3.pheno
@@ -247,5 +248,5 @@
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-21 16:30:21.767477+00:00
+Build Date UTC : 2022-04-21 16:35:21.421261+00:00
 -->

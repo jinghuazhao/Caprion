@@ -34,7 +34,7 @@ The phenotypic data is generated in accordance with the double transformations a
 
 The bgen files were extracted from a list of all samples, the variant IDs of which were replaced when RSid is missing (.).
 
-The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH. Also note that
+The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH lines. Also note that
 
 * GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
 * GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
@@ -43,7 +43,7 @@ The bgen generation is moved into .sb based on cclake but can be switched back t
     sed -i '1d' ${caprion}/work/caprion-2.pheno
     sed -i '1d' ${caprion}/work/caprion-3.pheno
 ```
-    at `pilot/work` while the original version is saved at `analysis/work/`.
+at `pilot/work` while the original version is saved at `analysis/work/`.
 
 It looked to take 3.5 days on Cardio without unfiltered genotypes and once these are taken care of the analysis can be propagated.
 
@@ -60,4 +60,4 @@ To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log
 
 ## 7. Variant identification
 
-Again we employs an iterative merging scheme.
+Again an iterative merging scheme is employed.

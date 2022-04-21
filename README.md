@@ -36,8 +36,8 @@ The bgen files were extracted from a list of all samples, the variant IDs of whi
 
 The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH. Also note that
 
-    A. GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
-    B. GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
+    * GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
+    * GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
 ```bash
     sed -i '1d' ${caprion}/work/caprion-1.pheno
     sed -i '1d' ${caprion}/work/caprion-2.pheno

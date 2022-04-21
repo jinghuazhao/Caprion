@@ -113,6 +113,10 @@
 <ul class="nav flex-column">
 </ul>
 </li>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#7-variant-identification">7. Variant identification</a>
+<ul class="nav flex-column">
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -128,6 +132,7 @@
 <li>4_pca_clustering.R</li>
 <li>5_pgwas.sh</li>
 <li>6_meta_analysis.sh</li>
+<li>7_merge.sh</li>
 </ul>
 <h2 id="1-data-handling-and-pca-projection">1. Data handling and PCA projection</h2>
 <p>The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected. </p>
@@ -136,13 +141,14 @@
 <h2 id="3-wgcna-experiment">3. WGCNA experiment</h2>
 <p>This can be finalised according to the Science paper.</p>
 <h2 id="4-pca-and-clustering">4. PCA and clustering</h2>
-<p>The groupings based on proteins can be made on three phases altogether. and instead of a classification indicator the first three PCs are used.</p>
+<p>The groupings based on proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.</p>
 <p>The PLINK2 has been consistent in the pilot studies, so <code>scale()</code> operaions can be used in the inverse normal transformations.</p>
 <p>The phenotypic data is generated in accordance with the double transformations as in SCALLOP-Seq analysis.</p>
 <h2 id="5-pgwas">5. pGWAS</h2>
-<p>Note that</p>
+<p>The bgen files were extracted from a list of all samples, the variant IDs of which were replaced when RSid is missing (.).</p>
+<p>The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH. Also note that</p>
 <pre><code>A. GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
-B. GCTA uses headerless phenotype files, so the following section is run from `5_pgwas.sh` in preparation.
+B. GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
 </code></pre>
 <pre><code class="language-bash">    sed -i '1d' ${caprion}/work/caprion-1.pheno
     sed -i '1d' ${caprion}/work/caprion-2.pheno
@@ -156,7 +162,9 @@ B. GCTA uses headerless phenotype files, so the following section is run from `5
 <pre><code class="language-bash">6_meta_analysis &lt;task&gt;
 </code></pre>
 <p>where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.</p>
-<p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p></div>
+<p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p>
+<h2 id="7-variant-identification">7. Variant identification</h2>
+<p>Again we employs an iterative merging scheme.</p></div>
 </div>
 </div>
 <footer class="col-md-12">
@@ -239,5 +247,5 @@ B. GCTA uses headerless phenotype files, so the following section is run from `5
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-19 21:11:09.598988+00:00
+Build Date UTC : 2022-04-21 16:18:39.602432+00:00
 -->

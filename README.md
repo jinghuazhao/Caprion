@@ -8,6 +8,7 @@ This is now done in a named sequence.
 * 4_pca_clustering.R
 * 5_pgwas.sh
 * 6_meta_analysis.sh
+* 7_merge.sh
 
 ## 1. Data handling and PCA projection
 
@@ -23,7 +24,7 @@ This can be finalised according to the Science paper.
 
 ## 4. PCA and clustering
 
-The groupings based on proteins can be made on three phases altogether. and instead of a classification indicator the first three PCs are used.
+The groupings based on proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.
 
 The PLINK2 has been consistent in the pilot studies, so `scale()` operaions can be used in the inverse normal transformations.
 
@@ -31,10 +32,12 @@ The phenotypic data is generated in accordance with the double transformations a
 
 ## 5. pGWAS
 
-Note that
+The bgen files were extracted from a list of all samples, the variant IDs of which were replaced when RSid is missing (.).
+
+The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH. Also note that
 
     A. GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
-    B. GCTA uses headerless phenotype files, so the following section is run from `5_pgwas.sh` in preparation.
+    B. GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
 ```bash
     sed -i '1d' ${caprion}/work/caprion-1.pheno
     sed -i '1d' ${caprion}/work/caprion-2.pheno
@@ -54,3 +57,7 @@ This follows from the SCALLOP/INF implementation, as designed in the logic of a 
 where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.
 
 To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log(10)' 1433B-1.tbl`, say.
+
+## 7. Variant identification
+
+Again we employs an iterative merging scheme.

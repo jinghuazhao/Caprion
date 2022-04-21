@@ -151,9 +151,9 @@
 <li>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</li>
 <li>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</li>
 </ul>
-<pre><code class="language-bash">    sed -i '1d' ${caprion}/work/caprion-1.pheno
-    sed -i '1d' ${caprion}/work/caprion-2.pheno
-    sed -i '1d' ${caprion}/work/caprion-3.pheno
+<pre><code class="language-bash">     sed -i '1d' ${caprion}/work/caprion-1.pheno
+     sed -i '1d' ${caprion}/work/caprion-2.pheno
+     sed -i '1d' ${caprion}/work/caprion-3.pheno
 </code></pre>
 <p>         at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
 <p>It looked to take 3.5 days on Cardio without unfiltered genotypes and once these are taken care of the analysis can be propagated.</p>
@@ -247,5 +247,5 @@
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-21 21:01:59.182692+00:00
+Build Date UTC : 2022-04-21 21:10:40.000568+00:00
 -->

@@ -2,9 +2,9 @@
 
 #SBATCH --job-name=_METAL
 
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --qos=cardio
+##SBATCH --account CARDIO-SL0-CPU
+##SBATCH --partition cardio
+##SBATCH --qos=cardio
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
@@ -24,7 +24,7 @@ export rt=${caprion}/analysis/METAL
 function METAL_analysis()
 {
   metal ${rt}/${phenoname}.metal 2>&1 | tee ${rt}/${phenoname}-1.tbl.log;gzip -f ${rt}/${phenoname}-1.tbl
-# metal ${rt}/${phenoname}-chrX.metal 2>&1 | tee ${rt}/${phenoname}-chrX-1.tbl.log; gzip -f ${rt}/${phenoname}-chrX-1.tbl
+  metal ${rt}/${phenoname}-chrX.metal 2>&1 | tee ${rt}/${phenoname}-chrX-1.tbl.log; gzip -f ${rt}/${phenoname}-chrX-1.tbl
 }
 
 METAL_analysis

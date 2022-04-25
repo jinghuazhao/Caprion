@@ -60,4 +60,4 @@ To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log
 
 ## 7. Variant identification
 
-Again an iterative merging scheme is employed.
+An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled.

@@ -1,29 +1,32 @@
 #!/usr/bin/bash
 
+##SBATCH --account CARDIO-SL0-CPU
+##SBATCH --partition cardio
+##SBATCH --qos=cardio
+##SBATCH --export ALL
+
 ##SBATCH --job-name=_bgen
+##SBATCH --array=1-22
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
+
+##SBATCH --job-name=_fastGWA
+##SBATCH --array=1-987
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
-
-##SBATCH --array=1-22
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
-
-#SBATCH --job-name=_fastGWA
-
-##SBATCH --account CARDIO-SL0-CPU
-##SBATCH --partition cardio
-##SBATCH --qos=cardio
-
 #SBATCH --array=1-987
-#SBATCH --export ALL
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
+#SBATCH --job-name=_qqmanhattan
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
+export analysis=~/Caprion/analysis
 export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/work/caprion.varlist)
 export interval=${HPC_WORK}/data/interval
 
@@ -72,9 +75,35 @@ function fastLR()
 # export phenocol=$(grep -n -f ${caprion}/work/caprion.lrlist ${caprion}/work/caprion.varlist | \
 #                   tr ':' '\t' | cut -f1 | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
 
-fastLR 1
-fastLR 2
-fastLR 3
+function qqmanhattan()
+{
+  cat <(echo chromosome position) \
+      <(awk 'NR>1{print $1,$2}' ${analysis}/METAL/sentinels/${phenoname}.signals) \
+      > ${analysis}/work/${phenoname}.annotate
+  gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
+  awk '{print $1,$2,10^$12}' > ${analysis}/work/${phenoname}.txt
+  R --slave --vanilla --args \
+      input_data_path=${analysis}/work/${phenoname}.txt \
+      output_data_rootname=${analysis}/METAL/qqmanhattan/${phenoname}_turboqq \
+      plot_title="${phenoname}" < ~/cambridge-ceu/turboqq/turboqq.r
+  R --slave --vanilla --args \
+      input_data_path=${analysis}/work/${phenoname}.txt \
+      output_data_rootname=${analysis}/METAL/qqmanhattan/${phenoname}_turboman \
+      custom_peak_annotation_file_path=${analysis}/work/${phenoname}.annotate \
+      reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
+      pvalue_sign=5.065856e-11 \
+      plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
+  rm ${analysis}/work/${phenoname}.txt
+# R --no-save < utils/qqman.R
+}
+
+#bgen
+#fastLR 1
+#fastLR 2
+#fastLR 3
+qqmanhattan
+
+# --- inactive code ---
 
 function fastGWA()
 # fastGWA mixed model

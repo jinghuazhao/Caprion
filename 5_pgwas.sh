@@ -54,6 +54,8 @@ function fastGWAsetup()
 
 # sbatch --export=ALL ${caprion}/5_pgwas.sb
 
+if [ ! -d ~/Caprion/analysis/METAL/qqmanhattan ]; then mkdir ~/Caprion/analysis/METAL/qqmanhattan; fi
+
 function lrlist()
 {
   ls ${caprion}/work/*.fastGWA.gz | \

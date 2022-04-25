@@ -45,7 +45,9 @@ The bgen generation is moved into .sb based on cclake but can be switched back t
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;at `pilot/work` while the original version is saved at `analysis/work/`.
 
-It looked to take 3.5 days on Cardio without unfiltered genotypes and once these are taken care of the analysis can be propagated.
+It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
+
+The (sb)atch file is extended to produce Q-Q/Manhattan plots.
 
 ## 6. Meta-analysis
 

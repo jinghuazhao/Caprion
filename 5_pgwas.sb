@@ -119,7 +119,7 @@ function lz()
          gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "
             {
-              if (NR>1 && \$1==chr && \$2>=start && \$3<end) {\$12=10^\$12;print}
+              if (NR>1 && \$1==chr && \$2>=start && \$2<end) {\$12=10^\$12;print}
             }" | \
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz

@@ -47,14 +47,13 @@ function fastGWAsetup()
   sed -i '1d' ${caprion}/work/caprion-1.pheno
   sed -i '1d' ${caprion}/work/caprion-2.pheno
   sed -i '1d' ${caprion}/work/caprion-3.pheno
+  if [ ! -d ~/Caprion/analysis/METAL/qqmanhattanlz ]; then mkdir ~/Caprion/analysis/METAL/qqmanhattanlz; fi
 }
 # slow but unnecessary
 # gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --sample ${caprion}/work/caprion.sample --make-grm --out ${caprion}/work/caprion --threads 10
 # sed -i '1d' ${caprion}/work/caprion.pheno
 
 # sbatch --export=ALL ${caprion}/5_pgwas.sb
-
-if [ ! -d ~/Caprion/analysis/METAL/qqmanhattanlz ]; then mkdir ~/Caprion/analysis/METAL/qqmanhattanlz; fi
 
 function lrlist()
 {

@@ -3,7 +3,6 @@
 ##SBATCH --account CARDIO-SL0-CPU
 ##SBATCH --partition cardio
 ##SBATCH --qos=cardio
-##SBATCH --export ALL
 
 ##SBATCH --job-name=_bgen
 ##SBATCH --array=1-22

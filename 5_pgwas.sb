@@ -79,7 +79,7 @@ function fastLR()
 # export phenocol=$(grep -n -f ${caprion}/work/caprion.lrlist ${caprion}/work/caprion.varlist | \
 #                   tr ':' '\t' | cut -f1 | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
 
-function qqmanhattan()
+function qqmanhattanlz()
 {
   cat <(echo chromosome position) \
       <(awk 'NR>1{print $1,$2}' ${analysis}/METAL/sentinels/${phenoname}.signals) \
@@ -88,11 +88,11 @@ function qqmanhattan()
   awk '{print $1,$2,10^$12}' > ${analysis}/work/${phenoname}.txt
   R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
-      output_data_rootname=${analysis}/METAL/qqmanhattan/${phenoname}_turboqq \
+      output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_turboqq \
       plot_title="${phenoname}" < ~/cambridge-ceu/turboqq/turboqq.r
   R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
-      output_data_rootname=${analysis}/METAL/qqmanhattan/${phenoname}_turboman \
+      output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_turboman \
       custom_peak_annotation_file_path=${analysis}/work/${phenoname}.annotate \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5.065856e-11 \
@@ -126,7 +126,7 @@ function lz()
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol P --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL/qqmanhattan --svg --refsnp {4}
+                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL/qqmanhattanlz --svg --refsnp {4}
      # rm ${analysis}/work/${phenoname}-{4}.lz
      '
   fi

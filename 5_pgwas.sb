@@ -115,12 +115,11 @@ function lz()
      parallel -j1 -C ' ' --env analysis --env phenoname '
        (
          gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
-         awk "NR==1 {\$12=\"P\";print}"
+         awk -v OFS="\t" "NR==1 {\$12=\"P\";print}"
          gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "
             {
-              if (\$1==chr && \$2>=start && \$3<end) \$12=10^\$12;
-              if (NR>1) print
+              if (NR>1 && \$1==chr && \$2>=start && \$3<end) {\$12=10^\$12;print}
             }" | \
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz

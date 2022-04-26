@@ -113,23 +113,22 @@ function lz()
        '
      ) | \
      parallel -j1 -C ' ' --env analysis --env phenoname '
-       gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
-       awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "
-       {
-         if (NR==1) {
-            \$12=\"P\";
-             print
-         }
-         else if (\$1==chr && \$2>=start && \$3<end) {
-            \$12=10^\$12;
-             print
-         }
-       }" > ${analysis}/work/${phenoname}.lz
-       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}.lz \
+       (
+         gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
+         awk "NR==1 {\$12=\"P\";print}"
+         gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "
+            {
+              if (\$1==chr && \$2>=start && \$3<end) \$12=10^\$12;
+              if (NR>1) print
+            }" | \
+         sort -k1,1n -k2,2n
+       ) > ${analysis}/work/${phenoname}-{4}.lz
+       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol P --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL/qqmanhattan --svg --refsnp {4}
-     # rm ${analysis}/work/${phenoname}.lz
+     # rm ${analysis}/work/${phenoname}-{4}.lz
      '
   fi
 }

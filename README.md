@@ -40,10 +40,11 @@ The bgen generation is moved into .sb based on cclake but can be switched back t
 * GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
 * GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
 
-    >
+    >```
     > sed -i '1d' ${caprion}/work/caprion-1.pheno
     > sed -i '1d' ${caprion}/work/caprion-2.pheno
     > sed -i '1d' ${caprion}/work/caprion-3.pheno
+    >```
     >
     > at `pilot/work` while the original version is saved at `analysis/work/`.
 

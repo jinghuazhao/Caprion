@@ -41,12 +41,12 @@ The bgen generation is moved into .sb based on cclake but can be switched back t
 * GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
 
     >```
-    > sed -i '1d' ${caprion}/work/caprion-1.pheno
-    > sed -i '1d' ${caprion}/work/caprion-2.pheno
-    > sed -i '1d' ${caprion}/work/caprion-3.pheno
+    >sed -i '1d' ${caprion}/work/caprion-1.pheno
+    >sed -i '1d' ${caprion}/work/caprion-2.pheno
+    >sed -i '1d' ${caprion}/work/caprion-3.pheno
     >```
     >
-    > at `pilot/work` while the original version is saved at `analysis/work/`.
+    >at `pilot/work` while the original version is saved at `analysis/work/`.
 
 It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
 

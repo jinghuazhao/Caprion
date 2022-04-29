@@ -41,7 +41,7 @@ The bgen generation is moved into .sb based on cclake but can be switched back t
 * GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
 
     >
-    > ```bash
+    > ```
     > sed -i '1d' ${caprion}/work/caprion-1.pheno
     > sed -i '1d' ${caprion}/work/caprion-2.pheno
     > sed -i '1d' ${caprion}/work/caprion-3.pheno

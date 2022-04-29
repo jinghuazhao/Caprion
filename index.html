@@ -150,15 +150,15 @@
 <p>The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH lines. Also note that</p>
 <ul>
 <li>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</li>
-<li>
-<p>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</p>
-<blockquote>
-<p><code>sed -i '1d' ${caprion}/work/caprion-1.pheno
-sed -i '1d' ${caprion}/work/caprion-2.pheno
-sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
-<p>at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
-</blockquote>
-</li>
+<li>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.
+    &gt;
+    &gt; <code>bash
+    &gt; sed -i '1d' ${caprion}/work/caprion-1.pheno
+    &gt; sed -i '1d' ${caprion}/work/caprion-2.pheno
+    &gt; sed -i '1d' ${caprion}/work/caprion-3.pheno
+    &gt;</code>
+    &gt;
+    &gt; at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</li>
 </ul>
 <p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.</p>
 <p>The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots.</p>
@@ -254,5 +254,5 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-29 08:13:38.762437+00:00
+Build Date UTC : 2022-04-29 08:36:32.462257+00:00
 -->

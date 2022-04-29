@@ -42,7 +42,7 @@
 <a class="nav-link" href="."></a>
 </li>
 <li class="navitem active">
-<a class="nav-link" href=".">Analysis</a>
+<a class="nav-link" href=".">Home</a>
 </li>
 <li class="navitem">
 <a class="nav-link" href="pilot/">Pilot studies</a>
@@ -87,8 +87,6 @@
 </div>
 <div class="navbar-collapse collapse card bg-secondary" id="toc-collapse">
 <ul class="nav flex-column">
-<li class="nav-item" data-level="1"><a class="nav-link" href="#analysis">Analysis</a>
-<ul class="nav flex-column">
 <li class="nav-item" data-level="2"><a class="nav-link" href="#1-data-handling-and-pca-projection">1. Data handling and PCA projection</a>
 <ul class="nav flex-column">
 </ul>
@@ -122,12 +120,10 @@
 </ul>
 </li>
 </ul>
-</li>
-</ul>
 </div>
 </div></div>
 <div class="col-md-9" role="main">
-<h1 id="analysis">Analysis</h1>
+<p>Analysis</p>
 <p>This is now done in a named sequence.</p>
 <ul>
 <li>1_pca_projection.sh</li>
@@ -154,13 +150,16 @@
 <p>The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH lines. Also note that</p>
 <ul>
 <li>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</li>
-<li>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.
-    &gt; <code>bash
-    &gt; sed -i '1d' ${caprion}/work/caprion-1.pheno
-    &gt; sed -i '1d' ${caprion}/work/caprion-2.pheno
-    &gt; sed -i '1d' ${caprion}/work/caprion-3.pheno
-    &gt;</code>
-    &gt; at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</li>
+<li>
+<p>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</p>
+<blockquote>
+<p><code>bash
+sed -i '1d' ${caprion}/work/caprion-1.pheno
+sed -i '1d' ${caprion}/work/caprion-2.pheno
+sed -i '1d' ${caprion}/work/caprion-3.pheno</code>
+at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
+</blockquote>
+</li>
 </ul>
 <p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.</p>
 <p>The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots.</p>
@@ -256,5 +255,5 @@
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-04-29 07:33:05.464058+00:00
+Build Date UTC : 2022-04-29 07:37:54.505009+00:00
 -->

@@ -1,47 +1,57 @@
 
-test <- function()
+options(width=200)
+suppressMessages(library(HIBAG))
+hlaLociInfo()
+caprion <- "/home/jhz22/Caprion/"
+region <- 500 # kb
+hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
+seed <- 123456
+
+interval <- function()
 {
-  suppressMessages(library(HIBAG))
-  hlaLociInfo()
-  region <- 500   # kb
-  for (hla.id in c("A","B","C","DQA1","DQB1","DRB1"))
+  bed.fn <- file.path(caprion, "pilot", "data", "merged_imputation.bed")
+  fam.fn <- file.path(caprion, "pilot", "data", "merged_imputation.fam")
+  bim.fn <- file.path(caprion, "pilot", "data", "merged_imputation.bim")
+  interval.geno <- hlaBED2Geno(bed.fn, fam.fn, bim.fn, assembly="hg19",rm.invalid.allele=TRUE, import.chr="6")
+  save(interval.geno,file=file.path(caprion,"analysis","work","hla.rda"))
+  for (hlaId in hlaLoci)
   {
-    H1 <- HLA_Type_Table[, paste0(hla.id, ".1")]
-    H2 <- HLA_Type_Table[, paste0(hla.id, ".2")]
-    hla <- hlaAllele(HLA_Type_Table$sample.id, H1, H2, locus=hla.id, assembly="hg19")
-    hlatab <- hlaSplitAllele(hla, train.prop=0.3)
-    snpid <- hlaFlankingSNP(interval.geno$snp.id, interval.geno$snp.position, hla.id, region*1000, assembly="hg19")
+    snpid <- hlaFlankingSNP(interval.geno$snp.id, interval.geno$snp.position, hlaId, region*1000, assembly="hg19")
     print(length(snpid))
-    id <- hla.id
-    assign(id,hla)
+  }
+}
+
+setup <- function()
+{
+  set.seed(seed)
+  for (hlaId in hlaLoci)
+  {
+    H1 <- HLA_Type_Table[, paste0(hlaId, ".1")]
+    H2 <- HLA_Type_Table[, paste0(hlaId, ".2")]
+    hla <- hlaAllele(HLA_Type_Table$sample.id, H1, H2, locus=hlaId, assembly="hg19")
+    hlatab <- hlaSplitAllele(hla, train.prop=0.3)
+    id <- hlaId
+    assign(id,hla,envir=.GlobalEnv)
+    snpid <- hlaFlankingSNP(HapMap_CEU_Geno$snp.id, HapMap_CEU_Geno$snp.position,hlaId, region*1000, assembly="hg19")
+    train.geno <- hlaGenoSubset(HapMap_CEU_Geno, snp.sel=match(snpid, HapMap_CEU_Geno$snp.id),
+                                samp.sel=match(hlatab$training$value$sample.id, HapMap_CEU_Geno$sample.id))
+    test.geno <- hlaGenoSubset(HapMap_CEU_Geno, samp.sel=match(hlatab$validation$value$sample.id, HapMap_CEU_Geno$sample.id))
+    hlaModel <- hlaAttrBagging(hlatab$training, train.geno, nclassifier=4, verbose.detail=TRUE)
+    summary(hlaModel)
+    assign(paste0(id,".model"),hlaModel,envir=.GlobalEnv)
   }
 # model.fn <- system.file("extdata" ,"ModelList.RData", package="HIBAG")
 # OutOfBag.fn <- system.file("extdata" ,"OutOfBag.RData", package="HIBAG")
 # model <- get(load(model.fn))
 # OutOfBag <- get(load(OutOfBag.fn))
 # rm(modellist,mobj)
-}
 # removing lines containing NA's
 # l <- apply(!apply(HLA_Type_Table, 1, is.na),2,all)
 # HLA_Type_Table <- HLA_Type_Table[l,]
-
-interval <- function()
-{
-  bed.fn <- file.path("/home/jhz22/Caprion", "pilot", "data", "merged_imputation.bed")
-  fam.fn <- file.path("/home/jhz22/Caprion", "pilot", "data", "merged_imputation.fam")
-  bim.fn <- file.path("/home/jhz22/Caprion", "pilot", "data", "merged_imputation.bim")
-  hlaBED2Geno(bed.fn, fam.fn, bim.fn, assembly="hg19",rm.invalid.allele=TRUE, import.chr="6")
 }
 
-interval.geno <- interval()
-set.seed(100)
-train.geno <- hlaGenoSubset(interval.geno,
-                            snp.sel=match(snpid, interval.geno$snp.id),
-                            samp.sel=match(hlatab$training$value$sample.id,
-                            interval.geno$sample.id))
-test.geno <- hlaGenoSubset(interval.geno, samp.sel=match(hlatab$validation$value$sample.id, interval.geno$sample.id))
-model <- hlaAttrBagging(hlatab$training, train.geno, nclassifier=4, verbose.detail=TRUE)
-summary(model)
+# interval.geno <- interval()
+load(file.path(caprion,"analysis","work","hla.rda"))
 
-pred <- hlaPredict(model, interval.geno, type="response+dosage")
+pred <- hlaPredict(A.model, interval.geno, type="response+dosage")
 summary(pred)

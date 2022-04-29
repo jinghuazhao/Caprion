@@ -9,6 +9,7 @@ This is now done in a named sequence.
 * 5_pgwas.sh
 * 6_meta_analysis.sh
 * 7_merge.sh
+* 8_hla.R
 
 ## 1. Data handling and PCA projection
 
@@ -38,12 +39,12 @@ The bgen generation is moved into .sb based on cclake but can be switched back t
 
 * GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
 * GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
-```bash
-     sed -i '1d' ${caprion}/work/caprion-1.pheno
-     sed -i '1d' ${caprion}/work/caprion-2.pheno
-     sed -i '1d' ${caprion}/work/caprion-3.pheno
-```
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;at `pilot/work` while the original version is saved at `analysis/work/`.
+    > ```bash
+    > sed -i '1d' ${caprion}/work/caprion-1.pheno
+    > sed -i '1d' ${caprion}/work/caprion-2.pheno
+    > sed -i '1d' ${caprion}/work/caprion-3.pheno
+    > ```
+    > at `pilot/work` while the original version is saved at `analysis/work/`.
 
 It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
 
@@ -63,3 +64,7 @@ To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log
 ## 7. Variant identification
 
 An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled.
+
+## 8. HLA imputation
+
+This will be based on information from several software, e.g., [CookHLA](https://cambridge-ceu.github.io/csd3/applications/CookHLA.html).

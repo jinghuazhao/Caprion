@@ -21,7 +21,7 @@ interval <- function()
   }
 }
 
-setup <- function()
+HapMap_CEU <- function()
 {
   set.seed(seed)
   for (hlaId in hlaLoci)
@@ -39,6 +39,9 @@ setup <- function()
     hlaModel <- hlaAttrBagging(hlatab$training, train.geno, nclassifier=4, verbose.detail=TRUE)
     summary(hlaModel)
     assign(paste0(id,".model"),hlaModel,envir=.GlobalEnv)
+    pred <- hlaPredict(A.model, HapMap_CEU_Geno, type="response+dosage")
+    summary(pred)
+    assign(paste0(id,".pred"),pred,envir=.GlobalEnv)
   }
 # model.fn <- system.file("extdata" ,"ModelList.RData", package="HIBAG")
 # OutOfBag.fn <- system.file("extdata" ,"OutOfBag.RData", package="HIBAG")
@@ -50,8 +53,5 @@ setup <- function()
 # HLA_Type_Table <- HLA_Type_Table[l,]
 }
 
-# interval.geno <- interval()
+interval.geno <- interval()
 load(file.path(caprion,"analysis","work","hla.rda"))
-
-pred <- hlaPredict(A.model, interval.geno, type="response+dosage")
-summary(pred)

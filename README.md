@@ -69,4 +69,4 @@ An iterative merging scheme is employed; the HLA region is simplified but will b
 
 ## 8. HLA imputation
 
-This will be based on information from several software, e.g., [CookHLA](https://cambridge-ceu.github.io/csd3/applications/CookHLA.html).
+This is experimented on several software including CookHLA and SNP2HLA, as desribed [here](https://cambridge-ceu.github.io/csd3/applications/CookHLA.html).

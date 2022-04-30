@@ -45,4 +45,4 @@ python CookHLA.py \
        -mp 8
 }
 
-SNP2HLA
+CookHLA

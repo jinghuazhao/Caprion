@@ -46,3 +46,6 @@ python CookHLA.py \
 }
 
 CookHLA
+
+# HIBAG
+# R --no-save < 8_hla.R

@@ -3,9 +3,19 @@ options(width=200)
 suppressMessages(library(HIBAG))
 hlaLociInfo()
 caprion <- "/home/jhz22/Caprion/"
+hpc_work <- Sys.getenv("HPC_WORK")
 region <- 500 # kb
 hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
 seed <- 123456
+
+bc58 <- function()
+{
+  bed.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bed")
+  fam.fn <- file.path(hpc_work,"CookHLA","example","1958BC.fam")
+  bim.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bim")
+  bc58.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg19",rm.invalid.allele=TRUE,import.chr="6")
+  assign("bc58.geno",bc58.geno,envir=.GlobalEnv)
+}
 
 interval <- function()
 {
@@ -13,6 +23,7 @@ interval <- function()
   fam.fn <- file.path(caprion, "pilot", "data", "merged_imputation.fam")
   bim.fn <- file.path(caprion, "pilot", "data", "merged_imputation.bim")
   interval.geno <- hlaBED2Geno(bed.fn, fam.fn, bim.fn, assembly="hg19",rm.invalid.allele=TRUE, import.chr="6")
+  assign("interval.geno",interval.geno,envir=.GlobalEnv)
   save(interval.geno,file=file.path(caprion,"analysis","work","hla.rda"))
   for (hlaId in hlaLoci)
   {
@@ -21,7 +32,7 @@ interval <- function()
   }
 }
 
-HapMap_CEU <- function()
+HapMap_CEU_model <- function()
 {
   set.seed(seed)
   for (hlaId in hlaLoci)
@@ -53,5 +64,18 @@ HapMap_CEU <- function()
 # HLA_Type_Table <- HLA_Type_Table[l,]
 }
 
-interval.geno <- interval()
+HIBAG <- function(hlaId,cohort)
+{
+  cat(hlaId,"\n")
+  model.id <- get(paste0(hlaId,".model"))
+  cohort.geno <- get(paste0(cohort,".geno"))
+  cohort.pred <- invisible(hlaPredict(model.id, cohort.geno, type = "response+dosage"))
+  assign(paste0(cohort,hlaId),cohort.pred,envir=.GlobalEnv)
+}
+
+bc58()
+interval()
 load(file.path(caprion,"analysis","work","hla.rda"))
+HapMap_CEU_model()
+HIBAG("B","bc58")
+HIBAG("B","interval")

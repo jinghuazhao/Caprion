@@ -23,29 +23,9 @@ function SNP2HLA()
         --linear --out ${caprion}/hla_IMPUTED.dosage.assoc
 }
 
-function CookHLA()
-{
-cd ${cookhla}
-source ~/COVID-19/py37/bin/activate
+SNP2HLA
 
-python -m MakeGeneticMap \
-       -i ${caprion}/hla \
-       -hg 19 \
-       -ref ${cookhla}/1000G_REF/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
-       -o ${caprion}/hla_IMPUTED
-
-python CookHLA.py \
-       -i ${caprion}/hla \
-       -hg 19 \
-       -o ${caprion}/hla_CookHLA \
-       -ref ${cookhla}/1000G_REF/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
-       -gm ${caprion}/hla_IMPUTED.mach_step.avg.clpsB \
-       -ae ${caprion}/hla_IMPUTED.aver.erate \
-       -mem 20g \
-       -mp 8
-}
-
-CookHLA
-
+# CookHLA
+# sbatch 8_hla.sb
 # HIBAG
 # R --no-save < 8_hla.R

@@ -2,6 +2,11 @@
 options(width=200)
 caprion <- "/home/jhz22/Caprion/"
 suppressMessages(library(HIBAG))
+hlaLociInfo()
+hpc_work <- Sys.getenv("HPC_WORK")
+region <- 500 # kb
+hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
+seed <- 123456
 
 interval <- function()
 {
@@ -17,33 +22,6 @@ interval <- function()
     print(length(snpid))
   }
 }
-
-EUR_HLA4 <- function()
-{
-  model.list <- get(load(file.path(caprion,"analysis","HIBAG","ImmunoChip-Broad-HLARES-HLA4-hg19.RData")))
-  summary(interval.geno)
-  for (hlaId in hlaLoci)
-  {
-    model <- hlaModelFromObj(model.list[[hlaId]])
-    summary(model)
-    pred <- predict(model, interval.geno, type="response+prob")
-    assign(paste0(hlaId,".pred"),pred,envir=.GlobalEnv)
-  # summary(pred)
-  # pred$value
-  # pred$postprob
-  }
-}
-
-load(file.path(caprion,"analysis","work","hla.rda"))
-EUR_HLA4()
-
-# --- legacy ---
-
-hlaLociInfo()
-hpc_work <- Sys.getenv("HPC_WORK")
-region <- 500 # kb
-hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
-seed <- 123456
 
 bc58hatk <- function()
 {

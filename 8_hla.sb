@@ -1,58 +1,56 @@
 #!/usr/bin/bash
 
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --mem=35000
-#SBATCH --partition cardio
-#SBATCH --qos=cardio
+##SBATCH --account CARDIO-SL0-CPU
+##SBATCH --mem=55000
+##SBATCH --partition cardio
+##SBATCH --qos=cardio
 
-#SBATCH --job-name=_CookHLA
-#SBATCH --time=5-00:00:00
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_CookHLA_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_CookHLA_%A_%a.e
+##SBATCH --job-name=_CookHLA
+##SBATCH --time=5-00:00:00
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_CookHLA_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_CookHLA_%A_%a.e
 
-##SBATCH --account=PETERS-SL3-CPU
-##SBATCH --partition=cclake
-##SBATCH --mem=28800
-##SBATCH --time=3-00::00:00
-##SBATCH --array=1-7
-##SBATCH --job-name=_HIBAG
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_HIBAG_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_HIBAG_%A_%a.e
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake
+#SBATCH --time=1-00:00:00
+#SBATCH --array=1-7
+#SBATCH --job-name=_HIBAG
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_HIBAG_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_HIBAG_%A_%a.e
 
 export caprion=~/Caprion/analysis/work
 export cookhla=${HPC_WORK}/CookHLA
 
 function CookHLA()
 {
-cd ${cookhla}
-source ~/COVID-19/py37/bin/activate
+  cd ${cookhla}
+  source ~/COVID-19/py37/bin/activate
 
-python -m MakeGeneticMap \
-       -i ${caprion}/hla \
-       -hg 19 \
-       -ref ${cookhla}/1000G_REF/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
-       -o ${caprion}/hla_IMPUTED
+  python -m MakeGeneticMap \
+         -i ${caprion}/hla \
+         -hg 19 \
+         -ref ${cookhla}/1000G_REF/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
+         -o ${caprion}/hla_IMPUTED
 
-python CookHLA.py \
-       -i ${caprion}/hla \
-       -hg 19 \
-       -o ${caprion}/hla_CookHLA \
-       -ref ${cookhla}/1000G_REF/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
-       -gm ${caprion}/hla_IMPUTED.mach_step.avg.clpsB \
-       -ae ${caprion}/hla_IMPUTED.aver.erate \
-       -mem 20g \
-       -mp 8
+  python CookHLA.py \
+         -i ${caprion}/hla \
+         -hg 19 \
+         -o ${caprion}/hla_CookHLA \
+         -ref ${cookhla}/1000G_REF/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
+         -gm ${caprion}/hla_IMPUTED.mach_step.avg.clpsB \
+         -ae ${caprion}/hla_IMPUTED.aver.erate \
+         -mem 20g \
+         -mp 8
 }
 
-HIBAG <- function()
+function HIBAG()
 {
   Rscript -e '
-    locus <- Sys.getenv("SLURM_ARRAY_TASK_ID")
     UKB_HLA4 <- function()
     {
       model.list <- get(load(file.path(caprion,"analysis","HIBAG","AffyAxiomUKB-European-HLA4-hg19.RData")))
       summary(interval.geno)
-      hlaId <- ("A","B","C","DRB1","DQA1","DQB1","DPB1")[index]
+      hlaId <- c("A","B","C","DRB1","DQA1","DQB1","DPB1")[locus]
       model <- hlaModelFromObj(mod_lst[[hlaId]])
       summary(model)
       pred <- predict(model, interval.geno, type="response+prob")
@@ -62,10 +60,10 @@ HIBAG <- function()
     # pred$value
     # pred$postprob
     }
-
     load(file.path(caprion,"analysis","work","hla.rda"))
+    locus <- Sys.getenv("SLURM_ARRAY_TASK_ID")
     UKB_HLA4()
   '
 }
 
-CookHLA
+HIBAG

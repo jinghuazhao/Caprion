@@ -1,12 +1,11 @@
-
 options(width=200)
-caprion <- "/home/jhz22/Caprion/"
-suppressMessages(library(HIBAG))
-hlaLociInfo()
+caprion <- "~/Caprion"
 hpc_work <- Sys.getenv("HPC_WORK")
 region <- 500 # kb
 hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
 seed <- 123456
+suppressMessages(library(HIBAG))
+hlaLociInfo()
 
 interval <- function()
 {
@@ -46,6 +45,9 @@ HapMap_CEU_model <- function()
   set.seed(seed)
   for (hlaId in hlaLoci)
   {
+  # when removing lines containing NA's
+  # l <- apply(!apply(HLA_Type_Table, 1, is.na),2,all)
+  # HLA_Type_Table <- HLA_Type_Table[l,]
     H1 <- HLA_Type_Table[, paste0(hlaId, ".1")]
     H2 <- HLA_Type_Table[, paste0(hlaId, ".2")]
     hla <- hlaAllele(HLA_Type_Table$sample.id, H1, H2, locus=hlaId, assembly="hg19")
@@ -63,14 +65,15 @@ HapMap_CEU_model <- function()
     summary(pred)
     assign(paste0(id,".pred"),pred,envir=.GlobalEnv)
   }
-# model.fn <- system.file("extdata" ,"ModelList.RData", package="HIBAG")
-# OutOfBag.fn <- system.file("extdata" ,"OutOfBag.RData", package="HIBAG")
-# model <- get(load(model.fn))
-# OutOfBag <- get(load(OutOfBag.fn))
-# rm(modellist,mobj)
-# removing lines containing NA's
-# l <- apply(!apply(HLA_Type_Table, 1, is.na),2,all)
-# HLA_Type_Table <- HLA_Type_Table[l,]
+}
+
+HIBAG_A <- function()
+{
+  model.fn <- system.file("extdata" ,"ModelList.RData", package="HIBAG")
+  model <- get(load(model.fn))
+  OutOfBag.fn <- system.file("extdata" ,"OutOfBag.RData", package="HIBAG")
+  OutOfBag <- get(load(OutOfBag.fn))
+  rm(modellist,mobj)
 }
 
 HIBAG <- function(hlaId,cohort)
@@ -85,7 +88,8 @@ HIBAG <- function(hlaId,cohort)
 bc58()
 interval()
 HapMap_CEU_model()
-# fail with wrong assembly
-HIBAG("B","bc58hatk")
 HIBAG("B","bc58")
 HIBAG("B","interval")
+
+# fail with wrong assembly
+HIBAG("B","bc58hatk")

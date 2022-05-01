@@ -1,21 +1,7 @@
 
 options(width=200)
-suppressMessages(library(HIBAG))
-hlaLociInfo()
 caprion <- "/home/jhz22/Caprion/"
-hpc_work <- Sys.getenv("HPC_WORK")
-region <- 500 # kb
-hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
-seed <- 123456
-
-bc58 <- function()
-{
-  bed.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bed")
-  fam.fn <- file.path(hpc_work,"CookHLA","example","1958BC.fam")
-  bim.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bim")
-  bc58.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg19",rm.invalid.allele=TRUE,import.chr="6")
-  assign("bc58.geno",bc58.geno,envir=.GlobalEnv)
-}
+suppressMessages(library(HIBAG))
 
 interval <- function()
 {
@@ -30,6 +16,51 @@ interval <- function()
     snpid <- hlaFlankingSNP(interval.geno$snp.id, interval.geno$snp.position, hlaId, region*1000, assembly="hg19")
     print(length(snpid))
   }
+}
+
+EUR_HLA4 <- function()
+{
+  model.list <- get(load(file.path(caprion,"analysis","HIBAG","ImmunoChip-Broad-HLARES-HLA4-hg19.RData")))
+  summary(interval.geno)
+  for (hlaId in hlaLoci)
+  {
+    model <- hlaModelFromObj(model.list[[hlaId]])
+    summary(model)
+    pred <- predict(model, interval.geno, type="response+prob")
+    assign(paste0(hlaId,".pred"),pred,envir=.GlobalEnv)
+  # summary(pred)
+  # pred$value
+  # pred$postprob
+  }
+}
+
+load(file.path(caprion,"analysis","work","hla.rda"))
+EUR_HLA4()
+
+# --- legacy ---
+
+hlaLociInfo()
+hpc_work <- Sys.getenv("HPC_WORK")
+region <- 500 # kb
+hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
+seed <- 123456
+
+bc58hatk <- function()
+{
+  bed.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.bed")
+  fam.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.fam")
+  bim.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.bim")
+  bc58hatk.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg18",rm.invalid.allele=TRUE,import.chr="6")
+  assign("bc58hatk.geno",bc58hatk.geno,envir=.GlobalEnv)
+}
+
+bc58 <- function()
+{
+  bed.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bed")
+  fam.fn <- file.path(hpc_work,"CookHLA","example","1958BC.fam")
+  bim.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bim")
+  bc58.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg19",rm.invalid.allele=TRUE,import.chr="6")
+  assign("bc58.geno",bc58.geno,envir=.GlobalEnv)
 }
 
 HapMap_CEU_model <- function()
@@ -75,7 +106,8 @@ HIBAG <- function(hlaId,cohort)
 
 bc58()
 interval()
-load(file.path(caprion,"analysis","work","hla.rda"))
 HapMap_CEU_model()
+# fail with wrong assembly
+HIBAG("B","bc58hatk")
 HIBAG("B","bc58")
 HIBAG("B","interval")

@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 #SBATCH --account CARDIO-SL0-CPU
-#SBATCH --mem=25000
+#SBATCH --mem=55000
 #SBATCH --partition cardio
 #SBATCH --qos=cardio
 
@@ -52,8 +52,8 @@ function HIBAG()
     suppressMessages(library(HIBAG))
     model <- hlaModelFromObj(model.list[[hlaId]])
     summary(model)
-    assign(paste0(hlaId,".pred"), predict(model, interval.geno, type="response+prob"))
-    save(get(paste0(hlaId,".pred")),file=file.path(caprion,"analysis","work",paste0("hla-",hlaId,".rda")))
+    pred <- predict(model, interval.geno, type="response+prob")
+    save(pred,file=file.path(caprion,"analysis","work",paste0("hla-",hlaId,".rda")))
   '
 }
 

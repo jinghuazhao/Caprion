@@ -2,24 +2,26 @@
 
 This is now done in a named sequence.
 
-* 1_pca_projection.sh
-* 2_ggm.R
-* 3_wgcna.R
-* 4_pca_clustering.R
-* 5_pgwas.sh
-* 6_meta_analysis.sh
-* 7_merge.sh
-* 8_hla.sh
+    > ```
+    > 1_pca_projection.sh
+    > 2_ggm.R
+    > 3_wgcna.R
+    > 4_pca_clustering.R
+    > 5_pgwas.sh
+    > 6_meta_analysis.sh
+    > 7_merge.sh
+    > 8_hla.sh
+    > ```
 
 ## 1. Data handling and PCA projection
 
 The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected. 
 
-## 2. GGM experiment
+## 2. GGM
 
 The results are ready to report.
 
-## 3. WGCNA experiment
+## 3. WGCNA
 
 This can be finalised according to the Science paper.
 
@@ -50,7 +52,7 @@ The bgen generation is moved into .sb based on cclake but can be switched back t
 
 It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
 
-The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots.
+The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots.
 
 ## 6. Meta-analysis
 

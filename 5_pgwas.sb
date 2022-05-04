@@ -3,6 +3,7 @@
 #SBATCH --account CARDIO-SL0-CPU
 #SBATCH --partition cardio
 #SBATCH --qos=cardio
+#SBATCH --mem=28800
 
 ##SBATCH --job-name=_bgen
 ##SBATCH --array=1-22
@@ -21,7 +22,6 @@
 
 ##SBATCH --account=PETERS-SL3-CPU
 ##SBATCH --partition=cclake
-##SBATCH --mem=28800
 ##SBATCH --time=12:00:00
 ##SBATCH --array=1-987
 ##SBATCH --job-name=_lz

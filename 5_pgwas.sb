@@ -127,7 +127,7 @@ function lz()
          gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
          awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}"
          gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
-         awk -v chr={1} -v start={2} -v end={3} "NR>1 && \$1==chr && \$2>=start && \$2<end" | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {$12=-$12;print}" | \
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \

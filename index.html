@@ -93,11 +93,11 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#2-ggm-experiment">2. GGM experiment</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#2-ggm">2. GGM</a>
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#3-wgcna-experiment">3. WGCNA experiment</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#3-wgcna">3. WGCNA</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -129,21 +129,22 @@
 <div class="col-md-9" role="main">
 <h1 id="analysis">Analysis</h1>
 <p>This is now done in a named sequence.</p>
-<ul>
-<li>1_pca_projection.sh</li>
-<li>2_ggm.R</li>
-<li>3_wgcna.R</li>
-<li>4_pca_clustering.R</li>
-<li>5_pgwas.sh</li>
-<li>6_meta_analysis.sh</li>
-<li>7_merge.sh</li>
-<li>8_hla.sh</li>
-</ul>
+<pre><code>&gt; ```
+&gt; 1_pca_projection.sh
+&gt; 2_ggm.R
+&gt; 3_wgcna.R
+&gt; 4_pca_clustering.R
+&gt; 5_pgwas.sh
+&gt; 6_meta_analysis.sh
+&gt; 7_merge.sh
+&gt; 8_hla.sh
+&gt; ```
+</code></pre>
 <h2 id="1-data-handling-and-pca-projection">1. Data handling and PCA projection</h2>
 <p>The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected. </p>
-<h2 id="2-ggm-experiment">2. GGM experiment</h2>
+<h2 id="2-ggm">2. GGM</h2>
 <p>The results are ready to report.</p>
-<h2 id="3-wgcna-experiment">3. WGCNA experiment</h2>
+<h2 id="3-wgcna">3. WGCNA</h2>
 <p>This can be finalised according to the Science paper.</p>
 <h2 id="4-pca-and-clustering">4. PCA and clustering</h2>
 <p>The groupings based on proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.</p>
@@ -165,7 +166,7 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 </li>
 </ul>
 <p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.</p>
-<p>The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots.</p>
+<p>The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots.</p>
 <h2 id="6-meta-analysis">6. Meta-analysis</h2>
 <p>This follows from the SCALLOP/INF implementation, as designed in the logic of a Makefile, i.e.,</p>
 <pre><code class="language-bash">6_meta_analysis &lt;task&gt;
@@ -259,5 +260,5 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-05-04 16:10:03.703274+00:00
+Build Date UTC : 2022-05-04 16:19:13.291230+00:00
 -->

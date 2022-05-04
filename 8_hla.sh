@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 
+export work=~/Caprion/pilot/work
 export pilot=~/Caprion/pilot/data
 export caprion=~/Caprion/analysis/work
 
@@ -7,8 +8,11 @@ function extract_hla()
 # Region as used in the SCALLOP-INF project
 {
   plink --bfile ${pilot}/merged_imputation --chr 6 --from-bp 25392021 --to-bp 33392022 \
+        --keep ${work}/caprion.id2 \
         --make-bed --out ${caprion}/hla
 }
+
+extract_hla
 
 # HLA imputation:
 # SNP2HLA, CookHLA, HIBAG are now all part of the following SLURM script,

@@ -16,18 +16,18 @@
 ##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
 
-##SBATCH --job-name=_qqmanhattan
-##SBATCH --array=1-987
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.e
+#SBATCH --job-name=_qqmanhattan
+#SBATCH --array=1-987
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.e
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
 #SBATCH --array=1-987
-#SBATCH --job-name=_lz
+##SBATCH --job-name=_lz
 #SBATCH --mem=3420
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.e
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
@@ -83,7 +83,7 @@ function fastLR()
 function qqmanhattan()
 {
   gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
-  awk '{if (NR==1) print "chromsome","position","pvalue","beta","se"; else print $1,$2,10^$12,$10,$11}' > ${analysis}/work/${phenoname}.txt
+  awk '{if (NR==1) print "chromsome","position","pvalue","beta","se"; else print $1,$2,$12,$10,$11}' > ${analysis}/work/${phenoname}.txt
   R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
       output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_turboqq \
@@ -127,7 +127,7 @@ function lz()
          gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
          awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}"
          gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
-         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {$12=-$12;print}" | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print}" | \
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
@@ -143,8 +143,8 @@ function lz()
 #fastLR 1
 #fastLR 2
 #fastLR 3
-#qqmanhattan
-lz
+qqmanhattan
+#lz
 
 # --- inactive code ---
 

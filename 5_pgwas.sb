@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
-##SBATCH --account CARDIO-SL0-CPU
-##SBATCH --partition cardio
-##SBATCH --qos=cardio
-##SBATCH --mem=28800
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --qos=cardio
+#SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
 ##SBATCH --job-name=_bgen
@@ -21,11 +21,11 @@
 #SBATCH --output=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.o
 #SBATCH --error=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.e
 
-#SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake
-#SBATCH --array=1-987
+##SBATCH --account=PETERS-SL3-CPU
+##SBATCH --partition=cclake
+##SBATCH --array=1-987
 ##SBATCH --job-name=_lz
-#SBATCH --mem=3420
+##SBATCH --mem=3420
 ##SBATCH --output=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.e
 
@@ -83,15 +83,15 @@ function fastLR()
 function qqmanhattan()
 {
   gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
-  awk '{if (NR==1) print "chromsome","position","pvalue","beta","se"; else print $1,$2,$12,$10,$11}' > ${analysis}/work/${phenoname}.txt
+  awk '{if (NR==1) print "chromsome","position","log_pvalue","beta","se"; else print $1,$2,-$12,$10,$11}' > ${analysis}/work/${phenoname}.txt
   R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
-      output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_turboqq \
+      output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_qq \
       plot_title="${phenoname}" < ~/cambridge-ceu/turboqq/turboqq.r
   if [ ! -f ${analysis}/METAL/sentinels/${phenoname}.signals ]; then
      R --slave --vanilla --args \
        input_data_path=${analysis}/work/${phenoname}.txt \
-       output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_turboman \
+       output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_manhattan \
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
        pvalue_sign=5.065856e-11 \
        plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
@@ -101,7 +101,7 @@ function qqmanhattan()
         > ${analysis}/work/${phenoname}.annotate
     R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
-      output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_turboman \
+      output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_manhattan \
       custom_peak_annotation_file_path=${analysis}/work/${phenoname}.annotate \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5.065856e-11 \

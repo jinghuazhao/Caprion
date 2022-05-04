@@ -2,16 +2,16 @@
 
 This is now done in a named sequence.
 
-    >```
-    >1_pca_projection.sh
-    >2_ggm.R
-    >3_wgcna.R
-    >4_pca_clustering.R
-    >5_pgwas.sh
-    >6_meta_analysis.sh
-    >7_merge.sh
-    >8_hla.sh
-    >```
+```
+1_pca_projection.sh
+2_ggm.R
+3_wgcna.R
+4_pca_clustering.R
+5_pgwas.sh
+6_meta_analysis.sh
+7_merge.sh
+8_hla.sh
+```
 
 ## 1. Data handling and PCA projection
 

@@ -106,6 +106,7 @@ function qqmanhattan()
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5.065856e-11 \
       plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
+    rm ${analysis}/work/${phenoname}.annotate
   fi
   rm ${analysis}/work/${phenoname}.txt
 # R --no-save < utils/qqman.R

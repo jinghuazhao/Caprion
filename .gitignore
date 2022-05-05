@@ -1,8 +1,9 @@
+.git/
+.Rhistory
 HIBAG/
 METAL/
-./git
-.Rhistory
 docs/
+pgwas/
 reports/
 site/
 work/

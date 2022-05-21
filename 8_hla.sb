@@ -32,8 +32,9 @@ function SNP2HLA()
 # csh SNP2HLA.csh ${caprion}/hla ${snp2hla}/HM_CEU_REF ${caprion}/hla_IMPUTED plink 250000 100
 # 1000Genomes
   csh SNP2HLA.csh ${caprion}/work/hla ${snp2hla}/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC ${caprion}/HLA/SNP2HLA/hla_SNP2HLA plink 250000 100
-  plink --noweb --dosage ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage noheader format=1 \
-        --fam ${caprion}/HLA/SHP2HLA/hla_SNP2HLA.fam \
+# No results will be generated since --pheno is unspecified/phenotype in .fam is all missing (-9)
+  plink --dosage ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage noheader format=1 \
+        --fam ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.fam \
         --linear --out ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage.assoc
 }
 

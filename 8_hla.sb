@@ -35,7 +35,7 @@ function SNP2HLA()
 # No results will be generated since --pheno is unspecified/phenotype in .fam is all missing (-9)
   plink --dosage ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage noheader format=1 \
         --fam ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.fam \
-        --linear --out ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage.assoc
+        --out ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage.assoc
 }
 
 function CookHLA()

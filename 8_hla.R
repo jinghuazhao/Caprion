@@ -7,6 +7,14 @@ seed <- 123456
 suppressMessages(library(HIBAG))
 hlaLociInfo()
 
+lookup <- function(rsid)
+{
+  model.list <- get(load(file.path(caprion,"analysis","HLA","HIBAG","AffyAxiomUKB-European-HLA4-hg19.RData")))
+  grepl(rsid,lapply(model.list,"[[",3))
+}
+
+lookup("rs2229092")
+
 interval <- function()
 {
   bed.fn <- file.path(caprion, "pilot", "data", "merged_imputation.bed")

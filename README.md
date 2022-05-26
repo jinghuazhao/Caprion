@@ -71,6 +71,12 @@ An iterative merging scheme is employed; the HLA region is simplified but will b
 
 ## 8. HLA imputation
 
-This is experimented on several software including HIBAG, CookHLA and SNP2HLA  as desribed [here](https://cambridge-ceu.github.io/csd3/applications/CookHLA.html). The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.
+This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed [here](https://cambridge-ceu.github.io/csd3/applications/CookHLA.html). The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.
 
-Whole cohort imputation is only feasible with HIBAG by default while single-threaded runs are attempted with SNP2HLA and CookHLA -- the reference panel is based on the 1000Genomes data.
+Whole cohort imputation is feasible with HIBAG,
+
+**Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
+------|-----|-----|----|------|------|------|-----
+**N**     |1857 |2572 |1866| 1740 | 1924 | 1624 | 2436
+
+while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.

@@ -76,7 +76,14 @@ This is experimented on several software including HIBAG, CookHLA and SNP2HLA as
 Whole cohort imputation is feasible with HIBAG,
 
 **Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
-------|-----|-----|----|------|------|------|-----
+----------|-----|-----|----|------|------|------|-----
 **N**     |1857 |2572 |1866| 1740 | 1924 | 1624 | 2436
 
 while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.
+
+It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 1000Genomes reference panel has 465 variants with HLA prefix and the partition is as follows,
+
+**Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
+----------|-----|-----|----|------|------|------|-----
+**HLA_**  |  98 | 183 | 69 |   0  |  33  |   0  |  82
+

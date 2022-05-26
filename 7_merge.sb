@@ -20,11 +20,11 @@ export caprion=~/Caprion
 export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/pilot/work/caprion.varlist)
 
 function pgz()
-# 1. extract all significant SNPs
+# 1. extract all significant SNPs, alternatively log(5e-8/987)/log(10)
 {
 # zcat METAL/{}-1.tbl.gz | head -1
   zcat ${caprion}/analysis/METAL/${p}-1.tbl.gz | \
-  awk 'NR>1 && $12<=log(5e-8/987)/log(10)' | \
+  awk 'NR>1 && $12<=log(5e-8)/log(10)' | \
   sort -k1,1n -k2,2n | \
   gzip -f > ${caprion}/analysis/METAL/sentinels/${p}.p.gz
 }

@@ -1,7 +1,9 @@
 .git/
 .Rhistory
 HLA/
+IMGT2Seq/
 METAL/
+bMarkerGenerator/
 docs/
 pgwas/
 reports/

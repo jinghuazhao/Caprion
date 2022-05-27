@@ -11,6 +11,7 @@ function extract_hla()
   plink --bfile ${pilot}/merged_imputation --chr 6 --from-bp 25392021 --to-bp 33392022 \
         --keep ${work}/caprion.id2 \
         --make-bed --out ${caprion}/work/hla
+  awk '{print $1,$2,$5-1}' ${caprion}/work/hla.fam > ${caprion}/work/hla.pheno
 }
 
 extract_hla

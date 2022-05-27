@@ -41,7 +41,8 @@ function SNP2HLA()
 # No results will be generated since --pheno is unspecified/phenotype in .fam is all missing (-9)
   plink --dosage ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage noheader format=1 \
         --fam ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.fam \
-        --out ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage.assoc
+        --pheno ${caprion}/work/hla.pheno \
+        --out ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage
 }
 
 function CookHLA()
@@ -84,7 +85,6 @@ function HIBAG()
 function hatk()
 # A toy data
 {
-  awk '{print $1,$2,$5-1}' ${caprion}/work/hla.fam > ${caprion}/work/hla.pheno
   source ~/COVID-19/py37/bin/activate
   ln -sf ${hatk}/IMGT2Seq
   ln -sf ${hatk}/bMarkerGenerator

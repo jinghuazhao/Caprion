@@ -19,6 +19,7 @@ function hatk()
   cut -d' ' -f1,2,5 ${caprion}/work/hla.fam > ${caprion}/work/hla.pheno
   source ~/COVID-19/py37/bin/activate
   ln -sf ${hatk}/IMGT2Seq
+  ln -sf ${hatk}/bMarkerGenerator
   python3 ${hatk}/HATK.py \
           --variants ${caprion}/work/hla \
           --hped ${caprion}/HLA/CookHLA/hla_CookHLA.MHC.HLA_IMPUTATION_OUT.hped \

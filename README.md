@@ -73,7 +73,7 @@ An iterative merging scheme is employed; the HLA region is simplified but will b
 
 This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed [here](https://cambridge-ceu.github.io/csd3/applications/CookHLA.html). The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.
 
-Whole cohort imputation is feasible with HIBAG,
+Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,
 
 **Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
 ----------|-----|-----|----|------|------|------|-----
@@ -87,3 +87,4 @@ It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 10
 ----------|-----|-----|----|------|------|------|-----
 **HLA_**  |  98 | 183 | 69 |   0  |  33  |   0  |  82
 
+The hped file from CookHLA can be used by HATK for association analysis (see `8_hla.sh`) while the advantage of SNP2HLA is that binary ped files are ready for use as usual.

@@ -13,26 +13,6 @@ function extract_hla()
         --make-bed --out ${caprion}/work/hla
 }
 
-function hatk()
-# A toy data
-{
-  cut -d' ' -f1,2,5 ${caprion}/work/hla.fam > ${caprion}/work/hla.pheno
-  source ~/COVID-19/py37/bin/activate
-  ln -sf ${hatk}/IMGT2Seq
-  ln -sf ${hatk}/bMarkerGenerator
-  python3 ${hatk}/HATK.py \
-          --variants ${caprion}/work/hla \
-          --hped ${caprion}/HLA/CookHLA/hla_CookHLA.MHC.HLA_IMPUTATION_OUT.hped \
-          --2field \
-          --pheno ${caprion}/work/hla.pheno \
-          --pheno-name sex \
-          --out ${caprion}/work/hla_assoc \
-          --imgt 3320 \
-          --hg 18 \
-          --imgt-dir ${hatk}/example/IMGTHLA3320 \
-          --multiprocess 8
-}
-
 extract_hla
 
 # HLA imputation:

@@ -14,20 +14,22 @@ function extract_hla()
 }
 
 function hatk()
-# additional work required
+# A toy data
 {
+  cut -d' ' -f1,2,5 ${caprion}/work/hla.fam > ${caprion}/work/hla.pheno
   source ~/COVID-19/py37/bin/activate
-  python3 HATK.py \
-          --variants ${caprion}/HLA/CookHLA/hla.COPY.LiftDown_hg18 \
+  ln -sf ${hatk}/IMGT2Seq
+  python3 ${hatk}/HATK.py \
+          --variants ${caprion}/work/hla \
           --hped ${caprion}/HLA/CookHLA/hla_CookHLA.MHC.HLA_IMPUTATION_OUT.hped \
           --2field \
           --pheno ${caprion}/work/hla.pheno \
-          --pheno-name RA \
-          --out ${caprion}/work/hla.COPY.LiftDown_hg18 \
+          --pheno-name sex \
+          --out ${caprion}/work/hla_assoc \
           --imgt 3320 \
           --hg 18 \
           --imgt-dir ${hatk}/example/IMGTHLA3320 \
-          --multiprocess 10
+          --multiprocess 8
 }
 
 extract_hla

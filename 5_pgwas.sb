@@ -93,7 +93,7 @@ function qqmanhattan()
        input_data_path=${analysis}/work/${phenoname}.txt \
        output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_manhattan \
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
-       pvalue_sign=5.065856e-11 \
+       pvalue_sign=5e-8 \
        plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
   else
     cat <(echo chromosome position) \
@@ -104,7 +104,7 @@ function qqmanhattan()
       output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_manhattan \
       custom_peak_annotation_file_path=${analysis}/work/${phenoname}.annotate \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
-      pvalue_sign=5.065856e-11 \
+      pvalue_sign=5e-8 \
       plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
     rm ${analysis}/work/${phenoname}.annotate
   fi
@@ -135,7 +135,30 @@ function lz()
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL/qqmanhattanlz --svg --refsnp {4}
-     # rm ${analysis}/work/${phenoname}-{4}.lz
+       rm ${analysis}/work/${phenoname}-{4}.lz
+     '
+  fi
+  if [ -f ${analysis}/METAL/sentinels/${phenoname}-chrX.signals ]; then
+     (
+       awk 'NR>1{print $6}' ${analysis}/METAL/sentinels/${phenoname}-chrX.signals | \
+       parallel -j1 -C' ' --env analysis --env phenoname '
+         zgrep -w {} ${analysis}/METAL/${phenoname}-chrX-1.tbl.gz | \
+         awk -v rsid={} "{print \$1,\$2-5e5,\$2+5e5,rsid}"
+       '
+     ) | \
+     parallel -j1 -C ' ' --env analysis --env phenoname '
+       (
+         gunzip -c ${analysis}/METAL/${phenoname}-chrX-1.tbl.gz | \
+         awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}"
+         gunzip -c ${analysis}/METAL/${phenoname}-chrX-1.tbl.gz | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print}" | \
+         sort -k1,1n -k2,2n
+       ) > ${analysis}/work/${phenoname}-chrX-{4}.lz
+       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-chrX-{4}.lz \
+                 --delim tab title="${phenoname}-{4}" \
+                 --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
+                 --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL/qqmanhattanlz --svg --refsnp {4}
+       rm ${analysis}/work/${phenoname}-chrX-{4}.lz
      '
   fi
 }
@@ -145,7 +168,7 @@ function lz()
 #fastLR 2
 #fastLR 3
 qqmanhattan
-#lz
+# lz
 
 # --- inactive code ---
 

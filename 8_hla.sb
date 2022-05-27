@@ -31,6 +31,11 @@ export cookhla=${HPC_WORK}/CookHLA
 export snp2hla=~/genetics/SNP2HLA_package_v1.0.3/SNP2HLA
 export hatk=~/hpc-work/HATK/
 
+. /etc/profile.d/modules.sh
+module purge
+module load rhel7/default-peta4
+module load gcc/6
+
 function SNP2HLA()
 {
   cd ${snp2hla}
@@ -47,6 +52,7 @@ function SNP2HLA()
 function CookHLA()
 {
   cd ${cookhla}
+  module load python/3.7
   source ~/COVID-19/py37/bin/activate
 
   python -m MakeGeneticMap \
@@ -83,11 +89,13 @@ function HIBAG()
 
 function hatk()
 {
+  module load python/3.7
   source ~/COVID-19/py37/bin/activate
   ln -sf ${hatk}/IMGT2Seq
   ln -sf ${hatk}/bMarkerGenerator
   python3 ${hatk}/HATK.py \
-          --variants ${caprion}/work/hla \
+          --logistic \
+          --variants ${caprion}/HLA/CookHLA/hla.COPY.LiftDown_hg18 \
           --hped ${caprion}/HLA/CookHLA/hla_CookHLA.MHC.HLA_IMPUTATION_OUT.hped \
           --2field \
           --pheno ${caprion}/work/hla.pheno \

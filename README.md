@@ -87,4 +87,4 @@ It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 10
 ----------|-----|-----|----|------|------|------|-----
 **HLA_**  |  98 | 183 | 69 |   0  |  33  |   0  |  82
 
-The hped file from CookHLA can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.
+The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.

@@ -84,7 +84,7 @@ function HIBAG()
 function hatk()
 # A toy data
 {
-  cut -d' ' -f1,2,5 ${caprion}/work/hla.fam > ${caprion}/work/hla.pheno
+  awk '{print $1,$2,$5-1}' ${caprion}/work/hla.fam > ${caprion}/work/hla.pheno
   source ~/COVID-19/py37/bin/activate
   ln -sf ${hatk}/IMGT2Seq
   ln -sf ${hatk}/bMarkerGenerator

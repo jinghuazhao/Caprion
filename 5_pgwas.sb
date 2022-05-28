@@ -156,7 +156,7 @@ function lz()
        ) > ${analysis}/work/${phenoname}-chrX-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-chrX-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
-                 --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
+                 --markercol MarkerName --pvalcol log10P --no-transform --chr X --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL/qqmanhattanlz \
                  --svg --refsnp $(echo {4} | sed 's/_[A-Z]*_[A-Z]*//')
        rm ${analysis}/work/${phenoname}-chrX-{4}.lz

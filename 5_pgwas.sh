@@ -112,7 +112,7 @@ function EUR_1KGp3_chrX()
   bcftools view -S - -o - -O z ${EUR}/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz | \
   bcftools annotate --set-id '%CHROM:%POS' -o ~/Caprion/analysis/work/chrX.vcf.gz -O z -
   plink --vcf ~/Caprion/analysis/work/chrX.vcf.gz --make-bed --out ${ldfile}
-  sed -i 's/^[2-3]*/chrX/' ${ldfile}.bim
+  sed -i 's/^[2-3]*/X/;s/X:/chrX:/' ${ldfile}.bim
 }
 # a bit clumsy with errors
 # qctool -filetype vcf -g ~/Caprion/analysis/work/chrX.vcf.gz -ofiletype binary_ped -og ${ldfile}

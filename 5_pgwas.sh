@@ -109,10 +109,12 @@ function EUR_1KGp3_chrX()
   export EUR=~/rds/public_databases/1000G
   export ldfile=${HPC_WORK}/locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX
   grep -w EUR ${EUR}/integrated_call_samples_v3.20130502.ALL.panel | cut -f1 | \
-  bcftools view -S - -o ~/Caprion/analysis/work/chrX.vcf.gz -O z ${EUR}/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz
-# qctool -filetype vcf -g ~/Caprion/analysis/work/chrX.vcf.gz -ofiletype binary_ped -og ${ldfile}
-  plink --vcf ~/Caprion/analysis/work/chrX.vcf.gz --recode vcf --out ${ldfile}
+  bcftools view -S - -o - -O z ${EUR}/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz | \
+  bcftools annotate --set-id '%CHROM:%POS\_%REF\_%FIRST_ALT' -o ~/Caprion/analysis/work/chrX.vcf.gz -O z -
+  plink --vcf ~/Caprion/analysis/work/chrX.vcf.gz --make-bed --out ${ldfile}
 }
+# a bit clumsy with errors
+# qctool -filetype vcf -g ~/Caprion/analysis/work/chrX.vcf.gz -ofiletype binary_ped -og ${ldfile}
 
 # Read 87696888 items
 # common_cutoffs

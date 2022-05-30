@@ -1,10 +1,10 @@
 #!/usr/bin/bash
 
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --qos=cardio
-#SBATCH --mem=28800
-#SBATCH --time=12:00:00
+##SBATCH --account CARDIO-SL0-CPU
+##SBATCH --partition cardio
+##SBATCH --qos=cardio
+##SBATCH --mem=28800
+##SBATCH --time=12:00:00
 
 ##SBATCH --job-name=_bgen
 ##SBATCH --array=1-22
@@ -16,10 +16,10 @@
 ##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
 
-#SBATCH --job-name=_qqmanhattan
-#SBATCH --array=1-987
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.e
+##SBATCH --job-name=_qqmanhattan
+##SBATCH --array=1-987
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.e
 
 ##SBATCH --account=PETERS-SL3-CPU
 ##SBATCH --partition=cclake-himem
@@ -28,6 +28,15 @@
 ##SBATCH --mem=6840
 ##SBATCH --output=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.e
+
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --job-name=pairs
+#SBATCH --qos=cardio
+#SBATCH --mem=50000
+#SBATCH --time=12:00:00
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
@@ -167,13 +176,40 @@ function lz()
   fi
 }
 
+
+function pairs()
+{
+  export caprion=~/Caprion
+  export analysis=${caprion}/analysis
+  export pgwas=${analysis}/pgwas
+  export work=${analysis}/work
+  export TMPDIR=${HPC_WORK}/work
+  export prot=ERAP2
+
+# seq 3 | parallel -C' ' 'gunzip -c ${pgwas}/caprion-{}-${prot}.fastGWA.gz | cut -f1-3,8 | gzip -f> ${work}/${prot}-{}.gz'
+
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    prot <- Sys.getenv("prot")
+    work <- Sys.getenv("work")
+    b1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(b1=BETA) %>% mutate(chrpos=paste0(CHR,":",POS))
+    b2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(b2=BETA) %>% mutate(chrpos=paste0(CHR,":",POS))
+    b3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(b3=BETA) %>% mutate(chrpos=paste0(CHR,":",POS))
+    b <- left_join(b1,b2) %>% left_join(b3)
+    png(file.path("work",paste0(prot,".png")),width=10,height=8,units="in",res=300)
+    pairs(b[paste0("b",1:3)],cex=0.5,pch=19)
+    dev.off()
+  '
+}
+
 #bgen
 #fastLR 1
 #fastLR 2
 #fastLR 3
-qqmanhattan
+#qqmanhattan
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
 # lz
+pairs
 
 # --- inactive code ---
 

@@ -190,20 +190,20 @@ function pairs()
 
   gunzip -c ${pilot}/bgen/${uniprot}_invn-plink2.gz | cut -f1-3,9 | gzip -f > ${work}/${prot}-pilot-1.gz
   gunzip -c ${pilot}/bgen2/${prot}_All_invn-plink2.gz | cut -f1-3,9 | gzip -f > ${work}/${prot}-pilot-2.gz
-  gunzip -c ${pilot}/bgen3/protein-${prot}_invn-plink2.gz | cut -f1-3,9 | gzip -f ${work}/${prot}-pilot-3.gz
+  gunzip -c ${pilot}/bgen3/protein-${prot}_invn-plink2.gz | cut -f1-3,9 | gzip -f > ${work}/${prot}-pilot-3.gz
 # seq 3 | parallel -C' ' 'gunzip -c ${pgwas}/caprion-{}-${prot}.fastGWA.gz | cut -f1-3,8 | gzip -f> ${work}/${prot}-{}.gz'
 
   Rscript -e '
     suppressMessages(library(dplyr))
     prot <- Sys.getenv("prot")
     work <- Sys.getenv("work")
-    b1 <- read.delim(file.path(work,paste0(prot,"-pilot-1.gz"))) %>% rename(CHR=X.CHROM,b1=BETA) %>%
+    b1 <- read.delim(file.path(work,paste0(prot,"-pilot-1.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b1=BETA) %>%
           mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
-    b2 <- read.delim(file.path(work,paste0(prot,"-pilot-2.gz"))) %>% rename(CHR=X.CHROM,b2=BETA) %>%
+    b2 <- read.delim(file.path(work,paste0(prot,"-pilot-2.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b2=BETA) %>%
           mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
-    b3 <- read.delim(file.path(work,paste0(prot,"-pilot-3.gz"))) %>% rename(CHR=X.CHROM,b3=BETA) %>%
+    b3 <- read.delim(file.path(work,paste0(prot,"-pilot-3.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b3=BETA) %>%
           mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
-    b <- b1 %<% left_join(b2) %>% left_join(b3)
+    b <- b1 %>% left_join(b2) %>% left_join(b3)
     cor(b[c("b1","b2","b3")],use="complete.obs",method="pearson")
     png(file.path("work",paste0(prot,"-pilot.png")),width=10,height=8,units="in",res=300)
     pairs(b[paste0("b",1:3)],cex=0.5,pch=19)
@@ -211,7 +211,7 @@ function pairs()
     b1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(b1=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
     b2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(b2=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
     b3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(b3=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
-    b <- b1 %<% left_join(b2) %>% left_join(b3)
+    b <- b1 %>% left_join(b2) %>% left_join(b3)
     cor(b[c("b1","b2","b3")],use="complete.obs",method="pearson")
     png(file.path("work",paste0(prot,".png")),width=10,height=8,units="in",res=300)
     pairs(b[paste0("b",1:3)],cex=0.5,pch=19)

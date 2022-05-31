@@ -45,19 +45,44 @@ function cistrans()
     signals <- read.table(file.path("work","caprion.signals"),header=TRUE)
     merged <- read.delim(file.path("work","caprion.merge"))
     names(merged)[1:4] <- c("prot","Chr","bp","SNP")
-    suppressMessages(library(dplyr))
+  # glist-hg19
     INF <- Sys.getenv("INF")
     glist_hg19 <- read.table(file.path(INF,"csd3","glist-hg19"),col.names=c("chr","start","end","gene")) %>%
                   filter(! chr %in% c("XY","Y"))
     X <- with(glist_hg19,chr=="X")
     glist_hg19[X,"chr"] <- "23"
-    panel <- select(pQTLtools::caprion,Protein,Accession,Gene) %>%
-                    left_join(glist_hg19,by=c('Gene'='gene')) %>%
-                    mutate(Protein=gsub("_HUMAN","",Protein)) %>%
-                    rename(prot=Protein) %>%
-                    filter(prot %in% unique(merged$prot))
+    suppressMessages(library(dplyr))
+    ucsc <- transmute(pQTLtools::hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
+            select(Gene,chr,start,end)
+    X <- with(ucsc,chr=="X")
+    ucsc[X,"chr"] <- "23"
+    added_gene <- subset(glist_hg19,gene %in%c("APOC2","APOC4","CZIB","FYB1","SEPTIN2")) %>%
+                  rename(Gene=gene)
+    ucsc <- bind_rows(ucsc,added_gene)
+    caprion <- select(pQTLtools::caprion,Protein,Accession,Gene) %>%
+               mutate(Protein=gsub("_HUMAN","",Protein)) %>%
+               rename(prot=Protein)
+    caprion[c(55,237,433,435),]
+    subset(glist_hg19,grepl("^AMY1",gene))
+    subset(glist_hg19,grepl("^C4B",gene)&chr=="6")
+
+    pqtls <- select(merged,prot,SNP,log.P.) %>%
+             rename(log10P=log.P.) %>%
+             left_join(caprion) %>%
+             select(Gene,SNP,log10P)
+    posSNP <- select(merged,SNP,Chr,bp)
+    suppressMessages(library(iBMQ))
+    cis.vs.trans <- eqtlClassifier(pqtls,posSNP,ucsc,1e6)
+    table(cis.vs.trans$Type)
+  ##eqtlClassifier
+    posGene <- select(glist_hg19,gene,chr,start,end)
+    cvt <- eqtlClassifier(pqtls,posSNP,posGene,1e6)
+    table(cvt$Type)
+  ##cis.vs.trans.classification
+    panel <- left_join(caprion,glist_hg19,by=c('Gene'='gene')) %>%
+             filter(prot %in% unique(merged$prot))
     cistrans <- gap::cis.vs.trans.classification(merged,panel,"prot")
-    cis.vs.trans <- with(cistrans,data)
+    cvt <- with(cistrans,data)
   '
 }
 

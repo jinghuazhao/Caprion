@@ -33,13 +33,14 @@ function merge()
       <(sed '1d;s/\t/ /g' ${work}/caprion.signals | grep 'X:' | \
         parallel -C' ' -j20 'zgrep -w {7} ${analysis}/METAL/{1}-chrX-1.tbl.gz | paste <(echo {1}) -') \
       > ${work}/caprion.merge
-  cut -f11,14 work/caprion.merge | sed '1d' | awk -vOFS="\t" '{printf $2" "; if($1<0) print "-"; else print "+"}' | \
+  cut -f11,14 ${work}/caprion.merge | sed '1d' | awk -vOFS="\t" '{printf $2" "; if($1<0) print "-"; else print "+"}' | \
   sort -k1,1 -k2,2 | uniq -c | awk -vOFS="\t" '{print $1,$2,$3}'> ${work}/caprion.dir
 }
 
 function cistrans()
 {
   Rscript -e '
+    suppressMessages(library(dplyr))
   # Directions
     work <- Sys.getenv("work")
     caprion.dir <- within(read.table("work/caprion.dir",col.names=c("Count","Direction","Final")),{Direction=gsub(""," ",Direction)})
@@ -54,7 +55,6 @@ function cistrans()
                   filter(! chr %in% c("XY","Y"))
     X <- with(glist_hg19,chr=="X")
     glist_hg19[X,"chr"] <- "23"
-    suppressMessages(library(dplyr))
     ucsc <- transmute(pQTLtools::hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
             select(Gene,chr,start,end)
     X <- with(ucsc,chr=="X")
@@ -88,8 +88,7 @@ function cistrans()
              left_join(caprion_modified) %>%
              select(Gene,SNP,log10P)
     posSNP <- select(merged,SNP,Chr,bp)
-    suppressMessages(library(iBMQ))
-    cis.vs.trans <- eqtlClassifier(pqtls,posSNP,ucsc_modified,1e6)
+    cis.vs.trans <- gap::qtlClassifier(pqtls[,1:2],posSNP,ucsc_modified,1e6)
     table(cis.vs.trans$Type)
   ##eqtlClassifier
     posGene <- select(glist_hg19,gene,chr,start,end)
@@ -98,8 +97,9 @@ function cistrans()
   ##cis.vs.trans.classification
     panel <- left_join(caprion_modified,ucsc) %>%
              filter(prot %in% unique(merged$prot))
-    cistrans <- gap::cis.vs.trans.classification(merged,panel,"prot")
-    cvt <- with(cistrans,data)
+    cvt <- gap::cis.vs.trans.classification(merged,panel,"prot")
+  # suppressMessages(library(iBMQ))
+  # cis.vs.trans <- eqtlClassifier(pqtls,posSNP,ucsc_modified,1e6)
   '
 }
 

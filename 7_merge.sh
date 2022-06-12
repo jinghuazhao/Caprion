@@ -86,13 +86,14 @@ function cistrans()
     pqtls <- select(merged,prot,SNP,log.P.) %>%
              rename(log10P=log.P.) %>%
              left_join(caprion_modified) %>%
-             select(Gene,SNP,log10P)
+             select(Gene,SNP,prot)
     posSNP <- select(merged,SNP,Chr,bp)
-    cis.vs.trans <- gap::qtlClassifier(pqtls[,1:2],posSNP,ucsc_modified,1e6)
+    cis.vs.trans <- gap::qtlClassifier(pqtls[,1:3],posSNP,ucsc_modified,1e6)
     table(cis.vs.trans$Type)
-  ##eqtlClassifier
+  # Not quite working below.
+  ##qtlClassifier
     posGene <- select(glist_hg19,gene,chr,start,end)
-    cvt <- eqtlClassifier(pqtls,posSNP,posGene,1e6)
+    cvt <- gap::qtlClassifier(pqtls,posSNP,posGene,1e6)
     table(cvt$Type)
   ##cis.vs.trans.classification
     panel <- left_join(caprion_modified,ucsc) %>%

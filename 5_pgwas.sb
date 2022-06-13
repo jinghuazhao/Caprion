@@ -29,24 +29,24 @@
 ##SBATCH --output=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.e
 
-##SBATCH --account CARDIO-SL0-CPU
-##SBATCH --partition cardio
-##SBATCH --job-name=pairs
-##SBATCH --qos=cardio
-##SBATCH --mem=50000
-##SBATCH --time=12:00:00
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.e
-
 #SBATCH --account CARDIO-SL0-CPU
 #SBATCH --partition cardio
-#SBATCH --job-name=miamiplot
-#SBATCH --array=322
+#SBATCH --job-name=pairs
 #SBATCH --qos=cardio
 #SBATCH --mem=50000
 #SBATCH --time=12:00:00
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_miamiplot_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_miamiplot_%A_%a.e
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.e
+
+##SBATCH --account CARDIO-SL0-CPU
+##SBATCH --partition cardio
+##SBATCH --job-name=miamiplot
+##SBATCH --array=322
+##SBATCH --qos=cardio
+##SBATCH --mem=50000
+##SBATCH --time=12:00:00
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_miamiplot_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_miamiplot_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
@@ -198,33 +198,52 @@ function pairs()
   export prot=ERAP2
   export uniprot=Q6P179
 
-  gunzip -c ${pilot}/bgen/${uniprot}_invn-plink2.gz | cut -f1-3,9 | gzip -f > ${work}/${prot}-pilot-1.gz
-  gunzip -c ${pilot}/bgen2/${prot}_All_invn-plink2.gz | cut -f1-3,9 | gzip -f > ${work}/${prot}-pilot-2.gz
-  gunzip -c ${pilot}/bgen3/protein-${prot}_invn-plink2.gz | cut -f1-3,9 | gzip -f > ${work}/${prot}-pilot-3.gz
-  seq 3 | parallel -C' ' 'gunzip -c ${pgwas}/caprion-{}-${prot}.fastGWA.gz | cut -f1-3,8 | gzip -f> ${work}/${prot}-{}.gz'
+  gunzip -c ${pilot}/bgen/${uniprot}_invn-plink2.gz | cut -f1-3,9,10,12 | gzip -f > ${work}/${prot}-pilot-1.gz
+  gunzip -c ${pilot}/bgen2/${prot}_All_invn-plink2.gz | cut -f1-3,9,10,12 | gzip -f > ${work}/${prot}-pilot-2.gz
+  gunzip -c ${pilot}/bgen3/protein-${prot}_invn-plink2.gz | cut -f1-3,9,10,12 | gzip -f > ${work}/${prot}-pilot-3.gz
+  seq 3 | parallel -C' ' 'gunzip -c ${pgwas}/caprion-{}-${prot}.fastGWA.gz | cut -f1-3,8-10 | gzip -f> ${work}/${prot}-{}.gz'
 
   Rscript -e '
     suppressMessages(library(dplyr))
     prot <- Sys.getenv("prot")
     work <- Sys.getenv("work")
     b1 <- read.delim(file.path(work,paste0(prot,"-pilot-1.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b1=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
     b2 <- read.delim(file.path(work,paste0(prot,"-pilot-2.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b2=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
     b3 <- read.delim(file.path(work,paste0(prot,"-pilot-3.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b3=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
     b <- b1 %>% left_join(b2) %>% left_join(b3)
     cor(b[c("b1","b2","b3")],use="complete.obs",method="pearson")
     png(file.path("work",paste0(prot,"-pilot.png")),width=10,height=8,units="in",res=300)
     pairs(b[paste0("b",1:3)],cex=0.5,pch=19)
     dev.off()
-    b1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(b1=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
-    b2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(b2=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
-    b3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(b3=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP)
+    b1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(b1=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
+    b2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(b2=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
+    b3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(b3=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
     b <- b1 %>% left_join(b2) %>% left_join(b3)
     cor(b[c("b1","b2","b3")],use="complete.obs",method="pearson")
     png(file.path("work",paste0(prot,".png")),width=10,height=8,units="in",res=300)
     pairs(b[paste0("b",1:3)],cex=0.5,pch=19)
+    dev.off()
+    p1 <- read.delim(file.path(work,paste0(prot,"-pilot-1.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,p1=P) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE)
+    p2 <- read.delim(file.path(work,paste0(prot,"-pilot-2.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,p2=P) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE)
+    p3 <- read.delim(file.path(work,paste0(prot,"-pilot-3.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,p3=P) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE)
+    p <- p1 %>% left_join(p2) %>% left_join(p3)
+    cor(p[c("p1","p2","p3")],use="complete.obs",method="pearson")
+    png(file.path("work",paste0(prot,"-pilot-p.png")),width=10,height=8,units="in",res=300)
+    pairs(b[paste0("p",1:3)],cex=0.5,pch=19)
+    dev.off()
+    p1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(p1=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE)
+    p2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(p2=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE)
+    p3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(p3=BETA) %>% mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE)
+    p <- p1 %>% left_join(p2) %>% left_join(p3)
+    cor(p[c("p1","p2","p3")],use="complete.obs",method="pearson")
+    png(file.path("work",paste0(prot,"-p.png")),width=10,height=8,units="in",res=300)
+    pairs(b[paste0("p",1:3)],cex=0.5,pch=19)
     dev.off()
   '
 }
@@ -274,8 +293,8 @@ function miamiplot()
 #qqmanhattan
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
 #lz
-#pairs
-miamiplot
+pairs
+#miamiplot
 
 # --- inactive code ---
 

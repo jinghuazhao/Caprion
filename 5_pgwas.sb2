@@ -198,37 +198,10 @@ function pairs()
   export prot=ERAP2
   export uniprot=Q6P179
 
-  gunzip -c ${pilot}/bgen/${uniprot}_invn-plink2.gz | cut -f1-3,9,10,12 | gzip -f > ${work}/${prot}-pilot-1.gz
-  gunzip -c ${pilot}/bgen2/${prot}_All_invn-plink2.gz | cut -f1-3,9,10,12 | gzip -f > ${work}/${prot}-pilot-2.gz
-  gunzip -c ${pilot}/bgen3/protein-${prot}_invn-plink2.gz | cut -f1-3,9,10,12 | gzip -f > ${work}/${prot}-pilot-3.gz
-  seq 3 | parallel -C' ' 'gunzip -c ${pgwas}/caprion-{}-${prot}.fastGWA.gz | cut -f1-3,8-10 | gzip -f> ${work}/${prot}-{}.gz'
-
   Rscript -e '
     suppressMessages(library(dplyr))
     prot <- Sys.getenv("prot")
     work <- Sys.getenv("work")
-    b1 <- read.delim(file.path(work,paste0(prot,"-pilot-1.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b1=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
-    b2 <- read.delim(file.path(work,paste0(prot,"-pilot-2.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b2=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
-    b3 <- read.delim(file.path(work,paste0(prot,"-pilot-3.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,b3=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
-    b <- b1 %>% left_join(b2) %>% left_join(b3)
-    cor(b[c("b1","b2","b3")],use="complete.obs",method="pearson")
-    png(file.path("work",paste0(prot,"-pilot.png")),width=10,height=8,units="in",res=300)
-    pairs(b[paste0("b",1:3)],cex=0.5,pch=19)
-    dev.off()
-    b1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(b1=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
-    b2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(b2=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
-    b3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(b3=BETA) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
-    b <- b1 %>% left_join(b2) %>% left_join(b3)
-    cor(b[c("b1","b2","b3")],use="complete.obs",method="pearson")
-    png(file.path("work",paste0(prot,".png")),width=10,height=8,units="in",res=300)
-    pairs(b[paste0("b",1:3)],cex=0.5,pch=19)
-    dev.off()
     p1 <- read.delim(file.path(work,paste0(prot,"-pilot-1.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,p1=P) %>%
           mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE) %>% mutate(p1=-log10(p1))
     p2 <- read.delim(file.path(work,paste0(prot,"-pilot-2.gz"))) %>% rename(CHR=X.CHROM,SNP=ID,p2=P) %>%
@@ -240,12 +213,12 @@ function pairs()
     png(file.path("work",paste0(prot,"-pilot-p.png")),width=10,height=8,units="in",res=300)
     pairs(p[paste0("p",1:3)],cex=0.5,pch=19)
     dev.off()
-    p1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(p1=P) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE) %>% mutate(p1=-log10(p1))
-    p2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(p2=P) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE) %>% mutate(p2=-log10(p2))
-    p3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(p3=P) %>%
-          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE) %>% mutate(p3=-log10(p3))
+    p1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% mutate(p1=-log10(P)) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>%  select(-CHR,-POS,-SNP,-BETA,-SE,-P)
+    p2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% mutate(p2=-log10(P)) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE,-P)
+    p3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% mutate(p3=-log10(P)) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE,-P)
     p <- p1 %>% left_join(p2) %>% left_join(p3)
     cor(p[c("p1","p2","p3")],use="complete.obs",method="pearson")
     png(file.path("work",paste0(prot,"-p.png")),width=10,height=8,units="in",res=300)

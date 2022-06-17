@@ -40,9 +40,7 @@ function merge()
 function cistrans()
 {
   Rscript -e '
-    options(width=120)
     suppressMessages(library(dplyr))
-    suppressMessages(library(gap))
   # Directions
     work <- Sys.getenv("work")
     caprion.dir <- within(read.table("work/caprion.dir",col.names=c("Count","Direction","Final")),{Direction=gsub(""," ",Direction)})
@@ -86,46 +84,18 @@ function cistrans()
             rename(Gene=gene)
     ucsc_modified <- bind_rows(ucsc,APOC,AMY,C4B,HIST,HBA)
     pqtls <- select(merged,prot,SNP,log.P.) %>%
-             mutate(log10p=-log.P.) %>%
+             rename(log10P=log.P.) %>%
              left_join(caprion_modified) %>%
-             select(Gene,SNP,prot,log10p)
+             select(Gene,SNP,prot)
     posSNP <- select(merged,SNP,Chr,bp)
-    cis.vs.trans <- qtlClassifier(pqtls,posSNP,ucsc_modified,1e6) %>%
+    cis.vs.trans <- qtlClassifier(pqtls[,1:3],posSNP,ucsc_modified,1e6) %>%
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)
-    write.csv(cis.vs.trans,file=file.path(work,"caprion.cis.vs.trans"),row.names=FALSE,quote=FALSE)
-    png(file.path(work,"caprion.pqtl2d.png"),width=12,height=10,unit="in",res=300)
-    r <- qtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
-                   gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
-                   TSS=TRUE,cis="cis",plot=TRUE,cex.labels=0.6,cex.points=0.6,
-                   xlab="pQTL position",ylab="Gene position")
-    dev.off()
-    r <- qtl2dplotly(cis.vs.trans,chrlen=gap::hg19,qtl.id="SNP",qtl.prefix="pQTL:",target.type="Protein",
-                     snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
-                     gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
-                     TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
-                     xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(work,"caprion.pqtl2dplotly.html"))
-    r <- qtl3dplotly(cis.vs.trans,chrlen=gap::hg19,qtl.id="SNP",qtl.prefix="pQTL:",target.type="Protein",
-                     snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
-                     gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
-                     TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
-                     xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(work,"caprion.pqtl3dplotly.html"))
-  '
-}
-
-cistrans
-
-function legacy()
-{
-# Number of proteins which contribute pQTLs
-  sed '1d' work/caprion.signals |cut -d' ' -f1 | sort -k1,1 | uniq | wc -l
-# Number of unique variants
-  awk 'NR>1{print $7}' work/caprion.signals | sort | uniq | wc -l
-# ordering of pQTLs
-  sed '1d;s/\t/ /g' work/caprion.signals | sort -k5,5gr
-  Rscript -e '
+    pqtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
+                   gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",protein="prot",gene="Gene",
+                   lp=NULL,cis="cis",plot=TRUE)
+    gap::qtl2dplotly(cis.vs.trans,chrlen=gap::hg19,qtl.id="SNP",qtl.target="Protein:",qtl.gene="Gene:",
+                     TSS=FALSE,xlab="pQTL position",ylab="Gene position")
   # Not quite working below.
   ##qtlClassifier
     posGene <- select(glist_hg19,gene,chr,start,end)
@@ -139,3 +109,12 @@ function legacy()
   # cis.vs.trans <- eqtlClassifier(pqtls,posSNP,ucsc_modified,1e6)
   '
 }
+
+cistrans
+
+# Number of proteins which contribute pQTLs
+sed '1d' work/caprion.signals |cut -d' ' -f1 | sort -k1,1 | uniq | wc -l
+# Number of unique variants
+awk 'NR>1{print $7}' work/caprion.signals | sort | uniq | wc -l
+# ordering of pQTLs
+sed '1d;s/\t/ /g' work/caprion.signals | sort -k5,5gr

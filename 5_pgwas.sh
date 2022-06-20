@@ -133,3 +133,14 @@ function EUR_1KGp3_chrX()
 
 # by chromosome
 # seq 22 | xargs -I {} bash -c "cut -f15 ${ref}/impute_{}_interval.snpstats > {}.MAF"
+
+function uniprot_prot_list()
+{
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    caprion <- select(pQTLtools::caprion,Protein,Accession,Gene) %>%
+               mutate(Protein=gsub("_HUMAN","",Protein)) %>%
+               rename(prot=Protein)
+    write.table(caprion,file="~/Caprion/analysis/work/caprion.list",col.names=FALSE,row.names=FALSE,quote=FALSE)
+ '
+}

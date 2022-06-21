@@ -119,32 +119,7 @@ function mean()
 {
   export caprion=~/Caprion
   awk '{gsub(/NA/,"0",$NF);print}' ${caprion}/pilot/work/caprion.sample > ${caprion}/analysis/work/caprion.sample
-  cut -f1-6 --output-delimiter=' ' ${work}/caprion.merge | \
-  awk 'NR>1{gsub(/23/,"X",$2);print}' | \
-  parallel -C' ' -j10 '
-  export prot={1}
-  export chr={2}
-  export bp={3}
-  export pqtl={4}
-  for batch in {1..3}
-  do
-    export batch=${batch}
-    export out=${caprion}/analysis/work/caprion-${batch}-${prot}-${pqtl}
-    plink-2 --bgen ${caprion}/pilot/work/chr${chr}.bgen ref-unknown \
-            --sample ${caprion}/analysis/work/caprion.sample \
-            --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-            --keep ${caprion}/pilot/work/caprion-${batch}.id \
-            --pheno ${caprion}/pilot/work/caprion-${batch}.pheno --pheno-name ${prot} \
-            --recode oxford \
-            --out ${caprion}/analysis/work/caprion-${batch}-${prot}-${pqtl}
-    paste <(awk "NR>2{print \$1,\$5}" ${out}.sample) \
-          <(awk "{for(i=0;i<(NF-5)/3;i++) print \$1,\$2,\$3,\$4,\$5, \$(5+i),\$(6+i),\$(7+i)}" ${out}.gen) > ${out}.dat
-    rm ${out}.gen ${out}.sample ${out}.log
-  done
-  '
 }
-
-mean
 
 function legacy()
 {

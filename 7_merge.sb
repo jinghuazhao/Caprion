@@ -10,10 +10,14 @@
 ##SBATCH --partition cardio
 ##SBATCH --qos=cardio
 
-#SBATCH --array=1-987
-#SBATCH --export ALL
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_merge_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_merge_%A_%a.e
+##SBATCH --array=1-987
+##SBATCH --export ALL
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_merge_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_merge_%A_%a.e
+
+#SBATCH --array=1-1266
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_dat_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_dat_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion
@@ -92,4 +96,40 @@ function sentinels()
   '
 }
 
-for cmd in pgz _HLA sentinels; do $cmd; done
+# for cmd in pgz _HLA sentinels; do $cmd; done
+
+function mean_by_genotype()
+{
+  export caprion=~/Caprion
+  read prot chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${caprion}/analysis/work/caprion.merge)
+  export prot=${prot}
+  export chr=${chr}
+  export bp=${bp}
+  export pqtl=${pqtl}
+  for batch in {1..3}
+  do
+    export batch=${batch}
+    export out=${caprion}/analysis/pgwas/means/caprion-${batch}-${prot}-${pqtl}
+    plink-2 --bgen ${caprion}/pilot/work/chr${chr}.bgen ref-unknown \
+            --sample ${caprion}/analysis/work/caprion.sample \
+            --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
+            --keep ${caprion}/pilot/work/caprion-${batch}.id \
+            --pheno ${caprion}/pilot/work/caprion-${batch}.pheno --pheno-name ${prot} \
+            --recode oxford \
+            --out ${out}
+    paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
+          <(awk '{for(i=0;i<(NF-5)/3;i++) print $1,$2,$3,$4,$5, $(6+i),$(7+i),$(8+i)}' ${out}.gen) > ${out}.dat
+    rm ${out}.gen ${out}.sample ${out}.log
+    Rscript -e '
+       suppressMessages(library(dplyr))
+       datfile <- Sys.getenv("out");
+       dat <- read.table(paste0(datfile,".dat"),col.names=c("IID","pheno","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
+              mutate(g=paste0(g1,g2,g3)) %>%
+              group_by(g) %>%
+              summarise(n=n(),m=mean(pheno))
+       print(dat)
+    '
+  done
+}
+
+mean_by_genotype

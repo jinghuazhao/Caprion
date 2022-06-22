@@ -135,14 +135,13 @@ function mean_by_genotype()
        dat <- read.table(paste0(datfile,".dat"),
                          colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
                          col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
-              mutate(g=paste0(as.integer(g1),as.integer(g2),as.integer(g3)),
-                     Genotype=as.factor(case_when(g == genotypes[1] ~ paste0("1.",A1,"/",A1),
-                                                  g == genotypes[2] ~ paste0("2.",A1,"/",A2),
-                                                  g == genotypes[3] ~ paste0("3.",A2,"/",A2),
+              mutate(g=paste0(round(g1),round(g2),round(g3)),
+                     Genotype=as.factor(case_when(g == genotypes[1] ~ paste0(A1,"/",A1),
+                                                  g == genotypes[2] ~ paste0(A1,"/",A2),
+                                                  g == genotypes[3] ~ paste0(A2,"/",A2),
                                                   TRUE ~ "Other")))
-       print(dat)
        means <- group_by(dat,Genotype) %>%
-                summarise(n=n(),m=mean(Phenotype))
+                summarise(N=n(),Mean=mean(Phenotype))
        invisible(list(dat=dat,means=means))
      }
      v <- m <- list()

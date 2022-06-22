@@ -124,39 +124,38 @@ function mean_by_genotype()
     fi
   done
   Rscript -e '
+     options(width=120)
      caprion <- Sys.getenv("caprion")
      prot <- Sys.getenv("prot")
      pqtl <- Sys.getenv("pqtl")
-     suppressMessages(library(dplyr))
-     process_batch <- function(batch)
+     invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
+     process_batch <- function(batch, genotypes=c("100","010","001"))
      {
-       genotypes <- c('001','010','100')
-       f <- paste0("caprion","-",batch,"-",prot,"-",pqtl)
-       datfile <- file.path(caprion,"analysis","pgwas","means",f)
+       datfile <- file.path(caprion,"analysis","pgwas","means",paste("caprion",batch,prot,pqtl,sep="-"))
        dat <- read.table(paste0(datfile,".dat"),
                          colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
-                         col.names=c("IID","pheno","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
-              mutate(g=paste0(g1,g2,g3),
-                     labels=case_when(g==genotypes[1] ~ paste0(A1,A1), g==genotypes[2] ~ paste0(A1,A2), g==genotypes[3] ~ paste0(A2,A2)),
-                     Genotype=as.factor(labels)) %>%
-              filter(g %in% genotypes)
+                         col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
+              mutate(g=paste0(as.integer(g1),as.integer(g2),as.integer(g3)),
+                     Genotype=as.factor(case_when(g == genotypes[1] ~ paste0("1.",A1,"/",A1),
+                                                  g == genotypes[2] ~ paste0("2.",A1,"/",A2),
+                                                  g == genotypes[3] ~ paste0("3.",A2,"/",A2),
+                                                  TRUE ~ "Other")))
+       print(dat)
        means <- group_by(dat,Genotype) %>%
-                summarise(n=n(),m=mean(pheno))
-       write.table(means,file=file.path(caprion,"analysis","pgwas","means",paste0(batch,"-",prot,"-",pqtl,".txt")),row.names=FALSE,quote=FALSE)
+                summarise(n=n(),m=mean(Phenotype))
        invisible(list(dat=dat,means=means))
      }
-     suppressMessages(library(ggplot2))
-     suppressMessages(library(ggpubr))
-     p123 <- list()
+     v <- m <- list()
      for (batch in 1:3)
      {
-         dat <- process_batch(1)$dat
-         p123[[batch]]  <- ggplot(dat, aes(x=Genotype, y=pheno, fill=Genotype)) +
-                           geom_violin() +
-                           geom_boxplot(width=0.1) +
-                           theme_minimal()
+         x <- process_batch(batch)
+         v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
+                       geom_violin() +
+                       geom_boxplot(width=0.1) +
+                       theme_minimal()
+         m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
-     p <- ggarrange(p123[[1]],p123[[2]],p123[[3]],ncol=3,nrow=1,labels=c("batch1","batch2","batch3"))
+     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
      ggsave(file.path(caprion,"analysis","pgwas","means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
   '
 }

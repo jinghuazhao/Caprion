@@ -139,7 +139,7 @@ function mean_by_genotype()
                      Genotype=as.factor(case_when(g == genotypes[1] ~ paste0(A1,"/",A1),
                                                   g == genotypes[2] ~ paste0(A1,"/",A2),
                                                   g == genotypes[3] ~ paste0(A2,"/",A2),
-                                                  TRUE ~ "Other")))
+                                                  TRUE ~ "---")))
        means <- group_by(dat,Genotype) %>%
                 summarise(N=n(),Mean=mean(Phenotype))
        invisible(list(dat=dat,means=means))

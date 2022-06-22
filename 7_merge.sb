@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-#SBATCH --job-name=_merge
+#SBATCH --job-name=_means
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
 #SBATCH --mem=28800
@@ -16,8 +16,8 @@
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_merge_%A_%a.e
 
 #SBATCH --array=1-1266
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_dat_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_dat_%A_%a.e
+#SBATCH --output=~/Caprion/analysis/pgwas/means/slurm/_png_%A_%a.o
+#SBATCH --error=~/Caprion/analysis/pgwas/means/slurm/_png_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion
@@ -110,26 +110,55 @@ function mean_by_genotype()
   do
     export batch=${batch}
     export out=${caprion}/analysis/pgwas/means/caprion-${batch}-${prot}-${pqtl}
-    plink-2 --bgen ${caprion}/pilot/work/chr${chr}.bgen ref-unknown \
-            --sample ${caprion}/analysis/work/caprion.sample \
-            --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-            --keep ${caprion}/pilot/work/caprion-${batch}.id \
-            --pheno ${caprion}/pilot/work/caprion-${batch}.pheno --pheno-name ${prot} \
-            --recode oxford \
-            --out ${out}
-    paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
-          <(awk '{for(i=0;i<(NF-5)/3;i++) print $1,$2,$3,$4,$5, $(6+i),$(7+i),$(8+i)}' ${out}.gen) > ${out}.dat
-    rm ${out}.gen ${out}.sample ${out}.log
-    Rscript -e '
-       suppressMessages(library(dplyr))
-       datfile <- Sys.getenv("out");
-       dat <- read.table(paste0(datfile,".dat"),col.names=c("IID","pheno","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
-              mutate(g=paste0(g1,g2,g3)) %>%
-              group_by(g) %>%
-              summarise(n=n(),m=mean(pheno))
-       print(dat)
-    '
+    if [ ! -f ${out}.dat ]; then
+       plink-2 --bgen ${caprion}/pilot/work/chr${chr}.bgen ref-unknown \
+               --sample ${caprion}/analysis/work/caprion.sample \
+               --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
+               --keep ${caprion}/pilot/work/caprion-${batch}.id \
+               --pheno ${caprion}/pilot/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --recode oxford \
+               --out ${out}
+       paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
+             <(awk '{for(i=0;i<(NF-5)/3;i++) print $1,$2,$3,$4,$5, $(6+i),$(7+i),$(8+i)}' ${out}.gen) > ${out}.dat
+       rm ${out}.gen ${out}.sample ${out}.log
+    fi
   done
+  Rscript -e '
+     caprion <- Sys.getenv("caprion")
+     prot <- Sys.getenv("prot")
+     pqtl <- Sys.getenv("pqtl")
+     suppressMessages(library(dplyr))
+     process_batch <- function(batch)
+     {
+       genotypes <- c('001','010','100')
+       f <- paste0("caprion","-",batch,"-",prot,"-",pqtl)
+       datfile <- file.path(caprion,"analysis","pgwas","means",f)
+       dat <- read.table(paste0(datfile,".dat"),
+                         colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
+                         col.names=c("IID","pheno","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
+              mutate(g=paste0(g1,g2,g3),
+                     labels=case_when(g==genotypes[1] ~ paste0(A1,A1), g==genotypes[2] ~ paste0(A1,A2), g==genotypes[3] ~ paste0(A2,A2)),
+                     Genotype=as.factor(labels)) %>%
+              filter(g %in% genotypes)
+       means <- group_by(dat,labels) %>%
+                summarise(n=n(),m=mean(pheno))
+       print(means)
+       invisible(list(dat=dat,means=means))
+     }
+     suppressMessages(library(ggplot2))
+     suppressMessages(library(ggpubr))
+     p <- list()
+     for (batch in 1:3)
+     {
+         dat <- process_batch(1)$dat
+         p[[batch]]  <- ggplot(dat, aes(x=Genotype, y=pheno, fill=Genotype)) +
+                        geom_violin() +
+                        geom_boxplot(width=0.1) +
+                        theme_minimal()
+     }
+     p <- ggarrange(p[[1]],p[[2]],p[[3]],ncol=3,nrow=1,labels=c("batch1","batch2","batch3"))
+     ggsave(file.path(caprion,"analysis","pgwas","means",paste0("caprion","-",prot,"-",pqtl,".png")),device="png")
+  '
 }
 
 mean_by_genotype

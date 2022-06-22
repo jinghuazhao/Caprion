@@ -142,7 +142,7 @@ function mean_by_genotype()
               filter(g %in% genotypes)
        means <- group_by(dat,Genotype) %>%
                 summarise(n=n(),m=mean(pheno))
-       write.table(means,file=file.path(caprion,"analysis","pgwas","means",paste0(batch,"-",prot,"-",pqtl,".txt")),row.names=FALSE,quote=FALSE)
+       print(means)
        invisible(list(dat=dat,means=means))
      }
      suppressMessages(library(ggplot2))
@@ -157,8 +157,10 @@ function mean_by_genotype()
                            theme_minimal()
      }
      p <- ggarrange(p123[[1]],p123[[2]],p123[[3]],ncol=3,nrow=1,labels=c("batch1","batch2","batch3"))
-     ggsave(file.path(caprion,"analysis","pgwas","means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+     ggsave(file.path(caprion,"analysis","pgwas","means",paste0("caprion","-",prot,"-",pqtl,".png")),device="png")
   '
 }
 
 mean_by_genotype
+
+

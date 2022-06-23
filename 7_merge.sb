@@ -98,7 +98,7 @@ function sentinels()
 
 # for cmd in pgz _HLA sentinels; do $cmd; done
 
-function mean_by_genotype()
+function mean_by_genotype_gen_sample()
 {
   export caprion=~/Caprion
   read prot chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${caprion}/analysis/work/caprion.merge)
@@ -159,4 +159,59 @@ function mean_by_genotype()
   '
 }
 
-mean_by_genotype
+function mean_by_genotype_dosage()
+{
+  export caprion=~/Caprion
+  read prot chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${caprion}/analysis/work/caprion.merge)
+  export prot=${prot}
+  export chr=${chr}
+  export bp=${bp}
+  export pqtl=${pqtl}
+  for batch in {1..3}
+  do
+    export batch=${batch}
+    export out=${caprion}/analysis/pgwas/means/caprion-${batch}-${prot}-${pqtl}
+    if [ ! -f ${out}.dat ]; then
+       plink-2 --bgen ${caprion}/pilot/work/chr${chr}.bgen ref-unknown \
+               --sample ${caprion}/analysis/work/caprion.sample \
+               --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
+               --keep ${caprion}/pilot/work/caprion-${batch}.id \
+               --pheno ${caprion}/pilot/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --recode A include-alt \
+               --out ${out}
+       rm ${out}.log
+    fi
+  done
+  Rscript -e '
+     options(width=120)
+     caprion <- Sys.getenv("caprion")
+     prot <- Sys.getenv("prot")
+     pqtl <- Sys.getenv("pqtl")
+     invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
+     process_batch <- function(batch)
+     {
+       datfile <- file.path(caprion,"analysis","pgwas","means",paste("caprion",batch,prot,pqtl,sep="-"))
+       dat <- read.delim(paste0(datfile,".raw"),
+                         colClasses=c("character","character","character","character","integer","numeric","numeric"))
+       names(dat)[6:7] <- c("Phenotype","Genotype")
+       dat <- mutate(Genotype=round(Genotype))
+       means <- group_by(dat,Genotype) %>%
+                summarise(N=n(),Mean=mean(Phenotype))
+       invisible(list(dat=dat,means=means))
+     }
+     v <- m <- list()
+     for (batch in 1:3)
+     {
+         x <- process_batch(batch)
+         v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
+                       geom_violin() +
+                       geom_boxplot(width=0.1) +
+                       theme_minimal()
+         m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
+     }
+     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
+     ggsave(file.path(caprion,"analysis","pgwas","means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+  '
+}
+
+mean_by_genotype_dosage

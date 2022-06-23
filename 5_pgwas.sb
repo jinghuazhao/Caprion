@@ -189,6 +189,7 @@ function lz()
 
 
 function pairs()
+# all variants
 {
   export caprion=~/Caprion
   export analysis=${caprion}/analysis
@@ -257,6 +258,51 @@ function pairs()
   rm ${work}/${prot}-pilot-?.gz ${work}/${prot}-?.gz
 }
 
+function pairs_p()
+# variants below 1e-5 cutoff
+{
+  export caprion=~/Caprion
+  export analysis=${caprion}/analysis
+  export pgwas=${analysis}/pgwas
+  export pilot=${caprion}/pilot
+  export work=${analysis}/work
+  export TMPDIR=${HPC_WORK}/work
+  export uniprot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $2}' ~/Caprion/analysis/work/caprion.list)
+  export protx=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ~/Caprion/analysis/work/caprion.list | sed 's/^\([0-9].*\)/X\1/g')
+  export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ~/Caprion/analysis/work/caprion.list)
+
+  seq 3 | parallel -C' ' 'gunzip -c ${pgwas}/caprion-{}-${prot}.fastGWA.gz | awk "NR==1||\$10<=1e-5" | cut -f1-3,4,8-10 | gzip -f > ${work}/${prot}-{}.gz'
+
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    prot <- Sys.getenv("prot")
+    work <- Sys.getenv("work")
+    b1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(b1=BETA,a1=A1) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
+    b2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(b2=BETA,a2=A1) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
+    b3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(b3=BETA,a3=A1) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
+    b <- b1 %>% left_join(b2) %>% left_join(b3) %>% mutate(b2=if_else(a1==a2,b2,-b2),b3=if_else(a1==a3,b3,-b3))
+    cor(b[c("b1","b2","b3")],use="complete.obs",method="pearson")
+    png(file.path("work",paste0(prot,".png")),width=10,height=8,units="in",res=300)
+    pairs(b[paste0("b",1:3)],cex=0.5,pch=19)
+    dev.off()
+    p1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(p1=P) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE) %>% mutate(p1=-log10(p1))
+    p2 <- read.delim(file.path(work,paste0(prot,"-2.gz"))) %>% rename(p2=P) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE) %>% mutate(p2=-log10(p2))
+    p3 <- read.delim(file.path(work,paste0(prot,"-3.gz"))) %>% rename(p3=P) %>%
+          mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE) %>% mutate(p3=-log10(p3))
+    p <- p1 %>% left_join(p2) %>% left_join(p3)
+    cor(p[c("p1","p2","p3")],use="complete.obs",method="pearson")
+    png(file.path("work",paste0(prot,"-p.png")),width=10,height=8,units="in",res=300)
+    pairs(p[paste0("p",1:3)],cex=0.5,pch=19)
+    dev.off()
+  '
+  rm ${work}/${prot}-?.gz
+}
+
 function miamiplot()
 {
   export TMPDIR=/rds/user/jhz22/hpc-work/work
@@ -302,7 +348,7 @@ function miamiplot()
 #qqmanhattan
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
 #lz
-pairs
+pairs_p
 #miamiplot
 
 # --- inactive code ---

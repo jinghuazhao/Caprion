@@ -121,6 +121,10 @@ function mean()
   awk '{gsub(/NA/,"0",$NF);print}' ${caprion}/pilot/work/caprion.sample > ${caprion}/analysis/work/caprion.sample
 }
 
+signals
+merge
+cistrans
+
 function legacy()
 {
 # Number of proteins which contribute pQTLs

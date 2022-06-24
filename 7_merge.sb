@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-#SBATCH --job-name=_means
+#SBATCH --job-name=_merge
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
 #SBATCH --mem=28800
@@ -10,14 +10,14 @@
 ##SBATCH --partition cardio
 ##SBATCH --qos=cardio
 
-##SBATCH --array=1-987
-##SBATCH --export ALL
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_merge_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_merge_%A_%a.e
+#SBATCH --array=1-987
+#SBATCH --export ALL
+#SBATCH --output=/home/jhz22/Caprion/analysis/METAL/sentinels/slurm/_merge_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/METAL/sentinels/slurm/_merge_%A_%a.e
 
-#SBATCH --array=1-1266
-#SBATCH --output=/home/jhz22/Caprion/analysis/pgwas/means/slurm/_png_%A_%a.o
-#SBATCH --error=/home/jhz22/Caprion/analysis/pgwas/means/slurm/_png_%A_%a.e
+##SBATCH --array=1-1266
+##SBATCH --output=/home/jhz22/Caprion/analysis/pgwas/means/slurm/_png_%A_%a.o
+##SBATCH --error=/home/jhz22/Caprion/analysis/pgwas/means/slurm/_png_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion
@@ -28,7 +28,7 @@ function pgz()
 {
 # zcat METAL/{}-1.tbl.gz | head -1
   zcat ${caprion}/analysis/METAL/${p}-1.tbl.gz | \
-  awk 'NR>1 && $12<=log(5e-8)/log(10)' | \
+  awk 'NR>1 && $6>=0.001 && $12<=log(5e-8)/log(10)' | \
   sort -k1,1n -k2,2n | \
   gzip -f > ${caprion}/analysis/METAL/sentinels/${p}.p.gz
 }
@@ -95,8 +95,6 @@ function sentinels()
     write.table(m[,cols],file=file.path(d,paste0(prot,".signals")),row.names=FALSE,quote=FALSE,sep="\t")
   '
 }
-
-# for cmd in pgz _HLA sentinels; do $cmd; done
 
 function mean_by_genotype_gen_sample()
 {
@@ -216,4 +214,6 @@ function mean_by_genotype_dosage()
   '
 }
 
-mean_by_genotype_dosage
+# mean_by_genotype_dosage
+
+for cmd in pgz _HLA sentinels; do $cmd; done

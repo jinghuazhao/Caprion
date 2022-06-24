@@ -1,6 +1,6 @@
 # Analysis
 
-This is now done in a named sequence.
+This is now done in a named sequence[^1].
 
 ```
 1_pca_projection.sh
@@ -91,3 +91,14 @@ It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 10
 The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.
 
 ## 9. Lookup
+
+---
+
+[*1]: Directories
+
+    > Name | Description
+    > ------|------------
+    > pgwas | pGWAS
+    > METAL | Meta-analysis
+    > HLA | HLA imputation
+    > reports | Reports

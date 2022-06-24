@@ -188,16 +188,17 @@ function mean_by_genotype_dosage()
      prot <- Sys.getenv("prot")
      pqtl <- Sys.getenv("pqtl")
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
-     process_batch <- function(batch)
+     process_batch <- function(batch,digits=3)
      {
        datfile <- file.path(caprion,"analysis","pgwas","means",paste("caprion",batch,prot,pqtl,sep="-"))
-       dat <- read.delim(paste0(datfile,".raw"),
+       dat <- read.delim(paste0(datfile,".raw"),check.names=FALSE,
                          colClasses=c("character","character","character","character","integer","numeric","numeric"))
+       n7 <- names(dat)[7]
        names(dat)[6:7] <- c("Phenotype","Genotype")
-       dat <- mutate(Genotype=round(Genotype))
+       dat <- mutate(dat,Genotype=as.character(round(Genotype)))
        means <- group_by(dat,Genotype) %>%
-                summarise(N=n(),Mean=mean(Phenotype))
-       invisible(list(dat=dat,means=means))
+                summarise(N=n(),Mean=signif(mean(Phenotype),digits))
+       invisible(list(dat=dat,means=means,id=n7))
      }
      v <- m <- list()
      for (batch in 1:3)
@@ -206,6 +207,7 @@ function mean_by_genotype_dosage()
          v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
                        geom_violin() +
                        geom_boxplot(width=0.1) +
+                       xlab(with(x,id)) +
                        theme_minimal()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }

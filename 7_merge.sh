@@ -29,9 +29,9 @@ function merge()
 {
   cat <(gunzip -c ${caprion}/METAL/*-1.tbl.gz | head -1 | paste <(echo prot) -) \
       <(sed '1d;s/\t/ /g' ${work}/caprion.signals | grep -v 'X:' | \
-        parallel -C' ' -j20 'zgrep -w {7} ${analysis}/METAL/{1}-1.tbl.gz | paste <(echo {1}) -') \
+        parallel -C' ' -j20 'zgrep -w {7} ${caprion}/METAL/{1}-1.tbl.gz | paste <(echo {1}) -') \
       <(sed '1d;s/\t/ /g' ${work}/caprion.signals | grep 'X:' | \
-        parallel -C' ' -j20 'zgrep -w {7} ${analysis}/METAL/{1}-chrX-1.tbl.gz | paste <(echo {1}) -') \
+        parallel -C' ' -j20 'zgrep -w {7} ${caprion}/METAL/{1}-chrX-1.tbl.gz | paste <(echo {1}) -') \
       > ${work}/caprion.merge
   cut -f11,14 ${work}/caprion.merge | sed '1d' | awk -vOFS="\t" '{printf $2" "; if($1<0) print "-"; else print "+"}' | \
   sort -k1,1 -k2,2 | uniq -c | awk -vOFS="\t" '{print $1,$2,$3}'> ${work}/caprion.dir

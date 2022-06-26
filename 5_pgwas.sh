@@ -144,3 +144,25 @@ function uniprot_prot_list()
     write.table(caprion,file="~/Caprion/analysis/work/caprion.list",col.names=FALSE,row.names=FALSE,quote=FALSE)
  '
 }
+
+function caprion_ZYQ_classification()
+{
+  Rscript -e '
+    library(dplyr)
+    caprion_mc <- read.csv("~/Caprion/pilot/ZYQ_PC1_groups_20200703.csv") %>%
+                  rename(PC1_group=pc1_group) %>%
+                  mutate(PC1_group=as.factor(PC1_group))
+    means <- group_by(caprion_mc,PC1_group) %>%
+             summarise(N=n(),Mean=signif(mean(PC1),3),SD=signif(sd(PC1),3))
+    library(ggplot2)
+    library(ggpubr)
+    v <- ggplot(caprion_mc, aes(x=PC1_group, y=PC1, fill=PC1_group)) +
+                geom_violin() +
+                geom_boxplot(width=0.1) +
+                xlab("PC1 group") +
+                theme_minimal()
+    m <- ggtexttable(means, rows = NULL, theme = ttheme("mOrange"))
+    p <- ggarrange(v,m,ncol=1,nrow=2,labels="2. ZYQ")
+    ggsave("~/Caprion/analysis/work/ZYQ_grouping.png",width=10,height=12,units="in",device="png")
+  '
+}

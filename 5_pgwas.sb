@@ -36,8 +36,8 @@
 ##SBATCH --mem=50000
 ##SBATCH --array=1-987
 ##SBATCH --time=12:00:00
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.e
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/pairs/slurm/_pairs_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/pairs/slurm/_pairs_%A_%a.e
 
 ##SBATCH --account CARDIO-SL0-CPU
 ##SBATCH --partition cardio
@@ -285,7 +285,7 @@ function pairs_p()
           mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-SE,-P)
     b <- b1 %>% left_join(b2) %>% left_join(b3) %>% mutate(b2=if_else(a1==a2,b2,-b2),b3=if_else(a1==a3,b3,-b3))
     cor(b[c("b1","b2","b3")],use="complete.obs",method="pearson")
-    png(file.path("work",paste0(prot,".png")),width=10,height=8,units="in",res=300)
+    png(file.path("~/Caprion/analysis/METAL/pairs",paste0(prot,".png")),width=10,height=8,units="in",res=300)
     pairs(b[paste0("b",1:3)],cex=0.5,pch=19)
     dev.off()
     p1 <- read.delim(file.path(work,paste0(prot,"-1.gz"))) %>% rename(p1=P) %>%
@@ -296,7 +296,7 @@ function pairs_p()
           mutate(chrpos=paste0(CHR,":",POS)) %>% select(-CHR,-POS,-SNP,-BETA,-SE) %>% mutate(p3=-log10(p3))
     p <- p1 %>% left_join(p2) %>% left_join(p3)
     cor(p[c("p1","p2","p3")],use="complete.obs",method="pearson")
-    png(file.path("work",paste0(prot,"-p.png")),width=10,height=8,units="in",res=300)
+    png(file.path("~/Caprion/analysis/METAL/pairs",paste0(prot,"-p.png")),width=10,height=8,units="in",res=300)
     pairs(p[paste0("p",1:3)],cex=0.5,pch=19)
     dev.off()
   '
@@ -347,7 +347,7 @@ function miamiplot()
 #fastLR 3
 #qqmanhattan
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
-lz
+#lz
 #pairs_p
 #miamiplot
 

@@ -83,10 +83,10 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     sed -i '1d' ${caprion}/work/caprion-2.pheno
     sed -i '1d' ${caprion}/work/caprion-3.pheno
     ```
+    
     at `pilot/work` while the original version is saved at `analysis/work/`.
-
+    
     It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
-
 
 [^HLA]: Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,
 

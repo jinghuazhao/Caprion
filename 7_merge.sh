@@ -79,6 +79,7 @@ function cistrans()
     caprion_modified[237,"Gene"] <- "C4B"
     caprion_modified[278,"Gene"] <- "C1orf123"
     caprion_modified[385,"Gene"] <- "FYB"
+    caprion_modified[390,"Gene"] <- "FAM198A"
     caprion_modified[433,"Gene"] <- "HIST"
     caprion_modified[435,"Gene"] <- "HBA"
     caprion_modified[845,"Gene"] <- "SEPT2"

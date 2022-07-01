@@ -18,26 +18,26 @@
 
 ##SBATCH --job-name=_qqmanhattan
 ##SBATCH --array=1-987
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_qqmanhattan_%A_%a.e
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.e
 
-##SBATCH --account=PETERS-SL3-CPU
-##SBATCH --partition=cclake-himem
-##SBATCH --array=1-987
-##SBATCH --job-name=_lz
-##SBATCH --mem=6840
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_lz_%A_%a.e
-
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --job-name=pairs
-#SBATCH --qos=cardio
-#SBATCH --mem=50000
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake-himem
 #SBATCH --array=1-987
-#SBATCH --time=12:00:00
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.e
+#SBATCH --job-name=_lz
+#SBATCH --mem=6840
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.e
+
+##SBATCH --account CARDIO-SL0-CPU
+##SBATCH --partition cardio
+##SBATCH --job-name=pairs
+##SBATCH --qos=cardio
+##SBATCH --mem=50000
+##SBATCH --array=1-987
+##SBATCH --time=12:00:00
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pairs_%A_%a.e
 
 ##SBATCH --account CARDIO-SL0-CPU
 ##SBATCH --partition cardio
@@ -106,12 +106,12 @@ function qqmanhattan()
   awk '{if (NR==1) print "chromsome","position","log_pvalue","beta","se"; else print $1,$2,-$12,$10,$11}' > ${analysis}/work/${phenoname}.txt
   R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
-      output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_qq \
+      output_data_rootname=${analysis}/METAL/qqmanhattanlz/qqmanhattan/${phenoname}_qq \
       plot_title="${phenoname}" < ~/cambridge-ceu/turboqq/turboqq.r
   if [ ! -f ${analysis}/METAL/sentinels/${phenoname}.signals ]; then
      R --slave --vanilla --args \
        input_data_path=${analysis}/work/${phenoname}.txt \
-       output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_manhattan \
+       output_data_rootname=${analysis}/METAL/qqmanhattanlz/qqmanhattan/${phenoname}_manhattan \
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
        pvalue_sign=5e-8 \
        plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
@@ -121,7 +121,7 @@ function qqmanhattan()
         > ${analysis}/work/${phenoname}.annotate
     R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
-      output_data_rootname=${analysis}/METAL/qqmanhattanlz/${phenoname}_manhattan \
+      output_data_rootname=${analysis}/METAL/qqmanhattanlz/qqmanhattan/${phenoname}_manhattan \
       custom_peak_annotation_file_path=${analysis}/work/${phenoname}.annotate \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5e-8 \
@@ -155,7 +155,7 @@ function lz()
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL/qqmanhattanlz --svg --refsnp {4}
+                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL/qqmanhattanlz/lz --svg --refsnp {4}
        rm ${analysis}/work/${phenoname}-{4}.lz
      '
   fi
@@ -180,7 +180,7 @@ function lz()
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-chrX-{4}.lz \
                  --delim tab title="${phenoname}-chr{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL/qqmanhattanlz \
+                 --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL/qqmanhattanlz/lz \
                  --svg --refsnp $(echo chr{4} | sed "s/_[A-Z]*_[A-Z]*//")
        rm ${analysis}/work/${phenoname}-chrX-{4}.lz
      '
@@ -347,8 +347,8 @@ function miamiplot()
 #fastLR 3
 #qqmanhattan
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
-#lz
-pairs_p
+lz
+#pairs_p
 #miamiplot
 
 # --- inactive code ---

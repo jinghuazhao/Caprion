@@ -28,7 +28,7 @@ function pgz()
 {
 # zcat METAL/{}-1.tbl.gz | head -1
   zcat ${caprion}/analysis/METAL/${p}-1.tbl.gz | \
-  awk 'NR>1 && $6>=0.001 && $12<=log(5e-8)/log(10)' | \
+  awk 'NR>1 && $6>=0.01 && $12<=log(5e-8)/log(10)' | \
   sort -k1,1n -k2,2n | \
   gzip -f > ${caprion}/analysis/METAL/sentinels/${p}.p.gz
 }

@@ -78,13 +78,11 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
     * GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
     * GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
-
     ```
     sed -i '1d' ${caprion}/work/caprion-1.pheno
     sed -i '1d' ${caprion}/work/caprion-2.pheno
     sed -i '1d' ${caprion}/work/caprion-3.pheno
     ```
-
     at `pilot/work` while the original version is saved at `analysis/work/`.
 
     It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.

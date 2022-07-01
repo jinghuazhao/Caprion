@@ -1,6 +1,6 @@
 # Analysis
 
-This is now done in a named sequence[^1].
+This is now done in a named sequence[^directory].
 
 ```
 1_pca_projection.sh
@@ -34,7 +34,7 @@ The PLINK2 has been consistent in the pilot studies, so `scale()` operaions can 
 
 The phenotypic data is generated in accordance with the double transformations as in SCALLOP-Seq analysis.
 
-## 5. pGWAS[^2]
+## 5. pGWAS[^pGWAS]
 
 The bgen files were extracted from a list of all samples, the variant IDs of which were replaced when RSid is missing (.).
 
@@ -57,7 +57,7 @@ To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log
 
 An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled.
 
-## 8. HLA imputation[^3]
+## 8. HLA imputation[^HLA]
 
 This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed [here](https://cambridge-ceu.github.io/csd3/applications/CookHLA.html). The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.
 
@@ -67,7 +67,7 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
 ---
 
-[^1]: Directories
+[^directory]: Directories
 
     Name | Description
     ------|------------
@@ -76,7 +76,7 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     HLA | HLA imputation
     reports | Reports
 
-[^2]:
+[^pGWAS]:
 
     * GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
     * GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
@@ -92,7 +92,7 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
 
 
-[^3]: Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,
+[^HLA]: Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,
 
     **Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
     ----------|-----|-----|----|------|------|------|-----

@@ -39,8 +39,8 @@ function METAL_files_suffix()
      echo TRACKPOSITIONS ON
      echo AVERAGEFREQ ON
      echo MINMAXFREQ ON
-     echo ADDFILTER AF1 ">=" 0.0001
-     echo ADDFILTER AF1 "<=" 0.9999
+     echo ADDFILTER AF1 ">=" 0.01
+     echo ADDFILTER AF1 "<=" 0.99
      echo MARKERLABEL SNP
      echo ALLELELABELS A1 A2
      echo EFFECTLABEL BETA

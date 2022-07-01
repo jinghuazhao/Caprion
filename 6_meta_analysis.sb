@@ -2,18 +2,14 @@
 
 #SBATCH --job-name=_METAL
 
-##SBATCH --account CARDIO-SL0-CPU
-##SBATCH --partition cardio
-##SBATCH --qos=cardio
-
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
 #SBATCH --array=1-987
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_metal_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_metal_%A_%a.e
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/slurm/_metal_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/slurm/_metal_%A_%a.e
 #SBATCH --export ALL
 
 export TMPDIR=${HPC_WORK}/work

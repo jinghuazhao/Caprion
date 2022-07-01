@@ -204,13 +204,11 @@
 </li>
 <li id="fn:pGWAS">
 <p>Protein GWAS</p>
-<ul>
-<li>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</li>
-<li>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.
-<code>sed -i '1d' ${caprion}/work/caprion-1.pheno
+<p>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
+<p>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</p>
+<p><code>sed -i '1d' ${caprion}/work/caprion-1.pheno
 sed -i '1d' ${caprion}/work/caprion-2.pheno
-sed -i '1d' ${caprion}/work/caprion-3.pheno</code></li>
-</ul>
+sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 <p>at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
 <p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated. <a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
@@ -356,5 +354,5 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></li>
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-07-01 18:59:43.418052+00:00
+Build Date UTC : 2022-07-01 19:01:43.576319+00:00
 -->

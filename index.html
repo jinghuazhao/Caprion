@@ -105,7 +105,7 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#5-pgwas">5. pGWAS</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#5-pgwaspgwas">5. pGWAS[^pGWAS]</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -117,7 +117,7 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#8-hla-imputation">8. HLA imputation</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#8-hla-imputationhla">8. HLA imputation[^HLA]</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -153,88 +153,20 @@
 <p>The groupings based on proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.</p>
 <p>The PLINK2 has been consistent in the pilot studies, so <code>scale()</code> operaions can be used in the inverse normal transformations.</p>
 <p>The phenotypic data is generated in accordance with the double transformations as in SCALLOP-Seq analysis.</p>
-<h2 id="5-pgwas">5. pGWAS</h2>
+<h2 id="5-pgwaspgwas">5. pGWAS[^pGWAS]</h2>
 <p>The bgen files were extracted from a list of all samples, the variant IDs of which were replaced when RSid is missing (.).</p>
-<p>The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH lines. Also note that</p>
-<ul>
-<li>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</li>
-<li>
-<p>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</p>
-<blockquote>
-<p><code>sed -i '1d' ${caprion}/work/caprion-1.pheno
-sed -i '1d' ${caprion}/work/caprion-2.pheno
-sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
-<p>at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
-</blockquote>
-</li>
-</ul>
-<p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.</p>
+<p>The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH lines.</p>
 <p>The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots. Note that LocusZoom 1.4 does not contain 1000Genomes build 37 genotypes for chromosome X and therefore they are supplemented with local files in the required format, namely, <code>locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX.[bed, bim, fan]</code>.</p>
 <h2 id="6-meta-analysis">6. Meta-analysis</h2>
-<p>This follows from the SCALLOP/INF implementation, as designed in the logic of a Makefile, i.e.,</p>
+<p>This follows from the SCALLOP/INF implementation, as designed analogous to a Makefile, i.e.,</p>
 <pre><code class="language-bash">6_meta_analysis &lt;task&gt;
 </code></pre>
 <p>where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.</p>
 <p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p>
 <h2 id="7-variant-identification">7. Variant identification</h2>
 <p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled.</p>
-<h2 id="8-hla-imputation">8. HLA imputation</h2>
+<h2 id="8-hla-imputationhla">8. HLA imputation[^HLA]</h2>
 <p>This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed <a href="https://cambridge-ceu.github.io/csd3/applications/CookHLA.html">here</a>. The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.</p>
-<p>Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,</p>
-<table>
-<thead>
-<tr>
-<th><strong>Locus</strong></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>DQA1</th>
-<th>DQB1</th>
-<th>DPB1</th>
-<th>DRB1</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>N</strong></td>
-<td>1857</td>
-<td>2572</td>
-<td>1866</td>
-<td>1740</td>
-<td>1924</td>
-<td>1624</td>
-<td>2436</td>
-</tr>
-</tbody>
-</table>
-<p>while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.</p>
-<p>It is of note that <code>1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers</code> in the 1000Genomes reference panel has 465 variants with HLA prefix and the partition is as follows,</p>
-<table>
-<thead>
-<tr>
-<th><strong>Locus</strong></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>DQA1</th>
-<th>DQB1</th>
-<th>DPB1</th>
-<th>DRB1</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>HLA_</strong></td>
-<td>98</td>
-<td>183</td>
-<td>69</td>
-<td>0</td>
-<td>33</td>
-<td>0</td>
-<td>82</td>
-</tr>
-</tbody>
-</table>
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
 <h2 id="9-lookup">9. Lookup</h2>
 <hr/>
@@ -244,6 +176,33 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 &gt; METAL | Meta-analysis
 &gt; HLA | HLA imputation
 &gt; reports | Reports
+</code></pre>
+<p>[pGWAS]:</p>
+<pre><code>* GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
+* GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
+
+```
+sed -i '1d' ${caprion}/work/caprion-1.pheno
+sed -i '1d' ${caprion}/work/caprion-2.pheno
+sed -i '1d' ${caprion}/work/caprion-3.pheno
+```
+
+at `pilot/work` while the original version is saved at `analysis/work/`.
+
+It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
+</code></pre>
+<p>[^HLA]: Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,</p>
+<pre><code>**Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
+----------|-----|-----|----|------|------|------|-----
+**N**     |1857 |2572 |1866| 1740 | 1924 | 1624 | 2436
+
+while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.
+
+It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 1000Genomes reference panel has 465 variants with HLA prefix and the partition is as follows,
+
+**Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
+----------|-----|-----|----|------|------|------|-----
+**HLA_**  |  98 | 183 | 69 |   0  |  33  |   0  |  82
 </code></pre></div>
 </div>
 </div>
@@ -327,5 +286,5 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-07-01 08:42:42.594668+00:00
+Build Date UTC : 2022-07-01 18:38:35.090654+00:00
 -->

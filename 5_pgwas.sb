@@ -21,13 +21,13 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.e
 
-#SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake-himem
-#SBATCH --array=1-987
-#SBATCH --job-name=_lz
-#SBATCH --mem=6840
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.e
+##SBATCH --account=PETERS-SL3-CPU
+##SBATCH --partition=cclake-himem
+##SBATCH --array=1-987
+##SBATCH --job-name=_lz
+##SBATCH --mem=6840
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.e
 
 ##SBATCH --account CARDIO-SL0-CPU
 ##SBATCH --partition cardio
@@ -39,15 +39,15 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/pairs/slurm/_pairs_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/pairs/slurm/_pairs_%A_%a.e
 
-##SBATCH --account CARDIO-SL0-CPU
-##SBATCH --partition cardio
-##SBATCH --job-name=miamiplot
-##SBATCH --array=322
-##SBATCH --qos=cardio
-##SBATCH --mem=50000
-##SBATCH --time=12:00:00
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_miamiplot_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_miamiplot_%A_%a.e
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --job-name=miamiplot
+#SBATCH --array=1-987
+#SBATCH --qos=cardio
+#SBATCH --mem=50000
+#SBATCH --time=12:00:00
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/miamiplot/slurm/_miamiplot_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/miamiplot/slurm/_miamiplot_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
@@ -320,15 +320,14 @@ function miamiplot()
       awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$2"_"a1"_"a2; print snpid,$10,$8/$9}' | \
       sort -k1,1 \
      )
-  ) | gzip -f > ${caprion}/work/${uniprot}-${prot}-phase1-phase2.dat.gz
-  if [ ! -d ${caprion}/miamiplot ]; then mkdir ${caprion}/miamiplot; fi
+  ) | gzip -f > ${analysis}/work/${uniprot}-${prot}-phase1-phase2.dat.gz
   module load gcc/6
   Rscript -e '
-    caprion <- Sys.getenv("caprion")
+    analysis <- Sys.getenv("analysis")
     prot <- Sys.getenv("prot")
     uniprot <- Sys.getenv("uniprot")
-    uniprot_prot <- read.table(file.path(caprion,"work",paste(uniprot,prot,"phase1-phase2.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
-    png(file.path(caprion,"miamiplot",paste(uniprot,prot,"phase1-phase2-fastGWA.png",sep="-")),res=300,width=12,height=10,units="in")
+    uniprot_prot <- read.table(file.path(analysis,"work",paste(uniprot,prot,"phase1-phase2.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
+    png(file.path(analysis,"METAL","miamiplot",paste(uniprot,prot,"phase1-phase2-fastGWA.png",sep="-")),res=300,width=12,height=10,units="in")
     gap::miamiplot(uniprot_prot,chr="chr",bp="pos",p="pr",pr="p",snp="rsid",cex=0.4,ylab="Phase II (top)/I (bottom)")
     z <- function(p) qnorm(p/2,lower.tail=FALSE)
     cor_z1_z2 <- with(uniprot_prot,cor(z,zr,use="complete.obs",method="pearson"))
@@ -338,7 +337,7 @@ function miamiplot()
            cor_z1_z2,cor_p1_p2,with(sign_test_p1_p2,p.value)))
     dev.off()
   '
-  rm ${caprion}/work/${uniprot}-${prot}-phase1-phase2.dat.gz
+  rm ${analysis}/work/${uniprot}-${prot}-phase1-phase2.dat.gz
 }
 
 #bgen
@@ -349,7 +348,7 @@ function miamiplot()
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
 #lz
 #pairs_p
-#miamiplot
+miamiplot
 
 # --- inactive code ---
 

@@ -170,9 +170,10 @@ function caprion_ZYQ_classification()
     suppressMessages(require(Biobase))
     load("~/Caprion/pilot/ZYQ.rda")
     suppressMessages(require(quantro))
-    b <- matboxplot(exprs(protein_ZYQ), groupFactor=with(caprion_mc,PC1_group), cex=0.4, xaxt="n",
-                    main="Boxplots of all proteins", xlab="Sample", ylab="Abundance level")
-    ggsave("~/Caprion/analysis/work/ZYQ_boxplot.png",width=20,height=12,units="in",device="png")
+    png("~/Caprion/analysis/work/ZYQ_boxplot.png",width=20,height=12,units="in",device="png")
+    matboxplot(exprs(protein_ZYQ), groupFactor=with(caprion_mc,PC1_group), cex=0.4, xaxt="n",
+               main="Boxplots of all proteins", xlab="Sample", ylab="Abundance level")
+    dev.off()
   # Possible use
     g1 <- filter(caprion_mc,PC1_group=="group1") %>%
           select(LIMS.ID)

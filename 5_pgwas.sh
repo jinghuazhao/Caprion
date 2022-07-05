@@ -168,17 +168,25 @@ function caprion_ZYQ_classification()
     p <- ggarrange(v,m,ncol=1,nrow=2,labels="2. ZYQ")
     ggsave("~/Caprion/analysis/work/ZYQ_grouping.png",width=10,height=12,units="in",device="png")
     suppressMessages(require(Biobase))
-    load("~/Caprion/pilot/ZYQ.rda")
     suppressMessages(require(quantro))
-    png("~/Caprion/analysis/work/ZYQ_boxplot.png",res=300,width=20,height=12,units="in")
-    matboxplot(exprs(protein_ZYQ), groupFactor=with(caprion_mc,PC1_group), cex=0.4, xaxt="n",
-               main="Boxplots of all proteins", xlab="Sample", ylab="Abundance level")
-    dev.off()
+    load("~/Caprion/pilot/ZYQ.rda")
   # Possible use
     g1 <- filter(caprion_mc,PC1_group=="group1") %>%
           select(LIMS.ID)
     g2 <- filter(caprion_mc,PC1_group=="group2") %>%
           select(LIMS.ID)
+    g <- rbind(g1,g2)[["LIMS.ID"]]
     proteins <- t(exprs(protein_ZYQ))
+    png("~/Caprion/analysis/work/ZYQ_boxplot.png",res=300,width=50,height=12,units="in")
+    matboxplot(exprs(protein_ZYQ[,g]), groupFactor=with(caprion_mc,PC1_group), cex=0.4, pch=19, xaxt="n",
+               main="Boxplots of all proteins", xlab="Sample", ylab="Abundance level",
+               brewer.n=8, brewer.name="Dark2")
+    dev.off()
+    qtest <- quantro(protein_ZYQ,groupFactor=caprion_mc$PC1_group,B=10000)
+    summary(qtest)
+    anova(qtest)
+    quantroStat(qtest)
+    quantroStatPerm(qtest)
+    quantroPvalPerm(qtest)
   '
 }

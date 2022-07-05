@@ -312,11 +312,11 @@ function miamiplot()
   (
     echo snpid chr pos rsid p z pr zr
     join \
-    <(gunzip -c ~/Caprion/analysis/pgwas/caprion-1-ERAP2.fastGWA.gz | \
+    <(gunzip -c ~/Caprion/analysis/pgwas/caprion-1-${prot}.fastGWA.gz | \
       awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$2"_"a1"_"a2; print snpid,$1,$3,$2,$10,$8/$9}' | \
       sort -k1,1 \
      ) \
-    <(gunzip -c ~/Caprion/analysis/pgwas/caprion-2-ERAP2.fastGWA.gz  | \
+    <(gunzip -c ~/Caprion/analysis/pgwas/caprion-2-${prot}.fastGWA.gz  | \
       awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$2"_"a1"_"a2; print snpid,$10,$8/$9}' | \
       sort -k1,1 \
      )

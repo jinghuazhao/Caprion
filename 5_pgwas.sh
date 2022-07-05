@@ -154,6 +154,7 @@ function caprion_ZYQ_classification()
     caprion_mc <- read.csv("~/Caprion/pilot/ZYQ_PC1_groups_20200703.csv") %>%
                   rename(PC1_group=pc1_group) %>%
                   mutate(PC1_group=as.factor(PC1_group))
+    rownames(caprion_mc) <- with(caprion_mc,LIMS.ID)
     means <- group_by(caprion_mc,PC1_group) %>%
              summarise(N=n(),Mean=signif(mean(PC1),3),SD=signif(sd(PC1),3))
     library(ggplot2)
@@ -166,5 +167,17 @@ function caprion_ZYQ_classification()
     m <- ggtexttable(means, rows = NULL, theme = ttheme("mOrange"))
     p <- ggarrange(v,m,ncol=1,nrow=2,labels="2. ZYQ")
     ggsave("~/Caprion/analysis/work/ZYQ_grouping.png",width=10,height=12,units="in",device="png")
+    suppressMessages(require(Biobase))
+    load("~/Caprion/pilot/ZYQ.rda")
+    suppressMessages(require(quantro))
+    b <- matboxplot(exprs(protein_ZYQ), groupFactor=with(caprion_mc,PC1_group), cex=0.4, xaxt="n",
+                    main="Boxplots of all proteins", xlab="Sample", ylab="Abundance level")
+    ggsave("~/Caprion/analysis/work/ZYQ_boxplot.png",width=20,height=12,units="in",device="png")
+  # Possible use
+    g1 <- filter(caprion_mc,PC1_group=="group1") %>%
+          select(LIMS.ID)
+    g2 <- filter(caprion_mc,PC1_group=="group2") %>%
+          select(LIMS.ID)
+    proteins <- t(exprs(protein_ZYQ))
   '
 }

@@ -170,7 +170,7 @@ function caprion_ZYQ_classification()
     suppressMessages(require(Biobase))
     load("~/Caprion/pilot/ZYQ.rda")
     suppressMessages(require(quantro))
-    png("~/Caprion/analysis/work/ZYQ_boxplot.png",width=20,height=12,units="in",device="png")
+    png("~/Caprion/analysis/work/ZYQ_boxplot.png",res=300,width=20,height=12,units="in")
     matboxplot(exprs(protein_ZYQ), groupFactor=with(caprion_mc,PC1_group), cex=0.4, xaxt="n",
                main="Boxplots of all proteins", xlab="Sample", ylab="Abundance level")
     dev.off()

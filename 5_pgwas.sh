@@ -181,6 +181,7 @@ function caprion_ZYQ_classification()
     matboxplot(exprs(protein_ZYQ[,g]), groupFactor=with(caprion_mc,PC1_group), cex=0.4, pch=19, xaxt="n",
                main="Boxplots of all proteins", xlab="Sample", ylab="Abundance level",
                brewer.n=8, brewer.name="Dark2")
+    legend('top', c("Group1", "Group2"), col = c(1, 2), lty = 1, lwd = 3)
     dev.off()
     qtest <- quantro(protein_ZYQ,groupFactor=caprion_mc$PC1_group,B=10000)
     summary(qtest)

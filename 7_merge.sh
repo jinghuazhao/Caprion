@@ -122,9 +122,62 @@ function mean()
   awk '{gsub(/NA/,"0",$NF);print}' ${caprion}/pilot/work/caprion.sample > ${caprion}/analysis/work/caprion.sample
 }
 
+function fp()
+{
+  export analysis=~/Caprion/analysis
+  cp  ${analysis}/work/caprion.merge ${analysis}/work/tbl.tsv
+  cut -f2-4 ${analysis}/work/tbl.tsv | \
+  awk 'NR>1' | \
+  sort -k1,2n | \
+  uniq | \
+  awk -vOFS="\t" '{print $1":"$2,$3}' > ${analysis}/work/rsid.tsv
+  (
+    gunzip -c ${analysis}/pgwas/caprion-*fastGWA.gz | head -1
+    awk 'NR>1' ${analysis}/work/tbl.tsv | \
+    cut -f1,4,14 --output-delimiter=' ' | \
+    parallel -j10 -C' ' '
+      export direction=$(zgrep -w {2} ${analysis}/METAL/{1}-1.tbl.gz | cut -f13)
+      let j=1
+      for i in $(grep "Input File" ${analysis}/METAL/{1}-1.tbl.info | cut -d" " -f7)
+      do
+         export n=$(awk -vj=$j "BEGIN{split(ENVIRON[\"direction\"],a,\"\");print a[j]}")
+         if [ "$n" != "?" ]; then zgrep -H -w {2} $i; fi
+         let j=$j+1
+      done
+  '
+  ) | \
+  sed 's|/data/jinhua/INF/sumstats||g;s/.gz//g' > ${analysis}/work/all.tsv
+  Rscript -e '
+    require(gap)
+    require(dplyr)
+    tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
+           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
+           filter(!prot %in% c("BROX","CT027"))
+    all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
+           rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
+           mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR)) %>%
+           mutate(batch_prot_chr=strsplit(CHR,"-|:"),
+                  batch=unlist(lapply(batch_prot_chr,"[",1)),
+                  prot=unlist(lapply(batch_prot_chr,"[",2)),
+                  CHR=unlist(lapply(batch_prot_chr,"[",3))) %>%
+           mutate(MarkerName=paste0(CHR,":",POS),
+                  study=case_when(batch == batch[1] ~ "1. ZWK",
+                                  batch == batch[2] ~ "2. ZYQ",
+                                  batch == batch[3] ~ "3. UDP",
+                                  TRUE ~ "---")) %>%
+           select(-batch_prot_chr) %>%
+           filter(!prot %in% c("BROX","CT027"))
+    rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
+    pdf("~/Caprion/analysis/work/fp.pdf",width=10,height=8)
+    METAL_forestplot(tbl,all,rsid)
+    dev.off()
+  '
+}
+
 signals
 merge
 cistrans
+fp
 
 function legacy()
 {

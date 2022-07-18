@@ -57,7 +57,7 @@ To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log
 
 ## 7. Variant identification
 
-An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here.
+An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here[^metal].
 
 ## 8. HLA imputation[^HLA]
 

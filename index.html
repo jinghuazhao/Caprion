@@ -169,7 +169,7 @@
 <p>where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.</p>
 <p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p>
 <h2 id="7-variant-identification">7. Variant identification</h2>
-<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here.</p>
+<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here<sup id="fnref:metal"><a class="footnote-ref" href="#fn:metal">3</a></sup>.</p>
 <h2 id="8-hla-imputation4">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">4</a></sup></h2>
 <p>This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed <a href="https://cambridge-ceu.github.io/csd3/applications/CookHLA.html">here</a>. The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.</p>
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
@@ -366,5 +366,5 @@ a too large, ITMAX too small in gamma countinued fraction (gcf)</code></p>
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-07-18 19:11:32.084947+00:00
+Build Date UTC : 2022-07-18 21:06:33.138397+00:00
 -->

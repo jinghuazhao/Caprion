@@ -151,8 +151,7 @@ function fp()
     require(gap)
     require(dplyr)
     tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
-           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
-           filter(!prot %in% c("BROX","CT027"))
+           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position))
     all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
            mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR)) %>%
@@ -165,8 +164,7 @@ function fp()
                                   batch == batch[2] ~ "2. ZYQ",
                                   batch == batch[3] ~ "3. UDP",
                                   TRUE ~ "---")) %>%
-           select(-batch_prot_chr) %>%
-           filter(!prot %in% c("BROX","CT027"))
+           select(-batch_prot_chr)
     rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
     pdf("~/Caprion/analysis/work/fp.pdf",width=10,height=8)
     METAL_forestplot(tbl,all,rsid)

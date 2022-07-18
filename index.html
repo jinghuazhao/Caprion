@@ -121,7 +121,7 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#8-hla-imputation3">8. HLA imputation3</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#8-hla-imputation4">8. HLA imputation4</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -169,16 +169,11 @@
 <p>where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.</p>
 <p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p>
 <h2 id="7-variant-identification">7. Variant identification</h2>
-<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled.</p>
-<h2 id="8-hla-imputation3">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">3</a></sup></h2>
+<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here.</p>
+<h2 id="8-hla-imputation4">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">4</a></sup></h2>
 <p>This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed <a href="https://cambridge-ceu.github.io/csd3/applications/CookHLA.html">here</a>. The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.</p>
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
 <h2 id="9-lookup">9. Lookup</h2>
-<div class="footnote">
-<hr/>
-<ol>
-<li id="fn:directory">
-<p>Directories</p>
 <table>
 <thead>
 <tr>
@@ -205,20 +200,19 @@
 </tr>
 </tbody>
 </table>
-<p><a class="footnote-backref" href="#fnref:directory" title="Jump back to footnote 1 in the text">↩</a></p>
-</li>
-<li id="fn:pGWAS">
-<p>Protein GWAS</p>
 <p>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
 <p>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</p>
-<p><code>sed -i '1d' ${caprion}/work/caprion-1.pheno
+<pre><code>sed -i '1d' ${caprion}/work/caprion-1.pheno
 sed -i '1d' ${caprion}/work/caprion-2.pheno
-sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
+sed -i '1d' ${caprion}/work/caprion-3.pheno
+</code></pre>
 <p>at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
-<p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated. <a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 2 in the text">↩</a></p>
-</li>
-<li id="fn:HLA">
-<p>Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,</p>
+<p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.</p>
+<p>The .info files for proteins BROX and CT027 could not be obtained from METAL 2020-05-05 with the following error message -- an attempt was made to fix this and reported as a fixable issue to METAL GitHub respository (<code>https://github.com/statgen/METAL/issues/24</code>).</p>
+<pre><code>FATAL ERROR -
+a too large, ITMAX too small in gamma countinued fraction (gcf)
+</code></pre>
+<p>this has enabled Forest plots for the associate pQTLs.</p>
 <table>
 <thead>
 <tr>
@@ -273,7 +267,20 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 </tr>
 </tbody>
 </table>
-<p><a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 3 in the text">↩</a></p>
+<div class="footnote">
+<hr/>
+<ol>
+<li id="fn:directory">
+<p>Directories <a class="footnote-backref" href="#fnref:directory" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+<li id="fn:pGWAS">
+<p>Protein GWAS <a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
+<li id="fn:metal">
+<p>incomplete gamma function <a class="footnote-backref" href="#fnref:metal" title="Jump back to footnote 3 in the text">↩</a></p>
+</li>
+<li id="fn:HLA">
+<p>Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes, <a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 4 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -359,5 +366,5 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-07-16 08:51:03.936818+00:00
+Build Date UTC : 2022-07-18 18:59:39.624058+00:00
 -->

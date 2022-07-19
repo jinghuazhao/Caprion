@@ -101,7 +101,7 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     a too large, ITMAX too small in gamma countinued fraction (gcf)
     ```
 
-    An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository (`https://github.com/statgen/METAL/issues/24`).
+    An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository ([`https://github.com/statgen/METAL/issues/24`](https://github.com/statgen/METAL/issues/24)).
     This has enabled Forest plots for the associate pQTLs.
 
 [^HLA]: Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,

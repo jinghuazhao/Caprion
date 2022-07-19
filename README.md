@@ -94,14 +94,15 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
 [^metal]: incomplete gamma function
 
-    The .info files for proteins BROX and CT027 could not be obtained from METAL 2020-05-05 with the following error message -- an attempt was made to fix this and reported as a fixable issue to METAL GitHub respository (`https://github.com/statgen/METAL/issues/24`).
+    The .info files for proteins BROX and CT027 could not be obtained from METAL 2020-05-05 with the following error message,
 
     ```
     FATAL ERROR -
     a too large, ITMAX too small in gamma countinued fraction (gcf)
     ```
 
-    this has enabled Forest plots for the associate pQTLs.
+    An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository (`https://github.com/statgen/METAL/issues/24`).
+    This has enabled Forest plots for the associate pQTLs.
 
 [^HLA]: Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,
 

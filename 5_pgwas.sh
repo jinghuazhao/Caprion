@@ -97,10 +97,10 @@ function tableMAF()
   Rscript -e '
     maf <- scan("stdin");
     options(width=200)
-    common_cutoffs <- cut(maf,c(0,0.01,0.05,0.5));
+    common_cutoffs <- cut(maf,c(0,0.01,0.05,0.5),include.lowest=TRUE);
     table(common_cutoffs);
     table(common_cutoffs)/length(maf);
-    full_cutoffs <- cut(maf,c(0,0.0001,0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5));
+    full_cutoffs <- cut(maf,c(0,0.0001,0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5),include.lowest=TRUE);
     table(full_cutoffs);
     table(full_cutoffs)/length(maf)
   '
@@ -118,7 +118,7 @@ function EUR_1KGp3_chrX()
 }
 # a bit clumsy with errors
 # qctool -filetype vcf -g ~/Caprion/analysis/work/chrX.vcf.gz -ofiletype binary_ped -og ${ldfile}
-
+# include.lowest=FALSE (default)
 # Read 87696888 items
 # common_cutoffs
 #    (0,0.01] (0.01,0.05]  (0.05,0.5]
@@ -132,6 +132,20 @@ function EUR_1KGp3_chrX()
 # full_cutoffs
 #     (0,0.0001] (0.0001,0.001]   (0.001,0.01]    (0.01,0.05]     (0.05,0.1]      (0.1,0.2]      (0.2,0.3]      (0.3,0.4]      (0.4,0.5]
 #     0.44338007     0.28418919     0.10692408     0.03410371     0.01612883     0.02081379     0.01589170     0.01410017     0.01332961
+# include.lowest=TRUE
+# Read 87696888 items
+# common_cutoffs
+#    [0,0.01] (0.01,0.05]  (0.05,0.5]
+#    77667187     2990789     7038912
+# common_cutoffs
+#    [0,0.01] (0.01,0.05]  (0.05,0.5]
+#  0.88563219  0.03410371  0.08026410
+# full_cutoffs
+#     [0,0.0001] (0.0001,0.001]   (0.001,0.01]    (0.01,0.05]     (0.05,0.1]      (0.1,0.2]      (0.2,0.3]      (0.3,0.4]      (0.4,0.5]
+#       43367770       24922508        9376909        2990789        1414448        1825305        1393653        1236541        1168965
+# full_cutoffs
+#     [0,0.0001] (0.0001,0.001]   (0.001,0.01]    (0.01,0.05]     (0.05,0.1]      (0.1,0.2]      (0.2,0.3]      (0.3,0.4]      (0.4,0.5]
+#     0.49451892     0.28418919     0.10692408     0.03410371     0.01612883     0.02081379     0.01589170     0.01410017     0.01332961
 
 # by chromosome
 # seq 22 | xargs -I {} bash -c "cut -f15 ${ref}/impute_{}_interval.snpstats > {}.MAF"

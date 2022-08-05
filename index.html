@@ -89,6 +89,10 @@
 <ul class="nav flex-column">
 <li class="nav-item" data-level="1"><a class="nav-link" href="#analysis">Analysis</a>
 <ul class="nav flex-column">
+<li class="nav-item" data-level="2"><a class="nav-link" href="#workflow">workflow</a>
+<ul class="nav flex-column">
+</ul>
+</li>
 <li class="nav-item" data-level="2"><a class="nav-link" href="#programs1">Programs1</a>
 <ul class="nav flex-column">
 </ul>
@@ -136,8 +140,13 @@
 </div></div>
 <div class="col-md-9" role="main">
 <h1 id="analysis">Analysis</h1>
+<h2 id="workflow">workflow</h2>
+<p>This involves <code>cluster.yaml</code> and <code>workflow/</code>, <code>config/</code>, <code>results/</code>, <code>slurm/</code>.</p>
+<p>A call is made with</p>
+<pre><code class="language-bash">snakemake --max-jobs-per-second 1 --keep-going --notemp
+</code></pre>
 <h2 id="programs1">Programs<sup id="fnref:directory"><a class="footnote-ref" href="#fn:directory">1</a></sup></h2>
-<p>This is now done in a named sequence.</p>
+<p>Earlier work was done in a named sequence.</p>
 <pre><code>1_pca_projection.sh
 2_ggm.R
 3_wgcna.R
@@ -367,5 +376,5 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-07-26 13:42:58.601404+00:00
+Build Date UTC : 2022-08-05 09:42:33.227069+00:00
 -->

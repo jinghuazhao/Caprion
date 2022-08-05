@@ -133,6 +133,7 @@ function qqmanhattan()
 }
 
 function lz()
+# rs114800762 not in the reference panel, so would need to drop --refsnp for it.
 {
   module load python/2.7
   if [ -f ${analysis}/METAL/sentinels/${phenoname}.signals ]; then

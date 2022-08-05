@@ -151,7 +151,8 @@ function fp()
     require(gap)
     require(dplyr)
     tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
-           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position))
+           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
+           arrange(prot,SNP)
     all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
            mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR)) %>%
@@ -170,6 +171,30 @@ function fp()
     METAL_forestplot(tbl,all,rsid)
     dev.off()
   '
+}
+
+function fplz()
+{
+  export metal=~/Caprion/analysis/METAL
+# HSPB1_rs114800762 is missing as dug by the following code.
+  join -a1 <(sed '1d' work/caprion.merge | awk '{print $1"_"$4}' | sort -k1,1 ) \
+           <(ls METAL/qqmanhattanlz/lz/*pdf | xargs -l basename -s .pdf | awk '{print $1,NR}') | \
+  awk 'NF<2' | \
+  sed 's/_/ /' | \
+  parallel -C' ' 'ls METAL/qqmanhattanlz/lz/{1}*pdf'
+# forest/locuszoom left-right format
+  ulimit -n
+  ulimit -S -n 2048
+  qpdf --empty --pages $(ls ${metal}/qqmanhattanlz/lz/*.pdf) -- lz2.pdf
+  qpdf -show-npages lz2.pdf
+  qpdf --pages . 1-1586:odd -- lz2.pdf lz.pdf
+# Split files, note the naming scheme
+  pdfseparate lz.pdf temp-%04d-lz.pdf
+  pdfseparate ${metal}/fp/fp.pdf temp-%04d-fp.pdf
+# left-right with very small file size
+# Combine the final pdf
+  pdfjam temp-*-*.pdf --nup 2x1 --landscape --papersize '{7in,16in}' --outfile fp+lz.pdf
+  rm temp*pdf
 }
 
 signals

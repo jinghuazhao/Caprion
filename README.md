@@ -1,8 +1,18 @@
 # Analysis
 
+## workflow
+
+This involves `cluster.yaml` and `workflow/`, `config/`, `results/`, `slurm/`.
+
+A call is made with
+
+```bash
+snakemake --max-jobs-per-second 1 --keep-going --notemp
+```
+
 ## Programs[^directory]
 
-This is now done in a named sequence.
+Earlier work was done in a named sequence.
 
 ```
 1_pca_projection.sh

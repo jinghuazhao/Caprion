@@ -11,6 +11,8 @@ setup
 mkdocs build
 mkdocs gh-deploy
 
+git add cluster.yaml
+git commit -m "Snakemake workflow"
 git add .gitignore
 git commit -m ".gitignore"
 git add README.md pilot/README.md

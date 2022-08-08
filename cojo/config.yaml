@@ -1,5 +1,5 @@
 cluster:
-  mkdir -p cojo/logs/{rule} &&
+  mkdir -p logs/{rule} &&
   sbatch
     --account={resources.account}
     --partition={resources.partition}
@@ -8,8 +8,8 @@ cluster:
     --mem={resources.mem_mb}
     --time={resources.runtime}
     --job-name={rule}-{wildcards}
-    --error=logs/{rule}/{rule}-{wildcards}-%j.err
-    --output=logs/{rule}/{rule}-{wildcards}-%j.out
+    --error=logs/{rule}/{wildcards}.err
+    --output=logs/{rule}/{wildcards}.out
 default-resources:
   - account=CARDIO-SL0-CPU
   - partition=cardio

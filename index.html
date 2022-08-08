@@ -89,11 +89,11 @@
 <ul class="nav flex-column">
 <li class="nav-item" data-level="1"><a class="nav-link" href="#analysis">Analysis</a>
 <ul class="nav flex-column">
-<li class="nav-item" data-level="2"><a class="nav-link" href="#workflow">workflow</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#workflow-experimental">workflow (experimental)</a>
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#programs1">Programs1</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#programs2">Programs2</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -113,7 +113,7 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#5-pgwas2">5. pGWAS2</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#5-pgwas3">5. pGWAS3</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -125,7 +125,7 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#8-hla-imputation4">8. HLA imputation4</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#8-hla-imputation5">8. HLA imputation5</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -140,12 +140,14 @@
 </div></div>
 <div class="col-md-9" role="main">
 <h1 id="analysis">Analysis</h1>
-<h2 id="workflow">workflow</h2>
-<p>This involves <code>cluster.yaml</code> and <code>workflow/</code>, <code>config/</code>, <code>results/</code>, <code>slurm/</code>.</p>
-<p>A call is made with</p>
-<pre><code class="language-bash">snakemake --max-jobs-per-second 1 --keep-going --notemp
+<h2 id="workflow-experimental">workflow (experimental)</h2>
+<p>A call is made with<sup id="fnref:snakemake"><a class="footnote-ref" href="#fn:snakemake">1</a></sup></p>
+<pre><code class="language-bash"># config/, workflow/
+snakemake --max-jobs-per-second 1 --keep-going --notemp
+# cojo
+snakemake --profile cojo -s cojo/cojo.yaml -n
 </code></pre>
-<h2 id="programs1">Programs<sup id="fnref:directory"><a class="footnote-ref" href="#fn:directory">1</a></sup></h2>
+<h2 id="programs2">Programs<sup id="fnref:directory"><a class="footnote-ref" href="#fn:directory">2</a></sup></h2>
 <p>Earlier work was done in a named sequence.</p>
 <pre><code>1_pca_projection.sh
 2_ggm.R
@@ -167,7 +169,7 @@
 <p>The groupings based on proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.</p>
 <p>The PLINK2 has been consistent in the pilot studies, so <code>scale()</code> operaions can be used in the inverse normal transformations.</p>
 <p>The phenotypic data is generated in accordance with the double transformations as in SCALLOP-Seq analysis.</p>
-<h2 id="5-pgwas2">5. pGWAS<sup id="fnref:pGWAS"><a class="footnote-ref" href="#fn:pGWAS">2</a></sup></h2>
+<h2 id="5-pgwas3">5. pGWAS<sup id="fnref:pGWAS"><a class="footnote-ref" href="#fn:pGWAS">3</a></sup></h2>
 <p>The bgen files were extracted from a list of all samples, the variant IDs of which were replaced when RSid is missing (.).</p>
 <p>The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH lines.</p>
 <p>The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots. Note that LocusZoom 1.4 does not contain 1000Genomes build 37 genotypes for chromosome X and therefore they are supplemented with local files in the required format, namely, <code>locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX.[bed, bim, fan]</code>.</p>
@@ -178,14 +180,22 @@
 <p>where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.</p>
 <p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p>
 <h2 id="7-variant-identification">7. Variant identification</h2>
-<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here<sup id="fnref:metal"><a class="footnote-ref" href="#fn:metal">3</a></sup>.</p>
-<h2 id="8-hla-imputation4">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">4</a></sup></h2>
+<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here<sup id="fnref:metal"><a class="footnote-ref" href="#fn:metal">4</a></sup>.</p>
+<h2 id="8-hla-imputation5">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">5</a></sup></h2>
 <p>This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed <a href="https://cambridge-ceu.github.io/csd3/applications/CookHLA.html">here</a>. The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.</p>
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
 <h2 id="9-lookup">9. Lookup</h2>
 <div class="footnote">
 <hr/>
 <ol>
+<li id="fn:snakemake">
+<p>snakemake</p>
+<p>An environment for <code>snakemake</code> is enabled as follows,</p>
+<p><code>bash
+module load miniconda3/4.5.1
+export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop
+source activate ${csd3path}/miniconda37</code> <a class="footnote-backref" href="#fnref:snakemake" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
 <li id="fn:directory">
 <p>Directories</p>
 <table>
@@ -214,7 +224,7 @@
 </tr>
 </tbody>
 </table>
-<p><a class="footnote-backref" href="#fnref:directory" title="Jump back to footnote 1 in the text">↩</a></p>
+<p><a class="footnote-backref" href="#fnref:directory" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 <li id="fn:pGWAS">
 <p>Protein GWAS</p>
@@ -224,7 +234,7 @@
 sed -i '1d' ${caprion}/work/caprion-2.pheno
 sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 <p>at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
-<p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated. <a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated. <a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 3 in the text">↩</a></p>
 </li>
 <li id="fn:metal">
 <p>incomplete gamma function</p>
@@ -232,7 +242,7 @@ sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 <p><code>FATAL ERROR -
 a too large, ITMAX too small in gamma countinued fraction (gcf)</code></p>
 <p>An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository (<a href="https://github.com/statgen/METAL/issues/24"><code>https://github.com/statgen/METAL/issues/24</code></a>).
-This has enabled Forest plots for the associate pQTLs. <a class="footnote-backref" href="#fnref:metal" title="Jump back to footnote 3 in the text">↩</a></p>
+This has enabled Forest plots for the associate pQTLs. <a class="footnote-backref" href="#fnref:metal" title="Jump back to footnote 4 in the text">↩</a></p>
 </li>
 <li id="fn:HLA">
 <p>Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,</p>
@@ -290,7 +300,7 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </tr>
 </tbody>
 </table>
-<p><a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 4 in the text">↩</a></p>
+<p><a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 5 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>
@@ -376,5 +386,5 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-08-05 09:42:33.227069+00:00
+Build Date UTC : 2022-08-08 11:18:04.994784+00:00
 -->

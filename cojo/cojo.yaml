@@ -1,0 +1,34 @@
+import pandas as pd
+from snakemake.io import expand, glob_wildcards
+
+merge =  pd.read_table("work/caprion.merge")
+sentinel = merge.set_index(['prot','MarkerName'], drop=False)
+
+rule all:
+    input:
+        expand("results/{prot}-{rsid}-{chr}:{pos}.tst",
+               zip,
+               prot=sentinel['prot'],
+               rsid=sentinel['MarkerName'],
+               chr=sentinel['Chromosome'],
+               pos=sentinel['Position'])
+
+rule cojo:
+    params:
+        bfile="~/Caprion/pilot/data/merged_imputation",
+        prot="{prot}",
+        rsid="{rsid}",
+        chr="{chr}",
+        pos="{pos}"
+    output:
+        "results/{prot}-{rsid}-{chr}:{pos}.tst"
+    shell:
+        "scripts/cojo.sh {params.bfile} {params.prot} {params.rsid} {params.chr} {params.pos}"
+
+rule aggregate:
+    shell:
+       "echo {output}"
+
+# m = pd.read_table("work/caprion.merge")
+# merge = m.assign(id=m.prot+","+m.MarkerName+","+m.Chromosome.astype(str)+","+m.Position.astype(str))
+# sentinel = merge.drop(['FreqSE','MinFreq','MaxFreq','Direction','HetISq','HetChiSq','HetDf','logHetP'],axis=1).set_index('id', drop=False)

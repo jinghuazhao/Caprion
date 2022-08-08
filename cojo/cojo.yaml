@@ -23,7 +23,7 @@ rule cojo:
     output:
         "results/{prot}-{rsid}-{chr}:{pos}.tst"
     shell:
-        "scripts/cojo.sh {params.bfile} {params.prot} {params.rsid} {params.chr} {params.pos}"
+        "cojo/scripts/cojo.sh {params.bfile} {params.prot} {params.rsid} {params.chr} {params.pos}"
 
 rule aggregate:
     shell:

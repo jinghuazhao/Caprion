@@ -1,13 +1,14 @@
 # Analysis
 
-## workflow
+## workflow (experimental)
 
-This involves `cluster.yaml` and `workflow/`, `config/`, `results/`, `slurm/`.
-
-A call is made with
+A call is made with[^snakemake]
 
 ```bash
+# config/, workflow/
 snakemake --max-jobs-per-second 1 --keep-going --notemp
+# cojo
+snakemake --profile cojo -s cojo/cojo.yaml -n
 ```
 
 ## Programs[^directory]
@@ -76,6 +77,16 @@ This is experimented on several software including HIBAG, CookHLA and SNP2HLA as
 The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.
 
 ## 9. Lookup
+
+[^snakemake]: snakemake
+
+    An environment for `snakemake` is enabled as follows,
+
+    ```bash
+    module load miniconda3/4.5.1
+    export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop
+    source activate ${csd3path}/miniconda37
+    ```
 
 [^directory]: Directories
 

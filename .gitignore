@@ -1,11 +1,13 @@
 .git/
 .Rhistory
+.snakemake
 HLA/
 IMGT2Seq
 METAL/
 bMarkerGenerator
 doc/
 docs/
+logs/
 pgwas/
 reports/
 site/

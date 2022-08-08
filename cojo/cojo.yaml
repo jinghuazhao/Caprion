@@ -1,12 +1,11 @@
-import pandas as pd
+import pandas
 from snakemake.io import expand, glob_wildcards
-
-merge =  pd.read_table("work/caprion.merge")
-sentinel = merge.set_index(['prot','MarkerName'], drop=False)
+m = pandas.read_table("work/caprion.merge").drop(['FreqSE','MinFreq','MaxFreq','Direction','HetISq','HetChiSq','HetDf','logHetP'], axis=1)
+sentinel = m.assign(id=m.prot+","+m.MarkerName+","+m.Chromosome.astype(str)+","+m.Position.astype(str)).set_index(['prot','MarkerName'], drop=False)
 
 rule all:
     input:
-        expand("results/{prot}-{rsid}-{chr}:{pos}.tst",
+        expand("results/{prot}-{rsid}-{chr}:{pos}",
                zip,
                prot=sentinel['prot'],
                rsid=sentinel['MarkerName'],
@@ -21,14 +20,10 @@ rule cojo:
         chr="{chr}",
         pos="{pos}"
     output:
-        "results/{prot}-{rsid}-{chr}:{pos}.tst"
+        "results/{prot}-{rsid}-{chr}:{pos}"
     shell:
         "cojo/scripts/cojo.sh {params.bfile} {params.prot} {params.rsid} {params.chr} {params.pos}"
 
 rule aggregate:
     shell:
        "echo {output}"
-
-# m = pd.read_table("work/caprion.merge")
-# merge = m.assign(id=m.prot+","+m.MarkerName+","+m.Chromosome.astype(str)+","+m.Position.astype(str))
-# sentinel = merge.drop(['FreqSE','MinFreq','MaxFreq','Direction','HetISq','HetChiSq','HetDf','logHetP'],axis=1).set_index('id', drop=False)

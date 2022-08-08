@@ -13,7 +13,7 @@ export end=$(awk -vpos=${pos} -vflanking=${flanking} 'BEGIN{print pos+flanking}'
 
 plink2 --bfile ${bfile} \
        --chr ${chr} --from-bp ${start} --to-bp ${end} \
-       --geno 0.1 --mind 0.1 --maf 0.005 --indep-pairwise 1000kb 1 0.8 --out results/${pr}
+       --geno 0.1 --mind 0.1 --maf 0.01 --indep-pairwise 1000kb 1 0.1 --out results/${pr}
 if [ $(grep -w ${r} results/${pr}.prune.in | wc -l) -eq 0 ]; then
    export i=$(grep -w -f results/${pr}.prune.in {bfile}.bim | \
               awk -vpos=${pos} 'function abs(x) {if (x<0) return -x; else return x;} {d=abs($4-pos);print $1, $2, $4, d}' | \

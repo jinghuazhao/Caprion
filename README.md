@@ -9,7 +9,7 @@ A call is made with[^snakemake]
 snakemake --profile cojo -s cojo/rules/cojo.yaml
 ```
 
-and use --unlock when necessary.
+and use `--unlock` when necessary.
 
 
 ## Programs[^directory]

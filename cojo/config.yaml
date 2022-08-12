@@ -8,8 +8,8 @@ cluster:
     --mem={resources.mem_mb}
     --time={resources.runtime}
     --job-name={rule}-{wildcards}
-    --error=logs/{rule}/{wildcards}-prune.err
-    --output=logs/{rule}/{wildcards}-prune.out
+    --error=logs/{rule}/{wildcards}-{rule}.err
+    --output=logs/{rule}/{wildcards}-{rule}.out
 default-resources:
   - account=CARDIO-SL0-CPU
   - partition=cardio

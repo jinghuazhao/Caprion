@@ -12,17 +12,19 @@ rule all:
                chr=sentinel['Chromosome'],
                pos=sentinel['Position'])
 
-rule cojo:
+rule dosage:
     params:
         bfile="~/Caprion/pilot/data/merged_imputation",
         prot="{prot}",
         rsid="{rsid}",
         chr="{chr}",
-        pos="{pos}"
+        pos="{pos}",
+        chunksize=10,
+        caprion="~/Caprion/"
     output:
         "results/{prot}-{rsid}-{chr}:{pos}"
     shell:
-        "cojo/scripts/cojo.sh {params.bfile} {params.prot} {params.rsid} {params.chr} {params.pos}"
+        "cojo/scripts/cojo.sh {params.bfile} {params.prot} {params.rsid} {params.chr} {params.pos} {params.caprion}"
 
 rule aggregate:
     shell:

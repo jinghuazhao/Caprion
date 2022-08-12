@@ -5,11 +5,12 @@
 A call is made with[^snakemake]
 
 ```bash
-# config/, workflow/
-snakemake --max-jobs-per-second 1 --keep-going --notemp
 # cojo
-snakemake --profile cojo -s cojo/cojo.yaml -n
+snakemake --profile cojo -s cojo/rules/cojo.yaml
 ```
+
+and use --unlock when necessary.
+
 
 ## Programs[^directory]
 

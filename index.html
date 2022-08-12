@@ -142,11 +142,10 @@
 <h1 id="analysis">Analysis</h1>
 <h2 id="workflow-experimental">workflow (experimental)</h2>
 <p>A call is made with<sup id="fnref:snakemake"><a class="footnote-ref" href="#fn:snakemake">1</a></sup></p>
-<pre><code class="language-bash"># config/, workflow/
-snakemake --max-jobs-per-second 1 --keep-going --notemp
-# cojo
-snakemake --profile cojo -s cojo/cojo.yaml -n
+<pre><code class="language-bash"># cojo
+snakemake --profile cojo -s cojo/rules/cojo.yaml
 </code></pre>
+<p>and use --unlock when necessary.</p>
 <h2 id="programs2">Programs<sup id="fnref:directory"><a class="footnote-ref" href="#fn:directory">2</a></sup></h2>
 <p>Earlier work was done in a named sequence.</p>
 <pre><code>1_pca_projection.sh
@@ -386,5 +385,5 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-08-08 20:50:05.717739+00:00
+Build Date UTC : 2022-08-12 21:08:51.969286+00:00
 -->

@@ -7,12 +7,35 @@ export r=${3}
 export pr=${p}-${r}
 export chr=${4}
 export pos=${5}
-export caprion=${6}
 export flanking=1e6
 export start=$(awk -vpos=${pos} -vflanking=${flanking} 'BEGIN{start=pos-flanking;if(start<0) start=0;print start}')
 export end=$(awk -vpos=${pos} -vflanking=${flanking} 'BEGIN{print pos+flanking}')
 
-function prune()
+function gcta()
+{
+  if [ ! -s METAL/sentinels/${p}.p.gz ]; then
+     cat <(echo SNP A1 A2 freq b se p N) \
+         <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${p}.ma
+     cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
+     if [ -f results/${pr}.jma.cojo ]; then
+        rm results/${pr}.jma.cojo results/${pr}.ldr.cojo;
+     fi
+     if [ ! -f work/chr${chr}.bed ]; then
+        plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
+               --extract work/${p}.rsid --export ind-major-bed --maf 0.01 --out work/chr${chr}
+     fi
+     gcta-1.9 --bfile work/chr${chr} \
+              --cojo-file work/${p}.ma \
+              --cojo-slct \
+              --cojo-p 5e-8 \
+              --cojo-collinear 0.9 \
+              --out results/${pr}
+  fi
+}
+
+gcta
+
+function dosage()
 {
   plink2 --bfile ${bfile} \
          --chr ${chr} --from-bp ${start} --to-bp ${end} \
@@ -32,10 +55,6 @@ function prune()
      sort results/${pr}.prune.in > results/${pr}.prune
   fi
   rm results/${pr}.prune.in results/${pr}.prune.out
-}
-
-function dosage()
-{
   plink-2 --bgen data/chr${chr}.bgen ref-last \
           --sample data/caprion.sample \
           --extract prune/${pr}.prune \
@@ -48,6 +67,8 @@ function dosage()
 # cat ~/Caprion/pilot/work/caprion.bgenlist | xargs -l -I {} ln -s {}
 # ln -s ~/Caprion/pilot/work/caprion.sample
 # cd -
+
+# legacy
 
 function regress()
 {
@@ -67,28 +88,3 @@ function regress()
     })
   '
 }
-
-function gcta()
-{
-  if [ ! -s METAL/sentinels/${p}.p.gz ]; then
-     cat <(echo SNP A1 A2 freq b se p N) \
-         <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${p}.ma
-     cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
-     if [ -f work/${pr}.jma.cojo ]; then
-        rm work/${pr}.jma.cojo work/${pr}.ldr.cojo;
-     fi
-     if [ ! -f work/chr${chr}.bed ]; then
-        plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample --export ind-major-bed --maf 0.01 --out work/chr${chr}
-     fi
-     gcta-1.9 --bfile work/chr${chr} \
-              --cojo-file work/${p}.ma \
-              --chr ${chr} \
-              --extract work/${p}.rsid \
-              --cojo-slct \
-              --cojo-p 5e-8 \
-              --cojo-collinear 0.9 \
-              --out results/${pr}
-  fi
-}
-
-gcta

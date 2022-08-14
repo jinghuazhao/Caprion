@@ -13,24 +13,17 @@ export end=$(awk -vpos=${pos} -vflanking=${flanking} 'BEGIN{print pos+flanking}'
 
 function gcta()
 {
-  if [ ! -s METAL/sentinels/${p}.p.gz ]; then
-     cat <(echo SNP A1 A2 freq b se p N) \
-         <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${p}.ma
-     cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
-     if [ -f results/${pr}.jma.cojo ]; then
-        rm results/${pr}.jma.cojo results/${pr}.ldr.cojo;
-     fi
-     if [ ! -f work/chr${chr}.bed ]; then
-        plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
-               --extract work/${p}.rsid --export ind-major-bed --maf 0.01 --out work/chr${chr}
-     fi
-     gcta-1.9 --bfile work/chr${chr} \
-              --cojo-file work/${p}.ma \
-              --cojo-slct \
-              --cojo-p 5e-8 \
-              --cojo-collinear 0.9 \
-              --out results/${pr}
-  fi
+  cat <(echo SNP A1 A2 freq b se p N) \
+      <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${p}.ma
+  cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
+  plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
+         --extract work/${p}.rsid --export ind-major-bed --maf 0.01 --out work/chr${chr}
+  gcta-1.9 --bfile work/chr${chr} \
+           --cojo-file work/${p}.ma \
+           --cojo-slct \
+           --cojo-p 5e-8 \
+           --cojo-collinear 0.9 \
+           --out results/${pr}
 }
 
 gcta

@@ -14,7 +14,7 @@ rule all:
 
 rule gcta:
     params:
-        bfile="~/Caprion/pilot/data/merged_imputation",
+        bfile="data/merged_imputation",
         prot="{prot}",
         rsid="{rsid}",
         chr="{chr}",

@@ -16,24 +16,27 @@ function gcta()
   cat <(echo SNP A1 A2 freq b se p N) \
       <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${p}.ma
   cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
-  plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
-         --extract work/${p}.rsid \
-         --indep-pairwise 1000kb 1 0.1 --out results/${pr}.prune
-  if [ $(grep -w ${r} results/${pr}.prune.prune.in | wc -l) -eq 0 ]; then
-     export i=$(grep -w -f results/${pr}.prune.prune.in ${bfile}.bim | \
-                awk -vpos=${pos} 'function abs(x) {if (x<0) return -x; else return x;} {d=abs($4-pos);print $1, $2, $4, d}' | \
-                sort -r -k4,4n | \
-                awk 'NR==1 {print $2}' \
-              )
-     sed -i 's/'"$i"'/'"$r"'/g' results/${pr}.prune.prune.in
+  echo ${r} > results/${pr}.prune
+  if [ $(wc -l work/${p}.rsid) -gt 1 ]; then
+     plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
+            --extract work/${p}.rsid \
+            --indep-pairwise 1000kb 1 0.1 --out results/${pr}.prune
+     if [ $(grep -w ${r} results/${pr}.prune.prune.in | wc -l) -eq 0 ]; then
+        export i=$(grep -w -f results/${pr}.prune.prune.in ${bfile}.bim | \
+                   awk -vpos=${pos} 'function abs(x) {if (x<0) return -x; else return x;} {d=abs($4-pos);print $1, $2, $4, d}' | \
+                   sort -r -k4,4n | \
+                   awk 'NR==1 {print $2}' \
+                  )
+        sed -i 's/'"$i"'/'"$r"'/g' results/${pr}.prune.prune.in
+     fi
+     (
+       if [ ${chr} -eq 19 ]; then
+          sort results/${pr}.prune.prune.in | join -v1 - ${INF}/work/NLRP2
+       else
+          sort results/${pr}.prune.prune.in
+       fi
+     ) > results/${pr}.prune
   fi
-  (
-    if [ ${chr} -eq 19 ]; then
-       sort results/${pr}.prune.prune.in | join -v1 - ${INF}/work/NLRP2
-    else
-       sort results/${pr}.prune.prune.in
-    fi
-  ) > results/${pr}.prune
 # rm results/${pr}.prune.prune.in results/${pr}.prune.prune.out work/${p}.rsid
   plink2 --bgen data/chr${chr}.bgen ref-last \
          --sample data/caprion.sample \

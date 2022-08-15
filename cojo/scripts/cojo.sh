@@ -18,7 +18,7 @@ function gcta()
   cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
   plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
          --extract work/${p}.rsid \
-         --geno 0.1 --mind 0.1 --maf 0.01 --indep-pairwise 1000kb 1 0.1 --out results/${pr}.prune
+         --indep-pairwise 1000kb 1 0.1 --out results/${pr}.prune
   if [ $(grep -w ${r} results/${pr}.prune.prune.in | wc -l) -eq 0 ]; then
      export i=$(grep -w -f results/${pr}.prune.prune.in ${bfile}.bim | \
                 awk -vpos=${pos} 'function abs(x) {if (x<0) return -x; else return x;} {d=abs($4-pos);print $1, $2, $4, d}' | \
@@ -28,7 +28,7 @@ function gcta()
      sed -i 's/'"$i"'/'"$r"'/g' results/${pr}.prune.prune.in
   fi
   (
-    sort results/${pr}.prune.in
+    sort results/${pr}.prune.prune.in
     if [ ${chr} -eq 19 ]; then
        join -v1 results/${pr}.prune.prune.in ${INF}/work/NLRP2
     fi

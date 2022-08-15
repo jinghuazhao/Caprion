@@ -28,12 +28,13 @@ function gcta()
      sed -i 's/'"$i"'/'"$r"'/g' results/${pr}.prune.prune.in
   fi
   (
-    sort results/${pr}.prune.prune.in
     if [ ${chr} -eq 19 ]; then
-       join -v1 results/${pr}.prune.prune.in ${INF}/work/NLRP2
+       sort results/${pr}.prune.prune.in | join -v1 - ${INF}/work/NLRP2
+    else
+       sort results/${pr}.prune.prune.in
     fi
   ) > results/${pr}.prune
-  rm results/${pr}.prune.prune.in results/${pr}.prune.prune.out work/${p}.rsid
+# rm results/${pr}.prune.prune.in results/${pr}.prune.prune.out work/${p}.rsid
   plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
          --extract results/${pr}.prune --export ind-major-bed --out work/chr${chr}
   plink2 --bgen data/chr${chr}.bgen ref-last \

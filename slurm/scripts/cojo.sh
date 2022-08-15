@@ -16,7 +16,7 @@ function gcta()
   cat <(echo SNP A1 A2 freq b se p N) \
       <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${p}.ma
   cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
-  if [ $(wc -l work/${p}.rsid) -eq 1 ]; then return; fi
+  if [ $(wc -l work/${p}.rsid) -eq 1 ]; then return 0; fi
   plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
          --extract work/${p}.rsid \
          --indep-pairwise 1000kb 1 0.1 --out results/${pr}.prune

@@ -12,3 +12,8 @@ pgwas/
 reports/
 site/
 work/
+
+config/
+data/
+results/
+test/

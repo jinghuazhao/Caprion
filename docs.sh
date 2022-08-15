@@ -11,7 +11,7 @@ setup
 mkdocs build
 mkdocs gh-deploy
 
-git add cojo
+git add slurm
 git commit -m "Snakemake profiles"
 git add .gitignore
 git commit -m ".gitignore"

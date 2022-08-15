@@ -11,7 +11,7 @@ export flanking=1e6
 export start=$(awk -vpos=${pos} -vflanking=${flanking} 'BEGIN{start=pos-flanking;if(start<0) start=0;print start}')
 export end=$(awk -vpos=${pos} -vflanking=${flanking} 'BEGIN{print pos+flanking}')
 
-function gcta()
+function cojo()
 {
   cat <(echo SNP A1 A2 freq b se p N) \
       <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${p}.ma
@@ -52,33 +52,43 @@ function gcta()
            --cojo-p 5e-8 \
            --cojo-collinear 0.9 \
            --out results/${pr}.gcta
-}
-
-gcta
-
-# mkdir data
-# cd data
-# cat ~/Caprion/pilot/work/caprion.bgenlist | xargs -l -I {} ln -s {}
-# ln -s ~/Caprion/pilot/work/caprion.sample
-# cd -
-
-# legacy
-
-function regress()
-{
   Rscript -e '
     p <- Sys.getenv("p")
     pr <- Sys.getenv("pr")
-    rsids <- scan(pr,"")
-    chunks <- split(rsids, ceiling(seq_along(rsids)/snakemake@params[["chunksize"]]))
+    r <- scan(paste0("results/",pr,".prune"),"")
+    suppressMessages(library(dplyr))
+    raw <- read.delim(paste0("results/",pr,".dosage.raw")) %>% select(-FID, -PAT, -MAT, -SEX, -PHENOTYPE)
     load("reports/edata_batch.rda")
-    # https://www.statology.org/stepwise-regression-r/
-    lapply(chunks, {
-      intercept_only <- lm(p ~ 1, data=edata)
-      all <- lm(p ~ ., data=edata)
-      both <- step(intercept_only, direction='both', scope=formula(all), trace=0)
-      both$anova
-      summary(both)
-    })
+    load("data/pheno.rda")
+    edata <- with(edata_batch,edata)
+    edata <- left_join(subset(id,!is.na(IID)),data.frame(caprion_id=rownames(edata),edata)) %>%
+             select(IID,p) %>%
+             left_join(raw) %>%
+             select(-IID)
+    intercept_only <- lm(edata[[p]] ~ 1, data=edata)
+    all <- lm(edata[[p]] ~ ., data=edata)
+    both <- step(intercept_only, direction='both', scope=formula(all), trace=0)
+    both$anova
+    summary(both)
+    chunks <- split(r, ceiling(seq_along(r)/snakemake@params[["chunksize"]]))
   '
+}
+
+cojo
+
+function setup()
+{
+  mkdir data
+  cd data
+  cat ~/Caprion/pilot/work/caprion.bgenlist | xargs -l -I {} ln -s {}
+  ln -s ~/Caprion/pilot/work/caprion.sample
+  save(pheno,id,file="data/pheno.rda")
+  ln -s /home/jhz22/Caprion/pilot/work/caprion.pheno
+  Rscript -e '
+  pheno <- read.delim("caprion.pheno")
+  id <- pheno[c("IID","caprion_id")]
+  save(pheno,id,file="pheno.rda")
+  '
+  cd -
+# https://www.statology.org/stepwise-regression-r/
 }

@@ -1,6 +1,6 @@
 import pandas
-from snakemake.io import expand, glob_wildcards
 m = pandas.read_table("work/caprion.merge").drop(['FreqSE','MinFreq','MaxFreq','Direction','HetISq','HetChiSq','HetDf','logHetP'], axis=1)
+m = m[m.prot=="ERAP2"]
 sentinel = m.assign(id=m.prot+","+m.MarkerName+","+m.Chromosome.astype(str)+","+m.Position.astype(str)).set_index(['prot','MarkerName'], drop=False)
 
 rule all:

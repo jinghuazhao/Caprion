@@ -24,7 +24,7 @@ local-cores: 1
 latency-wait: 60
 jobs: 500
 keep-going: True
-rerun-incomplete: True
+rerun-incomplete: False
 printshellcmds: True
 scheduler: greedy
 use-conda: True

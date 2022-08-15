@@ -6,7 +6,7 @@ A call is made with[^snakemake]
 
 ```bash
 # cojo
-snakemake --cores --profile cojo -s cojo/rules/cojo.yaml
+snakemake --cores --profile slurm -s slurm/rules/cojo.yaml
 ```
 
 and use `--unlock` when necessary.

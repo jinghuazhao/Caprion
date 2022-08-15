@@ -23,4 +23,4 @@ rule gcta:
     output:
         "results/{prot}-{rsid}-{chr}:{pos}"
     shell:
-        "cojo/scripts/cojo.sh {params.bfile} {params.prot} {params.rsid} {params.chr} {params.pos}"
+        "slurm/scripts/cojo.sh {params.bfile} {params.prot} {params.rsid} {params.chr} {params.pos}"

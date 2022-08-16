@@ -62,11 +62,12 @@ function cojo()
     load("reports/edata_batch.rda")
     load("data/pheno.rda")
     edata <- with(edata_batch,edata)
+    edata[,p] <- invnormal(edata[,p])
+    xp <- gsub("^([0-9])","X\\1",p)
     edata <- left_join(subset(id,!is.na(IID)),data.frame(caprion_id=rownames(edata),edata)) %>%
-             select(IID,gsub("(^[0-9])","X\\1",p)) %>%
+             select(IID,xp) %>%
              left_join(raw) %>%
-             select(-IID) %>%
-             mutate(gsub("(^[0-9])","X\\1",p)=invnormal(edata[[gsub("(^[0-9])","X\\1",p)]]))
+             select(-IID)
     names(edata) <- gsub("^X([0-9])","\\1",names(edata))
     intercept_only <- lm(edata[[p]] ~ 1, data=edata)
     all <- lm(edata[[p]] ~ ., data=edata)
@@ -85,12 +86,11 @@ function setup()
   cd data
   cat ~/Caprion/pilot/work/caprion.bgenlist | xargs -l -I {} ln -s {}
   ln -s ~/Caprion/pilot/work/caprion.sample
-  save(pheno,id,file="data/pheno.rda")
   ln -s /home/jhz22/Caprion/pilot/work/caprion.pheno
   Rscript -e '
-  pheno <- read.delim("caprion.pheno")
+  pheno <- read.delim("data/caprion.pheno")
   id <- pheno[c("IID","caprion_id")]
-  save(pheno,id,file="pheno.rda")
+  save(pheno,id,file="data/pheno.rda")
   '
   cd -
 # https://www.statology.org/stepwise-regression-r/

@@ -224,7 +224,8 @@ function fplz()
 # forest/locuszoom left-right format
   ulimit -n
   ulimit -S -n 2048
-  qpdf --empty --pages $(ls ${metal}/qqmanhattanlz/lz/*.pdf) -- lz2.pdf
+  qpdf --empty --pages $(sed '1d' ~/Caprion/analysis/work/caprion.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
+                         parallel -C' ' 'ls $(echo METAL/qqmanhattanlz/lz/{1}_{2}.pdf | sed "s/:/_/")') -- lz2.pdf
   qpdf -show-npages lz2.pdf
   qpdf --pages . 1-1586:odd -- lz2.pdf lz.pdf
 # Split files, note the naming scheme

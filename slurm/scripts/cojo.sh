@@ -17,13 +17,13 @@ function cojo()
       <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${p}.ma
   cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
   # single significant variant
-  if [ $(wc -l work/${p}.rsid) -eq 1 ]; then return 0; fi
+  if [ $(wc -l work/${p}.rsid | cut -d' ' -f1) -eq 1 ]; then return 0; fi
   plink2 --bgen data/chr${chr}.bgen ref-unknown --sample data/caprion.sample \
          --extract work/${p}.rsid --indep-pairwise 1000kb 1 0.1 \
          --out results/${pr}.prune
   # only one variant left
-  if [ $(wc -l results/${pr}.prune.prune.in) -eq 1 ]; then return 0; fi
-  if [ $(grep -w ${r} results/${pr}.prune.prune.in | wc -l) -eq 0 ]; then
+  if [ $(wc -l results/${pr}.prune.prune.in | cut -d' ' -f1) -eq 1 ]; then return 0; fi
+  if [ $(grep -w ${r} results/${pr}.prune.prune.in | wc -l | cut -d' ' -f1) -eq 0 ]; then
      export i=$(grep -w -f results/${pr}.prune.prune.in ${bfile}.bim | \
                 awk -vpos=${pos} 'function abs(x) {if (x<0) return -x; else return x;} {print $1, $2, $4, abs($4-pos)}' | \
                 sort -r -k4,4n | \

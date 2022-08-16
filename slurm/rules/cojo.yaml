@@ -12,7 +12,7 @@ rule all:
                chr=sentinel['Chromosome'],
                pos=sentinel['Position'])
 
-rule gcta:
+rule cojo:
     params:
         bfile="data/merged_imputation",
         prot="{prot}",

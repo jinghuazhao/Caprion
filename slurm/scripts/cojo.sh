@@ -56,6 +56,7 @@ function cojo()
   Rscript -e '
     suppressMessages(library(dplyr))
     suppressMessages(library(gap))
+    suppressMessages(library(lars))
     p <- Sys.getenv("p")
     pr <- Sys.getenv("pr")
     r <- scan(paste0("results/",pr,".prune"),"")
@@ -77,6 +78,8 @@ function cojo()
     both <- step(intercept_only, direction="both", scope=formula(all), trace=0)
     print(both$anova)
     print(summary(both))
+    fit <- lars(dosage,edata[[p]], type="lasso")
+    print(summary(fit))
   ' > results/${pr}.lm.log
 }
 

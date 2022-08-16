@@ -78,8 +78,9 @@ function cojo()
     both <- step(intercept_only, direction="both", scope=formula(all), trace=0)
     print(both$anova)
     print(summary(both))
-    fit <- lars(dosage,edata[[p]], type="lasso")
-    print(summary(fit))
+    m <- as.matrix(subset(edata,!is.na(edata[[p]])))
+    fit <- lars(m,edata[[p]][!is.na(edata[[p]])],type="lasso")
+    print(fit)
   ' > results/${pr}.lm.log
 }
 

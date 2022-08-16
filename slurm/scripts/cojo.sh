@@ -18,11 +18,11 @@ function cojo()
   cut -d' ' -f1 work/${p}.ma | sed '1d' > work/${p}.rsid
   # single significant variant
   if [ $(wc -l work/${p}.rsid) -eq 1 ]; then return 0; fi
-  plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
+  plink2 --bgen data/chr${chr}.bgen ref-unknown --sample data/caprion.sample \
          --extract work/${p}.rsid --indep-pairwise 1000kb 1 0.1 \
          --out results/${pr}.prune
   # only one variant left
-  if [ $(wc -l work/${pr}.prune.prune.in) -eq 1 ]; then return 0; fi
+  if [ $(wc -l results/${pr}.prune.prune.in) -eq 1 ]; then return 0; fi
   if [ $(grep -w ${r} results/${pr}.prune.prune.in | wc -l) -eq 0 ]; then
      export i=$(grep -w -f results/${pr}.prune.prune.in ${bfile}.bim | \
                 awk -vpos=${pos} 'function abs(x) {if (x<0) return -x; else return x;} {print $1, $2, $4, abs($4-pos)}' | \
@@ -39,12 +39,12 @@ function cojo()
     fi
   ) > results/${pr}.prune
 # rm results/${pr}.prune.prune.in results/${pr}.prune.prune.out work/${p}.rsid
-  plink2 --bgen data/chr${chr}.bgen ref-last \
+  plink2 --bgen data/chr${chr}.bgen ref-unknown \
          --sample data/caprion.sample \
          --extract results/${pr}.prune \
          --recode A include-alt \
          --out results/${pr}.dosage
-  plink2 --bgen data/chr${chr}.bgen ref-last --sample data/caprion.sample \
+  plink2 --bgen data/chr${chr}.bgen ref-unknown --sample data/caprion.sample \
          --extract results/${pr}.prune --export ind-major-bed --out work/${pr}
   gcta-1.9 --bfile work/${pr} \
            --cojo-file work/${p}.ma --extract-region-snp ${r} 1000 --maf 0.01 \
@@ -57,21 +57,24 @@ function cojo()
     pr <- Sys.getenv("pr")
     r <- scan(paste0("results/",pr,".prune"),"")
     suppressMessages(library(dplyr))
+    suppressMessages(library(gap))
     raw <- read.delim(paste0("results/",pr,".dosage.raw")) %>% select(-FID, -PAT, -MAT, -SEX, -PHENOTYPE)
     load("reports/edata_batch.rda")
     load("data/pheno.rda")
     edata <- with(edata_batch,edata)
     edata <- left_join(subset(id,!is.na(IID)),data.frame(caprion_id=rownames(edata),edata)) %>%
-             select(IID,p) %>%
+             select(IID,gsub("(^[0-9])","X\\1",p)) %>%
              left_join(raw) %>%
-             select(-IID)
+             select(-IID) %>%
+             mutate(gsub("(^[0-9])","X\\1",p)=invnormal(edata[[gsub("(^[0-9])","X\\1",p)]]))
+    names(edata) <- gsub("^X([0-9])","\\1",names(edata))
     intercept_only <- lm(edata[[p]] ~ 1, data=edata)
     all <- lm(edata[[p]] ~ ., data=edata)
     both <- step(intercept_only, direction='both', scope=formula(all), trace=0)
     both$anova
     summary(both)
     chunks <- split(r, ceiling(seq_along(r)/snakemake@params[["chunksize"]]))
-  '
+  ' > results/${pr}.lm.log
 }
 
 cojo

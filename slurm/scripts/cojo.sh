@@ -53,11 +53,11 @@ function cojo()
            --cojo-collinear 0.9 \
            --out results/${pr}.gcta
   Rscript -e '
-    p <- Sys.getenv("p")
-    pr <- Sys.getenv("pr")
-    r <- scan(paste0("results/",pr,".prune"),"")
     suppressMessages(library(dplyr))
     suppressMessages(library(gap))
+    p <- Sys.getenv("p")
+    r <- scan(paste0("results/",pr,".prune"),"")
+    pr <- Sys.getenv("pr")
     raw <- read.delim(paste0("results/",pr,".dosage.raw")) %>% select(-FID, -PAT, -MAT, -SEX, -PHENOTYPE)
     load("reports/edata_batch.rda")
     load("data/pheno.rda")
@@ -72,8 +72,8 @@ function cojo()
     intercept_only <- lm(edata[[p]] ~ 1, data=edata)
     all <- lm(edata[[p]] ~ ., data=edata)
     both <- step(intercept_only, direction='both', scope=formula(all), trace=0)
-    both$anova
-    summary(both)
+    print(both$anova)
+    print(summary(both))
     chunks <- split(r, ceiling(seq_along(r)/snakemake@params[["chunksize"]]))
   ' > results/${pr}.lm.log
 }

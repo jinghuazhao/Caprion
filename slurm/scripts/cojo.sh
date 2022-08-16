@@ -22,6 +22,7 @@ function cojo()
          --extract work/${p}.rsid --indep-pairwise 1000kb 1 0.1 \
          --out results/${pr}.prune
   # only one variant left
+  if [ ! -f results/${pr}.prune.prune.in ]; then return 0; fi
   if [ $(wc -l results/${pr}.prune.prune.in | cut -d' ' -f1) -eq 1 ]; then return 0; fi
   if [ $(grep -w ${r} results/${pr}.prune.prune.in | wc -l | cut -d' ' -f1) -eq 0 ]; then
      export i=$(grep -w -f results/${pr}.prune.prune.in ${bfile}.bim | \
@@ -56,8 +57,9 @@ function cojo()
     suppressMessages(library(dplyr))
     suppressMessages(library(gap))
     p <- Sys.getenv("p")
-    r <- scan(paste0("results/",pr,".prune"),"")
     pr <- Sys.getenv("pr")
+    r <- scan(paste0("results/",pr,".prune"),"")
+    chunks <- split(r, ceiling(seq_along(r)/snakemake@params[["chunksize"]]))
     raw <- read.delim(paste0("results/",pr,".dosage.raw")) %>% select(-FID, -PAT, -MAT, -SEX, -PHENOTYPE)
     load("reports/edata_batch.rda")
     load("data/pheno.rda")
@@ -71,10 +73,9 @@ function cojo()
     names(edata) <- gsub("^X([0-9])","\\1",names(edata))
     intercept_only <- lm(edata[[p]] ~ 1, data=edata)
     all <- lm(edata[[p]] ~ ., data=edata)
-    both <- step(intercept_only, direction='both', scope=formula(all), trace=0)
+    both <- step(intercept_only, direction="both", scope=formula(all), trace=0)
     print(both$anova)
     print(summary(both))
-    chunks <- split(r, ceiling(seq_along(r)/snakemake@params[["chunksize"]]))
   ' > results/${pr}.lm.log
 }
 

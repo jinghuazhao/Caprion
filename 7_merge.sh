@@ -173,6 +173,45 @@ function fp()
   '
 }
 
+function HetISq()
+# Code extracted from caprion.Rmd
+{
+  Rscript -e '
+    suppressMessages(require(dplyr))
+    all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
+           mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR)) %>%
+           mutate(batch_prot_chr=strsplit(CHR,"-|:"),
+                  batch=unlist(lapply(batch_prot_chr,"[",1)),
+                  prot=unlist(lapply(batch_prot_chr,"[",2)),
+                  CHR=unlist(lapply(batch_prot_chr,"[",3))) %>%
+           mutate(MarkerName=paste0(CHR,":",POS),
+                  Batch=case_when(batch == batch[1] ~ "1. ZWK",
+                                  batch == batch[2] ~ "2. ZYQ",
+                                  batch == batch[3] ~ "3. UDP",
+                                  TRUE ~ "---"),
+                  direction=case_when(sign(BETA) == -1 ~ "-", sign(BETA) == 1 ~ "+", sign(BETA) == 0 ~ "0", TRUE ~ "---")) %>%
+           select(Batch,prot,-batch_prot_chr,MarkerName,SNP,A1,A2,N,AF1,BETA,SE,P,INFO,direction)
+    b1 <- subset(all,Batch=="1. ZWK")
+    names(b1) <- paste0(names(all),".ZWK")
+    b1 <- rename(b1, prot=prot.ZWK, SNP=SNP.ZWK)
+    b2 <- subset(all,Batch=="2. ZYQ")
+    names(b2) <- paste0(names(all),".ZYQ")
+    b3 <- subset(all,Batch=="3. UDP")
+    names(b3) <- paste0(names(all),".UDP")
+    b <- full_join(b1,b2,by=c('prot'='prot.ZYQ','SNP'='SNP.ZYQ')) %>% full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
+         mutate(directions=gsub("NA","?",paste0(direction.ZWK,direction.ZYQ,direction.UDP))) %>%
+         select(-Batch.ZWK,-Batch.ZYQ,-Batch.UDP,direction.ZWK,direction.ZYQ,direction.UDP)
+    tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
+           arrange(prot,MarkerName) %>%
+           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position), index=1:n())
+    Het <- filter(tbl,HetISq>=75) %>%
+           select(prot,SNP,Direction,HetISq,index) %>%
+           left_join(select(b,prot,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
+    write.csv(Het,file="work/HetISq75.csv",row.names=FALSE,quote=FALSE)
+    write(Het[['index']],file='work/HetISq75.index',sep=",",ncolumns=nrow(Het))
+  '
+}
+
 function fplz()
 {
   export metal=~/Caprion/analysis/METAL
@@ -195,6 +234,7 @@ function fplz()
 # Combine the final pdf
   pdfjam temp-*-*.pdf --nup 2x1 --landscape --papersize '{7in,16in}' --outfile fp+lz.pdf
   rm temp*pdf
+  qpdf fp+lz.pdf --pages . $(cat HetISq75.index) -- HetISq75.pdf
 }
 
 signals

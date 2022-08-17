@@ -19,7 +19,7 @@ function cojo()
   # single significant variant
   if [ $(wc -l work/${p}.rsid | cut -d' ' -f1) -eq 1 ]; then return 0; fi
   plink2 --bgen data/chr${chr}.bgen ref-unknown --sample data/caprion.sample \
-         --extract work/${p}.rsid --indep-pairwise 1000kb 1 0.1 \
+         --extract work/${p}.rsid --geno 0.1 --mind 0.1 --indep-pairwise 1000kb 1 0.1 \
          --out results/${pr}.prune
   # only one variant left
   if [ ! -f results/${pr}.prune.prune.in ]; then return 0; fi
@@ -48,7 +48,7 @@ function cojo()
   plink2 --bgen data/chr${chr}.bgen ref-unknown --sample data/caprion.sample \
          --extract results/${pr}.prune --export ind-major-bed --out work/${pr}
   gcta-1.9 --bfile work/${pr} \
-           --cojo-file work/${p}.ma --extract-region-snp ${r} 1000 --maf 0.01 \
+           --cojo-file work/${p}.ma --extract-region-snp ${r} 1000 0.1 --maf 0.01 \
            --cojo-slct \
            --cojo-p 5e-8 \
            --cojo-collinear 0.9 \
@@ -100,4 +100,18 @@ function setup()
   '
   cd -
 # https://www.statology.org/stepwise-regression-r/
+}
+
+function checkfreq()
+{
+  cat results/ERAP2-rs2910686.gcta.freq.badsnps | cut -f1 | sed '1d' > badsnps
+  plink2 --bfile work/ERAP2-rs2910686 --freq --missing --out badsnps
+  plink2 --bfile ~/Caprion/pilot/data/caprion.01 --extract badsnps --freq --missing \
+         --pheno <(awk {'if(NR==1) else $1=NR;print}' ~/Caprion/pilot/data/caprion.dat) --pheno-name Q6P179_invn --out ZWK
+  plink2 --bfile ~/Caprion/pilot/data2/caprion.01 --extract badsnps --freq --missing \
+         --pheno <(awk {'if(NR==1) else $1=NR;print}' ~/Caprion/pilot/data/phase2.pheno) --pheno-name ERAP2_All_invn --out ZYQ
+  plink2 --bfile ~/Caprion/pilot/data3/caprion.01 --extract badsnps --freq --missing \
+         --pheno <(awk {'if(NR==1) else $1=NR;print}' ~/Caprion/pilot/data/protein.pheno) --pheno-name ERAP2_invn --out ZYQ
+
+  cat ZWK.afreq ZYQ.afreq UDP.afreq <(head -1 ZWK.afreq) <(grep -w -f badsnps badsnps.afreq) | awk -vOFS='|' '{print $1,$2,$3,$4,$5,$6}'
 }

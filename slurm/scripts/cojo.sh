@@ -11,7 +11,7 @@ export pos=${5}
 function cojo()
 {
   cat <(echo SNP A1 A2 freq b se p N) \
-      <(gunzip -c METAL/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${pr}.ma
+      <(gunzip -c METAL3/sentinels/${p}.p.gz | awk '{print $3,toupper($4),toupper($5),$6,$10,$11,10^$12,$18}') > work/${pr}.ma
   cut -d' ' -f1 work/${pr}.ma | sed '1d' > work/${pr}.rsid
   # singleton variant
   if [ $(wc -l work/${pr}.rsid | cut -d' ' -f1) -eq 1 ]; then return 0; fi
@@ -26,43 +26,17 @@ function cojo()
   # for flanking window adding --extract-region-snp ${r} 1000
   if [ ! -f results/${pr}.gcta.jma.cojo ]; then return 0; fi
   sed '1d' results/${pr}.gcta.jma.cojo | cut -f2 > results/${pr}.jma
-  rm work/${pr}.ma work/${pr}.rsid
+  plink --bfile work/${pr} \
+        --extract results/${pr}.jma \
+        --r square \
+        --out results/${pr}
   plink2 --bgen data/chr${chr}.bgen ref-unknown \
          --sample data/caprion.sample \
          --extract results/${pr}.jma \
          --recode A include-alt \
          --out results/${pr}.dosage
-  Rscript -e '
-    suppressMessages(library(dplyr))
-    suppressMessages(library(gap))
-    suppressMessages(library(lars))
-    p <- Sys.getenv("p")
-    pr <- Sys.getenv("pr")
-    r <- scan(paste0("results/",pr,".jma"),"")
-    ldr <- read.delim(paste0("results/",pr,".gcta.ldr.cojo"))
-    rownames(ldr) <- ldr[["SNP"]]
-    ldr <- ldr[,2:(nrow(ldr)+1)]
-    raw <- read.delim(paste0("results/",pr,".dosage.raw")) %>% select(-FID, -PAT, -MAT, -SEX, -PHENOTYPE)
-    load("reports/edata_batch.rda")
-    load("data/pheno.rda")
-    edata <- with(edata_batch,edata)
-    edata[,p] <- invnormal(edata[,p])
-    xp <- gsub("^([0-9])","X\\1",p)
-    edata <- left_join(subset(id,!is.na(IID)),data.frame(caprion_id=rownames(edata),edata)) %>%
-             select(IID,all_of(xp)) %>%
-             left_join(raw) %>%
-             select(-IID)
-    names(edata) <- gsub("^X([0-9])","\\1",names(edata))
-    dosage <- select(edata,-all_of(p))
-    names(dosage) <- unlist(lapply(strsplit(names(dosage),"_"),"[",1))
-    r <- gsub(":",".",unlist(lapply(strsplit(r,"_"),"[",1)))
-    all <- lm(edata[[p]] ~ ., data=dosage[r])
-    print(anova(all))
-    print(summary(all))
-    m <- as.matrix(subset(edata,!is.na(edata[[p]])))
-    fit <- lars(m,edata[[p]][!is.na(edata[[p]])],type="lasso")
-    print(fit)
-  ' > results/${pr}.lm.log
+  R --no-save < slurm/scripts/cojo.R > results/${pr}.lm.log
+  rm work/${pr}.ma work/${pr}.rsid results/${pr}.jma
 }
 
 cojo

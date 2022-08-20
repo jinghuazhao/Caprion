@@ -21,13 +21,13 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.e
 
-##SBATCH --account=PETERS-SL3-CPU
-##SBATCH --partition=cclake-himem
-##SBATCH --array=1-987
-##SBATCH --job-name=_lz
-##SBATCH --mem=6840
-##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.o
-##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.e
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake-himem
+#SBATCH --array=1-987
+#SBATCH --job-name=_lz
+#SBATCH --mem=6840
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.e
 
 ##SBATCH --account CARDIO-SL0-CPU
 ##SBATCH --partition cardio
@@ -39,15 +39,15 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/pairs/slurm/_pairs_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/pairs/slurm/_pairs_%A_%a.e
 
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --job-name=miamiplot
-#SBATCH --array=1-987
-#SBATCH --qos=cardio
-#SBATCH --mem=50000
-#SBATCH --time=12:00:00
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/miamiplot/slurm/_miamiplot_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/miamiplot/slurm/_miamiplot_%A_%a.e
+##SBATCH --account CARDIO-SL0-CPU
+##SBATCH --partition cardio
+##SBATCH --job-name=miamiplot
+##SBATCH --array=1-987
+##SBATCH --qos=cardio
+##SBATCH --mem=50000
+##SBATCH --time=12:00:00
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/miamiplot/slurm/_miamiplot_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/miamiplot/slurm/_miamiplot_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
@@ -133,7 +133,7 @@ function qqmanhattan()
 }
 
 function lz()
-# rs114800762 not in the reference panel, so would need to drop --refsnp for it.
+# rs114800762 not in the reference panel, so would need to drop --refsnp, and then rename.
 {
   module load python/2.7
   if [ -f ${analysis}/METAL/sentinels/${phenoname}.signals ]; then
@@ -392,10 +392,10 @@ function miamiplot2()
 #fastLR 3
 #qqmanhattan
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
-#lz
+lz
 #pairs_p
 #miamiplot
-miamiplot2
+#miamiplot2
 
 # --- inactive code ---
 

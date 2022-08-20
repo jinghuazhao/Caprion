@@ -226,8 +226,8 @@ function fplz()
   ulimit -S -n 2048
   qpdf --empty --pages $(sed '1d' ~/Caprion/analysis/work/caprion.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
                          parallel -C' ' 'ls $(echo METAL/qqmanhattanlz/lz/{1}_{2}.pdf | sed "s/:/_/")') -- lz2.pdf
-  qpdf -show-npages lz2.pdf
-  qpdf --pages . 1-1586:odd -- lz2.pdf lz.pdf
+  export npages=$(qpdf -show-npages lz2.pdf)
+  qpdf --pages . 1-$npages:odd -- lz2.pdf lz.pdf
 # Split files, note the naming scheme
   pdfseparate lz.pdf temp-%04d-lz.pdf
   pdfseparate ${metal}/fp/fp.pdf temp-%04d-fp.pdf
@@ -235,7 +235,8 @@ function fplz()
 # Combine the final pdf
   pdfjam temp-*-*.pdf --nup 2x1 --landscape --papersize '{7in,16in}' --outfile fp+lz.pdf
   rm temp*pdf
-  qpdf fp+lz.pdf --pages . $(cat HetISq75.index) -- HetISq75.pdf
+# qpdf fp+lz.pdf --pages . $(cat HetISq75.index) -- HetISq75.pdf
+  qpdf fp+lz.pdf --pages . $(sed '1d' caprion.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- HetISq75.pdf
 }
 
 signals

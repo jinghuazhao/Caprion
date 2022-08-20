@@ -11,7 +11,7 @@ function METAL_list()
   ls ${caprion}/analysis/work/pgwas/caprion-?-*.fastGWA.gz | \
   xargs -l basename -s .fastGWA.gz | \
   awk -vdir=${caprion}/analysis/work/pgwas -vOFS="\t" '{s=substr($1,9,1);p=$1;gsub("caprion-[0-9]-","",p);print s, p, dir"/"$1".fastGWA.gz"}' | \
-  sort -k2,2 -k1,1n > ${caprion}/analysis/METAL/METAL.list
+  sort -k2,2 -k1,1n | grep -v caprion-1 > ${caprion}/analysis/METAL/METAL.list
 }
 
 function METAL_list_pilot()

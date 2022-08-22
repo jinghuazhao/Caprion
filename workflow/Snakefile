@@ -1,0 +1,24 @@
+import pandas
+from datetime import date
+
+today_date = date.today()
+shell.prefix('module load gcc/6 plink/2.00-alpha python/3.7 ceuadmin/stata texlive')
+
+# snakemake -s workflow/rules/cojo.smk --configfile config/config.yaml -j1 --use-conda --keep-going --notemp
+subworkflow cojo:
+    workdir:
+        "./"
+    snakefile:
+        "rules/cojo.smk"
+
+# snakemake -s workflow/rules/report.smk --configfile config/config.yaml -j1 --use-conda --keep-going --notemp
+subworkflow report:
+    workdir:
+        "./"
+    snakefile:
+        "rules/report.smk"
+
+rule all:
+    input:
+        report("results/tests.html")
+        cojo(expand("results/cojo_Analaysis_{DATE}.html", DATE = today_date)),

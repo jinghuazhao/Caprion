@@ -1,0 +1,43 @@
+---
+title: "Tests"
+author:
+- Jing Hua Zhao
+date: "`r Sys.Date()`"
+toc: false
+number_sections: false
+output:
+  html_document:
+    df_print: paged
+    keep_md: true
+    toc: true
+    number_sections: false
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+bibliography: [tests.bib]
+link-citations: yes
+csl: nature-genetics.csl
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bookdown)
+library(knitr)
+library(png)
+library(tinytex)
+library(lattice)
+```
+
+This is an example of citation @zyq.
+
+The following is an example of Miami plot.
+
+```{r test, echo=FALSE, fig.caption="gap.datasets illustration", fig.height=10, fig.width=12, warning=FALSE}
+suppressMessages(library(gap))
+gwas <- within(mhtdata[c("chr","pos","p")], {z=qnorm(p/2)})
+chrmaxpos <- miamiplot2(gwas,gwas,name1="Batch 2",name2="Batch 1",z1="z",z2="z")
+labelManhattan(chr=c(2,16),pos=c(226814165,52373776),name=c("AnonymousGene","FTO"),gwas,gwasZLab="z",chrmaxpos=chrmaxpos)
+```

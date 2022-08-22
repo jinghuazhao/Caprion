@@ -5,8 +5,11 @@
 A call is made with[^snakemake]
 
 ```bash
-# cojo
+# slurm/cojo
 snakemake --cores --profile slurm -s slurm/rules/cojo.yaml
+# testing
+snakemake -s workflow/rules/cojo.yaml -j1
+snakemake -s workflow/rules/report.smk -j1
 ```
 
 and use `--unlock` when necessary.

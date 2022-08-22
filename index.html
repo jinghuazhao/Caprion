@@ -142,8 +142,11 @@
 <h1 id="analysis">Analysis</h1>
 <h2 id="workflow-experimental">workflow (experimental)</h2>
 <p>A call is made with<sup id="fnref:snakemake"><a class="footnote-ref" href="#fn:snakemake">1</a></sup></p>
-<pre><code class="language-bash"># cojo
+<pre><code class="language-bash"># slurm/cojo
 snakemake --cores --profile slurm -s slurm/rules/cojo.yaml
+# testing
+snakemake -s workflow/rules/cojo.yaml -j1
+snakemake -s workflow/rules/report.smk -j1
 </code></pre>
 <p>and use <code>--unlock</code> when necessary.</p>
 <h2 id="programs2">Programs<sup id="fnref:directory"><a class="footnote-ref" href="#fn:directory">2</a></sup></h2>
@@ -385,5 +388,5 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-08-20 14:54:20.697253+00:00
+Build Date UTC : 2022-08-22 21:25:01.146442+00:00
 -->

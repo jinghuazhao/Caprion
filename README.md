@@ -2,14 +2,14 @@
 
 ## workflow (experimental)
 
-A call is made with[^snakemake]
+Example calls[^snakemake]
 
 ```bash
-# slurm/cojo
-snakemake --cores --profile slurm -s slurm/rules/cojo.yaml
 # testing
-snakemake -s workflow/rules/cojo.yaml -j1
+snakemake -s workflow/rules/cojo.smk -j1
 snakemake -s workflow/rules/report.smk -j1
+# slurm
+snakemake --cores --profile slurm -s slurm/rules/cojo.yaml
 ```
 
 and use `--unlock` when necessary.

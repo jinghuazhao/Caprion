@@ -2,15 +2,17 @@
 
 ## workflow (experimental)
 
-Example calls[^snakemake]
+Example calls
 
 ```bash
-# testing
+#
+module load miniconda3/4.5.1
+export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop
+source activate ${csd3path}/miniconda37
+#
 snakemake -s workflow/rules/cojo.smk -j1
 snakemake -s workflow/rules/report.smk -j1
 snakemake --cores --profile workflow -s workflow/rules/cojo.smk
-# slurm
-snakemake --cores --profile slurm -s slurm/rules/cojo.yaml
 ```
 
 and use `--unlock` when necessary.
@@ -82,16 +84,6 @@ This is experimented on several software including HIBAG, CookHLA and SNP2HLA as
 The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.
 
 ## 9. Lookup
-
-[^snakemake]: snakemake
-
-    An environment for `snakemake` is enabled as follows,
-
-    ```bash
-    module load miniconda3/4.5.1
-    export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop
-    source activate ${csd3path}/miniconda37
-    ```
 
 [^directory]: Directories
 

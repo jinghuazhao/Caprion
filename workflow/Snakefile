@@ -21,4 +21,3 @@ subworkflow report:
 rule all:
     input:
         report("results/tests.html")
-        cojo(expand("results/cojo_Analaysis_{DATE}.html", DATE = today_date)),

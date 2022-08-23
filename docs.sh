@@ -11,7 +11,7 @@ setup
 mkdocs build
 mkdocs gh-deploy
 
-git add slurm workflow
+git add workflow
 git commit -m "Snakemake profiles"
 git add .gitignore
 git commit -m ".gitignore"

@@ -8,6 +8,7 @@ Example calls[^snakemake]
 # testing
 snakemake -s workflow/rules/cojo.smk -j1
 snakemake -s workflow/rules/report.smk -j1
+snakemake --cores --profile workflow -s workflow/rules/cojo.smk
 # slurm
 snakemake --cores --profile slurm -s slurm/rules/cojo.yaml
 ```

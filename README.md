@@ -2,8 +2,6 @@
 
 ## workflow (experimental)
 
-Example calls
-
 ```bash
 #
 module load miniconda3/4.5.1

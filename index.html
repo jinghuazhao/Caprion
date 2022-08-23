@@ -145,6 +145,7 @@
 <pre><code class="language-bash"># testing
 snakemake -s workflow/rules/cojo.smk -j1
 snakemake -s workflow/rules/report.smk -j1
+snakemake --cores --profile workflow -s workflow/rules/cojo.smk
 # slurm
 snakemake --cores --profile slurm -s slurm/rules/cojo.yaml
 </code></pre>
@@ -388,5 +389,5 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-08-23 09:31:53.632150+00:00
+Build Date UTC : 2022-08-23 10:01:49.211710+00:00
 -->

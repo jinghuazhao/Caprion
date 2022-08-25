@@ -8,7 +8,7 @@ rule all:
 
 rule report:
     input:
-        markdown="scripts/tests.Rmd"
+        markdown="workflow/scripts/tests.Rmd"
     output:
         outfile="results/tests.html"
     params:

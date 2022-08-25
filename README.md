@@ -5,8 +5,8 @@
 ```bash
 #
 module load miniconda3/4.5.1
-export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop
-source ${csd3path}/miniconda37/bin/activate
+export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/miniconda37
+source ${csd3path}/bin/activate
 #
 snakemake -s workflow/rules/cojo.smk -j1
 snakemake -s workflow/rules/report.smk -j1

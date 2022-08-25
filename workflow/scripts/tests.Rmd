@@ -17,7 +17,7 @@ output:
       smooth_scroll: false
 bibliography: [tests.bib]
 link-citations: yes
-csl: nature-genetics.csl
+csl: ../data/nature-genetics.csl
 editor_options:
   chunk_output_type: console
 ---

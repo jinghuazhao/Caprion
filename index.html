@@ -143,8 +143,8 @@
 <h2 id="workflow-experimental">workflow (experimental)</h2>
 <pre><code class="language-bash">#
 module load miniconda3/4.5.1
-export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop
-source ${csd3path}/miniconda37/bin/activate
+export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/miniconda37
+source ${csd3path}/bin/activate
 #
 snakemake -s workflow/rules/cojo.smk -j1
 snakemake -s workflow/rules/report.smk -j1
@@ -382,5 +382,5 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-08-25 10:42:08.163324+00:00
+Build Date UTC : 2022-08-25 10:47:08.160180+00:00
 -->

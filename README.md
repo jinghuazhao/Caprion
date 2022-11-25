@@ -133,3 +133,5 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     **Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
     ----------|-----|-----|----|------|------|------|-----
     **HLA_**  |  98 | 183 | 69 |   0  |  33  |   0  |  82
+
+    A recent update: PGG.HLA, [https://www.pggmhc.org/pggmhc/](https://www.pggmhc.org/pggmhc/)

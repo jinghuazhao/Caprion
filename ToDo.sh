@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+pandoc ToDo.md --mathjax -s -o ToDo.html
+st
+
 export caprion=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics
 
 export pre_qc_data=${caprion}/pre_qc_data
@@ -162,6 +165,7 @@ zyq <- mapping("ZYQ")
 udp <- mapping("UDP")
 
 dr2 <- function(a,b,c)
+# difference in r^2
 {
   all3 <- intersect(intersect(colnames(a),colnames(b)),colnames(c))
   ab <- sum(abs(a[all3,all3]^2-b[all3,all3]^2),na.rm=TRUE)
@@ -177,4 +181,23 @@ dr2(zwk$r_d,zyq$r_d,udp$r_d)
 dr2(zwk$r_e,zyq$r_e,udp$r_e)
 dr2(zwk$r_f,zyq$r_f,udp$r_f)
 dr2(zwk$r,zyq$r,udp$r)
+
+wr2 <- function(a,b,c)
+# weight in r^2
+{
+  all3 <- intersect(intersect(colnames(a),colnames(b)),colnames(c))
+  N <- length(all3)
+  wa <- sum(a[all3,all3]^2,na.rm=TRUE) - N
+  wb <- sum(b[all3,all3]^2,na.rm=TRUE) - N
+  wc <- sum(c[all3,all3]^2,na.rm=TRUE) - N
+  c(N,wa,wb,wc)
+}
+
+wr2(zwk$r_a,zyq$r_a,udp$r_a)
+wr2(zwk$r_b,zyq$r_b,udp$r_b)
+wr2(zwk$r_c,zyq$r_c,udp$r_c)
+wr2(zwk$r_d,zyq$r_d,udp$r_d)
+wr2(zwk$r_e,zyq$r_e,udp$r_e)
+wr2(zwk$r_f,zyq$r_f,udp$r_f)
+wr2(zwk$r,zyq$r,udp$r)
 '

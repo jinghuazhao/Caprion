@@ -17,7 +17,7 @@ function cojo()
   if [ $(wc -l work/${pr}.rsid | cut -d' ' -f1) -eq 1 ]; then return 0; fi
   plink2 --bgen data/chr${chr}.bgen ref-unknown --sample data/caprion.sample \
          --extract work/${pr}.rsid --export ind-major-bed --out work/${pr}
-  gcta-1.9 --bfile work/${pr} \
+  gcta-1.9 --bfile ${INF}/INTERVAL/per_chr/interval.imputed.olink.chr_${chr} \
            --cojo-file work/${pr}.ma --maf 0.01 --diff-freq 1 \
            --cojo-slct \
            --cojo-p 5e-8 \

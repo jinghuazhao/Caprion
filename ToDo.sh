@@ -64,6 +64,7 @@ Rscript -e '
 Rscript -e '
 options(width=200)
 suppressMessages(library("dplyr"))
+suppressMessages(library(Biobase))
 setwd("../pilot")
 
 mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
@@ -82,6 +83,8 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   {
      load("2020.rda")
      setdiff(colnames(Normalized_All),colnames(Protein_DR_Filt))
+     dim(Normalized_All)
+     dim(Protein_DR_Filt)
      load("ZYQ_R.rda")
      load("ZYQ.rda")
      r <- ZYQ_R
@@ -146,7 +149,7 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   r_c <- cor(t(rd_c[-1]),use="everything")
   colnames(r_c) <- rownames(r_c) <- d$Isotope.Group.ID
   rd_d <- rd
-  r_d <- cor(rd_d,use="everything")
+  r_d <- cor(t(rd_d[-1]),use="everything")
   colnames(r_d) <- rownames(r_d) <- d$Isotope.Group.ID
   rd_e <- t(exprs(pept[igi_pept]))
   rd_e[rd_e==0] <- NA

@@ -155,7 +155,7 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   rd_e[rd_e==0] <- NA
   r_e <- cor(rd_e,use="everything")
   rd_f <- t(exprs(pept[igi_pept]))
-  rd_f[!is.na(rd_c)&rd_c<50000] <- NA
+  rd_f[!is.na(t(rd_c[-1]))&t(rd_c[-1])<50000] <- NA
   r_f <- cor(rd_f,use="everything")
   r <- cor(t(exprs(prot_pept)),use="everything")
   colnames(r) <- rownames(r) <- c("PROC_HUMAN","EPCR_HUMAN","ERAP2_HUMAN",d$Isotope.Group.ID)

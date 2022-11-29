@@ -75,7 +75,8 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
      dim(Protein_All_Peptides)
      dim(Protein_DR_Filt_Peptides)
      load("ZWK.rda")
-     r <- data.frame(rawIGs,R=1)
+     r <- data.frame(rawIGs,R=1) %>%
+          select(-Protein)
      m <- Normalized_Peptides[c("Isotope.Group.ID","Modified.Peptide.Sequence","Protein")]
      prot <- protein_ZWK
      pept <- peptide_ZWK
@@ -118,10 +119,12 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   r_n <- names(r)
   r_ZWK <- r_n[grepl("ZWK",r_n)]
   print(r_ZWK)
+  r_other <- setdiff(r_n[!grepl(paste("ZWK",code,sep="|"),r_n)][-(1:5)],"R")
+  print(r_other)
   x <- filter(r,Isotope.Group.ID %in% igi) %>%
        select(Isotope.Group.ID,r_n[grepl(code,r_n)],R)
   rd <- aggregate(select(x,-c(Isotope.Group.ID,R)),by=list(x$Isotope.Group.ID),max,na.rm=TRUE) %>%
-         rename(Isotope.Group.ID=Group.1)
+        rename(Isotope.Group.ID=Group.1)
   rd[rd==-Inf] <- NA
   write.csv(rd,file=paste0("~/",code,".csv"),quote=FALSE,row.names=FALSE)
   diff_PROC <- setdiff(igi_PROC,intersect(rd$Isotope.Group.ID,igi_PROC))
@@ -137,6 +140,8 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
        left_join(m) %>%
        arrange(Protein)
   igi_pept <- intersect(paste(igi),featureNames(pept))
+  igi_other <- filter(r,Isotope.Group.ID%in%igi_pept)[1:5]
+  names(igi_other) <- paste0(code,"_",names(igi_other))
   prot_pept <- combine(prot[c("PROC_HUMAN","EPCR_HUMAN","ERAP2_HUMAN")],pept[igi_pept])
   r_a <- cor(t(rd[-1]),use="everything")
   colnames(r_a) <- rownames(r_a) <- d$Isotope.Group.ID
@@ -157,10 +162,11 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   rd_f <- t(exprs(pept[igi_pept]))
   rd_f[!is.na(t(rd_c[-1]))&t(rd_c[-1])<50000] <- NA
   r_f <- cor(rd_f,use="everything")
-  r <- cor(t(exprs(prot_pept)),use="everything")
-  colnames(r) <- rownames(r) <- c("PROC_HUMAN","EPCR_HUMAN","ERAP2_HUMAN",d$Isotope.Group.ID)
-  invisible(list(z=z,d=rd,diff_PROC=diff_PROC,diff_EPCR=diff_EPCR,diff_ERAP2=diff_ERAP2,diff_all=diff_all,dr=d,
-                 r_a=r_a,r_b=r_b,r_c=r_c,r_d=r_d,r_e=r_e,r_f=r_f,r=r))
+  r_pp <- cor(t(exprs(prot_pept)),use="everything")
+  colnames(r_pp) <- rownames(r_pp) <- c("PROC_HUMAN","EPCR_HUMAN","ERAP2_HUMAN",d$Isotope.Group.ID)
+  invisible(list(z=z,r=r,d=rd,igi_other=unique(igi_other),
+                 diff_PROC=diff_PROC,diff_EPCR=diff_EPCR,diff_ERAP2=diff_ERAP2,diff_all=diff_all,dr=d,
+                 r_a=r_a,r_b=r_b,r_c=r_c,r_d=r_d,r_e=r_e,r_f=r_f,r_pp=r_pp))
 }
 
 zwk <- mapping("ZWK")
@@ -183,7 +189,7 @@ dr2(zwk$r_c,zyq$r_c,udp$r_c)
 dr2(zwk$r_d,zyq$r_d,udp$r_d)
 dr2(zwk$r_e,zyq$r_e,udp$r_e)
 dr2(zwk$r_f,zyq$r_f,udp$r_f)
-dr2(zwk$r,zyq$r,udp$r)
+dr2(zwk$r_pp,zyq$r_pp,udp$r_pp)
 
 wr2 <- function(a,b,c)
 # weight in r^2
@@ -202,5 +208,21 @@ wr2(zwk$r_c,zyq$r_c,udp$r_c)
 wr2(zwk$r_d,zyq$r_d,udp$r_d)
 wr2(zwk$r_e,zyq$r_e,udp$r_e)
 wr2(zwk$r_f,zyq$r_f,udp$r_f)
-wr2(zwk$r,zyq$r,udp$r)
+wr2(zwk$r_pp,zyq$r_pp,udp$r_pp)
+
+other_check <- left_join(zwk$igi_other,zyq$igi_other,by=c('ZWK_Isotope.Group.ID'='ZYQ_Isotope.Group.ID')) %>%
+               left_join(udp$igi_other,by=c('ZWK_Isotope.Group.ID'='UDP_Isotope.Group.ID')) %>%
+               rename(Isotope.Group.ID=ZWK_Isotope.Group.ID)
+other_check_n <- names(other_check)
+n1 <- other_check_n[grepl("Isotope.Group.ID|Modified.Peptide.Sequence",other_check_n)]
+n2 <- other_check_n[grepl("Monoisotopic",other_check_n)]
+n3 <- other_check_n[grepl("Time",other_check_n)]
+n4 <- other_check_n[grepl("Charge",other_check_n)]
+knitr::kable(other_check[c(n1,n3,n4,n2)])
+)
+
+knitr::kable(other_check[c("Isotope.Group.ID",other_check_n[grepl("Modified.Peptide.Sequence",other_check_n)])])
+knitr::kable(other_check[c("Isotope.Group.ID",other_check_n[grepl("Monoisotopic",other_check_n)])])
+knitr::kable(other_check[c("Isotope.Group.ID",other_check_n[grepl("Time",other_check_n)])])
+knitr::kable(other_check[c("Isotope.Group.ID",other_check_n[grepl("Charge",other_check_n)])])
 '

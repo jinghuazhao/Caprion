@@ -164,7 +164,9 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   r_f <- cor(rd_f,use="everything")
   r_pp <- cor(t(exprs(prot_pept)),use="everything")
   colnames(r_pp) <- rownames(r_pp) <- c("PROC_HUMAN","EPCR_HUMAN","ERAP2_HUMAN",d$Isotope.Group.ID)
-  invisible(list(z=z,r=r,d=rd,igi_other=unique(igi_other),
+  m <- subset(z,Isotope.Group.ID%in%d$Isotope.Group.ID) %>%
+      mutate(Protein=gsub("_HUMAN","",Protein),code=code)
+  invisible(list(z=z,r=r,d=rd,m=m,igi_other=unique(igi_other),
                  diff_PROC=diff_PROC,diff_EPCR=diff_EPCR,diff_ERAP2=diff_ERAP2,diff_all=diff_all,dr=d,
                  r_a=r_a,r_b=r_b,r_c=r_c,r_d=r_d,r_e=r_e,r_f=r_f,r_pp=r_pp))
 }
@@ -172,6 +174,14 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
 zwk <- mapping("ZWK")
 zyq <- mapping("ZYQ")
 udp <- mapping("UDP")
+
+m <- bind_rows(zwk$m,zyq$m,udp$m) %>%
+     group_by(Protein,Modified.Peptide.Sequence,code) %>%
+     summarise(groups=paste(Isotope.Group.ID,collapse=";")) %>%
+     mutate(protein_peptide_isotope=paste(Protein,Modified.Peptide.Sequence,groups,sep="_"))
+t <- with(m,table(protein_peptide_isotope,code))
+knitr::kable(t,caption="Protein/Peptide/Isotope_Group by batch")
+write.csv(t,file=file.path("~/Q1.csv"),quote=FALSE)
 
 dr2 <- function(a,b,c)
 # difference in r^2

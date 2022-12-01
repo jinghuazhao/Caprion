@@ -65,6 +65,8 @@ Rscript -e '
 options(width=200)
 suppressMessages(library("dplyr"))
 suppressMessages(library(Biobase))
+suppressMessages(library(pheatmap))
+caprion <- Sys.getenv("caprion")
 setwd("../pilot")
 
 mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
@@ -138,7 +140,8 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   dr <- apply(rd>50000,1,sum)/ncol(rd)*100
   d <- data.frame(Isotope.Group.ID=as.numeric(rd$Isotope.Group.ID),dr=dr) %>%
        left_join(m) %>%
-       arrange(Protein)
+       arrange(Protein) %>%
+       mutate(Protein=gsub("_HUMAN","",Protein))
   igi_pept <- intersect(paste(igi),featureNames(pept))
   igi_other <- filter(r,Isotope.Group.ID%in%igi_pept)[1:5]
   names(igi_other) <- paste0(code,"_",names(igi_other))
@@ -166,7 +169,8 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   colnames(r_pp) <- rownames(r_pp) <- c("PROC_HUMAN","EPCR_HUMAN","ERAP2_HUMAN",d$Isotope.Group.ID)
   m <- subset(z,Isotope.Group.ID%in%d$Isotope.Group.ID) %>%
       mutate(Protein=gsub("_HUMAN","",Protein),code=code)
-  invisible(list(z=z,r=r,d=rd,m=m,igi_other=unique(igi_other),
+  d <- mutate(d,code=code)
+  invisible(list(z=z,r=r,d=rd,m=m,pp=prot_pept,igi_other=unique(igi_other),
                  diff_PROC=diff_PROC,diff_EPCR=diff_EPCR,diff_ERAP2=diff_ERAP2,diff_all=diff_all,dr=d,
                  r_a=r_a,r_b=r_b,r_c=r_c,r_d=r_d,r_e=r_e,r_f=r_f,r_pp=r_pp))
 }
@@ -175,13 +179,38 @@ zwk <- mapping("ZWK")
 zyq <- mapping("ZYQ")
 udp <- mapping("UDP")
 
-m <- bind_rows(zwk$m,zyq$m,udp$m) %>%
-     group_by(Protein,Modified.Peptide.Sequence,code) %>%
-     summarise(groups=paste(Isotope.Group.ID,collapse=";")) %>%
-     mutate(protein_peptide_isotope=paste(Protein,Modified.Peptide.Sequence,groups,sep="_"))
-t <- with(m,table(protein_peptide_isotope,code))
-knitr::kable(t,caption="Protein/Peptide/Isotope_Group by batch")
-write.csv(t,file=file.path("~/Q1.csv"),quote=FALSE)
+q1 <- bind_rows(zwk$m,zyq$m,udp$m) %>%
+      group_by(Protein,Modified.Peptide.Sequence,code) %>%
+      summarise(groups=paste(Isotope.Group.ID,collapse=";")) %>%
+      mutate(protein_peptide_isotope=paste(Protein,Modified.Peptide.Sequence,groups,sep="_"))
+t1  <- with(q1,table(protein_peptide_isotope,code))
+knitr::kable(t1,caption="Protein/Peptide/Isotope_Group by batch")
+write.csv(t1,file=file.path("~/Q1.csv"),quote=FALSE)
+
+q2 <- bind_rows(zwk$dr,zyq$dr,udp$dr) %>%
+      filter(dr>=10) %>%
+      group_by(Protein,Modified.Peptide.Sequence,code) %>%
+      summarise(groups=paste(Isotope.Group.ID,collapse=";")) %>%
+      mutate(protein_peptide_isotope=paste(Protein,Modified.Peptide.Sequence,groups,sep="_"))
+t2 <- with(q2,table(protein_peptide_isotope,code))
+knitr::kable(t2,caption="Protein/Peptide/Isotope_Group by batch")
+write.csv(t2,file=file.path("~/Q2.csv"),quote=FALSE)
+
+q3 <- function(es,rt="EPCR-PROC-ERAP2-corr")
+{
+  corr <- cor(t(exprs(es)),use="everything")
+  f_png <- file.path(caprion,"analysis","work",paste0(rt,".png"))
+  png(f_png,width=12,height=10,units="in",pointsize=4,res=300)
+  pheatmap(corr)
+  dev.off()
+# corr[!lower.tri(cor(corr))] <- NA
+  f_csv <- file.path(caprion,"analysis","work",paste0(rt,".csv"))
+  write.csv(format(corr,digits=2),file=f_csv,quote=FALSE)
+}
+
+q3(zwk$pp,rt="PP_ZWK-corr")
+q3(zyq$pp,rt="PP_ZYQ-corr")
+q3(udp$pp,rt="PP_UDP-corr")
 
 dr2 <- function(a,b,c)
 # difference in r^2

@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 
+convert -resize 50% work/PP_ZWK-corr.png PP_ZWK-corr.png
 pandoc ToDo.md --mathjax -s -o ToDo.html
 st
 
@@ -198,19 +199,30 @@ write.csv(t2,file=file.path("~/Q2.csv"),quote=FALSE)
 
 q3 <- function(es,rt="EPCR-PROC-ERAP2-corr")
 {
-  corr <- cor(t(exprs(es)),use="everything")
+  attach(es)
+  cpmi <- select(m,code,Protein,Modified.Peptide.Sequence,Isotope.Group.ID) %>%
+          mutate(name=paste(code,Protein,Modified.Peptide.Sequence,Isotope.Group.ID,sep="_"))
+  fn <- setdiff(featureNames(pp),c("EPCR_HUMAN","ERAP2_HUMAN","PROC_HUMAN"))
+  ann <- left_join(data.frame(Isotope.Group.ID=as.numeric(fn)),cpmi) %>%
+         arrange(Protein,Modified.Peptide.Sequence) %>%
+         select(Isotope.Group.ID,name)
+  print(ann)
+  dat <- pp[paste(ann$Isotope.Group.ID)]
+  featureNames(dat) <- ann$name
+  corr <- cor(t(exprs(dat)),use="everything")
   f_png <- file.path(caprion,"analysis","work",paste0(rt,".png"))
   png(f_png,width=12,height=10,units="in",pointsize=4,res=300)
-  pheatmap(corr)
+  pheatmap(corr,cluster_rows=FALSE, cluster_cols=FALSE)
   dev.off()
 # corr[!lower.tri(cor(corr))] <- NA
   f_csv <- file.path(caprion,"analysis","work",paste0(rt,".csv"))
   write.csv(format(corr,digits=2),file=f_csv,quote=FALSE)
+  detach(es)
 }
 
-q3(zwk$pp,rt="PP_ZWK-corr")
-q3(zyq$pp,rt="PP_ZYQ-corr")
-q3(udp$pp,rt="PP_UDP-corr")
+q3(zwk,rt="PP_ZWK-corr")
+q3(zyq,rt="PP_ZYQ-corr")
+q3(udp,rt="PP_UDP-corr")
 
 dr2 <- function(a,b,c)
 # difference in r^2

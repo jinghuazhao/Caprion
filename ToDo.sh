@@ -1,6 +1,12 @@
 #!/usr/bin/bash
 
-convert -resize 50% work/PP_ZWK-corr.png PP_ZWK-corr.png
+for batch in ZWK ZYQ UDP
+do
+  for src in intensity PP
+  do
+    convert -resize 50% work/${src}_${batch}-corr.png ${src}_${batch}-corr.png
+  done
+done
 pandoc ToDo.md --mathjax -s -o ToDo.html
 st
 
@@ -197,32 +203,46 @@ t2 <- with(q2,table(protein_peptide_isotope,code))
 knitr::kable(t2,caption="Protein/Peptide/Isotope_Group by batch")
 write.csv(t2,file=file.path("~/Q2.csv"),quote=FALSE)
 
-q3 <- function(es,rt="EPCR-PROC-ERAP2-corr")
+q3 <- function(dlist,src="peptide",rt="EPCR-PROC-ERAP2-corr")
 {
-  attach(es)
+  m <- with(dlist,m)
+  d <- with(dlist,d)
+  rownames(d) <- d[[1]]
   cpmi <- select(m,code,Protein,Modified.Peptide.Sequence,Isotope.Group.ID) %>%
           mutate(name=paste(code,Protein,Modified.Peptide.Sequence,Isotope.Group.ID,sep="_"))
-  fn <- setdiff(featureNames(pp),c("EPCR_HUMAN","ERAP2_HUMAN","PROC_HUMAN"))
-  ann <- left_join(data.frame(Isotope.Group.ID=as.numeric(fn)),cpmi) %>%
-         arrange(Protein,Modified.Peptide.Sequence) %>%
-         select(Isotope.Group.ID,name)
-  print(ann)
-  dat <- pp[paste(ann$Isotope.Group.ID)]
-  featureNames(dat) <- ann$name
-  corr <- cor(t(exprs(dat)),use="everything")
+  if (src=="peptide")
+  {
+    fn <- setdiff(featureNames(pp),c("EPCR_HUMAN","ERAP2_HUMAN","PROC_HUMAN"))
+    ann <- left_join(data.frame(Isotope.Group.ID=as.numeric(fn)),cpmi) %>%
+           arrange(Protein,Modified.Peptide.Sequence) %>%
+           select(Isotope.Group.ID,name)
+    dat <- pp[paste(ann$Isotope.Group.ID)]
+    featureNames(dat) <- ann$name
+    corr <- cor(t(exprs(dat)),use="everything")
+  } else if (src=="intensity") {
+    ann <- left_join(d[1],cpmi) %>%
+           arrange(Protein,Modified.Peptide.Sequence) %>%
+           select(Isotope.Group.ID,name)
+    dat <- t(d[-1][paste(ann$Isotope.Group.ID),])
+    colnames(dat) <- ann$name
+    corr <- cor(dat,use="everything")
+  }
   f_png <- file.path(caprion,"analysis","work",paste0(rt,".png"))
   png(f_png,width=12,height=10,units="in",pointsize=4,res=300)
   pheatmap(corr,cluster_rows=FALSE, cluster_cols=FALSE)
   dev.off()
-# corr[!lower.tri(cor(corr))] <- NA
+  corr[!lower.tri(cor(corr))] <- NA
   f_csv <- file.path(caprion,"analysis","work",paste0(rt,".csv"))
   write.csv(format(corr,digits=2),file=f_csv,quote=FALSE)
-  detach(es)
 }
 
-q3(zwk,rt="PP_ZWK-corr")
-q3(zyq,rt="PP_ZYQ-corr")
-q3(udp,rt="PP_UDP-corr")
+q3(zwk,src="intensity",rt="intensity_ZWK-corr")
+q3(zyq,src="intensity",rt="intensity_ZYQ-corr")
+q3(udp,src="intensity",rt="intensity_UDP-corr")
+
+q3(zwk,src="peptide",rt="PP_ZWK-corr")
+q3(zyq,src="peptide",rt="PP_ZYQ-corr")
+q3(udp,src="peptide",rt="PP_UDP-corr")
 
 dr2 <- function(a,b,c)
 # difference in r^2

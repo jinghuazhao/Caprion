@@ -65,6 +65,17 @@ Rscript -e '
   save(UDP_R,file=file.path(caprion,"pilot","UDP_R.rda"))
 '
 
+function peptides()
+{
+  cd ~/Caprion/pilot/bgen2/EPCR-PROC
+  cat <(echo Protein Group Seq OBS_CT BETA SE T_STAT P | tr ' ' '\t') \
+      <(zgrep -w rs867186 PROC* EPCR* | \
+        sed 's/_invn-plink2.gz//;s/:/\t/' | \
+        sed 's/_/\t/g;s/All/All\t/;s/DR/DR\t/' | \
+        sort -k1,1 -k3,3 | \
+        cut -f4-10 --complement) > ll
+}
+
 # /rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/pre_qc_data/spectra/
 # /rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/pre_qc_data/spectral_library_ZWK/
 
@@ -170,7 +181,7 @@ mapping <- function(code,genes=c("PROC","EPCR","ERAP2"))
   rd_e[rd_e==0] <- NA
   r_e <- cor(rd_e,use="everything")
   rd_f <- t(exprs(pept[igi_pept]))
-  rd_f[!is.na(t(rd_c[-1]))&t(rd_c[-1])<50000] <- NA
+  rd_f[!is.na(t(rd[-1]))&t(rd[-1])<50000] <- NA
   r_f <- cor(rd_f,use="everything")
   r_pp <- cor(t(exprs(prot_pept)),use="everything")
   colnames(r_pp) <- rownames(r_pp) <- c("PROC_HUMAN","EPCR_HUMAN","ERAP2_HUMAN",d$Isotope.Group.ID)

@@ -7,6 +7,8 @@ do
     convert -resize 50% work/${src}_${batch}-corr.png ${src}_${batch}-corr.png
   done
 done
+convert -resize 50% work/Q9UNN8-EPCR-all-dr.png EPCR-All-DR.png
+convert -resize 50% work/P04070-PROC-all-dr.png PROC-All-DR.png
 pandoc ToDo.md --mathjax -s -o ToDo.html
 st
 
@@ -308,3 +310,64 @@ knitr::kable(other_check[c("Isotope.Group.ID",other_check_n[grepl("Monoisotopic"
 knitr::kable(other_check[c("Isotope.Group.ID",other_check_n[grepl("Time",other_check_n)])])
 knitr::kable(other_check[c("Isotope.Group.ID",other_check_n[grepl("Charge",other_check_n)])])
 '
+
+#!/usr/bin/bash
+
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --job-name=miamiplot
+#SBATCH --array=317,751
+#SBATCH --qos=cardio
+#SBATCH --mem=50000
+#SBATCH --time=12:00:00
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/work/_miamiplot_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/work/_miamiplot_%A_%a.e
+
+export TMPDIR=${HPC_WORK}/work
+export caprion=~/Caprion/pilot
+export analysis=~/Caprion/analysis
+
+function miamiplot2()
+{
+  export TMPDIR=/rds/user/jhz22/hpc-work/work
+  export caprion=~/rds/projects/Caprion_proteomics/pilot
+  export analysis=~/Caprion/analysis
+  export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/2020.id | sed -r 's/^X([0-9])/\1/')
+  export uniprot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $2}' ${caprion}/2020.id)
+  module load gcc/6
+  if [ ! -f ${analysis}/work/${uniprot}-${prot}-all.dat.gz ]; then
+     (
+       echo snpid chr pos rsid p z
+       gunzip -c ${caprion}/bgen2/EPCR-PROC/${prot}_All_invn-plink2.gz | \
+       awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$3"_"a1"_"a2; print snpid,$1,$2,$3,$12,$11}' | \
+       sort -k2,2n -k3,3n
+     ) | \
+     gzip -f > ${analysis}/work/${uniprot}-${prot}-all.dat.gz
+  fi
+  if [ ! -f ${analysis}/work/${uniprot}-${prot}-dr.dat.gz ]; then
+     (
+       echo snpid chr pos rsid p z
+       gunzip -c ${caprion}/bgen2/EPCR-PROC/${prot}_DR_invn-plink2.gz  | \
+       awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$3"_"a1"_"a2; print snpid,$1,$2,$3,$12,$11}' | \
+       sort -k2,2n -k3,3n
+     ) | \
+     gzip -f > ${analysis}/work/${uniprot}-${prot}-dr.dat.gz
+  fi
+  Rscript -e '
+  caprion <- Sys.getenv("caprion");analysis <- Sys.getenv("analysis"); prot <- Sys.getenv("prot"); uniprot <- Sys.getenv("uniprot")
+  protein <- prot
+  suppressMessages(require(dplyr))
+  suppressMessages(require(gap))
+  gwas1 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"all.dat.gz",sep="-")),as.is=TRUE,header=TRUE) %>% filter(!is.na(p))
+  gwas2 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"dr.dat.gz",sep="-")),as.is=TRUE,header=TRUE) %>% filter(!is.na(p))
+  png(file.path(analysis,"work",paste(uniprot,prot,"all-dr.png",sep="-")),res=300,width=12,height=10,units="in")
+  chrmaxpos <- miamiplot2(gwas1,gwas2,name1="All",name2="DR",z1="z",z2="z") %>%
+               filter(chr!=-Inf & maxpos!=-Inf & genomestartpos!=-Inf & labpos!=-Inf)
+  labelManhattan(chr=20,pos=33764554,name=rs867186,gwas1,gwasZLab="z",chrmaxpos=chrmaxpos)
+  dev.off()
+  '
+# rm ${analysis}/work/${uniprot}-${prot}-all.dat.gz
+# rm ${analysis}/work/${uniprot}-${prot}-dr.dat.gz
+}
+
+miamiplot2

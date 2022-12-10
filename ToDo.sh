@@ -1,17 +1,5 @@
 #!/usr/bin/bash
 
-for batch in ZWK ZYQ UDP
-do
-  for src in intensity PP
-  do
-    convert -resize 50% work/${src}_${batch}-corr.png ${src}_${batch}-corr.png
-  done
-done
-convert -resize 50% work/Q9UNN8-EPCR-all-dr.png EPCR-All-DR.png
-convert -resize 50% work/P04070-PROC-all-dr.png PROC-All-DR.png
-pandoc ToDo.md --mathjax -s -o ToDo.html
-st
-
 export caprion=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics
 
 export pre_qc_data=${caprion}/pre_qc_data
@@ -371,3 +359,17 @@ function miamiplot2()
 }
 
 miamiplot2
+
+# ---
+
+for batch in ZWK ZYQ UDP
+do
+  for src in intensity PP
+  do
+    convert -resize 50% work/${src}_${batch}-corr.png ${src}_${batch}-corr.png
+  done
+done
+convert -resize 50% work/Q9UNN8-EPCR-all-dr.png EPCR-All-DR.png
+convert -resize 50% work/P04070-PROC-all-dr.png PROC-All-DR.png
+pandoc ToDo.md --mathjax -s -o ToDo.html
+st

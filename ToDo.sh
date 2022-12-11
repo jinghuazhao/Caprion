@@ -315,50 +315,161 @@ export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
 export analysis=~/Caprion/analysis
 
+export TMPDIR=/rds/user/jhz22/hpc-work/work
+export caprion=~/rds/projects/Caprion_proteomics/pilot
+export analysis=~/Caprion/analysis
+export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/2020.id | sed -r 's/^X([0-9])/\1/')
+export uniprot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $2}' ${caprion}/2020.id)
+module load gcc/6
+
+if [ ! -f ${analysis}/work/${uniprot}-${prot}-all.dat.gz ]; then
+   (
+     echo snpid chr pos rsid p z b
+     gunzip -c ${caprion}/bgen2/EPCR-PROC/${prot}_All_invn-plink2.gz | \
+     awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$3"_"a1"_"a2; print snpid,$1,$2,$3,$12,$11,$9}' | \
+     sort -k2,2n -k3,3n
+   ) | \
+   gzip -f > ${analysis}/work/${uniprot}-${prot}-all.dat.gz
+fi
+if [ ! -f ${analysis}/work/${uniprot}-${prot}-dr.dat.gz ]; then
+   (
+     echo snpid chr pos rsid p z b
+     gunzip -c ${caprion}/bgen2/EPCR-PROC/${prot}_DR_invn-plink2.gz  | \
+     awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$3"_"a1"_"a2; print snpid,$1,$2,$3,$12,$11,$9}' | \
+     sort -k2,2n -k3,3n
+   ) | \
+   gzip -f > ${analysis}/work/${uniprot}-${prot}-dr.dat.gz
+fi
+
 function miamiplot2()
 {
-  export TMPDIR=/rds/user/jhz22/hpc-work/work
-  export caprion=~/rds/projects/Caprion_proteomics/pilot
-  export analysis=~/Caprion/analysis
-  export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/2020.id | sed -r 's/^X([0-9])/\1/')
-  export uniprot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $2}' ${caprion}/2020.id)
-  module load gcc/6
-  if [ ! -f ${analysis}/work/${uniprot}-${prot}-all.dat.gz ]; then
-     (
-       echo snpid chr pos rsid p z
-       gunzip -c ${caprion}/bgen2/EPCR-PROC/${prot}_All_invn-plink2.gz | \
-       awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$3"_"a1"_"a2; print snpid,$1,$2,$3,$12,$11}' | \
-       sort -k2,2n -k3,3n
-     ) | \
-     gzip -f > ${analysis}/work/${uniprot}-${prot}-all.dat.gz
-  fi
-  if [ ! -f ${analysis}/work/${uniprot}-${prot}-dr.dat.gz ]; then
-     (
-       echo snpid chr pos rsid p z
-       gunzip -c ${caprion}/bgen2/EPCR-PROC/${prot}_DR_invn-plink2.gz  | \
-       awk 'NR>1{if($4<$5) {a1=$4;a2=$5} else {a1=$5;a2=$4}; snpid=$1":"$3"_"a1"_"a2; print snpid,$1,$2,$3,$12,$11}' | \
-       sort -k2,2n -k3,3n
-     ) | \
-     gzip -f > ${analysis}/work/${uniprot}-${prot}-dr.dat.gz
-  fi
   Rscript -e '
   caprion <- Sys.getenv("caprion");analysis <- Sys.getenv("analysis"); prot <- Sys.getenv("prot"); uniprot <- Sys.getenv("uniprot")
   protein <- prot
   suppressMessages(require(dplyr))
   suppressMessages(require(gap))
-  gwas1 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"all.dat.gz",sep="-")),as.is=TRUE,header=TRUE) %>% filter(!is.na(p))
-  gwas2 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"dr.dat.gz",sep="-")),as.is=TRUE,header=TRUE) %>% filter(!is.na(p))
+  gwas1 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"all.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
+  gwas2 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"dr.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
   png(file.path(analysis,"work",paste(uniprot,prot,"all-dr.png",sep="-")),res=300,width=12,height=10,units="in")
   chrmaxpos <- miamiplot2(gwas1,gwas2,name1="All",name2="DR",z1="z",z2="z") %>%
                filter(chr!=-Inf & maxpos!=-Inf & genomestartpos!=-Inf & labpos!=-Inf)
   labelManhattan(chr=20,pos=33764554,name=rs867186,gwas1,gwasZLab="z",chrmaxpos=chrmaxpos)
   dev.off()
   '
-# rm ${analysis}/work/${uniprot}-${prot}-all.dat.gz
-# rm ${analysis}/work/${uniprot}-${prot}-dr.dat.gz
 }
 
 miamiplot2
+
+Rscript -e '
+  miamiplotz <- function (gwas1, gwas2, name1 = "GWAS 1", name2 = "GWAS 2", chr1 = "chr",
+    chr2 = "chr", pos1 = "pos", pos2 = "pos", p1 = "p", p2 = "p",
+    z1 = NULL, z2 = NULL, sug = 1e-05, sig = 5e-08, pcutoff = 0.1,
+    topcols = c("green3", "darkgreen"), botcols = c("royalblue1",
+        "navy"), yAxisInterval = 5)
+  {
+    dat1 <- within(subset(gwas1,!is.na(p) & -log10(p)>=-log10(pcutoff)),{gpos<-NA;b<--90+b})
+    dat2 <- within(subset(gwas2,!is.na(p) & -log10(p)>=-log10(pcutoff)),{gpos<-NA;b<- 90+b})
+    chrmaxpos <- data.frame(chr = 1:22, maxpos = NA, genomestartpos = NA)
+    for (i in 1:22) {
+        chrmaxpos$maxpos[i] <- max(c(dat1$pos[dat1$chr == i],
+            dat2$pos[dat2$chr == i]), na.rm = TRUE)
+        if (i == 1) {
+            chrmaxpos$genomestartpos[i] <- 0
+        }
+        else {
+            chrmaxpos$genomestartpos[i] <- chrmaxpos$genomestartpos[i -
+                1] + chrmaxpos$maxpos[i - 1]
+        }
+    }
+    chrmaxpos$labpos <- chrmaxpos$genomestartpos + 0.5 * chrmaxpos$maxpos
+    for (ch in 1:22) {
+        vec <- which(dat1$chr == ch)
+        dat1$gpos[vec] <- dat1$pos[vec] + chrmaxpos$genomestartpos[ch]
+        vec2 <- which(dat2$chr == ch)
+        dat2$gpos[vec2] <- dat2$pos[vec2] + chrmaxpos$genomestartpos[ch]
+    }
+    maxp <- max(max(dat1$b, na.rm = TRUE), max(dat2$b,
+        na.rm = TRUE))+50
+    col1 <- rep(topcols, 22)[dat1$chr]
+    col2 <- rep(botcols, 22)[dat2$chr]
+    plot(dat1[c("gpos","b")], pch = 20,
+        cex = 0.6, col = col1, ylim = c((-maxp), (maxp +
+            5)), xaxt = "n", yaxt = "n", ylab = "b",
+        xlab = "", bty = "n")
+    points(dat2[c("gpos","b")], pch = 20,
+        cex = 0.6, col = col2)
+    text(chrmaxpos$labpos, 0, as.character(1:22), cex = 0.8)
+    axisLabNum <- floor(maxp/yAxisInterval)
+    axisLabAt <- seq(-yAxisInterval * axisLabNum, yAxisInterval *
+        axisLabNum, yAxisInterval)
+    axisLabels <- c(seq(axisLabNum * yAxisInterval, 0, -yAxisInterval),
+        seq(yAxisInterval, axisLabNum * yAxisInterval, yAxisInterval))
+    axis(2, at = axisLabAt, labels = axisLabels)
+    mtext(name1, side = 3, font = 2)
+    mtext(name2, side = 1, font = 2)
+    return(chrmaxpos)
+  }
+
+  caprion <- Sys.getenv("caprion");analysis <- Sys.getenv("analysis"); prot <- Sys.getenv("prot"); uniprot <- Sys.getenv("uniprot")
+  protein <- prot
+  suppressMessages(require(dplyr))
+  suppressMessages(require(gap))
+  gwas1 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"all.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
+  gwas2 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"dr.dat.gz",sep="-")),as.is=TRUE,header=TRUE)
+  png(file.path(analysis,"work",paste(uniprot,prot,"all-dr-b.png",sep="-")),res=300,width=12,height=10,units="in")
+  chrmaxpos <- miamiplotz(gwas1,gwas2,name1="All",name2="DR",z1="z",z2="z") %>%
+               filter(chr!=-Inf & maxpos!=-Inf & genomestartpos!=-Inf & labpos!=-Inf)
+  labelManhattan(chr=20,pos=33764554,name="rs867186",gwas1,gwasZLab="z",chrmaxpos=chrmaxpos)
+  dev.off()
+'
+
+# rm ${analysis}/work/${uniprot}-${prot}-all.dat.gz
+# rm ${analysis}/work/${uniprot}-${prot}-dr.dat.gz
+
+Rscript -e '
+ miamiplotz <- function (gwas1, gwas2, name1 = "GWAS 1", name2 = "GWAS 2", chr1 = "chr",
+    chr2 = "chr", pos1 = "pos", pos2 = "pos", p1 = "p", p2 = "p",
+    z1 = NULL, z2 = NULL, sug = 1e-05, sig = 5e-08, pcutoff = 0.1,
+    topcols = c("green3", "darkgreen"), botcols = c("royalblue1",
+        "navy"), yAxisInterval = 5)
+  {
+    dat1 <- within(subset(gwas1,!is.na(p) & -log10(p)>=-log10(pcutoff)),{gpos<-NA})
+    dat2 <- within(subset(gwas2,!is.na(p) & -log10(p)>=-log10(pcutoff)),{gpos<-NA})
+    chrmaxpos <- data.frame(chr = 1:22, maxpos = NA, genomestartpos = NA)
+    for (i in 1:22) {
+        chrmaxpos$maxpos[i] <- max(c(dat1$pos[dat1$chr == i],
+            dat2$pos[dat2$chr == i]), na.rm = TRUE)
+        if (i == 1) {
+            chrmaxpos$genomestartpos[i] <- 0
+        }
+        else {
+            chrmaxpos$genomestartpos[i] <- chrmaxpos$genomestartpos[i -
+                1] + chrmaxpos$maxpos[i - 1]
+        }
+    }
+    chrmaxpos$labpos <- chrmaxpos$genomestartpos + 0.5 * chrmaxpos$maxpos
+    for (ch in 1:22) {
+        vec <- which(dat1$chr == ch)
+        dat1$gpos[vec] <- dat1$pos[vec] + chrmaxpos$genomestartpos[ch]
+        vec2 <- which(dat2$chr == ch)
+        dat2$gpos[vec2] <- dat2$pos[vec2] + chrmaxpos$genomestartpos[ch]
+    }
+    dat <- merge(dat1,dat2,by=c("chr","pos"))
+    plot(dat[c("b.x","b.y")], pch = 20, cex = 0.6, xlab="All",ylab="DR")
+    return(chrmaxpos)
+  }
+
+  caprion <- Sys.getenv("caprion");analysis <- Sys.getenv("analysis"); prot <- Sys.getenv("prot"); uniprot <- Sys.getenv("uniprot")
+  protein <- prot
+  suppressMessages(require(dplyr))
+  suppressMessages(require(gap))
+  gwas1 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"all.dat.gz",sep="-")),as.is=TRUE,header=TRUE) %>% filter(!is.na(p))
+  gwas2 <- read.table(file.path(analysis,"work",paste(uniprot,prot,"dr.dat.gz",sep="-")),as.is=TRUE,header=TRUE) %>% filter(!is.na(p))
+  png(file.path(analysis,"work",paste(uniprot,prot,"all-dr-xy.png",sep="-")),res=300,width=12,height=10,units="in")
+  chrmaxpos <- miamiplotz(gwas1,gwas2,name1="All",name2="DR",z1="z",z2="z") %>%
+               filter(chr!=-Inf & maxpos!=-Inf & genomestartpos!=-Inf & labpos!=-Inf)
+  dev.off()
+'
 
 # ---
 
@@ -371,5 +482,7 @@ do
 done
 convert -resize 50% work/Q9UNN8-EPCR-all-dr.png EPCR-All-DR.png
 convert -resize 50% work/P04070-PROC-all-dr.png PROC-All-DR.png
+convert -resize 50% work/Q9UNN8-EPCR-all-dr-xy.png EPCR-All-DR-xy.png
+convert -resize 50% work/P04070-PROC-all-dr-xy.png PROC-All-DR-xy.png
 pandoc ToDo.md --mathjax -s -o ToDo.html
 st

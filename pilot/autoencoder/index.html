@@ -108,12 +108,14 @@
 <h1 id="autoencoder">Autoencoder</h1>
 <p>As shown at <a href="https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/">R-bloggers<img align="right" height="400" src="https://i0.wp.com/gradientdescending.com/wp-content/uploads/2018/07/reconstruction-1.png" width="560"/></a>,</p>
 <blockquote>
-<p>autoencoder is better at reconstructing the original data set than PCA when k is small, 
-however the error converges as k increases. For very large data sets this difference will be
+<p>autoencoder is better at reconstructing the original data set than PCA when k is small, </p>
+</blockquote>
+<p>where <code>k</code> corresponds to the number of principal components in PCA or bottleneck dimension in AE,</p>
+<blockquote>
+<p>however the error converges as k increases. For very large data sets this difference will be
 larger and means a smaller data set could be used for the same error as PCA. When dealing 
 with big data this is an important property`.</p>
 </blockquote>
-<p>where <code>k</code> corresponds to the number of principal components in PCA or bottleneck dimension in AE.</p>
 <p>The local adoption is <a href="../utils/ae_test.Rmd">ae_test.Rmd</a> which produces <a href="../utils/ae_test.html">ae_test.html</a> and <a href="../utils/ae_test.pdf">ae_test.pdf</a>.</p>
 <p>Additional work will be on variatinoal autoencoder (VAE) as indicated in the references below.</p>
 <h2 id="references">REFERENCES</h2>

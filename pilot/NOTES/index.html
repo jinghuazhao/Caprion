@@ -115,9 +115,10 @@ cd PoGo_Testprocedures/Testfiles
 module load ceuadmin/PoGo
 for Peptides in Testfile_experimental Testfile_small
 do
-  PoGo -fasta ./input/gencode.v25.pc_translations.fa -gtf ./input/gencode.v25.annotation.gtf -in input/${Peptides}.txt
+  PoGo -fasta input/gencode.v25.pc_translations.fa -gtf input/gencode.v25.annotation.gtf -in input/${Peptides}.txt
 done
 </code></pre>
+<p>Output files are also contained in the <code>input/</code> directory.</p>
 <h2 id="proteoform-analysis">Proteoform Analysis</h2>
 <h3 id="eth-zurich-u-toronto-team-develops-tool-for-bottom-up-proteomics-proteoform-analysis">ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis</h3>
 <p>Jul 28, 2021 | Adam Bonislawski</p>

@@ -107,7 +107,17 @@
 <div class="col-md-9" role="main">
 <h1 id="notes">NOTES</h1>
 <h2 id="pogo">PoGo</h2>
-<p>Fast Mapping of Peptides to Genomic Coordinates for Proteogenomic Analyses, <a href="https://www.sanger.ac.uk/tool/pogo/">https://www.sanger.ac.uk/tool/pogo/</a></p>
+<p>Fast Mapping of Peptides to Genomic Coordinates for Proteogenomic Analyses, <a href="https://www.sanger.ac.uk/tool/pogo/">https://www.sanger.ac.uk/tool/pogo/</a>, GitHub, <a href="https://github.com/cschlaffner/PoGo">https://github.com/cschlaffner/PoGo</a>.</p>
+<p>An example is established as follows,</p>
+<pre><code class="language-bash">wget -S ftp://ftp.sanger.ac.uk/pub/teams/17/software/PoGo/PoGo_Testprocedures.zip
+unzip PoGo_Testprocedures.zip
+cd PoGo_Testprocedures/Testfiles
+module load ceuadmin/PoGo
+for Peptides in Testfile_experimental Testfile_small
+do
+  PoGo -fasta ./input/gencode.v25.pc_translations.fa -gtf ./input/gencode.v25.annotation.gtf -in input/${Peptides}.txt
+done
+</code></pre>
 <h2 id="proteoform-analysis">Proteoform Analysis</h2>
 <h3 id="eth-zurich-u-toronto-team-develops-tool-for-bottom-up-proteomics-proteoform-analysis">ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis</h3>
 <p>Jul 28, 2021 | Adam Bonislawski</p>

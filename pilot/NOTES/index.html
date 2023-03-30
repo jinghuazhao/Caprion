@@ -108,6 +108,18 @@
 <h1 id="notes">NOTES</h1>
 <h2 id="pogo">PoGo</h2>
 <p>Fast Mapping of Peptides to Genomic Coordinates for Proteogenomic Analyses, <a href="https://www.sanger.ac.uk/tool/pogo/">https://www.sanger.ac.uk/tool/pogo/</a>, GitHub, <a href="https://github.com/cschlaffner/PoGo">https://github.com/cschlaffner/PoGo</a>.</p>
+<pre><code>PoGo uses transcript translations and reference gene annotations to identify the genomic loci of peptides and post-translational modifications. Multiple occurrences of peptides in the input data resulting in the same genomic loci will be collapsed as a single occurrence in the output.
+
+Input format
+
+The input format required by PoGo is a tab delimited file with four columns. Allowed file extensions for this format are *.pogo, *.txt, and *.tsv.
+
+Column  Column header   Description
+1   Sample  Name of sample or experiment
+2   Peptide     Peptide sequence with PSI-MS nodification names in round brackets following the mpdified amino acid, e.g. PEPT(Phopsho)IDE for a phosphorylated threonine
+3   PSMs    Number of peptide-spectrum matches (PSMs) for the given peptide
+4   Quant   Quantitative value for the given peptide in the given sample
+</code></pre>
 <p>An example is established as follows,</p>
 <pre><code class="language-bash">wget -S ftp://ftp.sanger.ac.uk/pub/teams/17/software/PoGo/PoGo_Testprocedures.zip
 unzip PoGo_Testprocedures.zip
@@ -120,18 +132,15 @@ done
 </code></pre>
 <p>Output files are also contained in the <code>input/</code> directory.</p>
 <p>GENCODE annotation data are available from <a href="https://www.gencodegenes.org/human/">https://www.gencodegenes.org/human/</a> and <a href="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/">https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/</a>.</p>
-<p>The Java GUI is run as follows,</p>
+<p>The Java GUI, <a href="https://github.com/cschlaffner/PoGoGUI">https://github.com/cschlaffner/PoGoGUI</a>, is run as follows,</p>
 <pre><code class="language-bash">java -jar PoGoGUI-v1.0.0.jar
 </code></pre>
 <p>which requires PoGo executable as well.</p>
-<p>The source is compiled with maven, e.g.,</p>
+<p>The source is compiled with maven, <a href="https://maven.apache.org/">https://maven.apache.org/</a>, e.g.,</p>
 <pre><code class="language-bash">module load maven-3.5.0-gcc-5.4.0-3sgaeze
-cd /usr/local/Cluster-Apps/ceuadmin/PoGo/1.0.0/PoGoGUI/PoGoGUI
-mvn compile
-mvn package
 mvn install
 </code></pre>
-<p>which uses <code>pom.xml</code>.</p>
+<p>assuming that <code>pom.xml</code> is available, e.g., <code>/usr/local/Cluster-Apps/ceuadmin/PoGo/1.0.0/PoGoGUI/PoGoGUI</code>.</p>
 <h2 id="proteoform-analysis">Proteoform Analysis</h2>
 <h3 id="eth-zurich-u-toronto-team-develops-tool-for-bottom-up-proteomics-proteoform-analysis">ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis</h3>
 <p>Jul 28, 2021 | Adam Bonislawski</p>

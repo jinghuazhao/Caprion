@@ -5,7 +5,7 @@ cd ~/Caprion/PoGo_Testprocedures/Testfiles
 Rscript -e '
 small <- read.delim("input/Testfile_small.txt")
 N <- nrow(small)
-small2 <- within(small,{PTMs=1;Quant=rnorm(N)+15})
+small2 <- within(small,{PSMs=1;Quant=rnorm(N)+15})
 outfile <- "input/Testfile_small2.txt"
 write.table(small2,file=outfile,quote=FALSE,row.names=FALSE,sep="\t")
 
@@ -13,21 +13,21 @@ library(dplyr)
 load("~/Caprion/pilot/caprion.rda")
 ZWK <- Normalized_Peptides %>%
        transmute(id=paste(Isotope.Group.ID,Protein,sep="."),
-                 Peptide=Modified.Peptide.Sequence,PTMs=1,Quant=Normalized_Peptides[["Monoisotopic.m/z"]])
+                 Peptide=Modified.Peptide.Sequence,PSMs=1,Quant=Normalized_Peptides[["Monoisotopic.m/z"]])
 outfile <- "Caprion/ZWK.txt"
 write.table(ZWK,file=outfile,quote=FALSE,row.names=FALSE,sep="\t")
 
 load("~/Caprion/pilot/2020.rda")
 ZYQ <- left_join(Mapping,Comp_Neq1) %>%
        transmute(id=paste(Isotope.Group.ID,Protein,sep="."),
-                 Peptide=Modified.Peptide.Sequence,PTMs=1,Quant=Monoisotopic.m.z)
+                 Peptide=Modified.Peptide.Sequence,PSMs=1,Quant=Monoisotopic.m.z)
 outfile <- "Caprion/ZYQ.txt"
 write.table(ZYQ,file=outfile,quote=FALSE,row.names=FALSE,sep="\t")
 
 load("~/Caprion/pilot/2021.rda")
 UDP <- Normalized_Peptides %>%
        transmute(id=paste(Isotope.Group.ID,Protein,sep="."),
-                 Peptide=Modified.Peptide.Sequence,PTMs=1,Quant=Normalized_Peptides[["Monoisotopic.m/z"]])
+                 Peptide=Modified.Peptide.Sequence,PSMs=1,Quant=Normalized_Peptides[["Monoisotopic.m/z"]])
 outfile <- "Caprion/UDP.txt"
 write.table(UDP,file=outfile,quote=FALSE,row.names=FALSE,sep="\t")
 '

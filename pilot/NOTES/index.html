@@ -108,18 +108,39 @@
 <h1 id="notes">NOTES</h1>
 <h2 id="pogo">PoGo</h2>
 <p>Fast Mapping of Peptides to Genomic Coordinates for Proteogenomic Analyses, <a href="https://www.sanger.ac.uk/tool/pogo/">https://www.sanger.ac.uk/tool/pogo/</a>, GitHub, <a href="https://github.com/cschlaffner/PoGo">https://github.com/cschlaffner/PoGo</a>.</p>
-<pre><code>PoGo uses transcript translations and reference gene annotations to identify the genomic loci of peptides and post-translational modifications. Multiple occurrences of peptides in the input data resulting in the same genomic loci will be collapsed as a single occurrence in the output.
-
-Input format
-
-The input format required by PoGo is a tab delimited file with four columns. Allowed file extensions for this format are *.pogo, *.txt, and *.tsv.
-
-Column  Column header   Description
-1   Sample  Name of sample or experiment
-2   Peptide     Peptide sequence with PSI-MS nodification names in round brackets following the mpdified amino acid, e.g. PEPT(Phopsho)IDE for a phosphorylated threonine
-3   PSMs    Number of peptide-spectrum matches (PSMs) for the given peptide
-4   Quant   Quantitative value for the given peptide in the given sample
-</code></pre>
+<p>It uses transcript translations and reference gene annotations to identify the genomic loci of peptides and post-translational modifications. Multiple occurrences of peptides in the input data resulting in the same genomic loci will be collapsed as a single occurrence in the output.</p>
+<p>The input format is a tab delimited file with four columns with file extensions such as <em>.pogo, </em>.txt, and *.tsv.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Column header</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Sample</td>
+<td>Name of sample or experiment</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Peptide</td>
+<td>Peptide sequence with PSI-MS nodification names in round brackets following the mpdified amino acid, e.g. PEPT(Phopsho)IDE for a phosphorylated threonine</td>
+</tr>
+<tr>
+<td>3</td>
+<td>PSMs</td>
+<td>Number of peptide-spectrum matches (PSMs) for the given peptide, including those redundantly identified (peptides can be “seen” more than once in a run)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Quant</td>
+<td>Quantitative value for the given peptide in the given sample</td>
+</tr>
+</tbody>
+</table>
 <p>An example is established as follows,</p>
 <pre><code class="language-bash">wget -S ftp://ftp.sanger.ac.uk/pub/teams/17/software/PoGo/PoGo_Testprocedures.zip
 unzip PoGo_Testprocedures.zip

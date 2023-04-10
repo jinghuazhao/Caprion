@@ -38,6 +38,9 @@ PoGo -fasta v43lift37/gencode.v43lift37.pc_translations.fa -gtf v43lift37/gencod
 PoGo -fasta v43lift37/gencode.v43lift37.pc_translations.fa -gtf v43lift37/gencode.v43lift37.annotation.gtf -in Caprion/ZYQ.txt
 PoGo -fasta v43lift37/gencode.v43lift37.pc_translations.fa -gtf v43lift37/gencode.v43lift37.annotation.gtf -in Caprion/UDP.txt
 
+PoGo -fasta v43lift37/gencode.v43lift37.pc_translations.fa -gtf v43lift37/gencode.v43lift37.annotation.gtf -mm 1 -mmmode=TRUE \
+     -merge=TRUE -in Caprion/merge/ZWK.txt,Caprion/merge/ZYQ.txt,Caprion/merge/UDP.txt
+
 export caprion=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics
 
 export pre_qc_data=${caprion}/pre_qc_data

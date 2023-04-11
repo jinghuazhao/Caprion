@@ -3,7 +3,6 @@
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
-export interval=${HPC_WORK}/data/interval
 
 for SLURM_ARRAY_TASK_ID in 14
 do
@@ -49,17 +48,28 @@ echo "#SBATCH --job-name=${protein}"
 echo "#SBATCH --output=${analysis}/peptide/${protein}/${protein}.o"
 echo "#SBATCH --error=${analysis}/peptide/${protein}/${protein}.e"
 echo
+echo "export protein=${protein}"
 ) > ${sbatch}
 cat << 'EOL' >> ${sbatch}
+
+export TMPDIR=${HPC_WORK}/work
+export pilot=~/Caprion/pilot
+export analysis=~/Caprion/analysis
+
 function fastLR()
 {
-  for peptide in $(head -1 ${analysis}/peptide/${protein}/${protein}.pheno | cut -d' ' -f1 --complement)
+  export batch=${1}
+  export pheno=${analysis}/peptide/${protein}/${protein}.pheno
+  export N=$(awk 'NR==1{print NF-1}' ${pheno})
+
+  for col in $(seq ${N})
   do
+  export peptide=$(awk 'NR==1{print $(col+1)}' col=${col} ${pheno})
   gcta-1.9 --mbgen ${pilot}/work/caprion.bgenlist \
            --sample ${pilot}/work/caprion.sample \
            --keep ${pilot}/work/caprion-${batch}.id \
            --fastGWA-lr \
-           --pheno ${analysis}/peptide/${protein}/${protein}-${batch}.pheno --mpheno ${peptide} \
+           --pheno ${analysis}/peptide/${protein}/${protein}.pheno --mpheno ${col} \
            --threads 10 \
            --out ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}
 
@@ -67,7 +77,7 @@ function fastLR()
            --sample ${pilot}/work/caprion.sample \
            --keep ${pilot}/work/chrX-${batch}.id \
            --fastGWA-lr --model-only \
-           --pheno ${analysis}/work/caprion-${batch}.pheno --mpheno ${peptide} \
+           --pheno ${analysis}/peptide/${protein}/${protein}.pheno --mpheno ${col} \
            --threads 10 \
            --out ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}
 
@@ -85,7 +95,6 @@ function fastLR()
 fastLR 1
 fastLR 2
 fastLR 3
-
 EOL
 
 echo sbatch ${sbatch}

@@ -93,30 +93,31 @@ function fastLR()
   for col in $(seq ${N})
   do
   export peptide=$(awk 'NR==1{print $(col+2)}' col=${col} ${pheno})
+  export root=${analysis}/peptide/${protein}/${protein}
   gcta-1.9 --mbgen ${pilot}/work/caprion.bgenlist \
            --sample ${pilot}/work/caprion.sample \
-           --keep ${pilot}/work/caprion-${batch}.id \
+           --keep ${pilot}/work/caprion-${batch}.id --geno 0.1 --maf 0.001 \
            --fastGWA-lr \
-           --pheno ${analysis}/peptide/${protein}/${protein}.mpheno --mpheno ${col} \
+           --pheno ${root}.mpheno --mpheno ${col} \
            --threads 10 \
-           --out ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}
+           --out ${root}-${batch}-${peptide}
 
   gcta-1.9 --mbgen ${pilot}/work/caprion.bgenlist \
            --sample ${pilot}/work/caprion.sample \
            --keep ${pilot}/work/chrX-${batch}.id \
            --fastGWA-lr --model-only \
-           --pheno ${analysis}/peptide/${protein}/${protein}.mpheno --mpheno ${col} \
+           --pheno ${root}.mpheno --mpheno ${col} \
            --threads 10 \
-           --out ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}
+           --out ${root}-${batch}-${peptide}
 
   gcta-1.9 --bgen ${pilot}/work/chrX.bgen \
            --sample ${pilot}/work/chrX.sample \
            --keep ${pilot}/work/chrX-${batch}.id \
-           --load-model ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}.fastGWA \
+           --load-model ${root}-${batch}-${peptide}.fastGWA \
            --extract ${pilot}/work/chrX.snplist --geno 0.1 \
            --threads 10 \
-           --out ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}-chrX
-  gzip -f ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}*fastGWA
+           --out ${root}-${batch}-${peptide}-chrX
+  gzip -f ${root}-${batch}-${peptide}*fastGWA
   done
 }
 

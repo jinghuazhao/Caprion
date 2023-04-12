@@ -14,8 +14,13 @@ export sbatch=${analysis}/peptide/${protein}/${protein}.sb
 Rscript -e '
   suppressMessages(library(Biobase))
   suppressMessages(library(dplyr))
+  pilot <- Sys.getenv("pilot")
   analysis <- Sys.getenv("analysis")
   protein <- Sys.getenv("protein")
+  ids <- read.delim(file.path(pilot,"work","caprion.pheno")) %>%
+         select(Affymetrix_gwasQC_bl,caprion_id) %>%
+         mutate(FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl,id=caprion_id) %>%
+         select(FID,IID,id)
   es_peptide <- function(batch,batches=c("ZWK","ZYQ","UDP"),verbose=FALSE)
   {
     code <- batches[batch]
@@ -23,8 +28,13 @@ Rscript -e '
     peptide_ids <- subset(get(paste("mapping",code,sep="_")),Protein==paste0(protein,"_HUMAN"))[["Isotope.Group.ID"]]
     peptide_exprs <- exprs(get(paste("peptide",code,sep="_")))
     peptide_exprs <- subset(peptide_exprs, rownames(peptide_exprs) %in% peptide_ids)
-    peptide_dat <- data.frame(id=colnames(peptide_exprs),t(peptide_exprs))
-    if (verbose) write.table(peptide_dat,file=paste0(analysis,"/peptide/",protein,"/",code,".pheno"),
+    peptide_dat <- ids %>%
+                   left_join(data.frame(id=colnames(peptide_exprs),t(peptide_exprs))) %>%
+                   filter(!is.na(FID) & grepl(code,id)) %>%
+                   select(-id)
+    na_dat <- apply(peptide_dat[setdiff(names(peptide_dat),c("FID","IID"))],1,sum,na.rm=TRUE)
+    if (verbose) write.table(filter(peptide_dat,na_dat!=0),
+                             file=paste0(analysis,"/peptide/",protein,"/",code,".pheno"),
                              col.names=gsub("^[X]","",names(peptide_dat)),row.names=FALSE,quote=FALSE)
     peptide_dat
   }
@@ -34,6 +44,8 @@ Rscript -e '
   caprion <- bind_rows(ZWK,ZYQ,UDP)
   write.table(caprion,file=paste0(analysis,"/peptide/",protein,"/",protein,".pheno"),
               col.names=gsub("^[X]","",names(caprion)),row.names=FALSE,quote=FALSE)
+  write.table(caprion,file=paste0(analysis,"/peptide/",protein,"/",protein,".mpheno"),
+              col.names=FALSE,row.names=FALSE,quote=FALSE)
 '
 
 (
@@ -69,7 +81,7 @@ function fastLR()
            --sample ${pilot}/work/caprion.sample \
            --keep ${pilot}/work/caprion-${batch}.id \
            --fastGWA-lr \
-           --pheno ${analysis}/peptide/${protein}/${protein}.pheno --mpheno ${col} \
+           --pheno ${analysis}/peptide/${protein}/${protein}.mpheno --mpheno ${col} \
            --threads 10 \
            --out ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}
 
@@ -77,7 +89,7 @@ function fastLR()
            --sample ${pilot}/work/caprion.sample \
            --keep ${pilot}/work/chrX-${batch}.id \
            --fastGWA-lr --model-only \
-           --pheno ${analysis}/peptide/${protein}/${protein}.pheno --mpheno ${col} \
+           --pheno ${analysis}/peptide/${protein}/${protein}.mpheno --mpheno ${col} \
            --threads 10 \
            --out ${analysis}/peptide/${protein}/${protein}-${batch}-${peptide}
 

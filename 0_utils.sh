@@ -89,7 +89,7 @@ function fastLR()
   export batch=${1}
   export pheno=${analysis}/peptide/${protein}/${protein}.pheno
   export N=$(awk 'NR==1{print NF-2}' ${pheno})
-  export fastGWA=gcta-1.93
+  export fastGWA=gcta-1.9
 
   for col in $(seq ${N})
   do
@@ -105,7 +105,7 @@ function fastLR()
 
   ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
              --sample ${pilot}/work/caprion.sample \
-             --keep ${pilot}/work/chrX-${batch}.id \
+             --keep ${pilot}/work/chrX-${batch}.id --geno 0.1 --maf 0.001 \
              --fastGWA-lr --model-only \
              --pheno ${root}.mpheno --mpheno ${col} \
              --threads 10 \

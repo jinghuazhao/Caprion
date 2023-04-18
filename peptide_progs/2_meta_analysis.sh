@@ -105,7 +105,7 @@ xargs -l basename -s .metal | \
 parallel -j3 --env rt -C' ' '
     metal ${rt}/{}.metal 2>&1 | \
     tee ${rt}/{}-1.tbl.log;
-    gzip -f ${rt}/{}-1.tbl
+    bgzip -f ${rt}/{}-1.tbl
 '
 
 EOL

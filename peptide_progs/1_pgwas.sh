@@ -62,24 +62,25 @@ Rscript -e '
               col.names=gsub("^X([0-9])","\\1",names(caprion)),row.names=FALSE,quote=FALSE)
   write.table(caprion,file=paste0(analysis,"/peptide/",protein,"/",protein,".mpheno"),
               col.names=FALSE,row.names=FALSE,quote=FALSE)
+  peptide_table <- group_by(get(paste0("mapping",code,sep="_")),Protein) %>%
+                   summarise(N=n(),n=row_number()) %>%
+                   data.frame %>%
+                   arrange(N)
 '
 
-(
-echo "#"'!'"/usr/bin/bash"
-echo
-echo "#SBATCH --account CARDIO-SL0-CPU"
-echo "#SBATCH --partition cardio"
-echo "#SBATCH --qos=cardio"
-echo "#SBATCH --mem=28800"
-echo "#SBATCH --time=3-00:00:00"
-echo "#SBATCH --job-name=${protein}"
-echo "#SBATCH --output=${analysis}/peptide/${protein}/${protein}.o"
-echo "#SBATCH --error=${analysis}/peptide/${protein}/${protein}.e"
-echo
-echo "export protein=${protein}"
-) > ${sbatch}
-cat << 'EOL' >> ${sbatch}
+cat << 'EOL' > ${sbatch}
+#!/usr/bin/bash
 
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --qos=cardio
+#SBATCH --mem=28800
+#SBATCH --time=3-00:00:00
+#SBATCH --job-name=PROTEIN
+#SBATCH --output=ANALYSIS/peptide/PROTEIN/PROTEIN.o
+#SBATCH --error=ANALYSIS/peptide/PROTEIN/PROTEIN.e
+
+export protein=${protein}
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
@@ -118,7 +119,7 @@ function fastLR()
              --extract ${pilot}/work/chrX.snplist --geno 0.1 \
              --threads 10 \
              --out ${root}-${batch}-${peptide}-chrX
-  gzip -f ${root}-${batch}-${peptide}*fastGWA
+  bgzip -f ${root}-${batch}-${peptide}*fastGWA
   done
 }
 
@@ -127,8 +128,6 @@ fastLR 2
 fastLR 3
 EOL
 
+sed -i "s|ANALYSIS|${analysis}|;s|PROTEIN|${protein}|" ${sbatch}
 echo sbatch ${sbatch}
 done
-
-# ls * | grep gz | grep -v chrX | wc -l
-# group_by(mapping_ZWK,Protein) %>% summarise(N=n(),n=row_number()) %>% data.frame %>% arrange(N)

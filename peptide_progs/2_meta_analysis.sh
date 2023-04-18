@@ -11,14 +11,16 @@ function METAL_list()
   ls ${root}/${protein}-?-*.fastGWA.gz | \
   xargs -l basename -s .fastGWA.gz | \
   tr '-' '\t' | \
-  awk -vdir=${root} -vOFS="\t" '
+  awk -vdir=${root} '
   {
      protein=$1;
      batch=$2;
      isotope=$3
-     chrx=$4
-     print protein, isotope, batch, chrx, dir"/"protein"-"batch"-"isotope".fastGWA.gz"
+     chrX=$4
+     printf "%s,%d,%d,%s,%s", protein, isotope, batch, chrX, dir"/"protein"-"batch"-"isotope;
+     if (chrX=="") print ".fastGWA.gz"; else print "-chrX.fastGWA.gz";
   }' | \
+  tr ',' '\t' | \
   sort -t$'\t' -k2,2n -k4,4 -k3,3n > ${root}/METAL/METAL.list
 }
 
@@ -52,18 +54,18 @@ function METAL_files_suffix()
      echo STDERR_PRINT_PRECISION 8
      echo GENOMICCONTROL OFF
      echo LOGPVALUE ON
-     echo OUTFILE ${root}/METAL/${isotope}-${suffix}- .tbl
-     awk '$2==isotope && $4==suffix {print "PROCESS", $5}' FS="\t" isotope=${isotope} suffix=${suffix} ${root}/METAL/METAL.list
+     echo OUTFILE ${root}/METAL/${isotope}${suffix}- .tbl
+     awk '$2==isotope && ("-"$4==suffix||$4==suffix) {print "PROCESS", $5}' FS="\t" isotope=${isotope} suffix=${suffix} ${root}/METAL/METAL.list
      echo ANALYZE HETEROGENEITY
      echo CLEAR
-  ) > ${root}/METAL/${isotope}-${suffix}.metal
+  ) > ${root}/METAL/${isotope}${suffix}.metal
   done
 }
 
 function METAL_files()
 {
   METAL_files_suffix
-  METAL_files_suffix chrX
+  METAL_files_suffix -chrX
 }
 
 function METAL_analysis()
@@ -71,12 +73,49 @@ function METAL_analysis()
   export rt=${root}/METAL
   ls $rt/*.metal | \
   xargs -l basename -s .metal | \
-  parallel -j1 --env rt -C' ' '
+  parallel -j3 --env rt -C' ' '
     metal ${rt}/{}.metal 2>&1 | \
     tee ${rt}/{}-1.tbl.log;
     gzip -f ${rt}/{}-1.tbl
   '
 }
 
+function METAL_analysis_sbatch()
+{
+cat << 'EOL' > ${root}/${protein}-METAL.sb
+#!/usr/bin/bash
+
+#SBATCH --job-name=_METAL
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+
+#SBATCH --account CARDIO-SL0-CPU
+#SBATCH --partition cardio
+#SBATCH --qos=cardio
+
+#SBATCH --output=${root}/${protein}-METAL.o
+#SBATCH --error=${root}/${protein}-METAL.e
+#SBATCH --export ALL
+
+export TMPDIR=${HPC_WORK}/work
+export rt=${root}/METAL
+
+ls $rt/*.metal | \
+xargs -l basename -s .metal | \
+parallel -j3 --env rt -C' ' '
+    metal ${rt}/{}.metal 2>&1 | \
+    tee ${rt}/{}-1.tbl.log;
+    gzip -f ${rt}/{}-1.tbl
+'
+
+EOL
+sbatch ${root}/${protein}-METAL.sb
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake
+#metal ${rt}/${isotope}.metal 2>&1 | tee ${rt}/${isotope}-1.tbl.log;gzip -f ${rt}/${isotope}-1.tbl
+#metal ${rt}/${isotope}-chrX.metal 2>&1 | tee ${rt}/${isotope}-chrX-1.tbl.log; gzip -f ${rt}/${isotope}-chrX-1.tbl
+}
+
 # A specific function name
+
 $1

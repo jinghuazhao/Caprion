@@ -1,0 +1,25 @@
+#!/usr/bin/bash
+
+#SBATCH --job-name=_METAL
+
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/slurm/_metal_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/slurm/_metal_%A_%a.e
+#SBATCH --export ALL
+
+export TMPDIR=${HPC_WORK}/work
+export root=~/Caprion/analysis/peptide/${protein}
+export isotope=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${root}.varlist)
+export rt=${root}/METAL
+
+function METAL_analysis()
+{
+  metal ${rt}/${isotope}.metal 2>&1 | tee ${rt}/${isotope}-1.tbl.log;gzip -f ${rt}/${isotope}-1.tbl
+  metal ${rt}/${isotope}-chrX.metal 2>&1 | tee ${rt}/${isotope}-chrX-1.tbl.log; gzip -f ${rt}/${isotope}-chrX-1.tbl
+}
+
+METAL_analysis

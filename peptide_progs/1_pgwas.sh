@@ -49,6 +49,13 @@ Rscript -e '
     peptide_lr <- data.frame(peptide_dat[c("FID","IID")],z)
     names(peptide_lr) <- gsub("^X([0-9])","\\1",names(peptide_lr))
     na_dat <- apply(peptide_dat[peptides],1,sum,na.rm=TRUE)
+    peptide_table <- group_by(get(paste("mapping",code,sep="_")),Protein) %>%
+                     summarise(N=n()) %>%
+                     data.frame() %>%
+                     filter(Protein!="-") %>%
+                     select(N) %>%
+                     table
+    if (verbose) hist(peptide_table)
     if (verbose) write.table(filter(peptide_lr,na_dat!=0),
                              file=paste0(analysis,"/peptide/",protein,"/",code,".pheno"),
                              row.names=FALSE,quote=FALSE)
@@ -62,10 +69,6 @@ Rscript -e '
               col.names=gsub("^X([0-9])","\\1",names(caprion)),row.names=FALSE,quote=FALSE)
   write.table(caprion,file=paste0(analysis,"/peptide/",protein,"/",protein,".mpheno"),
               col.names=FALSE,row.names=FALSE,quote=FALSE)
-  peptide_table <- group_by(get(paste0("mapping",code,sep="_")),Protein) %>%
-                   summarise(N=n(),n=row_number()) %>%
-                   data.frame %>%
-                   arrange(N)
 '
 
 cat << 'EOL' > ${sbatch}
@@ -128,6 +131,6 @@ fastLR 2
 fastLR 3
 EOL
 
-sed -i "s|ANALYSIS|${analysis}|;s|PROTEIN|${protein}|" ${sbatch}
+sed -i "s|ANALYSIS|${analysis}|;s|PROTEIN|${protein}|g" ${sbatch}
 echo sbatch ${sbatch}
 done

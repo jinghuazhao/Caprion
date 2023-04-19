@@ -1,9 +1,8 @@
 #!/usr/bin/bash
 
-export root=~/Caprion/analysis/peptide/${protein}
 export TMPDIR=${HPC_WORK}/work
-
-if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
+export pilot=~/Caprion/pilot
+export analysis=~/Caprion/analysis
 
 function METAL_list()
 # build the complete list of files
@@ -110,13 +109,23 @@ parallel -j3 --env rt -C' ' '
 
 EOL
 sed -i "s|ROOT_PROTEIN|${root}/${protein}|" ${root}/${protein}-METAL.sb
-sbatch ${root}/${protein}-METAL.sb
+echo sbatch ${root}/${protein}-METAL.sb
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
 #metal ${rt}/${isotope}.metal 2>&1 | tee ${rt}/${isotope}-1.tbl.log;gzip -f ${rt}/${isotope}-1.tbl
 #metal ${rt}/${isotope}-chrX.metal 2>&1 | tee ${rt}/${isotope}-chrX-1.tbl.log; gzip -f ${rt}/${isotope}-chrX-1.tbl
 }
 
-# A specific function name
+for i in $(seq 987)
+do
+  export SLURM_ARRAY_TASK_ID=${i}
+  export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
+  export root=~/Caprion/analysis/peptide/${protein}
 
-$1
+  if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
+
+# A specific function name
+  METAL_list
+  METAL_files
+  METAL_analysis_sbatch
+done

@@ -59,7 +59,7 @@ function sentinels()
 {
   (
     mergeBed -i ${root}/sentinels/${isotope}_nold.p -d 1000000 -c 13 -o min | \
-    awk -v OFS="\t" -v trait=${p} '
+    awk -v OFS="\t" -v trait=${isotope} '
     {
       if(NR==1) print "Chrom", "Start", "End", "P", "trait"
       print $0, trait
@@ -99,9 +99,8 @@ function sentinels()
 
 function mean_by_genotype_gen_sample()
 {
-  export caprion=~/Caprion
-  read prot chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${analysis}/peptide/caprion.merge)
-  export prot=${prot}
+  read isotope chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${root}/${protein}.merge)
+  export isotope=${isotope}
   export chr=${chr}
   export bp=${bp}
   export pqtl=${pqtl}
@@ -110,11 +109,11 @@ function mean_by_genotype_gen_sample()
     export batch=${batch}
     export out=${root}/means/${root}-${batch}-${pqtl}
     if [ ! -f ${out}.dat ]; then
-       plink-2 --bgen ${caprion}/pilot/work/chr${chr}.bgen ref-unknown \
-               --sample ${caprion}/analysis/work/caprion.sample \
+       plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
+               --sample ${analysis}/work/caprion.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-               --keep ${caprion}/pilot/work/caprion-${batch}.id \
-               --pheno ${caprion}/pilot/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --keep ${pilot}/caprion-${batch}.id \
+               --pheno ${pilot}/work/caprion-${batch}.pheno --pheno-name ${prot} \
                --recode oxford \
                --out ${out}
        paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
@@ -124,13 +123,14 @@ function mean_by_genotype_gen_sample()
   done
   Rscript -e '
      options(width=120)
-     caprion <- Sys.getenv("caprion")
-     prot <- Sys.getenv("prot")
+     root <- Sys.getenv("root")
+     protein <- Sys.getenv("protein")
+     isotope <- Sys.getenv("isotope")
      pqtl <- Sys.getenv("pqtl")
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
      process_batch <- function(batch, genotypes=c("100","010","001"))
      {
-       datfile <- file.path(caprion,"analysis","pgwas","means",paste("caprion",batch,prot,pqtl,sep="-"))
+       datfile <- file.path(root,"means",paste(protein,batch,isotope,pqtl,sep="-"))
        dat <- read.table(paste0(datfile,".dat"),
                          colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
                          col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
@@ -154,28 +154,27 @@ function mean_by_genotype_gen_sample()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
      p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(caprion,"analysis","pgwas","means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+     ggsave(file.path(root,"means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
   '
 }
 
 function mean_by_genotype_dosage()
 {
-  export caprion=~/Caprion
-  read prot chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${caprion}/analysis/work/caprion.merge)
-  export prot=${prot}
+  read isotope chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${analysis}/work/caprion.merge)
+  export isotope=${isotope}
   export chr=${chr}
   export bp=${bp}
   export pqtl=${pqtl}
   for batch in {1..3}
   do
     export batch=${batch}
-    export out=${caprion}/analysis/pgwas/means/caprion-${batch}-${prot}-${pqtl}
+    export out=${root}/${protein}-${batch}-${isotope}-${pqtl}
     if [ ! -f ${out}.dat ]; then
-       plink-2 --bgen ${caprion}/pilot/work/chr${chr}.bgen ref-unknown \
-               --sample ${caprion}/analysis/work/caprion.sample \
+       plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
+               --sample ${analysis}/work/caprion.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-               --keep ${caprion}/pilot/work/caprion-${batch}.id \
-               --pheno ${caprion}/pilot/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --keep ${pilot}/work/caprion-${batch}.id \
+               --pheno ${pilot}/work/caprion-${batch}.pheno --pheno-name ${prot} \
                --recode A include-alt \
                --out ${out}
        rm ${out}.log
@@ -183,13 +182,13 @@ function mean_by_genotype_dosage()
   done
   Rscript -e '
      options(width=120)
-     caprion <- Sys.getenv("caprion")
-     prot <- Sys.getenv("prot")
+     root <- Sys.getenv("root")
+     protein <- Sys.getenv("protein")
      pqtl <- Sys.getenv("pqtl")
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
      process_batch <- function(batch,digits=3)
      {
-       datfile <- file.path(caprion,"analysis","pgwas","means",paste("caprion",batch,prot,pqtl,sep="-"))
+       datfile <- file.path(root,"means",paste("caprion",batch,prot,pqtl,sep="-"))
        dat <- read.delim(paste0(datfile,".raw"),check.names=FALSE,
                          colClasses=c("character","character","character","character","integer","numeric","numeric"))
        n7 <- names(dat)[7]
@@ -211,7 +210,7 @@ function mean_by_genotype_dosage()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
      p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(caprion,"analysis","pgwas","means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+     ggsave(file.path(root,"means",paste0(protein,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
   '
 }
 
@@ -219,6 +218,7 @@ function mean_by_genotype_dosage()
 
 for isotope in $(head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement)
 do
+    export isotope=${isotope}
     for cmd in pgz _HLA sentinels; do $cmd; done
 done
 EOL
@@ -233,14 +233,14 @@ function signals()
 (
   cat ${root}/sentinels/*signals | \
   head -1 | \
-  awk -v FS="\t" '{print "prot",$0}'
+  awk -v FS="\t" '{print "isotope",$0}'
   head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | tr ' ' '\n' | \
   parallel -C' ' '
     if [ -f ${root}/sentinels/{}.signals ]; then
-       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${root}/sentinels/{}.signals
+       awk -v FS="\t" -v isotope={} "NR>1 {print isotope,\$0}" ${root}/sentinels/{}.signals
     fi
     if [ -f ${root}/sentinels/{}-chrX.signals ]; then
-       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${root}/sentinels/{}-chrX.signals
+       awk -v FS="\t" -v isotope={} "NR>1 {print isotope,\$0}" ${root}/sentinels/{}-chrX.signals
     fi
   '
 ) > ${root}/${protein}.signals
@@ -387,7 +387,7 @@ function fp()
                                   batch == batch[3] ~ "3. UDP",
                                   TRUE ~ "---")) %>%
            select(-batch_prot_chr)
-    rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
+    rsid <- read.table(file.path(root,"rsid.tsv"),col.names=c("MarkerName","rsid"))
     pdf(file.path(root,"fp.pdf"),width=10,height=8)
     METAL_forestplot(tbl,all,rsid)
     dev.off()
@@ -461,15 +461,14 @@ function fplz()
   qpdf fp+lz.pdf --pages . $(sed '1d' caprion.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- HetISq75.pdf
 }
 
+export TMPDIR=${HPC_WORK}/work
+export pilot=~/Caprion/pilot
+export analysis=~/Caprion/analysis
 for i in 14 # $(seq 987)
 do
   export SLURM_ARRAY_TASK_ID=${i}
-  export TMPDIR=${HPC_WORK}/work
-  export pilot=~/Caprion/pilot
-  export analysis=~/Caprion/analysis
   export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
   export root=${analysis}/peptide/${protein}
-
   setup
   merge_sb
   sbatch --wait ${root}/merge.sb

@@ -5,9 +5,9 @@ function setup()
   if [ ! -d ${root}/sentinels/slurm ]; then mkdir -p ${root}/sentinels/slurm; fi
 }
 
-function merge_sb()
+function sb()
 {
-cat <<'EOL'> ${root}/merge.sb
+cat <<'EOL'> ${root}/${protein}.merge
 #!/usr/bin/bash
 
 #SBATCH --job-name=_merge
@@ -19,10 +19,13 @@ cat <<'EOL'> ${root}/merge.sb
 #SBATCH --qos=cardio
 
 #SBATCH --export ALL
-#SBATCH --output=ROOT/sentinels/slurm/merge.o
-#SBATCH --error=ROOT/sentinels/slurm/merge.e
+#SBATCH --array=1-N
+#SBATCH --output=ROOT/sentinels/slurm/_merge_%A_%a.o
+#SBATCH --error=ROOT/sentinels/slurm/_merge_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
+export protein=PROTEIN
+export isotope=$(head -1 ${root}/${protein}.pheno | awk -vn=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
 
 function pgz()
 # 1. extract all significant SNPs
@@ -216,14 +219,11 @@ function mean_by_genotype_dosage()
 
 # mean_by_genotype_dosage
 
-for isotope in $(head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement)
-do
-    export isotope=${isotope}
-    for cmd in pgz _HLA sentinels; do $cmd; done
-done
+for cmd in pgz _HLA sentinels; do $cmd; done
 EOL
 
-sed -i "s|ROOT|${root}|" ${root}/merge.sb
+export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
+sed -i "s|ROOT|${root}|;s|PROTEIN|${protein}|;s|N|${N}|" ${root}/${protein}.merge
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
@@ -278,7 +278,7 @@ function cistrans()
                   filter(! chr %in% c("XY","Y"))
     X <- with(glist_hg19,chr=="X")
     glist_hg19[X,"chr"] <- "23"
-    ucsc <- transmute(pQTLtools::hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
+    ucsc <- transmute(pQTLdata::hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
             select(Gene,chr,start,end)
     X <- with(ucsc,chr=="X")
     ucsc[X,"chr"] <- "23"
@@ -356,9 +356,9 @@ function fp()
     awk 'NR>1' ${root}/tbl.tsv | \
     cut -f1,4,14 --output-delimiter=' ' | \
     parallel -j10 -C' ' '
-      export direction=$(zgrep -w {2} ${analysis}/METAL/{1}-1.tbl.gz | cut -f13)
+      export direction=$(zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | cut -f13)
       let j=1
-      for i in $(grep "Input File" ${analysis}/METAL/{1}-1.tbl.info | cut -d" " -f7)
+      for i in $(grep "Input File" ${root}/METAL/{1}-1.tbl.info | cut -d" " -f7)
       do
          export n=$(awk -vj=$j "BEGIN{split(ENVIRON[\"direction\"],a,\"\");print a[j]}")
          if [ "$n" != "?" ]; then zgrep -H -w {2} $i; fi
@@ -470,8 +470,8 @@ do
   export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
   export root=${analysis}/peptide/${protein}
   setup
-  merge_sb
-  sbatch --wait ${root}/merge.sb
+  sb
+  sbatch --wait ${root}/${protein}.merge
   signals
   merge
   cistrans

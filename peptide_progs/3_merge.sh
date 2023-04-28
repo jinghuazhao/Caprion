@@ -435,18 +435,19 @@ function qqmanhattan()
 {
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
+  export dir=${root}/qqmanhattanlz
   head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | tr ' ' '\n' | \
   parallel -C' ' --env root '
   gunzip -c ${root}/METAL/{}-1.tbl.gz | \
   awk "{if (NR==1) print \"chromsome\",\"position\",\"log_pvalue\",\"beta\",\"se\"; else print \$1,\$2,-\$12,\$10,\$11}" > ${root}/work/{}.txt
   R --slave --vanilla --args \
       input_data_path=${root}/work/{}.txt \
-      output_data_rootname=${root}/qqmanhattanlz/{}_qq \
+      output_data_rootname=${dir}/{}_qq \
       plot_title="{}" < ~/cambridge-ceu/turboqq/turboqq.r
   if [ ! -f ${root}/sentinels/{}.signals ]; then
      R --slave --vanilla --args \
        input_data_path=${root}/work/{}.txt \
-       output_data_rootname=${root}/qqmanhattanlz/{}_manhattan \
+       output_data_rootname=${dir}/{}_manhattan \
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
        pvalue_sign=5e-8 \
        plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
@@ -456,7 +457,7 @@ function qqmanhattan()
         > ${root}/work/{}.annotate
     R --slave --vanilla --args \
       input_data_path=${root}/work/{}.txt \
-      output_data_rootname=${root}/qqmanhattanlz/${}_manhattan \
+      output_data_rootname=${dir}/{}_manhattan \
       custom_peak_annotation_file_path=${root}/work/{}.annotate \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5e-8 \
@@ -464,16 +465,14 @@ function qqmanhattan()
     rm ${root}/work/{}.annotate
   fi
   rm ${root}/work/{}.txt
-  export dir=${root}/qqmanhattanlz
-  convert ${dir}/{}_qq.png -quality 0 ${dir}/{}_qq.jp2
-  img2pdf -o ${dir}/{}_qq.pdf ${dir}/{}_qq.jp2
-  rm "${dir}/{}_qq.jp2"
-  convert ${dir}/{}_manhattan.png -quality 0 ${dir}/{}_manhattan.jp2
-  img2pdf -o ${dir}/{}_manhattan.pdf ${dir}/{}_manhattan.jp2
-  rm "${dir}/{}_manhattan.jp2"
-  convert +append ${dir}/{}_qq.png ${dir}/{}_manhattan.png ${dir}/{}_qqmanhattan.pdf
+  convert +append ${dir}/{}_manhattan.png ${dir}/{}_qq.png -resize x500 -density 300 ${dir}/{}_qqmanhattan.png
+  convert ${dir}/{}_qqmanhattan.png -quality 0 ${dir}/{}_qqmanhattan.jp2
+  img2pdf -o ${dir}/{}_qqmanhattan.pdf ${dir}/{}_qqmanhattan.jp2
+  rm ${dir}/{}_qqmanhattan.jp2
   '
-  qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- qq+manhattan.pdf
+  module load texlive
+# pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
+  qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
   deactivate
 }
 

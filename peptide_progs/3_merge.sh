@@ -2,12 +2,15 @@
 
 function setup()
 {
-  if [ ! -d ${root}/sentinels/slurm ]; then mkdir -p ${root}/sentinels/slurm; fi
+  for d in sentinels/slurm work qqmanhattanlz
+  do
+    if [ ! -d ${root}/${d} ]; then mkdir -p ${root}/${d}; fi
+  done
 }
 
 function sb()
 {
-cat <<'EOL'> ${root}/${protein}.merge
+cat <<'EOL'> ${root}/${protein}-merge_sb
 #!/usr/bin/bash
 
 #SBATCH --job-name=_merge
@@ -223,7 +226,7 @@ for cmd in pgz _HLA sentinels; do $cmd; done
 EOL
 
 export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
-sed -i "s|ROOT|${root}|;s|PROTEIN|${protein}|;s|N|${N}|" ${root}/${protein}.merge
+sed -i "s|ROOT|${root}|;s|PROTEIN|${protein}|;s|N|${N}|" ${root}/${protein}-merge_sb
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
@@ -269,8 +272,8 @@ function cistrans()
     caprion.dir <- within(read.table(paste0(root,"/",protein,".dir"),col.names=c("Count","Direction","Final")),{Direction=gsub(""," ",Direction)})
     knitr::kable(caprion.dir)
   # cis/trans classification
-    signals <- read.table(paste0(root,"/",protein,".signals"),header=TRUE)
-    merged <- read.delim(paste0(root,"/",protein,".merge"))
+    signals <- read.table(paste0(root,"/",protein,".signals"),header=TRUE) %>% mutate(prot=protein)
+    merged <- read.delim(paste0(root,"/",protein,".merge")) %>% mutate(prot=protein)
     names(merged)[1:4] <- c("prot","Chr","bp","SNP")
   # glist-hg19
     INF <- Sys.getenv("INF")
@@ -282,7 +285,7 @@ function cistrans()
             select(Gene,chr,start,end)
     X <- with(ucsc,chr=="X")
     ucsc[X,"chr"] <- "23"
-    caprion <- select(pQTLtools::caprion,Protein,Accession,Gene) %>%
+    caprion <- select(pQTLdata::caprion,Protein,Accession,Gene) %>%
                mutate(Protein=gsub("_HUMAN","",Protein)) %>%
                rename(prot=Protein)
     quadruple <- function(d,label) data.frame(Gene=label,chr=min(d$chr),start=min(d$start),end=max(d$end))
@@ -315,8 +318,8 @@ function cistrans()
     cis.vs.trans <- qtlClassifier(pqtls,posSNP,ucsc_modified,1e6) %>%
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)
-    write.csv(cis.vs.trans,file=file.path(work,"caprion.cis.vs.trans"),row.names=FALSE,quote=FALSE)
-    png(file.path(work,"caprion.pqtl2d.png"),width=12,height=10,unit="in",res=300)
+    write.csv(cis.vs.trans,file=file.path(root,paste0(protein,".cis.vs.trans")),row.names=FALSE,quote=FALSE)
+    png(file.path(root,"pqtl2d.png"),width=12,height=10,unit="in",res=300)
     r <- qtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                    gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                    TSS=TRUE,cis="cis",plot=TRUE,cex.labels=0.6,cex.points=0.6,
@@ -327,20 +330,14 @@ function cistrans()
                      gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                      TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
                      xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(work,"caprion.pqtl2dplotly.html"))
+    htmlwidgets::saveWidget(r,file=file.path(root,paste0(protein,"-pqtl2dplotly.html")))
     r <- qtl3dplotly(cis.vs.trans,chrlen=gap::hg19,qtl.id="SNP",qtl.prefix="pQTL:",target.type="Protein",
                      snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                      gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                      TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
                      xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(work,"caprion.pqtl3dplotly.html"))
+    htmlwidgets::saveWidget(r,file=file.path(root,paste0(protein,"-pqtl3dplotly.html")))
   '
-}
-
-function mean()
-{
-  export caprion=~/Caprion
-  awk '{gsub(/NA/,"0",$NF);print}' ${root}/caprion.sample > ${root}/caprion.sample
 }
 
 function fp()
@@ -352,7 +349,7 @@ function fp()
   uniq | \
   awk -vOFS="\t" '{print $1":"$2,$3}' > ${root}/rsid.tsv
   (
-    gunzip -c ${root}/${root}-*fastGWA.gz | head -1
+    gunzip -c ${root}/${protein}-*fastGWA.gz | head -1
     awk 'NR>1' ${root}/tbl.tsv | \
     cut -f1,4,14 --output-delimiter=' ' | \
     parallel -j10 -C' ' '
@@ -366,25 +363,26 @@ function fp()
       done
   '
   ) | \
-  sed 's|/data/jinhua/INF/sumstats||g;s/.gz//g' > ${root}/all.tsv
+  sed 's/.gz//g' > ${root}/all.tsv
   Rscript -e '
     require(gap)
     require(dplyr)
     root <- Sys.getenv("root")
+    protein <- Sys.getenv("protein")
     tbl <- read.delim(file.path(root,"tbl.tsv")) %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
            arrange(prot,SNP)
     all <- read.delim(file.path(root,"all.tsv")) %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
-           mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR)) %>%
+           mutate(CHR=gsub(paste0(root,"/",protein,"-|.fastGWA"),"",CHR)) %>%
            mutate(batch_prot_chr=strsplit(CHR,"-|:"),
                   batch=unlist(lapply(batch_prot_chr,"[",1)),
                   prot=unlist(lapply(batch_prot_chr,"[",2)),
                   CHR=unlist(lapply(batch_prot_chr,"[",3))) %>%
            mutate(MarkerName=paste0(CHR,":",POS),
-                  study=case_when(batch == batch[1] ~ "1. ZWK",
-                                  batch == batch[2] ~ "2. ZYQ",
-                                  batch == batch[3] ~ "3. UDP",
+                  study=case_when(batch == 1 ~ "1. ZWK",
+                                  batch == 2 ~ "2. ZYQ",
+                                  batch == 3 ~ "3. UDP",
                                   TRUE ~ "---")) %>%
            select(-batch_prot_chr)
     rsid <- read.table(file.path(root,"rsid.tsv"),col.names=c("MarkerName","rsid"))
@@ -400,33 +398,32 @@ function HetISq()
   Rscript -e '
     suppressMessages(require(dplyr))
     root <- Sys.getenv("root")
+    protein <- Sys.getenv("protein")
     all <- read.delim(file.path(root,"all.tsv")) %>%
-           mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR)) %>%
-           mutate(batch_prot_chr=strsplit(CHR,"-|:"),
-                  batch=unlist(lapply(batch_prot_chr,"[",1)),
-                  prot=unlist(lapply(batch_prot_chr,"[",2)),
-                  CHR=unlist(lapply(batch_prot_chr,"[",3))) %>%
+           mutate(CHR=gsub(paste0(root,"/",protein,"-|.fastGWA"),"",CHR)) %>%
+           mutate(batch_pept_chr=strsplit(CHR,"-|:"),
+                  batch=unlist(lapply(batch_pept_chr,"[",1)),
+                  prot=unlist(lapply(batch_pept_chr,"[",2)),
+                  CHR=unlist(lapply(batch_pept_chr,"[",3))) %>%
            mutate(MarkerName=paste0(CHR,":",POS),
-                  Batch=case_when(batch == batch[1] ~ "1. ZWK",
-                                  batch == batch[2] ~ "2. ZYQ",
-                                  batch == batch[3] ~ "3. UDP",
+                  Batch=case_when(batch == 1 ~ "1. ZWK",
+                                  batch == 2 ~ "2. ZYQ",
+                                  batch == 3 ~ "3. UDP",
                                   TRUE ~ "---"),
                   direction=case_when(sign(BETA) == -1 ~ "-", sign(BETA) == 1 ~ "+", sign(BETA) == 0 ~ "0", TRUE ~ "---")) %>%
-           select(Batch,prot,-batch_prot_chr,MarkerName,SNP,A1,A2,N,AF1,BETA,SE,P,INFO,direction)
-    b1 <- subset(all,Batch=="1. ZWK")
-    names(b1) <- paste0(names(all),".ZWK")
-    b1 <- rename(b1, prot=prot.ZWK, SNP=SNP.ZWK)
-    b2 <- subset(all,Batch=="2. ZYQ")
-    names(b2) <- paste0(names(all),".ZYQ")
-    b3 <- subset(all,Batch=="3. UDP")
-    names(b3) <- paste0(names(all),".UDP")
-    b <- full_join(b1,b2,by=c('prot'='prot.ZYQ','SNP'='SNP.ZYQ')) %>% full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
+           select(Batch,prot,-batch_pept_chr,MarkerName,SNP,A1,A2,N,AF1,BETA,SE,P,INFO,direction)
+    b1 <- subset(all,Batch=="1. ZWK") %>% setNames(paste0(names(all),".ZWK")) %>% rename(prot=prot.ZWK, SNP=SNP.ZWK)
+    b2 <- subset(all,Batch=="2. ZYQ") %>% setNames(paste0(names(all),".ZYQ"))
+    b3 <- subset(all,Batch=="3. UDP") %>% setNames(paste0(names(all),".UDP"))
+    b <- full_join(b1,b2,by=c('prot'='prot.ZYQ','SNP'='SNP.ZYQ')) %>%
+         full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
          mutate(directions=gsub("NA","?",paste0(direction.ZWK,direction.ZYQ,direction.UDP))) %>%
          select(-Batch.ZWK,-Batch.ZYQ,-Batch.UDP,direction.ZWK,direction.ZYQ,direction.UDP)
     tbl <- read.delim(file.path(root,"tbl.tsv")) %>%
-           arrange(prot,MarkerName) %>%
+           arrange(protein,MarkerName) %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position), index=1:n())
     Het <- filter(tbl,HetISq>=75) %>%
+           mutate(prot=as.character(prot)) %>%
            select(prot,SNP,Direction,HetISq,index) %>%
            left_join(select(b,prot,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
     write.csv(Het,file=file.path(root,"HetISq75.csv"),row.names=FALSE,quote=FALSE)
@@ -434,31 +431,139 @@ function HetISq()
   '
 }
 
+function qqmanhattan()
+{
+  module load python/3.7
+  source ~/COVID-19/py37/bin/activate
+  head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | tr ' ' '\n' | \
+  parallel -C' ' --env root '
+  gunzip -c ${root}/METAL/{}-1.tbl.gz | \
+  awk "{if (NR==1) print \"chromsome\",\"position\",\"log_pvalue\",\"beta\",\"se\"; else print \$1,\$2,-\$12,\$10,\$11}" > ${root}/work/{}.txt
+  R --slave --vanilla --args \
+      input_data_path=${root}/work/{}.txt \
+      output_data_rootname=${root}/qqmanhattanlz/{}_qq \
+      plot_title="{}" < ~/cambridge-ceu/turboqq/turboqq.r
+  if [ ! -f ${root}/sentinels/{}.signals ]; then
+     R --slave --vanilla --args \
+       input_data_path=${root}/work/{}.txt \
+       output_data_rootname=${root}/qqmanhattanlz/{}_manhattan \
+       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
+       pvalue_sign=5e-8 \
+       plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
+  else
+    cat <(echo chromosome position) \
+        <(awk "NR>1{print \$1,\$2}" ${root}/sentinels/{}.signals) \
+        > ${root}/work/{}.annotate
+    R --slave --vanilla --args \
+      input_data_path=${root}/work/{}.txt \
+      output_data_rootname=${root}/qqmanhattanlz/${}_manhattan \
+      custom_peak_annotation_file_path=${root}/work/{}.annotate \
+      reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
+      pvalue_sign=5e-8 \
+      plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
+    rm ${root}/work/{}.annotate
+  fi
+  rm ${root}/work/{}.txt
+  export dir=${root}/qqmanhattanlz
+  convert ${dir}/{}_qq.png -quality 0 ${dir}/{}_qq.jp2
+  img2pdf -o ${dir}/{}_qq.pdf ${dir}/{}_qq.jp2
+  rm "${dir}/{}_qq.jp2"
+  convert ${dir}/{}_manhattan.png -quality 0 ${dir}/{}_manhattan.jp2
+  img2pdf -o ${dir}/{}_manhattan.pdf ${dir}/{}_manhattan.jp2
+  rm "${dir}/{}_manhattan.jp2"
+  convert +append ${dir}/{}_qq.png ${dir}/{}_manhattan.png ${dir}/{}_qqmanhattan.pdf
+  '
+  qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- qq+manhattan.pdf
+  deactivate
+}
+
+function lz()
+# for variant not in the reference panel, drop --refsnp, and then rename.
+{
+  module load python/2.7
+  if [ -f ${root}/${protein}.signals ]; then
+     (
+       cat ${root}/${protein}.signals | \
+       tr '\t' ' ' | \
+       awk 'NR>1 && $2!="23" {print $6, $7}' | \
+       parallel -j1 -C' ' --env root '
+         zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
+         awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}"
+       '
+     ) | \
+     parallel -j1 -C ' ' --env root '
+       (
+         gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
+         awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}" | \
+         cut -f1-3,12
+         gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
+         sort -k1,1n -k2,2n
+       ) > ${root}/work/{4}-{5}.lz
+       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
+                 --delim tab title="{4}-{5}" \
+                 --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
+                 --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --svg --refsnp {5}
+       rm ${root}/work/{4}-{5}.lz
+     '
+  fi
+  if [ -f ${root}/${protein}.signals ]; then
+     (
+       cat ${root}/${protein}.signals | \
+       tr '\t' ' ' | \
+       awk 'NR>1 && $2=="23" {print $6,$7}' ${root}/${protein}.signals | \
+       parallel -j1 -C' ' --env root '
+         zgrep -w {2} ${root}/METAL/{1}-chrX-1.tbl.gz | \
+         awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}"
+       '
+     ) | \
+     parallel -j1 -C ' ' --env root '
+       (
+         gunzip -c ${root}/METAL/{4}-chrX-1.tbl.gz | \
+         awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}" | \
+         cut -f1-3,12
+         gunzip -c ${root}/METAL/{4}-chrX-1.tbl.gz | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}}" | \
+         sort -k1,1n -k2,2n | \
+         sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
+       ) > ${root}/work/{4}-chrX-{5}.lz
+       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-chrX-{5}.lz \
+                 --delim tab title="{4}-chrX-{5}" \
+                 --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
+                 --no-date --plotonly --prefix={4}-chrX --rundir ${root}/qqmanhattanlz \
+                 --svg --refsnp $(echo chr{5} | sed "s/_[A-Z]*_[A-Z]*//")
+       rm ${root}/work/{4}-chrX-{5}.lz
+     '
+  fi
+}
+
 function fplz()
 {
-  export metal=~/Caprion/analysis/METAL
+  module load texlive
+  export metal=${root}/METAL
 # HSPB1_rs114800762 is missing as dug by the following code.
-  join -a1 <(sed '1d' work/caprion.merge | awk '{print $1"_"$4}' | sort -k1,1 ) \
-           <(ls METAL/qqmanhattanlz/lz/*pdf | xargs -l basename -s .pdf | awk '{print $1,NR}') | \
+  join -a1 <(sed '1d' ${root}/${protein}.merge | awk '{print $1"_"$4}' | sort -k1,1 ) \
+           <(ls ${root}/qqmanhattanlz/*pdf | xargs -l basename -s .pdf | awk '{print $1,NR}') | \
   awk 'NF<2' | \
   sed 's/_/ /' | \
-  parallel -C' ' 'ls METAL/qqmanhattanlz/lz/{1}*pdf'
+  parallel -C' ' 'ls ${root}/qqmanhattanlz/{1}*pdf'
 # forest/locuszoom left-right format
   ulimit -n
   ulimit -S -n 2048
-  qpdf --empty --pages $(sed '1d' ~/Caprion/analysis/work/caprion.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
-                         parallel -C' ' 'ls $(echo METAL/qqmanhattanlz/lz/{1}_{2}.pdf | sed "s/:/_/")') -- lz2.pdf
-  export npages=$(qpdf -show-npages lz2.pdf)
-  qpdf --pages . 1-$npages:odd -- lz2.pdf lz.pdf
+  qpdf --empty --pages $(sed '1d' ${root}/${protein}.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
+                         parallel -C' ' 'ls $(echo ${root}/qqmanhattanlz/{1}_{2}.pdf | sed "s/:/_/")') -- ${root}/lz2.pdf
+  export npages=$(qpdf -show-npages ${root}/lz2.pdf)
+  qpdf --pages . 1-$npages:odd -- ${root}/lz2.pdf ${root}/lz.pdf
 # Split files, note the naming scheme
-  pdfseparate lz.pdf temp-%04d-lz.pdf
-  pdfseparate ${metal}/fp/fp.pdf temp-%04d-fp.pdf
+  pdfseparate ${root}/lz.pdf ${root}/work/temp-%04d-lz.pdf
+  pdfseparate ${root}/fp.pdf ${root}/work/temp-%04d-fp.pdf
 # left-right with very small file size
 # Combine the final pdf
-  pdfjam temp-*-*.pdf --nup 2x1 --landscape --papersize '{7in,16in}' --outfile fp+lz.pdf
-  rm temp*pdf
+  pdfjam ${root}/work/temp-*-*.pdf --nup 2x1 --landscape --papersize '{7in,16in}' --outfile ${root}/fp+lz.pdf
+  rm ${root}/work/temp*pdf
 # qpdf fp+lz.pdf --pages . $(cat HetISq75.index) -- HetISq75.pdf
-  qpdf fp+lz.pdf --pages . $(sed '1d' caprion.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- HetISq75.pdf
+  qpdf ${root}/fp+lz.pdf --pages . $(sed '1d' ${root}/${protein}.merge | \
+  sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- ${root}/HetISq75.pdf
 }
 
 export TMPDIR=${HPC_WORK}/work
@@ -469,11 +574,15 @@ do
   export SLURM_ARRAY_TASK_ID=${i}
   export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
   export root=${analysis}/peptide/${protein}
-  setup
-  sb
-  sbatch --wait ${root}/${protein}.merge
-  signals
-  merge
-  cistrans
-  fp
+# setup
+# sb
+# sbatch --wait ${root}/${protein}-merge_sb
+# signals
+# merge
+# cistrans
+# fp
+# HetISq
+  qqmanhattan
+# lz
+# fplz
 done

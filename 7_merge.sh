@@ -236,7 +236,7 @@ function fplz()
   pdfjam temp-*-*.pdf --nup 2x1 --landscape --papersize '{7in,16in}' --outfile fp+lz.pdf
   rm temp*pdf
 # qpdf fp+lz.pdf --pages . $(cat HetISq75.index) -- HetISq75.pdf
-  qpdf fp+lz.pdf --pages . $(sed '1d' caprion.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- HetISq75.pdf
+  qpdf fp+lz.pdf --pages . $(sed '1d' ${caprion}.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- HetISq75.pdf
 }
 
 signals

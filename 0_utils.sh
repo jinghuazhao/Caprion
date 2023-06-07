@@ -22,15 +22,18 @@ Rscript -e '
     g <- rownames(p) %in% igID
     pept <- data.frame(p[g,])
     prot_pept <- bind_rows(pept,prot)
+    opar <- par()
     png(file.path(dir,"analysis","work",paste(protein,suffix,"dist.png",sep="-")),
         width=12,height=10,units="in",pointsize=4,res=300)
-    par(mar=c(10,5,3,3), font.lab = 3.5, font.axis = 3.5)
+    par(mar=c(15,10,5,5), font=2, font.lab = 5, font.axis = 5)
     n <- rownames(prot_pept)
     d <- t(prot_pept) %>%
          data.frame() %>%
          setNames(n)
+    source("hist.data.frame.R")
     hist.data.frame(d,cex.axis=2.5,cex.lab=2.5,cex.mtext=2.5,cex.names=2.5)
     dev.off()
+    par(opar)
     png(file.path(dir,"analysis","work",paste(protein,suffix,"corr.png",sep="-")),
         width=12,height=10,units="in",pointsize=4,res=300)
     pheatmap(cor(t(prot_pept)),display_numbers=TRUE,fontsize=24)

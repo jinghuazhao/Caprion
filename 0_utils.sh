@@ -30,7 +30,7 @@ Rscript -e '
     d <- t(prot_pept) %>%
          data.frame() %>%
          setNames(n)
-    source("hist.data.frame.R")
+    source("https://raw.githubusercontent.com/jinghuazhao/tests/main/Hmisc/hist.data.frame.R")
     hist.data.frame(d,cex.axis=2.5,cex.lab=2.5,cex.mtext=2.5,cex.names=2.5,ylab=expression("Frequency"))
     dev.off()
     par(opar)

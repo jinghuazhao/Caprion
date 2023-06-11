@@ -92,12 +92,12 @@ cat << 'EOL' > ${root}/${protein}-METAL.sb
 #SBATCH --partition cardio
 #SBATCH --qos=cardio
 
-#SBATCH --output=ROOT_PROTEIN-METAL.o
-#SBATCH --error=ROOT_PROTEIN-METAL.e
+#SBATCH --output=PROTEIN-METAL.o
+#SBATCH --error=PROTEIN-METAL.e
 #SBATCH --export ALL
 
 export TMPDIR=${HPC_WORK}/work
-export rt=${root}/METAL
+export rt=ROOT/METAL
 
 ls $rt/*.metal | \
 xargs -l basename -s .metal | \
@@ -108,7 +108,7 @@ parallel -j3 --env rt -C' ' '
 '
 
 EOL
-sed -i "s|ROOT_PROTEIN|${root}/${protein}|" ${root}/${protein}-METAL.sb
+sed -i "s|PROTEIN|${root}/${protein}|;s|ROOT|${root}|" ${root}/${protein}-METAL.sb
 echo sbatch ${root}/${protein}-METAL.sb
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake

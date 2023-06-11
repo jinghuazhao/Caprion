@@ -10,7 +10,7 @@ function setup()
 
 function sb()
 {
-cat <<'EOL'> ${root}/${protein}-merge_sb
+cat <<'EOL'> ${root}/${protein}-merge.sb
 #!/usr/bin/bash
 
 #SBATCH --job-name=_merge
@@ -22,7 +22,7 @@ cat <<'EOL'> ${root}/${protein}-merge_sb
 #SBATCH --qos=cardio
 
 #SBATCH --export ALL
-#SBATCH --array=1-N
+#SBATCH --array=1-_N_
 #SBATCH --output=ROOT/sentinels/slurm/_merge_%A_%a.o
 #SBATCH --error=ROOT/sentinels/slurm/_merge_%A_%a.e
 
@@ -226,7 +226,7 @@ for cmd in pgz _HLA sentinels; do $cmd; done
 EOL
 
 export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
-sed -i "s|ROOT|${root}|;s|PROTEIN|${protein}|;s|N|${N}|" ${root}/${protein}-merge_sb
+sed -i "s|ROOT|${root}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-merge.sb
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
@@ -568,20 +568,20 @@ function fplz()
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
-for i in 14 # $(seq 987)
+for i in 490 # $(seq 987)
 do
   export SLURM_ARRAY_TASK_ID=${i}
   export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
   export root=${analysis}/peptide/${protein}
-# setup
-# sb
-# sbatch --wait ${root}/${protein}-merge_sb
-# signals
-# merge
-# cistrans
-# fp
-# HetISq
-  qqmanhattan
-# lz
-# fplz
+  setup
+  sb
+  sbatch --wait ${root}/${protein}-merge.sb
+  signals
+  merge
+  cistrans
+  fp
+  HetISq
+# qqmanhattan
+  lz
+  fplz
 done

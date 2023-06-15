@@ -69,7 +69,7 @@ Rscript -e '
 '
 
 cd ~/Caprion/analysis/peptide/INHBE/
-cat <(gunzip -c INHBE-?-442628596.fastGWA.gz | head -1 | paste <echo Batch-peptide) -) \
+cat <(gunzip -c INHBE-?-442628596.fastGWA.gz | head -1 | paste <(echo Batch-peptide) -) \
     <(zgrep -w rs11172187 INHBE-?-442628596.fastGWA.gz) | \
 sed 's/fastGWA.gz:/\t/' | \
 Rscript -e '

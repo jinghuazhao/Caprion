@@ -1,15 +1,35 @@
 #!/usr/bin/bash
 
-cd ~/Caprion/analysis/peptide/INHBE/
-cat <(gunzip -c INHBE-?-442628596.fastGWA.gz | head -1 | paste <(echo Batch-peptide) -) \
-    <(zgrep -w rs11172187 INHBE-?-442628596.fastGWA.gz) | \
-sed 's/INHBE-//;s/.fastGWA.gz:/\t/' | \
-Rscript -e '
-  rs11172187 <- read.table("stdin",header=TRUE)
-  knitr::kable(rs11172187,caption="Effect sizes of rs11172187",digits=3)
-'
-cd -
+function pgwas()
+{
+  export protein=${1}
+  export pqtl=${2}
+  cd ~/Caprion/analysis/pgwas
+  cat <(gunzip -c caprion-?-${protein}.fastGWA.gz | head -1 | paste <(echo Batch-Protein) -|sed 's/-/\t/') \
+      <(zgrep -w ${pqtl} caprion-?-${protein}.fastGWA.gz) | \
+  sed 's/caprion-//;s/.fastGWA.gz:/\t/;s/-/\t/' | \
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    pqtl <- Sys.getenv("pqtl")
+    d <- read.table("stdin",header=TRUE) %>%
+         arrange(Batch)
+    knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
+  '
+  cd ~/Caprion/analysis/peptide/${protein}/
+  cat <(gunzip -c INHBE-?-*.fastGWA.gz | head -1 | paste <(echo Batch-Peptide) -|sed 's/-/\t/') \
+      <(zgrep -w ${pqtl} *fastGWA.gz) | \
+  sed 's/INHBE-//;s/.fastGWA.gz:/\t/;s/-/\t/' | \
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    pqtl <- Sys.getenv("pqtl")
+    d <- read.table("stdin",header=TRUE) %>%
+         arrange(Peptide,Batch)
+    knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
+  '
+}
 
+function hist_corr_lm()
+{
 Rscript -e '
   options(width=200)
   suppressMessages(library(Biobase))
@@ -20,7 +40,7 @@ Rscript -e '
   select(Protein,Accession,Gene,Protein.Description)
   protein_peptide <- function(protein="INHBE",suffix="ZWK")
   {
-    cat(suffix,"\n\n")
+    cat("\n**",suffix,"**\n",sep="")
     dir <- "~/rds/projects/Caprion_proteomics"
     load(file.path(dir,"pilot",paste(suffix,"rda",sep=".")))
     n <- paste("protein",suffix,sep="_")
@@ -77,3 +97,7 @@ Rscript -e '
   zyq <- protein_peptide(suffix="ZYQ")
   udp <- protein_peptide(suffix="UDP")
 '
+}
+
+pgwas INHBE rs149830883
+pgwas INHBE rs11172187

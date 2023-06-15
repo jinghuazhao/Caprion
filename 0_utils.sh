@@ -71,7 +71,7 @@ Rscript -e '
 cd ~/Caprion/analysis/peptide/INHBE/
 cat <(gunzip -c INHBE-?-442628596.fastGWA.gz | head -1 | paste <(echo Batch-peptide) -) \
     <(zgrep -w rs11172187 INHBE-?-442628596.fastGWA.gz) | \
-sed 's/fastGWA.gz:/\t/' | \
+sed 's/INHBE-//;s/.fastGWA.gz:/\t/' | \
 Rscript -e '
   rs11172187 <- read.table("stdin",header=TRUE)
   knitr::kable(rs11172187,caption="Effect sizes of rs11172187",digits=3)

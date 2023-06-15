@@ -1,5 +1,15 @@
 #!/usr/bin/bash
 
+cd ~/Caprion/analysis/peptide/INHBE/
+cat <(gunzip -c INHBE-?-442628596.fastGWA.gz | head -1 | paste <(echo Batch-peptide) -) \
+    <(zgrep -w rs11172187 INHBE-?-442628596.fastGWA.gz) | \
+sed 's/INHBE-//;s/.fastGWA.gz:/\t/' | \
+Rscript -e '
+  rs11172187 <- read.table("stdin",header=TRUE)
+  knitr::kable(rs11172187,caption="Effect sizes of rs11172187",digits=3)
+'
+cd -
+
 Rscript -e '
   options(width=200)
   suppressMessages(library(Biobase))
@@ -10,7 +20,7 @@ Rscript -e '
   select(Protein,Accession,Gene,Protein.Description)
   protein_peptide <- function(protein="INHBE",suffix="ZWK")
   {
-    cat(suffix,"\n")
+    cat(suffix,"\n\n")
     dir <- "~/rds/projects/Caprion_proteomics"
     load(file.path(dir,"pilot",paste(suffix,"rda",sep=".")))
     n <- paste("protein",suffix,sep="_")
@@ -35,17 +45,17 @@ Rscript -e '
     d <- t(prot_pept) %>%
          data.frame() %>%
          setNames(n)
-    cat("Protein\n")
+    cat("\nProtein")
     s <- summary(lm(INHBE~d[["442593377"]]+d[["442626845"]]+d[["442628596"]]+d[["442658425"]],data=d))
-    print(s,digits=3)
+    print(knitr::kable(coef(s),digits=3))
     dr_pept <- bind_rows(pept,dr)
     n <- rownames(dr_pept)
     d <- t(dr_pept) %>%
          data.frame() %>%
          setNames(n)
-    cat("Protein_DR\n")
+    cat("\nProtein_DR")
     s <- summary(lm(INHBE~d[["442593377"]]+d[["442626845"]]+d[["442628596"]]+d[["442658425"]],data=d))
-    print(s,digits=3)
+    print(knitr::kable(coef(s),digits=3))
     opar <- par()
     png(file.path(dir,"analysis","work",paste(protein,suffix,"dist.png",sep="-")),
         width=12,height=10,units="in",pointsize=4,res=300)
@@ -67,13 +77,3 @@ Rscript -e '
   zyq <- protein_peptide(suffix="ZYQ")
   udp <- protein_peptide(suffix="UDP")
 '
-
-cd ~/Caprion/analysis/peptide/INHBE/
-cat <(gunzip -c INHBE-?-442628596.fastGWA.gz | head -1 | paste <(echo Batch-peptide) -) \
-    <(zgrep -w rs11172187 INHBE-?-442628596.fastGWA.gz) | \
-sed 's/INHBE-//;s/.fastGWA.gz:/\t/' | \
-Rscript -e '
-  rs11172187 <- read.table("stdin",header=TRUE)
-  knitr::kable(rs11172187,caption="Effect sizes of rs11172187",digits=3)
-'
-cd -

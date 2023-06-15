@@ -65,17 +65,15 @@ Rscript -e '
     d <- t(prot_pept) %>%
          data.frame() %>%
          setNames(n)
-    cat("\nProtein")
-    s <- summary(lm(INHBE~d[["442593377"]]+d[["442626845"]]+d[["442628596"]]+d[["442658425"]],data=d))
-    print(knitr::kable(coef(s),digits=3))
+    cat("\nProtein/Protein_DR")
+    s1 <- summary(lm(INHBE~d[["442593377"]]+d[["442626845"]]+d[["442628596"]]+d[["442658425"]],data=d))
     dr_pept <- bind_rows(pept,dr)
     n <- rownames(dr_pept)
     d <- t(dr_pept) %>%
          data.frame() %>%
          setNames(n)
-    cat("\nProtein_DR")
-    s <- summary(lm(INHBE~d[["442593377"]]+d[["442626845"]]+d[["442628596"]]+d[["442658425"]],data=d))
-    print(knitr::kable(coef(s),digits=3))
+    s2 <- summary(lm(INHBE~d[["442593377"]]+d[["442626845"]]+d[["442628596"]]+d[["442658425"]],data=d))
+    print(knitr::kable(cbind(coef(s1),coef(s2)),digits=3))
     opar <- par()
     png(file.path(dir,"analysis","work",paste(protein,suffix,"dist.png",sep="-")),
         width=12,height=10,units="in",pointsize=4,res=300)

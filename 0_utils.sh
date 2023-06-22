@@ -4,6 +4,7 @@ function pgwas()
 {
   export protein=${1}
   export pqtl=${2}
+# protein
   cd ~/Caprion/analysis/pgwas
   cat <(gunzip -c caprion-?-${protein}.fastGWA.gz | head -1 | paste <(echo Batch-Protein) -|sed 's/-/\t/') \
       <(zgrep -w ${pqtl} caprion-?-${protein}.fastGWA.gz) | \
@@ -15,8 +16,29 @@ function pgwas()
          arrange(Batch)
     knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
   '
+  cat <(gunzip -c ~/Caprion/analysis/METAL/${protein}-1.tbl.gz | head -1 | paste <(echo Protein) -) \
+      <(zgrep -H -w ${pqtl} ~/Caprion/analysis/METAL/${protein}-1.tbl.gz) | \
+  sed 's/INHBE//;s/-1.tbl.gz:/\t/;s/:/\t/' | \
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    pqtl <- Sys.getenv("pqtl")
+    d <- read.table("stdin",header=TRUE) %>%
+         arrange(Protein)
+    knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
+  '
+  cat <(gunzip -c ~/Caprion/analysis/METAL3/${protein}-1.tbl.gz | head -1 | paste <(echo Protein) -) \
+      <(zgrep -H -w ${pqtl} ~/Caprion/analysis/METAL3/${protein}-1.tbl.gz) | \
+  sed 's/INHBE//;s/-1.tbl.gz:/\t/;s/:/\t/' | \
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    pqtl <- Sys.getenv("pqtl")
+    d <- read.table("stdin",header=TRUE) %>%
+         arrange(Protein)
+    knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
+  '
+# peptides
   cd ~/Caprion/analysis/peptide/${protein}/
-  cat <(gunzip -c INHBE-?-*.fastGWA.gz | head -1 | paste <(echo Batch-Peptide) -|sed 's/-/\t/') \
+  cat <(gunzip -c ${protein}-?-*.fastGWA.gz | head -1 | paste <(echo Batch-Peptide) -|sed 's/-/\t/') \
       <(zgrep -w ${pqtl} *fastGWA.gz) | \
   sed 's/INHBE-//;s/.fastGWA.gz:/\t/;s/-/\t/' | \
   Rscript -e '
@@ -26,7 +48,21 @@ function pgwas()
          arrange(Peptide,Batch)
     knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
   '
+  cat <(gunzip -c METAL/*-1.tbl.gz | head -1 | paste <(echo Peptide) -) \
+      <(zgrep -H -w ${pqtl} METAL/*-1.tbl.gz) | \
+  sed 's|METAL/||;s/-1.tbl.gz:/\t/;s/:/\t/' | \
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    pqtl <- Sys.getenv("pqtl")
+    d <- read.table("stdin",header=TRUE) %>%
+         arrange(Peptide)
+    knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
+  '
 }
+(
+  pgwas INHBE rs149830883
+  pgwas INHBE rs11172187
+) > ~/Caprion/analysis/work/INHBE.txt
 
 function hist_corr_lm()
 {
@@ -97,5 +133,35 @@ Rscript -e '
 '
 }
 
-pgwas INHBE rs149830883
-pgwas INHBE rs11172187
+function barplot()
+{
+Rscript -e '
+  one <- read.delim("1")
+  batches <- unique(with(one,Batch))
+  peptides <- unique(with(one,Peptide))
+
+  m <- s <- matrix(NA,length(peptides),length(batches))
+  colnames(m) <- paste(batches)
+  colnames(s) <- paste(batches)
+  rownames(m) <- paste(peptides)
+  rownames(s) <- paste(peptides)
+  for(p in paste(peptides)) for(b in paste(batches))
+  {
+    d <- subset(one, Peptide==p & Batch==b)
+    m[p,b] <- d[["BETA"]]
+    s[p,b] <- d[["SE"]]
+  }
+
+  s.bar <- function(x, y, upper, lower=upper, length=0.1,...)
+  {
+    arrows(x,y+upper, x, y-lower, angle=90, code=3, length=length, ...)
+  }
+
+  png("INHBE-peptides.png",res=300,width=6,height=6,units="in")
+  z <- barplot(m , beside=TRUE , legend.text=TRUE, args.legend=c(x=6,y=-0.9),
+               col=c("blue" , "skyblue", "red", "green"), xlab="Batch", ylab="Beta", ylim=c(-1.2,0))
+  s.bar(z,m,s)
+  title("INHBE rs149830883 association")
+  dev.off()
+'
+}

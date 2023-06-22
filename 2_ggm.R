@@ -21,7 +21,10 @@ protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
                Biobase::combine(protein_UDP)
 peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
                Biobase::combine(peptide_UDP)
-save(protein_all,peptide_all,file=file.path("~/Caprion/pilot/work/es.rda"))
+
+protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
+                  Biobase::combine(dr_UDP)
+save(protein_all,protein_dr_all,peptide_all,file=file.path("~/Caprion/analysis/work/es.rda"))
 
 fcheck <- function(es)
 {
@@ -82,7 +85,7 @@ ggm_all <- function(type,suffix)
              visInteraction(navigationButtons=TRUE) %>%
              visIgraphLayout(type="full") %>%
              visNodes(size=30)
-  visSave(network,file=file.path("~/Caprion/pilot/work","protein_all.html"),selfcontained=TRUE)
+  visSave(network,file=file.path("~/Caprion/analysis/work","protein_all.html"),selfcontained=TRUE)
 }
 
 ggm_all("protein","all")
@@ -107,12 +110,12 @@ ggm_batch <- function(type,suffix)
   labels <- colnames(pcor)
 # graph_make()
   nodes <- ncol(pcor)
-  pdf(file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".pdf")))
+  pdf(file=file.path("~/Caprion/analysis/work",paste0(type,"_",suffix,".pdf")))
   tests <- network.test.edges(pcor)
   net <- extract.network(tests, cutoff.ggm=0.05/(nodes*(nodes-1)/2))
   graph <- network.make.graph(net,labels)
   g <- graph_from_graphnel(graph)
-  save(tests,net,graph,g,file=file.path("~/Caprion/pilot/work",paste0(type,"_",suffix,".graph")))
+  save(tests,net,graph,g,file=file.path("~/Caprion/analysis/work",paste0(type,"_",suffix,".graph")))
   plot(g)
   dev.off()
 # graph_RCy3()
@@ -132,8 +135,8 @@ graph_RCy3 <- function()
 {
   suid_corrIGraph <- createNetworkFromIgraph(g,"corrIGraph")
   layoutNetwork("attribute-circle")
-  exportImage(file.path("~/Caprion/pilot/work","corrIGraph.pdf"),type="PDF",resolution=300,height=8,width=12,units="in",overwriteFile=TRUE)
-  exportNetwork(file.path("~/Caprion/pilot/work","corrIGraph.sif"))
-  saveSession(file.path("~/Caprion/pilot/work","corrIGraph.cys"),overwriteFile=TRUE)
+  exportImage(file.path("~/Caprion/analysis/work","corrIGraph.pdf"),type="PDF",resolution=300,height=8,width=12,units="in",overwriteFile=TRUE)
+  exportNetwork(file.path("~/Caprion/analysis/work","corrIGraph.sif"))
+  saveSession(file.path("~/Caprion/analysis/work","corrIGraph.cys"),overwriteFile=TRUE)
   deleteNetwork(suid_corrIGraph)
 }

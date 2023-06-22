@@ -50,7 +50,7 @@ pca_clustering <- function(prot)
   summary(mc)
   table(with(mc,classification))
   if(!interactive()) {
-     pdf("~/Caprion/analysis/work/pca_clustering.pdf")
+     pdf(paste0("~/Caprion/analysis/work/pca_clustering",suffix,".pdf"))
      scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]), color=c("blue","red")[mc$classification], main="Plot of the PC1, PC2 and PC3", pch=16)
      legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
      screeplot(pca, npcs=20, type="lines", main="PCA screeplot")
@@ -70,7 +70,7 @@ pca_clustering <- function(prot)
      mc_ZYQ_mc <- cbind(ZYQ_mc,classification=with(mc,classification)[grepl("ZYQ",names(mc$classification))])
      with(mc_ZYQ_mc,table(pc1_group,classification))
   }
-  pca_clustering_plot(pca,mc,"~/Caprion/analysis/work/pca_clustering.html")
+  pca_clustering_plot(pca,mc,paste0("~/Caprion/analysis/work/pca_clustering",suffix,".html"))
   list(pca=pca,km=km,mc=mc)
 }
 
@@ -80,11 +80,11 @@ quantro_sparsenetgls <- function(edata,batch,mod)
   suppressMessages(library(doParallel))
   registerDoParallel(cores=10)
   quantro(edata,batch,B=10000)
-  png("~/Caprion/analysis/work/matboxplot.png",width=12,height=10,unit="in",res=300)
+  png(paste0("~/Caprion/analysis/work/matboxplot",suffix,".png"),width=12,height=10,unit="in",res=300)
   par(cex=0.6,cex.lab=0.6)
   matboxplot(edata,batch)
   dev.off()
-  png("~/Caprion/analysis/work/matdensity.png",width=12,height=10,unit="in",res=300)
+  png(paste0("~/Caprion/analysis/work/matdensity",suffix,".png"),width=12,height=10,unit="in",res=300)
   matdensity(edata, batch, xlab = " ", ylab = "density", ylim=c(0,2),
              main = "Protein levels", brewer.n = 8, brewer.name = "Dark2")
   legend('top', c("ZWK", "ZYQ", "UDP"), col = c(1, 2, 3), lty = 1, lwd = 3)
@@ -94,7 +94,7 @@ quantro_sparsenetgls <- function(edata,batch,mod)
     suppressMessages(library(sparsenetgls))
     y <- t(edata)
     sngls <- sparsenetgls(y,mod)
-    save(sngls,file=paste0("~/Caprion/analysis/work/sparsenetgls-",batch,".rda"))
+    save(sngls,file=paste0("~/Caprion/analysis/work/sparsenetgls-",batch,suffix,".rda"))
     plotsngls(sngls,ith_lambda=5)
   }
 }
@@ -119,8 +119,8 @@ normalise_lr <- function(d,batches)
   rownames(z) <- d[["IID"]]
   caprion_lr <- data.frame(d[c("FID","IID")],z)
   names(caprion_lr) <- gsub("^X([0-9])","\\1",names(caprion_lr))
-  write.table(d[c("FID","IID")],file=paste0("~/Caprion/analysis/work/caprion-",batches,".id"),col.names=FALSE,row.names=FALSE)
-  write.table(caprion_lr,file=paste0("~/Caprion/analysis/work/caprion-",batches,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
+  write.table(d[c("FID","IID")],file=paste0("~/Caprion/analysis/work/caprion-",batches,suffix,".id"),col.names=FALSE,row.names=FALSE)
+  write.table(caprion_lr,file=paste0("~/Caprion/analysis/work/caprion-",batches,suffix,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
 }
 
 normalise <- function(prot)
@@ -145,10 +145,11 @@ normalise <- function(prot)
            left_join(data) %>%
            right_join(data.frame(prot,caprion_id=rownames(prot))) %>%
            mutate(batch=match(substr(sampleNames(protein_all),1,3),c("ZWK","ZYQ","UDP")))
-  write.table(select(pheno,Affymetrix_gwasQC_bl),file="~/Caprion/analysis/work/caprion.id",quote=FALSE,row.names=FALSE,col.names=FALSE)
+  write.table(select(pheno,Affymetrix_gwasQC_bl),file=paste0("~/Caprion/analysis/work/caprion",suffix,".id"),
+              quote=FALSE,row.names=FALSE,col.names=FALSE)
   caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl)[c("FID","IID",ids,"batch",dates,covars,pcs,PCS,xnames)]
   names(caprion_pheno) <- gsub("^X([0-9])","\\1",names(caprion_pheno))
-  write.table(caprion_pheno,file="~/Caprion/analysis/work/caprion.pheno",quote=FALSE,row.names=FALSE,sep="\t")
+  write.table(caprion_pheno,file=paste0("~/Caprion/analysis/work/caprion",suffix,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
 
   suppressMessages(library(sva))
   mod <- model.matrix(as.formula(paste0(c("~sexPulse","agePulse",pcs,PCS),collapse="+")), data=pheno)
@@ -180,7 +181,7 @@ normalise <- function(prot)
     d <- filter(dat[many,],batch==batches)
     z <- d
     names(z) <- gsub("^X([0-9])","\\1",names(z))
-    write.table(z,file=paste0("~/Caprion/analysis/work/caprion-",batches,".tsv"),quote=FALSE,row.names=FALSE,sep="\t")
+    write.table(z,file=paste0("~/Caprion/analysis/work/caprion-",batches,suffix,".tsv"),quote=FALSE,row.names=FALSE,sep="\t")
     normalise_lr(d,batches)
   }
   list(edata=t(combat_edata3),batch=batch)
@@ -192,11 +193,22 @@ suppressMessages(library(dplyr))
 suppressMessages(library(gap))
 
 load("~/Caprion/analysis/work/es.rda")
-prot <- t(exprs(protein_all))
-colnames(prot) <- gsub("_HUMAN","",colnames(prot))
-
 ZYQ.na <- c("BROX","CT027","GHRL","PSB6")
 UDP.na <- c("BROX","NCF2","SEM7A")
+
+suffix <- ""
+prot <- t(exprs(protein_all))
+colnames(prot) <- gsub("_HUMAN","",colnames(prot))
+if (FALSE)
+{
+  suffix <- "_dr"
+  prot <- t(exprs(protein_dr_all))
+  colnames(prot) <- gsub("_HUMAN","",colnames(prot))
+  ZYQ.na <- c(ZYQ.na,"A1AG2","CAH13","COF1","CZIB","GBRL2","GLTD2","HPSE","ITA6","K2C5",
+                     "MK14","NDKA","NOMO1","NQO2","PTPRM","RGMA","SE6L2","SHLB1","SYYC","TMED8","VATG1","VAV")
+  UDP.na <- c(UDP.na,"1433S", "AT1B1", "HPSE", "MYLK", "NENF", "NOMO1", "NQO2", "VATG1", "VAV")
+# r <- apply(all[grepl("UDP",rownames(all)),],2,sum); r[is.na(r)]
+}
 
 pnames <- colnames(prot)
 xnames <- gsub("(^[0-9])","X\\1",pnames)
@@ -206,10 +218,10 @@ pcs <- paste0("ppc",1:3)
 PCS <- paste0("PC",1:20)
 
 edata_batch <- normalise(prot)
-png("~/Caprion/analysis/work/combat-matboxplot.png",width=12,height=10,unit="in",res=300)
+png(paste0("~/Caprion/analysis/work/combat-matboxplot",suffix,".png"),width=12,height=10,unit="in",res=300)
 with(edata_batch,matboxplot(t(edata),groupFactor=batch, ylab="Protein measurement"))
 dev.off()
-png("~/Caprion/analysis/work/combat-matdensity.png",width=12,height=10,unit="in",res=300)
+png(paste0("~/Caprion/analysis/work/combat-matdensity",suffix,".png"),width=12,height=10,unit="in",res=300)
 with(edata_batch,matdensity(t(edata),groupFactor=batch,xlab = " ", ylab = "density", ylim=c(0,3),
            main = "Protein measurement", brewer.n = 8, brewer.name = "Dark2"))
 dev.off()
@@ -220,5 +232,5 @@ pca_km_mc <- pca_clustering(edata)
 detach(edata_batch)
 attach(pca_km_mc)
 if (interactive()) rgl::plot3d(with(pca,x[,c(2,1,3)]),col=mc$classification)
-pca_clustering_plot(pca,mc,"~/Caprion/analysis/work/pca_clustering_combat.html")
+pca_clustering_plot(pca,mc,paste0("~/Caprion/analysis/work/pca_clustering_combat",suffix,".html"))
 detach(pca_km_mc)

@@ -568,7 +568,7 @@ function fplz()
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
-for i in 490 # $(seq 987)
+for i in 754 # 319 # 490 # $(seq 987)
 do
   export SLURM_ARRAY_TASK_ID=${i}
   export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
@@ -581,7 +581,7 @@ do
   cistrans
   fp
   HetISq
-# qqmanhattan
+  qqmanhattan
   lz
   fplz
 done

@@ -9,7 +9,7 @@ function sb()
   export SLURM_ARRAY_TASK_ID=${1}
   export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
   if [ ! -d ${analysis}/peptide/${protein} ]; then mkdir ${analysis}/peptide/${protein}; fi
-  export sbatch=${analysis}/peptide/${protein}/${protein}.sb
+  export sbatch=${analysis}/peptide/${protein}/${protein}-pgwas.sb
 
   Rscript -e '
     suppressMessages(library(Biobase))
@@ -122,7 +122,8 @@ function fastLR()
              --extract ${pilot}/work/chrX.snplist --geno 0.1 \
              --threads 10 \
              --out ${root}-${batch}-${peptide}-chrX
-  bgzip -f ${root}-${batch}-${peptide}*fastGWA
+  bgzip -f ${root}-${batch}-${peptide}.fastGWA
+  bgzip -f ${root}-${batch}-${peptide}-chrX.fastGWA
   done
 }
 

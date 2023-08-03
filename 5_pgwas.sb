@@ -1,15 +1,14 @@
 #!/usr/bin/bash
 
-##SBATCH --account CARDIO-SL0-CPU
-##SBATCH --partition cardio
-##SBATCH --qos=cardio
-##SBATCH --mem=28800
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake-himem
 #SBATCH --time=12:00:00
 
-##SBATCH --job-name=_bgen
-##SBATCH --array=1-22
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
+#SBATCH --job-name=_bgen
+#SBATCH --array=1-22
+#SBATCH --mem=50000
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
 
 ##SBATCH --job-name=_fastGWA
 ##SBATCH --array=1-987
@@ -21,80 +20,68 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.e
 
-#SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake-himem
-#SBATCH --array=1-987
-#SBATCH --job-name=_lz
-#SBATCH --mem=6840
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.e
-
-##SBATCH --account CARDIO-SL0-CPU
-##SBATCH --partition cardio
-##SBATCH --job-name=pairs
-##SBATCH --qos=cardio
-##SBATCH --mem=50000
+##SBATCH --job-name=_lz
 ##SBATCH --array=1-987
-##SBATCH --time=12:00:00
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/lz/slurm/_lz_%A_%a.e
+
+##SBATCH --job-name=pairs
+##SBATCH --array=1-987
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/pairs/slurm/_pairs_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/pairs/slurm/_pairs_%A_%a.e
 
-##SBATCH --account CARDIO-SL0-CPU
-##SBATCH --partition cardio
 ##SBATCH --job-name=miamiplot
 ##SBATCH --array=1-987
-##SBATCH --qos=cardio
-##SBATCH --mem=50000
-##SBATCH --time=12:00:00
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/miamiplot/slurm/_miamiplot_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/miamiplot/slurm/_miamiplot_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
 export analysis=~/Caprion/analysis
-export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/work/caprion.varlist)
+export suffix=_dr
+export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)
 export interval=${HPC_WORK}/data/interval
 
 function bgen()
 {
   export chr=chr${SLURM_ARRAY_TASK_ID}
-  plink2 --bgen ${interval}/${chr}.bgen ref-unknown --sample ${interval}/interval.sample --keep ${caprion}/work/caprion.id2 \
+  plink2 --bgen ${interval}/${chr}.bgen ref-unknown --sample ${interval}/interval.sample --keep ${analysis}/work/caprion${suffix}.id2 \
          --export bgen-1.2 bits=8 --dosage-erase-threshold 0.001 \
          --set-missing-var-ids @:#_\$r_\$a --new-id-max-allele-len 680 \
-         --out ${caprion}/work/${chr}
-  bgenix -g ${caprion}/work/${chr}.bgen -index -clobber
+         --out ${analysis}/work/${chr}
+  bgenix -g ${analysis}/work/${chr}.bgen -index -clobber
 }
 
 function fastLR()
 # fastGWA without --grm-sparse
 {
   export phenocol=${SLURM_ARRAY_TASK_ID}
-  export phenoname=$(awk 'NR==ENVIRON["phenocol"]{print $1}' ${caprion}/work/caprion.varlist)
+  export phenoname=$(awk 'NR==ENVIRON["phenocol"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)
   export batch=${1}
-  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
-           --sample ${caprion}/work/caprion.sample \
-           --keep ${caprion}/work/caprion-${batch}.id \
+  gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
+           --sample ${analysis}/work/caprion.sample \
+           --keep ${analysis}/work/caprion-${batch}${suffix}.id \
            --fastGWA-lr \
-           --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} \
+           --pheno ${caprion}/work/caprion-${batch}${suffix}.pheno --mpheno ${phenocol} \
            --threads 10 \
-           --out ${caprion}/work/caprion-${batch}-${phenoname}
+           --out ${analysis}/work/caprion-${batch}-${phenoname}${suffix}
 
-  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist \
-           --sample ${caprion}/work/caprion.sample \
-           --keep ${caprion}/work/chrX-${batch}.id \
+  gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
+           --sample ${analysis}/work/caprion.sample \
+           --keep ${analysis}/work/chrX-${batch}${suffix}.id \
            --fastGWA-lr --model-only \
-           --pheno ${caprion}/work/caprion-${batch}.pheno --mpheno ${phenocol} \
+           --pheno ${analysis}/work/caprion-${batch}${suffix}.pheno --mpheno ${phenocol} \
            --threads 10 \
-           --out ${caprion}/work/caprion-${batch}-${phenoname}
+           --out ${analysis}/work/caprion-${batch}-${phenoname}${suffix}
 
-  gcta-1.9 --bgen ${caprion}/work/chrX.bgen \
-           --sample ${caprion}/work/chrX.sample \
-           --keep ${caprion}/work/chrX-${batch}.id \
-           --load-model ${caprion}/work/caprion-${batch}-${phenoname}.fastGWA \
-           --extract ${caprion}/work/chrX.snplist --geno 0.1 \
+  gcta-1.9 --bgen ${analyssi}/work/chrX.bgen \
+           --sample ${analysis}/work/chrX.sample \
+           --keep ${caprion}/work/chrX-${batch}${suffix}.id \
+           --load-model ${analysis}/work/caprion-${batch}-${phenoname}${suffix}.fastGWA \
+           --extract ${analysis}/work/chrX.snplist --geno 0.1 \
            --threads 10 \
-           --out ${caprion}/work/caprion-${batch}-${phenoname}-chrX
-  gzip -f ${caprion}/work/caprion-${batch}-${phenoname}*fastGWA
+           --out ${analysis}/work/caprion-${batch}-${phenoname}${suffix}-chrX
+  bgzip -f ${analysis}/work/caprion-${batch}-${phenoname}${suffix}*fastGWA
 }
 
 # export phenocol=$(grep -n -f ${caprion}/work/caprion.lrlist ${caprion}/work/caprion.varlist | \
@@ -386,13 +373,13 @@ function miamiplot2()
   rm ${analysis}/work/${uniprot}-${prot}-phase?.dat.gz
 }
 
-#bgen
+bgen
 #fastLR 1
 #fastLR 2
 #fastLR 3
 #qqmanhattan
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
-lz
+#lz
 #pairs_p
 #miamiplot
 #miamiplot2

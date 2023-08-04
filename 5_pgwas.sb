@@ -4,16 +4,17 @@
 #SBATCH --partition=cclake-himem
 #SBATCH --time=12:00:00
 
-#SBATCH --job-name=_bgen
-#SBATCH --array=1-22
-#SBATCH --mem=50000
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
+##SBATCH --job-name=_bgen
+##SBATCH --array=1-22
+##SBATCH --mem=50000
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
 
-##SBATCH --job-name=_fastGWA
-##SBATCH --array=1-987
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
+#SBATCH --job-name=_fastGWA
+#SBATCH --array=1-987
+#SBATCH --mem=28800
+#SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
+#SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
 
 ##SBATCH --job-name=_qqmanhattan
 ##SBATCH --array=1-987
@@ -64,7 +65,7 @@ function fastLR()
            --fastGWA-lr \
            --pheno ${caprion}/work/caprion-${batch}${suffix}.pheno --mpheno ${phenocol} \
            --threads 10 \
-           --out ${analysis}/work/caprion-${batch}-${phenoname}${suffix}
+           --out ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}
 
   gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
            --sample ${analysis}/work/caprion.sample \
@@ -72,7 +73,7 @@ function fastLR()
            --fastGWA-lr --model-only \
            --pheno ${analysis}/work/caprion-${batch}${suffix}.pheno --mpheno ${phenocol} \
            --threads 10 \
-           --out ${analysis}/work/caprion-${batch}-${phenoname}${suffix}
+           --out ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}
 
   gcta-1.9 --bgen ${analyssi}/work/chrX.bgen \
            --sample ${analysis}/work/chrX.sample \
@@ -80,8 +81,9 @@ function fastLR()
            --load-model ${analysis}/work/caprion-${batch}-${phenoname}${suffix}.fastGWA \
            --extract ${analysis}/work/chrX.snplist --geno 0.1 \
            --threads 10 \
-           --out ${analysis}/work/caprion-${batch}-${phenoname}${suffix}-chrX
-  bgzip -f ${analysis}/work/caprion-${batch}-${phenoname}${suffix}*fastGWA
+           --out ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}-chrX
+  bgzip -f ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}.fastGWA
+  bgzip -f ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}-chrX.fastGWA
 }
 
 # export phenocol=$(grep -n -f ${caprion}/work/caprion.lrlist ${caprion}/work/caprion.varlist | \
@@ -373,10 +375,10 @@ function miamiplot2()
   rm ${analysis}/work/${uniprot}-${prot}-phase?.dat.gz
 }
 
-bgen
-#fastLR 1
-#fastLR 2
-#fastLR 3
+#bgen
+fastLR 1
+fastLR 2
+fastLR 3
 #qqmanhattan
 ##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
 #lz

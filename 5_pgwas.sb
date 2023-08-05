@@ -75,7 +75,7 @@ function fastLR()
            --threads 10 \
            --out ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}
 
-  gcta-1.9 --bgen ${analyssi}/work/chrX.bgen \
+  gcta-1.9 --bgen ${analysis}/work/chrX.bgen \
            --sample ${analysis}/work/chrX.sample \
            --keep ${analysis}/work/chrX-${batch}${suffix}.id \
            --load-model ${analysis}/work/caprion-${batch}-${phenoname}${suffix}.fastGWA \

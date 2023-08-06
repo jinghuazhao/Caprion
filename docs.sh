@@ -26,7 +26,7 @@ git add pilot/gwas2.md
 git commit -m "gwas2"
 git add pilot/autoencoder.md
 git commit -m "autoencoder"
-git add docs.sh pilot/.gitignore pilot/utils pilot/docs.sh
+git add docs.sh pilot/.gitignore pilot/utils pilot/docs.sh pilot/NOTES.md
 git commit -m "utils"
 git add mkdocs.yml pilot/mkdocs.yml
 git commit -m "mkdocs.yml"

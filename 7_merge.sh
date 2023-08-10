@@ -1,40 +1,41 @@
 #!/usr/bin/bash
 
 export caprion=~/Caprion/analysis
+export suffix=_dr
 export work=~/Caprion/analysis/work
 export TMPDIR=${HPC_WORK}/work
 
 function setup()
 {
-  if [ ! -d ${caprion}/METAL/sentinels ]; then mkdir -p ${caprion}/METAL/sentinels; fi
+  if [ ! -d ${caprion}/METAL${suffix}/sentinels ]; then mkdir -p ${caprion}/METAL${suffix}/sentinels; fi
 }
 
 function signals()
 (
-  cat ${caprion}/METAL/sentinels/*signals | \
+  cat ${caprion}/METAL${suffix}/sentinels/*signals | \
   head -1 | \
   awk -v FS="\t" '{print "prot",$0}'
-  cat ~/Caprion/pilot/work/caprion.varlist | \
+  cat ~/Caprion/pilot/work/caprion${suffix}.varlist | \
   parallel -C' ' '
-    if [ -f ${caprion}/METAL/sentinels/{}.signals ]; then
-       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${caprion}/METAL/sentinels/{}.signals
+    if [ -f ${caprion}/METAL${suffix}/sentinels/{}.signals ]; then
+       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${caprion}/METAL${suffix}/sentinels/{}.signals
     fi
-    if [ -f ${caprion}/METAL/sentinels/{}-chrX.signals ]; then
-       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${caprion}/METAL/sentinels/{}-chrX.signals
+    if [ -f ${caprion}/METAL${suffix}/sentinels/{}-chrX.signals ]; then
+       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${caprion}/METAL${suffix}/sentinels/{}-chrX.signals
     fi
   '
-) > ${caprion}/work/caprion.signals
+) > ${caprion}/work/caprion${suffix}.signals
 
 function merge()
 {
-  cat <(gunzip -c ${caprion}/METAL/*-1.tbl.gz | head -1 | paste <(echo prot) -) \
-      <(sed '1d;s/\t/ /g' ${work}/caprion.signals | grep -v 'X:' | \
+  cat <(gunzip -c ${caprion}/METAL${suffix}/*-1.tbl.gz | head -1 | paste <(echo prot) -) \
+      <(sed '1d;s/\t/ /g' ${work}/caprion${suffix}.signals | grep -v 'X:' | \
         parallel -C' ' -j20 'zgrep -w {7} ${caprion}/METAL/{1}-1.tbl.gz | paste <(echo {1}) -') \
-      <(sed '1d;s/\t/ /g' ${work}/caprion.signals | grep 'X:' | \
+      <(sed '1d;s/\t/ /g' ${work}/caprion${suffix}.signals | grep 'X:' | \
         parallel -C' ' -j20 'zgrep -w {7} ${caprion}/METAL/{1}-chrX-1.tbl.gz | paste <(echo {1}) -') \
-      > ${work}/caprion.merge
+      > ${work}/caprion${suffix}.merge
   cut -f11,14 ${work}/caprion.merge | sed '1d' | awk -vOFS="\t" '{printf $2" "; if($1<0) print "-"; else print "+"}' | \
-  sort -k1,1 -k2,2 | uniq -c | awk -vOFS="\t" '{print $1,$2,$3}'> ${work}/caprion.dir
+  sort -k1,1 -k2,2 | uniq -c | awk -vOFS="\t" '{print $1,$2,$3}'> ${work}/caprion${suffix}.dir
 }
 
 function cistrans()
@@ -44,12 +45,15 @@ function cistrans()
     suppressMessages(library(dplyr))
     suppressMessages(library(gap))
   # Directions
+    caprion <- Sys.getenv("caprion")
+    suffix=Sys.getenv("suffix")
     work <- Sys.getenv("work")
-    caprion.dir <- within(read.table("work/caprion.dir",col.names=c("Count","Direction","Final")),{Direction=gsub(""," ",Direction)})
+    caprion.dir <- within(read.table(paste0(caprion,"/work/caprion",suffix,".dir"),
+                                     col.names=c("Count","Direction","Final")),{Direction=gsub(""," ",Direction)})
     knitr::kable(caprion.dir)
   # cis/trans classification
-    signals <- read.table(file.path("work","caprion.signals"),header=TRUE)
-    merged <- read.delim(file.path("work","caprion.merge"))
+    signals <- read.table(file.path(caprion,"work",paste0("caprion",suffix,".signals")),header=TRUE)
+    merged <- read.delim(file.path(caprion,"work",paste0("caprion",suffix,".merge")))
     names(merged)[1:4] <- c("prot","Chr","bp","SNP")
   # glist-hg19
     INF <- Sys.getenv("INF")
@@ -94,8 +98,8 @@ function cistrans()
     cis.vs.trans <- qtlClassifier(pqtls,posSNP,ucsc_modified,1e6) %>%
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)
-    write.csv(cis.vs.trans,file=file.path(work,"caprion.cis.vs.trans"),row.names=FALSE,quote=FALSE)
-    png(file.path(work,"caprion.pqtl2d.png"),width=12,height=10,unit="in",res=300)
+    write.csv(cis.vs.trans,file=file.path(caprion,work,"caprion.cis.vs.trans"),row.names=FALSE,quote=FALSE)
+    png(file.path(caprion,work,paste0("caprion",suffix,".pqtl2d.png")),width=12,height=10,unit="in",res=300)
     r <- qtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                    gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                    TSS=TRUE,cis="cis",plot=TRUE,cex.labels=0.6,cex.points=0.6,
@@ -106,13 +110,13 @@ function cistrans()
                      gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                      TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
                      xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(work,"caprion.pqtl2dplotly.html"))
+    htmlwidgets::saveWidget(r,file=file.path(caprion,work,paste0("caprion",suffix,".pqtl2dplotly.html")))
     r <- qtl3dplotly(cis.vs.trans,chrlen=gap::hg19,qtl.id="SNP",qtl.prefix="pQTL:",target.type="Protein",
                      snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                      gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                      TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
                      xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(work,"caprion.pqtl3dplotly.html"))
+    htmlwidgets::saveWidget(r,file=file.path(caprion,work,paste0("caprion",suffix,".pqtl3dplotly.html")))
   '
 }
 
@@ -132,13 +136,13 @@ function fp()
   uniq | \
   awk -vOFS="\t" '{print $1":"$2,$3}' > ${analysis}/work/rsid.tsv
   (
-    gunzip -c ${analysis}/pgwas/caprion-*fastGWA.gz | head -1
+    gunzip -c ${analysis}/pgwas${suffix}/caprion-*fastGWA.gz | head -1
     awk 'NR>1' ${analysis}/work/tbl.tsv | \
     cut -f1,4,14 --output-delimiter=' ' | \
     parallel -j10 -C' ' '
-      export direction=$(zgrep -w {2} ${analysis}/METAL/{1}-1.tbl.gz | cut -f13)
+      export direction=$(zgrep -w {2} ${analysis}/METAL${suffix}/{1}-1.tbl.gz | cut -f13)
       let j=1
-      for i in $(grep "Input File" ${analysis}/METAL/{1}-1.tbl.info | cut -d" " -f7)
+      for i in $(grep "Input File" ${analysis}/METAL${suffix}/{1}-1.tbl.info | cut -d" " -f7)
       do
          export n=$(awk -vj=$j "BEGIN{split(ENVIRON[\"direction\"],a,\"\");print a[j]}")
          if [ "$n" != "?" ]; then zgrep -H -w {2} $i; fi
@@ -214,13 +218,13 @@ function HetISq()
 
 function fplz()
 {
-  export metal=~/Caprion/analysis/METAL
+  export metal=~/Caprion/analysis/METAL${suffix}
 # HSPB1_rs114800762 is missing as dug by the following code.
   join -a1 <(sed '1d' work/caprion.merge | awk '{print $1"_"$4}' | sort -k1,1 ) \
            <(ls METAL/qqmanhattanlz/lz/*pdf | xargs -l basename -s .pdf | awk '{print $1,NR}') | \
   awk 'NF<2' | \
   sed 's/_/ /' | \
-  parallel -C' ' 'ls METAL/qqmanhattanlz/lz/{1}*pdf'
+  parallel -C' ' 'ls METAL${suffix}/qqmanhattanlz/lz/{1}*pdf'
 # forest/locuszoom left-right format
   ulimit -n
   ulimit -S -n 2048
@@ -239,6 +243,7 @@ function fplz()
   qpdf fp+lz.pdf --pages . $(sed '1d' ${caprion}.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- HetISq75.pdf
 }
 
+setup
 signals
 merge
 cistrans

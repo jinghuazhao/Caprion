@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=_merge
 #SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake-himem
+#SBATCH --partition=icelake
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -18,8 +18,15 @@
 export TMPDIR=${HPC_WORK}/work
 export analysis=~/Caprion/analysis
 export suffix=_dr
-export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)
+export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)${suffix}
 
+. /etc/profile.d/modules.sh
+module purge
+module load dot rhel8/slurm singularity/current rhel8/global cuda/11.4 vgl/2.5.1/64
+module load intel-oneapi-compilers/2022.1.0/gcc/b6zld2mz
+module load intel-oneapi-mpi/2021.6.0/intel/guxuvcpm rhel8/default-icl
+
+module load R/4.3.1-icelake
 
 function setup()
 {
@@ -81,7 +88,7 @@ function sentinels()
   ) | uniq > ${analysis}/METAL${suffix}/sentinels/${p}.sentinels
 
   Rscript -e '
-    d <- file.path(Sys.getenv("analysis"),paste0("METAL",Sys.getenv)"suffix")),"sentinels")
+    d <- file.path(Sys.getenv("analysis"),paste0("METAL",Sys.getenv("suffix")),"sentinels")
     prot <- Sys.getenv("p")
     f <- file.path(d,paste0(prot,".sentinels"))
     m <- read.table(f,header=TRUE,as.is=TRUE)

@@ -1,34 +1,29 @@
 #!/usr/bin/bash
 
-export caprion=~/Caprion/analysis
+export analysis=~/Caprion/analysis
 export suffix=_dr
 export work=~/Caprion/analysis/work
 export TMPDIR=${HPC_WORK}/work
 
-function setup()
-{
-  if [ ! -d ${caprion}/METAL${suffix}/sentinels ]; then mkdir -p ${caprion}/METAL${suffix}/sentinels; fi
-}
-
 function signals()
 (
-  cat ${caprion}/METAL${suffix}/sentinels/*signals | \
+  cat ${analysis}/METAL${suffix}/sentinels/*signals | \
   head -1 | \
   awk -v FS="\t" '{print "prot",$0}'
   cat ~/Caprion/pilot/work/caprion${suffix}.varlist | \
   parallel -C' ' '
-    if [ -f ${caprion}/METAL${suffix}/sentinels/{}.signals ]; then
-       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${caprion}/METAL${suffix}/sentinels/{}.signals
+    if [ -f ${analysis}/METAL${suffix}/sentinels/{}.signals ]; then
+       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${analysis}/METAL${suffix}/sentinels/{}.signals
     fi
-    if [ -f ${caprion}/METAL${suffix}/sentinels/{}-chrX.signals ]; then
-       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${caprion}/METAL${suffix}/sentinels/{}-chrX.signals
+    if [ -f ${analysis}/METAL${suffix}/sentinels/{}-chrX.signals ]; then
+       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${analysis}/METAL${suffix}/sentinels/{}-chrX.signals
     fi
   '
-) > ${caprion}/work/caprion${suffix}.signals
+) > ${analysis}/work/caprion${suffix}.signals
 
 function merge()
 {
-  cat <(gunzip -c ${caprion}/METAL${suffix}/*-1.tbl.gz | head -1 | paste <(echo prot) -) \
+  cat <(gunzip -c ${analysis}/METAL${suffix}/*-1.tbl.gz | head -1 | paste <(echo prot) -) \
       <(sed '1d;s/\t/ /g' ${work}/caprion${suffix}.signals | grep -v 'X:' | \
         parallel -C' ' -j20 'zgrep -w {7} ${caprion}/METAL/{1}-1.tbl.gz | paste <(echo {1}) -') \
       <(sed '1d;s/\t/ /g' ${work}/caprion${suffix}.signals | grep 'X:' | \
@@ -45,15 +40,15 @@ function cistrans()
     suppressMessages(library(dplyr))
     suppressMessages(library(gap))
   # Directions
-    caprion <- Sys.getenv("caprion")
+    analysis <- Sys.getenv("analysis")
     suffix=Sys.getenv("suffix")
     work <- Sys.getenv("work")
-    caprion.dir <- within(read.table(paste0(caprion,"/work/caprion",suffix,".dir"),
+    caprion.dir <- within(read.table(paste0(analysis,"/work/caprion",suffix,".dir"),
                                      col.names=c("Count","Direction","Final")),{Direction=gsub(""," ",Direction)})
     knitr::kable(caprion.dir)
   # cis/trans classification
-    signals <- read.table(file.path(caprion,"work",paste0("caprion",suffix,".signals")),header=TRUE)
-    merged <- read.delim(file.path(caprion,"work",paste0("caprion",suffix,".merge")))
+    signals <- read.table(file.path(analysis,"work",paste0("caprion",suffix,".signals")),header=TRUE)
+    merged <- read.delim(file.path(analysis,"work",paste0("caprion",suffix,".merge")))
     names(merged)[1:4] <- c("prot","Chr","bp","SNP")
   # glist-hg19
     INF <- Sys.getenv("INF")
@@ -99,7 +94,7 @@ function cistrans()
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)
     write.csv(cis.vs.trans,file=file.path(caprion,work,"caprion.cis.vs.trans"),row.names=FALSE,quote=FALSE)
-    png(file.path(caprion,work,paste0("caprion",suffix,".pqtl2d.png")),width=12,height=10,unit="in",res=300)
+    png(file.path(work,paste0("caprion",suffix,".pqtl2d.png")),width=12,height=10,unit="in",res=300)
     r <- qtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                    gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                    TSS=TRUE,cis="cis",plot=TRUE,cex.labels=0.6,cex.points=0.6,
@@ -116,14 +111,13 @@ function cistrans()
                      gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                      TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
                      xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(caprion,work,paste0("caprion",suffix,".pqtl3dplotly.html")))
+    htmlwidgets::saveWidget(r,file=file.path(work,paste0("caprion",suffix,".pqtl3dplotly.html")))
   '
 }
 
 function mean()
 {
-  export caprion=~/Caprion
-  awk '{gsub(/NA/,"0",$NF);print}' ${caprion}/pilot/work/caprion.sample > ${caprion}/analysis/work/caprion.sample
+  awk '{gsub(/NA/,"0",$NF);print}' ${analysis}/work/caprion${suffix}.sample > ${analysis}/work/caprion${suffix}.sample
 }
 
 function fp()
@@ -218,18 +212,18 @@ function HetISq()
 
 function fplz()
 {
-  export metal=~/Caprion/analysis/METAL${suffix}
+  export metal=${analysis}/METAL${suffix}
 # HSPB1_rs114800762 is missing as dug by the following code.
-  join -a1 <(sed '1d' work/caprion.merge | awk '{print $1"_"$4}' | sort -k1,1 ) \
-           <(ls METAL/qqmanhattanlz/lz/*pdf | xargs -l basename -s .pdf | awk '{print $1,NR}') | \
+  join -a1 <(sed '1d' ${analysis}/work/caprion${suffix}.merge | awk '{print $1"_"$4}' | sort -k1,1 ) \
+           <(ls ${analysis}/METAL${suffix}/qqmanhattanlz/lz/*pdf | xargs -l basename -s .pdf | awk '{print $1,NR}') | \
   awk 'NF<2' | \
   sed 's/_/ /' | \
-  parallel -C' ' 'ls METAL${suffix}/qqmanhattanlz/lz/{1}*pdf'
+  parallel -C' ' 'ls ${analysis}/METAL${suffix}/qqmanhattanlz/lz/{1}*pdf'
 # forest/locuszoom left-right format
   ulimit -n
   ulimit -S -n 2048
-  qpdf --empty --pages $(sed '1d' ~/Caprion/analysis/work/caprion.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
-                         parallel -C' ' 'ls $(echo METAL/qqmanhattanlz/lz/{1}_{2}.pdf | sed "s/:/_/")') -- lz2.pdf
+  qpdf --empty --pages $(sed '1d' ${analysis}/work/caprion.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
+                         parallel -C' ' 'ls $(echo ${analysis}/METAL${suffix}/qqmanhattanlz/lz/{1}_{2}.pdf | sed "s/:/_/")') -- lz2.pdf
   export npages=$(qpdf -show-npages lz2.pdf)
   qpdf --pages . 1-$npages:odd -- lz2.pdf lz.pdf
 # Split files, note the naming scheme
@@ -243,7 +237,6 @@ function fplz()
   qpdf fp+lz.pdf --pages . $(sed '1d' ${caprion}.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- HetISq75.pdf
 }
 
-setup
 signals
 merge
 cistrans

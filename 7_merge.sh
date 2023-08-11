@@ -2,7 +2,6 @@
 
 export analysis=~/Caprion/analysis
 export suffix=_dr
-export work=~/Caprion/analysis/work
 export TMPDIR=${HPC_WORK}/work
 
 function signals()
@@ -10,27 +9,22 @@ function signals()
   cat ${analysis}/METAL${suffix}/sentinels/*signals | \
   head -1 | \
   awk -v FS="\t" '{print "prot",$0}'
-  cat ~/Caprion/pilot/work/caprion${suffix}.varlist | \
+  cat ${analysis}/work/caprion${suffix}.varlist | \
   parallel -C' ' '
-    if [ -f ${analysis}/METAL${suffix}/sentinels/{}.signals ]; then
-       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${analysis}/METAL${suffix}/sentinels/{}.signals
-    fi
-    if [ -f ${analysis}/METAL${suffix}/sentinels/{}-chrX.signals ]; then
-       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${analysis}/METAL${suffix}/sentinels/{}-chrX.signals
+    if [ -f ${analysis}/METAL${suffix}/sentinels/{}${suffix}.signals ]; then
+       awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${analysis}/METAL${suffix}/sentinels/{}${suffix}.signals
     fi
   '
 ) > ${analysis}/work/caprion${suffix}.signals
 
 function merge()
 {
-  cat <(gunzip -c ${analysis}/METAL${suffix}/*-1.tbl.gz | head -1 | paste <(echo prot) -) \
-      <(sed '1d;s/\t/ /g' ${work}/caprion${suffix}.signals | grep -v 'X:' | \
-        parallel -C' ' -j20 'zgrep -w {7} ${caprion}/METAL/{1}-1.tbl.gz | paste <(echo {1}) -') \
-      <(sed '1d;s/\t/ /g' ${work}/caprion${suffix}.signals | grep 'X:' | \
-        parallel -C' ' -j20 'zgrep -w {7} ${caprion}/METAL/{1}-chrX-1.tbl.gz | paste <(echo {1}) -') \
-      > ${work}/caprion${suffix}.merge
-  cut -f11,14 ${work}/caprion.merge | sed '1d' | awk -vOFS="\t" '{printf $2" "; if($1<0) print "-"; else print "+"}' | \
-  sort -k1,1 -k2,2 | uniq -c | awk -vOFS="\t" '{print $1,$2,$3}'> ${work}/caprion${suffix}.dir
+  cat <(cat ${analysis}/METAL${suffix}/hdr| paste <(echo prot) -) \
+      <(sed '1d;s/\t/ /g' ${analysis}/work/caprion${suffix}.signals | \
+        parallel -C' ' -j20 'zgrep -w {7} ${analysis}/METAL${suffix}/{1}${suffix}-1.tbl.gz | paste <(echo {1}) -') \
+      > ${analysis}/work/caprion${suffix}.merge
+  cut -f11,14 ${analysis}/work/caprion${suffix}.merge | sed '1d' | awk -vOFS="\t" '{printf $2" "; if($1<0) print "-"; else print "+"}' | \
+  sort -k1,1 -k2,2 | uniq -c | awk -vOFS="\t" '{print $1,$2,$3}'> ${analysis}/work/caprion${suffix}.dir
 }
 
 function cistrans()
@@ -42,7 +36,6 @@ function cistrans()
   # Directions
     analysis <- Sys.getenv("analysis")
     suffix=Sys.getenv("suffix")
-    work <- Sys.getenv("work")
     caprion.dir <- within(read.table(paste0(analysis,"/work/caprion",suffix,".dir"),
                                      col.names=c("Count","Direction","Final")),{Direction=gsub(""," ",Direction)})
     knitr::kable(caprion.dir)
@@ -56,11 +49,11 @@ function cistrans()
                   filter(! chr %in% c("XY","Y"))
     X <- with(glist_hg19,chr=="X")
     glist_hg19[X,"chr"] <- "23"
-    ucsc <- transmute(pQTLtools::hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
+    ucsc <- transmute(pQTLdata::hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
             select(Gene,chr,start,end)
     X <- with(ucsc,chr=="X")
     ucsc[X,"chr"] <- "23"
-    caprion <- select(pQTLtools::caprion,Protein,Accession,Gene) %>%
+    caprion <- select(pQTLdata::caprion,Protein,Accession,Gene) %>%
                mutate(Protein=gsub("_HUMAN","",Protein)) %>%
                rename(prot=Protein)
     quadruple <- function(d,label) data.frame(Gene=label,chr=min(d$chr),start=min(d$start),end=max(d$end))
@@ -93,8 +86,8 @@ function cistrans()
     cis.vs.trans <- qtlClassifier(pqtls,posSNP,ucsc_modified,1e6) %>%
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)
-    write.csv(cis.vs.trans,file=file.path(caprion,work,"caprion.cis.vs.trans"),row.names=FALSE,quote=FALSE)
-    png(file.path(work,paste0("caprion",suffix,".pqtl2d.png")),width=12,height=10,unit="in",res=300)
+    write.csv(cis.vs.trans,file=file.path(analysis,"work","caprion.cis.vs.trans"),row.names=FALSE,quote=FALSE)
+    png(file.path(analysis,"work",paste0("caprion",suffix,".pqtl2d.png")),width=12,height=10,unit="in",res=300)
     r <- qtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                    gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                    TSS=TRUE,cis="cis",plot=TRUE,cex.labels=0.6,cex.points=0.6,
@@ -105,25 +98,24 @@ function cistrans()
                      gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                      TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
                      xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(caprion,work,paste0("caprion",suffix,".pqtl2dplotly.html")))
+    htmlwidgets::saveWidget(r,file=file.path(analysis,"work",paste0("caprion",suffix,".pqtl2dplotly.html")))
     r <- qtl3dplotly(cis.vs.trans,chrlen=gap::hg19,qtl.id="SNP",qtl.prefix="pQTL:",target.type="Protein",
                      snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                      gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                      TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
                      xlab="pQTL position",ylab="Gene position")
-    htmlwidgets::saveWidget(r,file=file.path(work,paste0("caprion",suffix,".pqtl3dplotly.html")))
+    htmlwidgets::saveWidget(r,file=file.path(analysis,"work",paste0("caprion",suffix,".pqtl3dplotly.html")))
   '
 }
 
 function mean()
 {
-  awk '{gsub(/NA/,"0",$NF);print}' ${analysis}/work/caprion${suffix}.sample > ${analysis}/work/caprion${suffix}.sample
+  awk '{gsub(/NA/,"0",$NF);print}' ${analysis}/work/caprion}.sample > ${analysis}/work/caprion${suffix}.sample
 }
 
 function fp()
 {
-  export analysis=~/Caprion/analysis
-  cp  ${analysis}/work/caprion.merge ${analysis}/work/tbl.tsv
+  cp  ${analysis}/work/caprion${suffix}.merge ${analysis}/work/tbl.tsv
   cut -f2-4 ${analysis}/work/tbl.tsv | \
   awk 'NR>1' | \
   sort -k1,2n | \
@@ -134,9 +126,9 @@ function fp()
     awk 'NR>1' ${analysis}/work/tbl.tsv | \
     cut -f1,4,14 --output-delimiter=' ' | \
     parallel -j10 -C' ' '
-      export direction=$(zgrep -w {2} ${analysis}/METAL${suffix}/{1}-1.tbl.gz | cut -f13)
+      export direction=$(zgrep -w {2} ${analysis}/METAL${suffix}/{1}${suffix}-1.tbl.gz | cut -f13)
       let j=1
-      for i in $(grep "Input File" ${analysis}/METAL${suffix}/{1}-1.tbl.info | cut -d" " -f7)
+      for i in $(grep "Input File" ${analysis}/METAL${suffix}/{1}${suffix}-1.tbl.info | cut -d" " -f7)
       do
          export n=$(awk -vj=$j "BEGIN{split(ENVIRON[\"direction\"],a,\"\");print a[j]}")
          if [ "$n" != "?" ]; then zgrep -H -w {2} $i; fi
@@ -144,16 +136,17 @@ function fp()
       done
   '
   ) | \
-  sed 's|/data/jinhua/INF/sumstats||g;s/.gz//g' > ${analysis}/work/all.tsv
+  sed 's/.gz//g' > ${analysis}/work/all.tsv
   Rscript -e '
     require(gap)
     require(dplyr)
+    suffix <- Sys.getenv("suffix")
     tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
            arrange(prot,SNP)
     all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
-           mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR)) %>%
+           mutate(CHR=gsub(suffix,"",CHR),CHR=gsub("/home/jhz22/Caprion/analysis/pgwas/caprion-|.fastGWA","",CHR)) %>%
            mutate(batch_prot_chr=strsplit(CHR,"-|:"),
                   batch=unlist(lapply(batch_prot_chr,"[",1)),
                   prot=unlist(lapply(batch_prot_chr,"[",2)),
@@ -176,8 +169,9 @@ function HetISq()
 {
   Rscript -e '
     suppressMessages(require(dplyr))
+    suffix <- Sys.getenv("suffix")
     all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
-           mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR)) %>%
+           mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR),CHR=gsub(suffix,"",CHR)) %>%
            mutate(batch_prot_chr=strsplit(CHR,"-|:"),
                   batch=unlist(lapply(batch_prot_chr,"[",1)),
                   prot=unlist(lapply(batch_prot_chr,"[",2)),
@@ -196,7 +190,8 @@ function HetISq()
     names(b2) <- paste0(names(all),".ZYQ")
     b3 <- subset(all,Batch=="3. UDP")
     names(b3) <- paste0(names(all),".UDP")
-    b <- full_join(b1,b2,by=c('prot'='prot.ZYQ','SNP'='SNP.ZYQ')) %>% full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
+    b <- full_join(b1,b2,by=c('prot'='prot.ZYQ','SNP'='SNP.ZYQ')) %>%
+         full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
          mutate(directions=gsub("NA","?",paste0(direction.ZWK,direction.ZYQ,direction.UDP))) %>%
          select(-Batch.ZWK,-Batch.ZYQ,-Batch.UDP,direction.ZWK,direction.ZYQ,direction.UDP)
     tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
@@ -205,8 +200,8 @@ function HetISq()
     Het <- filter(tbl,HetISq>=75) %>%
            select(prot,SNP,Direction,HetISq,index) %>%
            left_join(select(b,prot,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
-    write.csv(Het,file="work/HetISq75.csv",row.names=FALSE,quote=FALSE)
-    write(Het[['index']],file='work/HetISq75.index',sep=",",ncolumns=nrow(Het))
+    write.csv(Het,file=file.path(analysis,"work", paste0("HetISq75",suffix,".csv"),row.names=FALSE,quote=FALSE)
+    write(Het[['index']],file=file.path(analysis, "work", paste0("HetISq75",suffix,".index"),sep=",",ncolumns=nrow(Het))
   '
 }
 
@@ -222,7 +217,7 @@ function fplz()
 # forest/locuszoom left-right format
   ulimit -n
   ulimit -S -n 2048
-  qpdf --empty --pages $(sed '1d' ${analysis}/work/caprion.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
+  qpdf --empty --pages $(sed '1d' ${analysis}/work/caprion${suffix}.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
                          parallel -C' ' 'ls $(echo ${analysis}/METAL${suffix}/qqmanhattanlz/lz/{1}_{2}.pdf | sed "s/:/_/")') -- lz2.pdf
   export npages=$(qpdf -show-npages lz2.pdf)
   qpdf --pages . 1-$npages:odd -- lz2.pdf lz.pdf
@@ -234,33 +229,11 @@ function fplz()
   pdfjam temp-*-*.pdf --nup 2x1 --landscape --papersize '{7in,16in}' --outfile fp+lz.pdf
   rm temp*pdf
 # qpdf fp+lz.pdf --pages . $(cat HetISq75.index) -- HetISq75.pdf
-  qpdf fp+lz.pdf --pages . $(sed '1d' ${caprion}.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- HetISq75.pdf
+  qpdf fp+lz.pdf --pages . \
+                 $(sed '1d' ${analysis}/work/caprion${suffix}.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') \
+       -- HetISq75.pdf
 }
 
-signals
-merge
+# for cmd in signals merge; do $cmd; fi
 cistrans
 fp
-
-function legacy()
-{
-# Number of proteins which contribute pQTLs
-  sed '1d' work/caprion.signals |cut -d' ' -f1 | sort -k1,1 | uniq | wc -l
-# Number of unique variants
-  awk 'NR>1{print $7}' work/caprion.signals | sort | uniq | wc -l
-# ordering of pQTLs
-  sed '1d;s/\t/ /g' work/caprion.signals | sort -k5,5gr
-  Rscript -e '
-  # Not quite working below.
-  ##qtlClassifier
-    posGene <- select(glist_hg19,gene,chr,start,end)
-    cvt <- gap::qtlClassifier(pqtls,posSNP,posGene,1e6)
-    table(cvt$Type)
-  ##cis.vs.trans.classification
-    panel <- left_join(caprion_modified,ucsc) %>%
-             filter(prot %in% unique(merged$prot))
-    cvt <- gap::cis.vs.trans.classification(merged,panel,"prot")
-  # suppressMessages(library(iBMQ))
-  # cis.vs.trans <- eqtlClassifier(pqtls,posSNP,ucsc_modified,1e6)
-  '
-}

@@ -1,4 +1,4 @@
-# NOTES
+# Notes
 
 ## Peptide and Protein ID using OpenMS tools
 

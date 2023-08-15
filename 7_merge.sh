@@ -113,7 +113,7 @@ function mean()
   awk '{gsub(/NA/,"0",$NF);print}' ${analysis}/work/caprion}.sample > ${analysis}/work/caprion${suffix}.sample
 }
 
-function fp()
+function fp_data()
 {
   cp  ${analysis}/work/caprion${suffix}.merge ${analysis}/work/tbl.tsv
   cut -f2-4 ${analysis}/work/tbl.tsv | \
@@ -137,6 +137,10 @@ function fp()
   '
   ) | \
   sed 's/.gz//g' > ${analysis}/work/all.tsv
+}
+
+function fp()
+{
   Rscript -e '
     require(gap)
     require(dplyr)
@@ -158,15 +162,16 @@ function fp()
                                   TRUE ~ "---")) %>%
            select(-batch_prot_chr)
     rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
-    tbl_fp <- tbl[-22,][-40,][-80,][-118,][-181,][-225,][-446,][-500,][-628,][-743,][-941,][-949,][-1033,][-1075,][-1098,]
-    pdf("~/Caprion/analysis/work/fp.pdf",width=10,height=8)
-#   METAL_forestplot(tbl,all,rsid)
-    METAL_forestplot(tbl_fp,all,rsid)
-    dev.off()
-    prot_SNP <- tbl_fp |>
+    reml_fp <- tbl[-22,][-40,][-80,][-118,][-181,][-225,][-446,][-500,][-628,][-743,][-941,][-949,][-1033,][-1075,][-1098,]
+    prot_SNP <- reml_fp |>
                 mutate(prot_SNP=paste0(prot,"-",SNP)) |>
                 pull(prot_SNP)
-    setdiff(mutate(tbl,prot_SNP=paste0(prot,"-",SNP))|>pull(prot_SNP),prot_SNP)
+    setdiff(mutate(tbl,prot_SNP=paste0(prot,"-",SNP)) |>
+    pull(prot_SNP),prot_SNP)
+    pdf("~/Caprion/analysis/work/fp.pdf",width=10,height=8)
+    meta::settings.meta(method.tau="DL")
+    METAL_forestplot(tbl,all,rsid,random=FALSE)
+    dev.off()
   '
 }
 
@@ -240,6 +245,5 @@ function fplz()
        -- HetISq75.pdf
 }
 
-# for cmd in signals merge; do $cmd; fi
-cistrans
+# for cmd in signals merge cistrans; do $cmd; fi
 fp

@@ -162,15 +162,15 @@ function fp()
                                   TRUE ~ "---")) %>%
            select(-batch_prot_chr)
     rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
-    reml_fp <- tbl[-22,][-40,][-80,][-118,][-181,][-225,][-446,][-500,][-628,][-743,][-941,][-949,][-1033,][-1075,][-1098,]
+    tbl_reml <- tbl[-22,][-40,][-80,][-118,][-181,][-225,][-446,][-500,][-628,][-743,][-941,][-949,][-1033,][-1075,][-1098,]
     prot_SNP <- reml_fp |>
                 mutate(prot_SNP=paste0(prot,"-",SNP)) |>
                 pull(prot_SNP)
     setdiff(mutate(tbl,prot_SNP=paste0(prot,"-",SNP)) |>
     pull(prot_SNP),prot_SNP)
-    pdf("~/Caprion/analysis/work/fp.pdf",width=10,height=8)
-    meta::settings.meta(method.tau="DL")
-    METAL_forestplot(tbl,all,rsid,random=FALSE)
+    meta::settings.meta(method.tau="REML",random=FALSE)
+    pdf("~/Caprion/analysis/work/fp.pdf",width=10,height=6)
+    METAL_forestplot(tbl_reml,all,rsid)
     dev.off()
   '
 }

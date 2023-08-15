@@ -7,7 +7,7 @@ nav:
   - pilot/README.md
   - pilot/gwas2.md
   - pilot/autoencoder.md
-  - pilot/NOTES.md
+  - pilot/Notes.md
 theme:
     name: mkdocs
     nav_style: dark

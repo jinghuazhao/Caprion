@@ -141,6 +141,7 @@ function fp_data()
 
 function fp()
 {
+  if [ ! -d ${analysis}/METAL${suffix}/fp ]; then mkdir -o mkdir -p ${analysis}/METAL${suffix}/fp; fi
   Rscript -e '
     require(gap)
     require(dplyr)
@@ -150,16 +151,18 @@ function fp()
            arrange(prot,SNP)
     all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
-           mutate(CHR=gsub(suffix,"",CHR),CHR=gsub("/home/jhz22/Caprion/analysis/pgwas/caprion-|.fastGWA","",CHR)) %>%
+           mutate(CHR=gsub(suffix,"",CHR),
+                  CHR=gsub("/home/jhz22/Caprion/analysis/pgwas/caprion-|.fastGWA","",CHR)) %>%
            mutate(batch_prot_chr=strsplit(CHR,"-|:"),
                   batch=unlist(lapply(batch_prot_chr,"[",1)),
                   prot=unlist(lapply(batch_prot_chr,"[",2)),
-                  CHR=unlist(lapply(batch_prot_chr,"[",3))) %>%
+                  CHR=unlist(lapply(batch_prot_chr,"[",3)),CHR=gsub("chrX","23",CHR)) %>%
            mutate(MarkerName=paste0(CHR,":",POS),
-                  study=case_when(batch == batch[1] ~ "1. ZWK",
-                                  batch == batch[2] ~ "2. ZYQ",
-                                  batch == batch[3] ~ "3. UDP",
+                  study=case_when(batch == batch[1] ~ paste0("1. ZWK (",N,")"),
+                                  batch == batch[2] ~ paste0("2. ZYQ (",N,")"),
+                                  batch == batch[3] ~ paste0("3. UDP (",N,")"),
                                   TRUE ~ "---")) %>%
+           arrange(study) %>%
            select(-batch_prot_chr)
     rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
     tbl_reml <- tbl[-22,][-40,][-80,][-118,][-181,][-225,][-446,][-500,][-628,][-743,][-941,][-949,][-1033,][-1075,][-1098,]
@@ -168,11 +171,10 @@ function fp()
                 pull(prot_SNP)
     setdiff(mutate(tbl,prot_SNP=paste0(prot,"-",SNP)) |>
     pull(prot_SNP),prot_SNP)
-    meta::settings.meta(method.tau="REML",random=FALSE)
-    pdf("~/Caprion/analysis/work/fp.pdf",width=10,height=6)
-#   METAL_forestplot(tbl_reml,all,rsid)
-    METAL_forestplot(tbl_reml,all,rsid,method="REML",package="metafor")
-    dev.off()
+    meta::settings.meta(method.tau="DL",random=FALSE)
+    # pdf("~/Caprion/analysis/work/fp.pdf",width=8,height=5)
+    METAL_forestplot(tbl,all,rsid,package="metafor",method="FE",cex=1.2,cex.axis=1.5,,cex.lab=1.5,xlab="Effect",split=TRUE)
+    # dev.off()
   '
 }
 

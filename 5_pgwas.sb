@@ -10,16 +10,16 @@
 ##SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
 
-#SBATCH --job-name=_fastGWA
-#SBATCH --array=1-987
-#SBATCH --mem=28800
-#SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
-#SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
-
-##SBATCH --job-name=_qqmanhattan
+##SBATCH --job-name=_fastGWA
 ##SBATCH --array=1-987
-##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.o
-##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL/qqmanhattanlz/qqmanhattan/slurm/_qqmanhattan_%A_%a.e
+##SBATCH --mem=28800
+##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
+##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
+
+#SBATCH --job-name=_qqmanhattan
+#SBATCH --array=1-987
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz//slurm/_qqmanhattan_%A_%a.e
 
 ##SBATCH --job-name=_lz
 ##SBATCH --array=1-987
@@ -91,26 +91,27 @@ function fastLR()
 
 function qqmanhattan()
 {
-  gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
+  export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)${suffix}
+  gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
   awk '{if (NR==1) print "chromsome","position","log_pvalue","beta","se"; else print $1,$2,-$12,$10,$11}' > ${analysis}/work/${phenoname}.txt
   R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
-      output_data_rootname=${analysis}/METAL/qqmanhattanlz/qqmanhattan/${phenoname}_qq \
+      output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_qq \
       plot_title="${phenoname}" < ~/cambridge-ceu/turboqq/turboqq.r
-  if [ ! -f ${analysis}/METAL/sentinels/${phenoname}.signals ]; then
+  if [ ! -f ${analysis}/METAL{suffix}/sentinels/${phenoname}.signals ]; then
      R --slave --vanilla --args \
        input_data_path=${analysis}/work/${phenoname}.txt \
-       output_data_rootname=${analysis}/METAL/qqmanhattanlz/qqmanhattan/${phenoname}_manhattan \
+       output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_manhattan \
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
        pvalue_sign=5e-8 \
        plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
   else
     cat <(echo chromosome position) \
-        <(awk 'NR>1{print $1,$2}' ${analysis}/METAL/sentinels/${phenoname}.signals) \
+        <(awk 'NR>1{print $1,$2}' ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals) \
         > ${analysis}/work/${phenoname}.annotate
     R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
-      output_data_rootname=${analysis}/METAL/qqmanhattanlz/qqmanhattan/${phenoname}_manhattan \
+      output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_manhattan \
       custom_peak_annotation_file_path=${analysis}/work/${phenoname}.annotate \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5e-8 \
@@ -125,44 +126,44 @@ function lz()
 # rs114800762 not in the reference panel, so would need to drop --refsnp, and then rename.
 {
   module load python/2.7
-  if [ -f ${analysis}/METAL/sentinels/${phenoname}.signals ]; then
+  if [ -f ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals ]; then
      (
-       awk 'NR>1{print $6}' ${analysis}/METAL/sentinels/${phenoname}.signals | \
+       awk 'NR>1{print $6}' ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals | \
        parallel -j1 -C' ' --env analysis --env phenoname '
-         zgrep -w {} ${analysis}/METAL/${phenoname}-1.tbl.gz | \
+         zgrep -w {} ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
          awk -v rsid={} "{print \$1,\$2-5e5,\$2+5e5,rsid}"
        '
      ) | \
      parallel -j1 -C ' ' --env analysis --env phenoname '
        (
-         gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
+         gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
          awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}" | \
          cut -f1-3,12
-         gunzip -c ${analysis}/METAL/${phenoname}-1.tbl.gz | \
+         gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL/qqmanhattanlz/lz --svg --refsnp {4}
+                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz/lz --svg --refsnp {4}
        rm ${analysis}/work/${phenoname}-{4}.lz
      '
   fi
-  if [ -f ${analysis}/METAL/sentinels/${phenoname}-chrX.signals ]; then
+  if [ -f ${analysis}/METAL${suffix}/sentinels/${phenoname}-chrX.signals ]; then
      (
-       awk 'NR>1{print $6}' ${analysis}/METAL/sentinels/${phenoname}-chrX.signals | \
+       awk 'NR>1{print $6}' ${analysis}/METAL${suffix}/sentinels/${phenoname}-chrX.signals | \
        parallel -j1 -C' ' --env analysis --env phenoname '
-         zgrep -w {} ${analysis}/METAL/${phenoname}-chrX-1.tbl.gz | \
+         zgrep -w {} ${analysis}/METAL${suffix}/${phenoname}-chrX-1.tbl.gz | \
          awk -v rsid={} "{print \$1,\$2-5e5,\$2+5e5,rsid}"
        '
      ) | \
      parallel -j1 -C ' ' --env analysis --env phenoname '
        (
-         gunzip -c ${analysis}/METAL/${phenoname}-chrX-1.tbl.gz | \
+         gunzip -c ${analysis}/METAL${suffix}/${phenoname}-chrX-1.tbl.gz | \
          awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}" | \
          cut -f1-3,12
-         gunzip -c ${analysis}/METAL/${phenoname}-chrX-1.tbl.gz | \
+         gunzip -c ${analysis}/METAL${suffix}/${phenoname}-chrX-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}}" | \
          sort -k1,1n -k2,2n | \
          sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
@@ -170,7 +171,7 @@ function lz()
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-chrX-{4}.lz \
                  --delim tab title="${phenoname}-chr{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL/qqmanhattanlz/lz \
+                 --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL${suffix}/qqmanhattanlz/lz \
                  --svg --refsnp $(echo chr{4} | sed "s/_[A-Z]*_[A-Z]*//")
        rm ${analysis}/work/${phenoname}-chrX-{4}.lz
      '
@@ -376,11 +377,10 @@ function miamiplot2()
 }
 
 #bgen
-fastLR 1
-fastLR 2
-fastLR 3
-#qqmanhattan
-##SBATCH --array=9,57,169,184,532,626,632,636,785,817,823,918,927,959,982
+#fastLR 1
+#fastLR 2
+#fastLR 3
+qqmanhattan
 #lz
 #pairs_p
 #miamiplot

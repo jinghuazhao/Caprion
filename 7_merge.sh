@@ -171,10 +171,9 @@ function fp()
                 pull(prot_SNP)
     setdiff(mutate(tbl,prot_SNP=paste0(prot,"-",SNP)) |>
     pull(prot_SNP),prot_SNP)
-    meta::settings.meta(method.tau="DL",random=FALSE)
-    # pdf("~/Caprion/analysis/work/fp.pdf",width=8,height=5)
-    METAL_forestplot(tbl,all,rsid,package="metafor",method="FE",cex=1.2,cex.axis=1.5,,cex.lab=1.5,xlab="Effect",split=TRUE)
-    # dev.off()
+    pdf("~/Caprion/analysis/work/fp.pdf",width=8,height=5)
+    METAL_forestplot(tbl,all,rsid,package="metafor",method="FE",cex=1.2,cex.axis=1.2,,cex.lab=1.2,xlab="Effect",split=TRUE)
+    dev.off()
   '
 }
 

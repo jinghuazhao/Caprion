@@ -2,7 +2,7 @@
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake-himem
-#SBATCH --mem=40000
+#SBATCH --mem=80000
 #SBATCH --time=12:00:00
 
 ##SBATCH --job-name=_bgen
@@ -142,11 +142,11 @@ function lz()
      ) | \
      parallel -j1 -C ' ' --env analysis --env phenoname '
        (
-         echo -e "Chromosome\t\Position\tMarkerName\tlog10P"
+         echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
          gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
          cut -f1-3,12
          gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
-         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {print \$1,\$2,\$3,\$12*-1}" | \
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
@@ -166,11 +166,11 @@ function lz()
      ) | \
      parallel -j1 -C ' ' --env analysis --env phenoname '
        (
-         echo -e "Chromosome\t\Position\tMarkerName\tlog10P"
+         echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
          gunzip -c ${analysis}/METAL${suffix}/${phenoname}-chrX-1.tbl.gz | \
          cut -f1-3,12
          gunzip -c ${analysis}/METAL${suffix}/${phenoname}-chrX-1.tbl.gz | \
-         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}}" | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {print \$1,\$2,\$3,\$12*-1}}" | \
          sort -k1,1n -k2,2n | \
          sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
        ) > ${analysis}/work/${phenoname}-chrX-{4}.lz

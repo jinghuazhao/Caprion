@@ -2,7 +2,7 @@
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake-himem
-#SBATCH --mem=80000
+#SBATCH --mem=15000
 #SBATCH --time=12:00:00
 
 ##SBATCH --job-name=_bgen
@@ -24,6 +24,7 @@
 
 ##SBATCH --job-name=_lz
 ##SBATCH --array=1-987
+##SBATCH --mem 6800
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
 
@@ -98,7 +99,8 @@ function qqmanhattan()
 {
   export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)${suffix}
   gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
-  awk '{if (NR==1) print "chromsome","position","log_pvalue","beta","se"; else print $1,$2,-$12,$10,$11}' > ${analysis}/work/${phenoname}.txt
+  awk '{if (NR==1) print "chromsome","position","log_pvalue","beta","se";
+        else if ($1!=23) print $1,$2,-$12,$10,$11}' > ${analysis}/work/${phenoname}.txt
   R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt \
       output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_qq \

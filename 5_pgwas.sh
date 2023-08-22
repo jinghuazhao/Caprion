@@ -218,3 +218,23 @@ function caprion_ZYQ_classification()
     quantro_qtest(combat_edata,"_combat")
   '
 }
+
+function pdf()
+{
+  export f=${analysis}/work/caprion${suffix}.signals
+  export N=$(sed '1d' ${f} | wc -l)
+  export g=10
+  export d=${analysis}/METAL{suffix}/qqmanhattanlz
+  sed '1d' ${f} | \
+  awk -vN=${N} -vg=${g} '
+  function ceil(v) {return(v+=v<0?0:0.999)}
+  {
+     printf "%d %s\n", ceil(NR*g/N), $1
+  } ' > ${N}
+  for i in {1..${g}}
+  do
+     qpdf --empty $(awk -v i=${i} '$1==i' ${N} | cut -d' ' -f2 | awk -vd=${d} '{print d"/" $1 "_dr_qq.pdf"}' | tr '\n' ' ';echo) \
+          --pages . -- qq-${i}.pdf
+  done
+  rm ${N}
+}

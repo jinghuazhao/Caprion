@@ -224,17 +224,40 @@ function pdf()
   export f=${analysis}/work/caprion${suffix}.signals
   export N=$(sed '1d' ${f} | wc -l)
   export g=10
-  export d=${analysis}/METAL{suffix}/qqmanhattanlz
+  export d=${analysis}/METAL${suffix}/qqmanhattanlz
+  module load ceuadmin/pdfjam gcc/6
+# qq-manhattan
+  ls ${d}/*_qq.png | xargs -l basename -s _qq.png | \
+  parallel -C' ' 'convert -resize 150% {}_qq.png {}_qq.pdf;convert {}_manhattan.png {}_manhattan.pdf'
+  qpdf --empty --pages $(ls *_qq.pdf) -- qq.pdf
+  qpdf --empty --pages $(ls *_manhattan.pdf) -- manhattan.pdf
+  pdfseparate qq.pdf temp-%04d-qq.pdf
+  pdfseparate manhattan.pdf temp-%04d-manhattan.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR<=500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile qq-manhattan1.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>500 && NR<=1000') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile qq-manhattan2.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>1000 && NR<=1500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile qq-manhattan3.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>1500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile qq-manhattan4.pdf
+  qpdf --empty --pages qq-manhattan*pdf -- qq-manhattan.pdf
+  rm temp*
+# lz
   sed '1d' ${f} | \
   awk -vN=${N} -vg=${g} '
   function ceil(v) {return(v+=v<0?0:0.999)}
   {
-     printf "%d %s\n", ceil(NR*g/N), $1
+     printf "%d %s %d %d %s\n", ceil(NR*g/N), $1, $2, $4, $7
   } ' > ${N}
-  for i in {1..${g}}
+  for i in `seq ${g}`
   do
-     qpdf --empty $(awk -v i=${i} '$1==i' ${N} | cut -d' ' -f2 | awk -vd=${d} '{print d"/" $1 "_dr_qq.pdf"}' | tr '\n' ' ';echo) \
-          --pages . -- qq-${i}.pdf
+     export n=$(awk -v i=${i} '$1==i' ${N} | wc -l)
+     qpdf --empty --pages $(awk -v i=${i} -v suffix=${suffix} '$1==i' ${N} | \
+                            awk -vd=${d} '{if($2=="FCN3"suffix && $5=="rs35451048") $5=="rs7975994"; print d"/"$2"_dr_"$5".pdf"}' | \
+                            tr ':' '_' | tr '\n' ' ';echo) \
+          -- lz2-${i}.pdf
+     qpdf --pages . 1-${n}:odd -- lz2-${i}.pdf lz-${i}.pdf
+     rm lz2-${i}.pdf
   done
+  qpdf --empty --pages $(ls lz-[0-9]*.pdf) -- lz.pdf
   rm ${N}
 }
+
+pdf

@@ -244,19 +244,38 @@ function pdf()
   awk -vN=${N} -vg=${g} '
   function ceil(v) {return(v+=v<0?0:0.999)}
   {
+     gsub(":","_",$7)
      printf "%d %s %d %d %s\n", ceil(NR*g/N), $1, $2, $4, $7
   } ' > ${N}
   for i in `seq ${g}`
   do
      export n=$(awk -v i=${i} '$1==i' ${N} | wc -l)
-     qpdf --empty --pages $(awk -v i=${i} -v suffix=${suffix} '$1==i' ${N} | \
-                            awk -vd=${d} '{if($2=="FCN3"suffix && $5=="rs35451048") $5=="rs7975994"; print d"/"$2"_dr_"$5".pdf"}' | \
-                            tr ':' '_' | tr '\n' ' ';echo) \
+     export n2=$(expr ${n} \* 2)
+     if [ ${i} -eq 5 ]; then
+     export n2=$(expr ${n2} - 2)
+     qpdf --empty --pages $(awk -v i=${i} '$1==i' ${N} | \
+                            awk -v d=${d}/lz -v suffix=${suffix} '
+                            {
+                              if($2=="FCN3"suffix && $5=="rs35451048") $5=="rs7975994"; print d"/"$2"_dr_"$5".pdf"
+                            }' | \
+                            sort -k1,1 | \
+                            grep -v HSPB1_dr_rs114800762.pdf | \
+                            tr '\n' ' ';echo) \
           -- lz2-${i}.pdf
-     qpdf --pages . 1-${n}:odd -- lz2-${i}.pdf lz-${i}.pdf
+     else
+     qpdf --empty --pages $(awk -v i=${i} '$1==i' ${N} | \
+                            awk -v d=${d}/lz -v suffix=${suffix} '
+                            {
+                              if($2=="FCN3"suffix && $5=="rs35451048") $5=="rs7975994"; print d"/"$2"_dr_"$5".pdf"
+                            }' | \
+                            sort -k1,1 | \
+                            tr '\n' ' ';echo) \
+          -- lz2-${i}.pdf
+     fi
+     qpdf --pages . 1-${n2}:odd -- lz2-${i}.pdf lz-${i}.pdf
      rm lz2-${i}.pdf
   done
-  qpdf --empty --pages $(ls lz-[0-9]*.pdf) -- lz.pdf
+  qpdf --empty --pages $(echo lz-{1..10}.pdf) -- lz.pdf
   rm ${N}
 }
 

@@ -23,8 +23,7 @@
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz//slurm/_qqmanhattan_%A_%a.e
 
 #SBATCH --job-name=_lz
-##SBATCH --array=1-987
-#SBATCH --array 364
+#SBATCH --array=1-987
 #SBATCH --mem 6800
 #SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
 #SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
@@ -154,7 +153,7 @@ function rs7975994()
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --svg --refsnp rs7975994
+                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --svg --refsnp rs35451048
        rm ${analysis}/work/${phenoname}-{4}.lz
      '
   fi
@@ -415,8 +414,8 @@ function miamiplot2()
 #fastLR 2
 #fastLR 3
 #qqmanhattan
-#lz
-rs7975994
+lz
+#rs7975994
 #pairs_p
 #miamiplot
 #miamiplot2

@@ -23,7 +23,7 @@
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz//slurm/_qqmanhattan_%A_%a.e
 
 #SBATCH --job-name=_lz
-#SBATCH --array=1-987
+##SBATCH --array=1-987
 #SBATCH --array=462
 #SBATCH --mem 6800
 #SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
@@ -130,7 +130,7 @@ function qqmanhattan()
 # R --no-save < utils/qqman.R
 }
 
-function renew_rsid()
+function missing_rsid()
 {
 # rs35451048 not in the reference panel
 # 12      588371  590545  -9      FCN3_dr rs35451048
@@ -143,10 +143,10 @@ function renew_rsid()
   export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)${suffix}
   if [ -f ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals ]; then
      (
-       awk -vold=$old -vnew=$new '$6==old {print new}' ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals | \
+       awk -vold=$old '$6==old {print old}' ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals | \
        parallel -j1 -C' ' --env analysis --env phenoname '
          zgrep -w {} ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
-         awk -v rsid={} "{print \$1,\$2-5e5,\$2+5e5,rsid}"
+         awk -v rsid=${old} "{print \$1,\$2-5e5,\$2+5e5,rsid}"
        '
      ) | \
      parallel -j1 -C ' ' --env analysis --env phenoname '
@@ -154,16 +154,19 @@ function renew_rsid()
          echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
          gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {print \$1,\$2,\$3,-\$12}" | \
-         sort -k1,1n -k2,2n
+         sort -k1,1n -k2,2n | \
        ) > ${analysis}/work/${phenoname}-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly \
-                 --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --svg --refsnp ${new}
-       rm ${analysis}/work/${phenoname}-{4}.lz
-       mv ${phenoname}-${new}.pdf ${phenoname}-${old}.pdf
-       mv ${phenoname}-${new}.svg ${phenoname}-${old}.svg
+                 --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --svg --refsnp {4}
+     # rm ${analysis}/work/${phenoname}-{4}.lz
+     # with --no-snp-name the following rename would work
+       mv ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_chr{1}_{2}-{3}.pdf \
+          ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}-${old}.pdf
+       mv ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_chr{1}_{2}-{3}.svg \
+          ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}-${old}.svg
      '
   fi
 }
@@ -424,7 +427,7 @@ function miamiplot2()
 #fastLR 3
 #qqmanhattan
 #lz
-renew_rsid
+missing_rsid
 #pairs_p
 #miamiplot
 #miamiplot2

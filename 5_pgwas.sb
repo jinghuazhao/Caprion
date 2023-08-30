@@ -154,9 +154,9 @@ function missing_rsid()
          echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
          gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {print \$1,\$2,\$3,-\$12}" | \
-         sort -k1,1n -k2,2n | \
+         sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz
-       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
+       locuszoom --source interval --build interval37 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly \

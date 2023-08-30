@@ -251,18 +251,6 @@ function pdf()
   do
      export n=$(awk -v i=${i} '$1==i' ${N} | wc -l)
      export n2=$(expr ${n} \* 2)
-     if [ ${i} -eq 5 ]; then
-     export n2=$(expr ${n2} - 2)
-     qpdf --empty --pages $(awk -v i=${i} '$1==i' ${N} | \
-                            awk -v d=${d}/lz -v suffix=${suffix} '
-                            {
-                              if($2=="FCN3"suffix && $5=="rs35451048") $5=="rs7975994"; print d"/"$2"_dr_"$5".pdf"
-                            }' | \
-                            sort -k1,1 | \
-                            grep -v HSPB1_dr_rs114800762.pdf | \
-                            tr '\n' ' ';echo) \
-          -- lz2-${i}.pdf
-     else
      qpdf --empty --pages $(awk -v i=${i} '$1==i' ${N} | \
                             awk -v d=${d}/lz -v suffix=${suffix} '
                             {
@@ -271,7 +259,6 @@ function pdf()
                             sort -k1,1 | \
                             tr '\n' ' ';echo) \
           -- lz2-${i}.pdf
-     fi
      qpdf --pages . 1-${n2}:odd -- lz2-${i}.pdf lz-${i}.pdf
      rm lz2-${i}.pdf
   done

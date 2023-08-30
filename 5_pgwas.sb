@@ -132,11 +132,7 @@ function qqmanhattan()
 
 function missing_rsid()
 {
-# rs35451048 not in the reference panel
-# 12      588371  590545  -9      FCN3_dr rs35451048
 # Warning: rs114800762 is not the current name in genome build (should be: rs3982708)
-  export old=rs35451048
-  export new=rs7975994
   export old=rs114800762
   export new=rs3982708
   module load python/2.7

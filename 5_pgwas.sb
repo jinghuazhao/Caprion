@@ -157,8 +157,8 @@ function missing_rsid()
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly \
                  --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --svg --refsnp {4}
-     # rm ${analysis}/work/${phenoname}-{4}.lz
-     # with --no-snp-name the following rename would work
+     rm ${analysis}/work/${phenoname}-{4}.lz
+     # --no-snp-name handling
        mv ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_chr{1}_{2}-{3}.pdf \
           ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}-${old}.pdf
        mv ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_chr{1}_{2}-{3}.svg \

@@ -252,10 +252,7 @@ function pdf()
      export n=$(awk -v i=${i} '$1==i' ${N} | wc -l)
      export n2=$(expr ${n} \* 2)
      qpdf --empty --pages $(awk -v i=${i} '$1==i' ${N} | \
-                            awk -v d=${d}/lz -v suffix=${suffix} '
-                            {
-                              if($2=="FCN3"suffix && $5=="rs35451048") $5=="rs7975994"; print d"/"$2"_dr_"$5".pdf"
-                            }' | \
+                            awk -v d=${d}/lz -v suffix=${suffix} '{print d"/"$2,suffix,"_"$5".pdf"}' | \
                             sort -k1,1 | \
                             tr '\n' ' ';echo) \
           -- lz2-${i}.pdf
@@ -264,6 +261,15 @@ function pdf()
   done
   qpdf --empty --pages $(echo lz-{1..10}.pdf) -- lz.pdf
   rm ${N}
+# fp-lz
+  pdfseparate ${analysis}/work/fp.pdf temp-%04d-fp.pdf
+  pdfseparate ${analysis}/METAL${suffix}/qqmanhattanlz/lz.pdf temp-%04d-lz.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR<=500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile fp-lz1.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>500 && NR<=1000') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile fp-lz2.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>1000 && NR<=1500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile fp-lz3.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>1500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile fp-lz4.pdf
+  qpdf --empty --pages fp-lz*pdf -- fp-lz.pdf
+  rm temp*
 }
 
 pdf

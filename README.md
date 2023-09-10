@@ -127,16 +127,16 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
 [^HLA]: Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,
 
-    **Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
+    **Locus** |  A  |  B  |  C | DPB1 | DQA1 | DQB1 | DRB1
     ----------|-----|-----|----|------|------|------|-----
-    **N**     |1857 |2572 |1866| 1740 | 1924 | 1624 | 2436
+    **N**     |1857 |2572 |1866| 1624 | 1740 | 1924 |  2436
 
     while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.
 
     It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 1000Genomes reference panel has 465 variants with HLA prefix and the partition is as follows,
 
-    **Locus** |  A  |  B  |  C | DQA1 | DQB1 | DPB1 | DRB1
+    **Locus** |  A  |  B  |  C | DPB1 | DQA1 | DQB1 | DRB1
     ----------|-----|-----|----|------|------|------|-----
-    **HLA_**  |  98 | 183 | 69 |   0  |  33  |   0  |  82
+    **HLA_**  |  98 | 183 | 69 |   0  |  0   |  33  |  82
 
-    A recent update: PGG.HLA, [https://www.pggmhc.org/pggmhc/](https://www.pggmhc.org/pggmhc/)
+    A recent update: PGG.HLA, <https://pog.fudan.edu.cn/pggmhc/>, requires data submission.

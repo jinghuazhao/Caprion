@@ -21,6 +21,11 @@ interval <- function()
   fam.fn <- file.path(caprion, "pilot", "data", "merged_imputation.fam")
   bim.fn <- file.path(caprion, "pilot", "data", "merged_imputation.bim")
   interval.geno <- hlaBED2Geno(bed.fn, fam.fn, bim.fn, assembly="hg19",rm.invalid.allele=TRUE, import.chr="6")
+  setwd("~/rds/post_qc_data/interval/genotype/affy_ukbiobank_array/genotyped")
+  bed <- "merged_imputation.bed"
+  fam <- "merged_imputation.fam"
+  bim <- "merged_imputation.bim"
+  interval.geno <- hlaBED2Geno(bed, fam, bim, assembly="hg19",rm.invalid.allele=TRUE, import.chr="6")
   assign("interval.geno",interval.geno,envir=.GlobalEnv)
   save(interval.geno,file=file.path(caprion,"analysis","work","hla.rda"))
   for (hlaId in hlaLoci)

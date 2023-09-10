@@ -69,6 +69,7 @@ function CookHLA()
          -gm ${caprion}/HLA/CookHLA/hla_IMPUTED.mach_step.avg.clpsB \
          -ae ${caprion}/HLA/CookHLA/hla_IMPUTED.aver.erate \
          -mem 250g
+  deactivate
 }
 
 function HIBAG()
@@ -89,8 +90,10 @@ function HIBAG()
 
 function hatk()
 {
+
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
+
   ln -sf ${hatk}/IMGT2Seq
   ln -sf ${hatk}/bMarkerGenerator
   python3 ${hatk}/HATK.py \
@@ -105,6 +108,7 @@ function hatk()
           --hg 18 \
           --imgt-dir ${hatk}/example/IMGTHLA3320 \
           --multiprocess 8
+  deactivate
 }
 
 hatk

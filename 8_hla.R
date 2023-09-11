@@ -27,10 +27,6 @@ bc58hatk <- function()
 
 interval <- function()
 {
-  bed.fn <- file.path(caprion, "pilot", "data", "merged_imputation.bed")
-  fam.fn <- file.path(caprion, "pilot", "data", "merged_imputation.fam")
-  bim.fn <- file.path(caprion, "pilot", "data", "merged_imputation.bim")
-  interval.geno <- hlaBED2Geno(bed.fn, fam.fn, bim.fn, assembly="hg19",rm.invalid.allele=TRUE, import.chr="6")
   setwd("~/rds/post_qc_data/interval/genotype/affy_ukbiobank_array/genotyped")
   bed <- "merged_imputation.bed"
   fam <- "merged_imputation.fam"
@@ -72,22 +68,19 @@ HapMap_CEU_model <- function()
   }
 }
 
-HIBAG_A <- function()
-{
-  model.fn <- system.file("extdata" ,"ModelList.RData", package="HIBAG")
-  model <- get(load(model.fn))
-  OutOfBag.fn <- system.file("extdata" ,"OutOfBag.RData", package="HIBAG")
-  OutOfBag <- get(load(OutOfBag.fn))
-  rm(modellist,mobj)
-}
-
-HIBAG <- function(hlaId,cohort)
+HIBAG <- function(hlaId,cohort,reference="HapMap")
 {
   cat(hlaId,"\n")
-  model.id <- get(paste0(hlaId,".model"))
   cohort.geno <- get(paste0(cohort,".geno"))
-  cohort.pred <- hlaPredict(model.id, cohort.geno, type = "response+dosage")
-  assign(paste0(cohort,hlaId),cohort.pred,envir=.GlobalEnv)
+  if (reference=="HapMap")
+  {
+    model.id <- get(paste0(hlaId,".model"))
+    cohort.pred <- hlaPredict(model.id, cohort.geno, type="response+dosage")
+  } else {
+    model.id <- hlaModelFromObj(model.list[[hlaId]])
+    cohort.pred <- predict(model, cohort.geno, type="response+prob")
+  }
+  assign(paste0(cohort,".",hlaId),cohort.pred,envir=.GlobalEnv)
 }
 
 lookup <- function(rsid=NULL)
@@ -97,13 +90,27 @@ lookup <- function(rsid=NULL)
   invisible(model.list)
 }
 
+hlaId <- "B"
 model.list <- lookup("rs2229092")
-plot(model.list$B)
+plot(model.list[[hlaId]])
+model <- hlaModelFromObj(model.list[[hlaId]])
 bc58()
 interval()
 HapMap_CEU_model()
-HIBAG("B","bc58")
-HIBAG("B","interval")
+HIBAG(hlaId,"bc58")
+HIBAG(hlaId,"interval")
+HIBAG(hlaId,"interval","UKB")
+
+# Notes
 
 # fail with wrong assembly
-HIBAG("B","bc58hatk")
+HIBAG(hlaId,"bc58hatk")
+
+HIBAG_A <- function()
+{
+  model.fn <- system.file("extdata" ,"ModelList.RData", package="HIBAG")
+  model <- get(load(model.fn))
+  OutOfBag.fn <- system.file("extdata" ,"OutOfBag.RData", package="HIBAG")
+  OutOfBag <- get(load(OutOfBag.fn))
+  rm(modellist,mobj)
+}

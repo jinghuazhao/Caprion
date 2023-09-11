@@ -125,11 +125,12 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository ([`https://github.com/statgen/METAL/issues/24`](https://github.com/statgen/METAL/issues/24)).
     This has enabled Forest plots for the associate pQTLs.
 
-[^HLA]: Whole cohort imputation is feasible with HIBAG which contains inclusive lists of SNPs based on samples of the following sizes,
+[^HLA]: Whole cohort imputation is feasible with a HIBAG reference panel,
 
-    **Locus** |  A  |  B  |  C | DPB1 | DQA1 | DQB1 | DRB1
-    ----------|-----|-----|----|------|------|------|-----
-    **N**     |1857 |2572 |1866| 1624 | 1740 | 1924 |  2436
+    **Locus** |   A  |   B  |   C  | DPB1 | DQA1 | DQB1 | DRB1
+    ----------|------|------|------|------|------|------|-----
+    **N**     | 1857 | 2572 | 1866 | 1624 | 1740 | 1924 | 2436
+    SNPs      |  891 |  990 | 1041 |  689 |  948 |  979 |  891
 
     while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.
 

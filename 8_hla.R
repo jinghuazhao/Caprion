@@ -1,5 +1,5 @@
 options(width=200)
-caprion <- "~/Caprion"
+analysis <- "~/Caprion/analysis"
 hpc_work <- Sys.getenv("HPC_WORK")
 region <- 500 # kb
 hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
@@ -27,13 +27,10 @@ bc58hatk <- function()
 
 interval <- function()
 {
-  setwd("~/rds/post_qc_data/interval/genotype/affy_ukbiobank_array/genotyped")
-  bed <- "merged_imputation.bed"
-  fam <- "merged_imputation.fam"
-  bim <- "merged_imputation.bim"
-  interval.geno <- hlaBED2Geno(bed, fam, bim, assembly="hg19",rm.invalid.allele=TRUE, import.chr="6")
+  setwd(file.path(analysis,"work"))
+  interval.geno <- hlaBED2Geno("hla.bed", "hla.fam", "hla.bim", assembly="hg19",rm.invalid.allele=TRUE, import.chr="6")
   assign("interval.geno",interval.geno,envir=.GlobalEnv)
-  save(interval.geno,file=file.path(caprion,"analysis","work","hla.rda"))
+  save(interval.geno,file=file.path(analysis,"work","hla.rda"))
   for (hlaId in hlaLoci)
   {
     snpid <- hlaFlankingSNP(interval.geno$snp.id, interval.geno$snp.position, hlaId, region*1000, assembly="hg19")
@@ -74,10 +71,10 @@ HIBAG <- function(hlaId,cohort,reference="HapMap")
   cohort.geno <- get(paste0(cohort,".geno"))
   if (reference=="HapMap")
   {
-    model.id <- get(paste0(hlaId,".model"))
-    cohort.pred <- hlaPredict(model.id, cohort.geno, type="response+dosage")
+    model <- get(paste0(hlaId,".model"))
+    cohort.pred <- hlaPredict(model, cohort.geno, type="response+dosage")
   } else {
-    model.id <- hlaModelFromObj(model.list[[hlaId]])
+    model <- hlaModelFromObj(model.list[[hlaId]])
     cohort.pred <- predict(model, cohort.geno, type="response+prob")
   }
   assign(paste0(cohort,".",hlaId),cohort.pred,envir=.GlobalEnv)
@@ -85,29 +82,38 @@ HIBAG <- function(hlaId,cohort,reference="HapMap")
 
 lookup <- function(rsid=NULL)
 {
-  model.list <- get(load(file.path(caprion,"analysis","HLA","HIBAG","AffyAxiomUKB-European-HLA4-hg19.RData")))
+  model.list <- get(load(file.path(analysis,"HLA","HIBAG","AffyAxiomUKB-European-HLA4-hg19.RData")))
   if (!is.null(rsid)) print(grepl(rsid,lapply(model.list,"[[",3)))
   invisible(model.list)
 }
 
-hlaId <- "B"
 model.list <- lookup("rs2229092")
+hlaId <- "A"
 plot(model.list[[hlaId]])
-model <- hlaModelFromObj(model.list[[hlaId]])
-bc58()
 interval()
 HapMap_CEU_model()
-HIBAG(hlaId,"bc58")
 HIBAG(hlaId,"interval")
-HIBAG(hlaId,"interval","UKB")
+for(hlaId in hlaLoci)
+{
+  HIBAG(hlaId,"interval","UKBAxiom")
+  interval.hla <- paste0("interval",".",hlaId)
+  save(get(interval.hla),file=file.path(analysis,"work",interval.hla))
+}
 
 # Notes
+
+bc58()
+HIBAG(hlaId,"bc58")
 
 # fail with wrong assembly
 HIBAG(hlaId,"bc58hatk")
 
-HIBAG_A <- function()
+f_backup <- function()
 {
+  setwd("~/rds/post_qc_data/interval/genotype/affy_ukbiobank_array/genotyped")
+  bed <- "merged_imputation.bed"
+  fam <- "merged_imputation.fam"
+  bim <- "merged_imputation.bim"
   model.fn <- system.file("extdata" ,"ModelList.RData", package="HIBAG")
   model <- get(load(model.fn))
   OutOfBag.fn <- system.file("extdata" ,"OutOfBag.RData", package="HIBAG")

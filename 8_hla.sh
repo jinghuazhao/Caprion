@@ -9,12 +9,16 @@ export suffix=_dr
 function extract_hla()
 # Region as used in the SCALLOP-INF project along with a toy data
 {
-  plink --bfile ${pilot}/merged_imputation --chr 6 --from-bp 25392021 --to-bp 33392022 \
+  plink --bfile ${pilot}/merged_imputation \
         --keep ${work}/caprion.id2 \
-        --make-bed --out ${analysis}/work/hla
+        --maf 0.001 \
+        --make-bed \
+        --out ${analysis}/work/hla
   cat <(echo FID IID sex) \
       <(awk '{print $1,$2,$5-1}' ${analysis}/work/hla.fam) > ${analysis}/work/hla.pheno
 }
+# plink --bfile ${pilot}/merged_imputation --chr 6 --from-bp 25392021 --to-bp 33392022
+
 
 function hla2hped()
 {

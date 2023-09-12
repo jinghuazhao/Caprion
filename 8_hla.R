@@ -2,10 +2,10 @@ options(width=200)
 analysis <- "~/Caprion/analysis"
 hpc_work <- Sys.getenv("HPC_WORK")
 region <- 500 # kb
-hlaLoci <- c("A","B","C","DQA1","DQB1","DRB1")
+hlaLoci <- c("A","B","C","DPB1","DQA1","DQB1","DRB1")
 seed <- 123456
 suppressMessages(library(HIBAG))
-hlaLociInfo()
+suppressMessages(library(parallel))
 
 interval <- function()
 {
@@ -69,7 +69,6 @@ lookup <- function(rsid=NULL)
   invisible(model.list)
 }
 
-library(parallel)
 cl <- makeCluster(8)
 model.list <- lookup("rs2229092")
 load(file.path(analysis,"work","hla.rda"))
@@ -99,6 +98,7 @@ bc58hatk <- function()
 
 tests <- function()
 {
+  hlaLociInfo()
   hlaId <- "A"
   plot(model.list[[hlaId]])
   bc58()

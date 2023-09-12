@@ -6,8 +6,17 @@ export pilot=~/Caprion/pilot/data
 export hatk=~/hpc-work/HATK/
 export suffix=_dr
 
-function extract_hla()
-# Region as used in the SCALLOP-INF project along with a toy data
+# 1. Chromosome 6 data is extracted for all/Caprion samples
+# extract
+# 2. HLA imputation:
+# 2.1 HIBAG is tested with 8_hla.R
+# R --no-save < 8_hla.R
+# 2.2 SNP2HLA, CookHLA, HIBAG are now all part of the following SLURM script,
+# sbatch 8_hla.sb
+# CookHLA also uses SNP2HLA utility for making reference.
+# 3. hla_tapas is not yet fully functional.
+
+function extract()
 {
   plink --bfile ${pilot}/merged_imputation \
         --keep ${work}/caprion.id2 \
@@ -17,10 +26,11 @@ function extract_hla()
   cat <(echo FID IID sex) \
       <(awk '{print $1,$2,$5-1}' ${analysis}/work/hla.fam) > ${analysis}/work/hla.pheno
 }
+# Region as used in the SCALLOP-INF project
 # plink --bfile ${pilot}/merged_imputation --chr 6 --from-bp 25392021 --to-bp 33392022
 
-
 function hla2hped()
+# 3 cols short, so results are unusable.
 {
   Rscript -e '
     analysis <- Sys.getenv("analysis")
@@ -48,28 +58,6 @@ function hla2hped()
            ${analysis}/HLA/HIBAG/hla-DRB1.txt
 }
 
-# HLA imputation:
-# SNP2HLA, CookHLA, HIBAG are now all part of the following SLURM script,
-# sbatch 8_hla.sb
-# HIBAG is specifically run through from the following R script,
-# R --no-save < 8_hla.R
-# CookHLA also uses SNP2HLA utility for making reference.
-
-function hla_signals()
-{
-  awk '$2==6 {print $7}' ${analysis}/work/caprion${suffix}.signals | \
-  grep -f - -w ${INF}/work/INTERVAL.rsid | \
-  sed 's/chr6://;s/_/\t/' | \
-  awk -v start=25392021 -v end=33392022 'start <= $1 && $1<= end {print $1,$3}' | \
-  sort -k2,2 | \
-  join -12 -27 - <(awk '$2==6' ${analysis}/work/caprion${suffix}.signals | sort -k7,7) | \
-  cut -d' ' -f3 > ${analysis}/work/hla.prot
-}
-
-# prot <- scan("hla.prot",what="")
-# gene <- subset(pQTLdata::caprion[1:3],Protein %in% paste0(prot,"_HUMAN"))
-# write.table(gene,file="hla.gene",quote=FALSE,row.names=FALSE,sep="\t")
-
 function hla_tapas()
 {
 export CookHLA=${analysis}/HLA/CookHLA
@@ -92,3 +80,18 @@ for batch in 1 2 3
   done
 done
 }
+
+function hla_signals()
+{
+  awk '$2==6 {print $7}' ${analysis}/work/caprion${suffix}.signals | \
+  grep -f - -w ${INF}/work/INTERVAL.rsid | \
+  sed 's/chr6://;s/_/\t/' | \
+  awk -v start=25392021 -v end=33392022 'start <= $1 && $1<= end {print $1,$3}' | \
+  sort -k2,2 | \
+  join -12 -27 - <(awk '$2==6' ${analysis}/work/caprion${suffix}.signals | sort -k7,7) | \
+  cut -d' ' -f3 > ${analysis}/work/hla.prot
+}
+
+# prot <- scan("hla.prot",what="")
+# gene <- subset(pQTLdata::caprion[1:3],Protein %in% paste0(prot,"_HUMAN"))
+# write.table(gene,file="hla.gene",quote=FALSE,row.names=FALSE,sep="\t")

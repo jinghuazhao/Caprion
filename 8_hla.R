@@ -68,16 +68,16 @@ HapMap_CEU_model <- function()
 HIBAG <- function(hlaId,cohort,reference="HapMap")
 {
   cat(hlaId,"\n")
-  cohort.geno <- get(paste0(cohort,".geno"))
+  geno <- get(paste0(cohort,".geno"))
   if (reference=="HapMap")
   {
     model <- get(paste0(hlaId,".model"))
-    cohort.pred <- hlaPredict(model, cohort.geno, type="response+dosage")
+    pred <- hlaPredict(model, geno, type="response+dosage")
   } else {
     model <- hlaModelFromObj(model.list[[hlaId]])
-    cohort.pred <- predict(model, cohort.geno, type="response+prob")
+    pred <- predict(model, geno, type="response+prob")
   }
-  assign(paste0(cohort,".",hlaId),cohort.pred,envir=.GlobalEnv)
+  assign(paste0(cohort,".",hlaId),pred,envir=.GlobalEnv)
 }
 
 lookup <- function(rsid=NULL)
@@ -96,8 +96,8 @@ HIBAG(hlaId,"interval")
 for(hlaId in hlaLoci)
 {
   HIBAG(hlaId,"interval","UKBAxiom")
-  interval.hla <- paste0("interval",".",hlaId)
-  save(get(interval.hla),file=file.path(analysis,"work",interval.hla))
+  interval.hlaId <- paste0("interval",".",hlaId)
+  save(get(interval.hlaId),file=file.path(analysis,"work",interval.hlaId))
 }
 
 # Notes

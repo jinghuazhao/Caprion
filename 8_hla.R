@@ -7,24 +7,6 @@ seed <- 123456
 suppressMessages(library(HIBAG))
 hlaLociInfo()
 
-bc58 <- function()
-{
-  bed.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bed")
-  fam.fn <- file.path(hpc_work,"CookHLA","example","1958BC.fam")
-  bim.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bim")
-  bc58.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg19",rm.invalid.allele=TRUE,import.chr="6")
-  assign("bc58.geno",bc58.geno,envir=.GlobalEnv)
-}
-
-bc58hatk <- function()
-{
-  bed.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.bed")
-  fam.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.fam")
-  bim.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.bim")
-  bc58hatk.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg18",rm.invalid.allele=TRUE,import.chr="6")
-  assign("bc58hatk.geno",bc58hatk.geno,envir=.GlobalEnv)
-}
-
 interval <- function()
 {
   setwd(file.path(analysis,"work"))
@@ -75,9 +57,9 @@ HIBAG <- function(hlaId,cohort,reference="HapMap")
     pred <- hlaPredict(model, geno, type="response+dosage")
   } else {
     model <- hlaModelFromObj(model.list[[hlaId]])
-    pred <- predict(model, geno, type="response+prob")
+    pred <- predict(model, geno, type="response+prob",cl)
   }
-  assign(paste0(cohort,".",hlaId),pred,envir=.GlobalEnv)
+  assign(paste0(cohort,".",hlaId),pred,env=.GlobalEnv)
 }
 
 lookup <- function(rsid=NULL)
@@ -87,29 +69,46 @@ lookup <- function(rsid=NULL)
   invisible(model.list)
 }
 
+library(parallel)
+cl <- makeCluster(8)
 model.list <- lookup("rs2229092")
-hlaId <- "A"
-plot(model.list[[hlaId]])
-interval()
-HapMap_CEU_model()
-HIBAG(hlaId,"interval")
-for(hlaId in hlaLoci)
-{
-  HIBAG(hlaId,"interval","UKBAxiom")
-  interval.hlaId <- paste0("interval",".",hlaId)
-  save(get(interval.hlaId),file=file.path(analysis,"work",interval.hlaId))
-}
+load(file.path(analysis,"work","hla.rda"))
+for (hlaId in hlaLoci) HIBAG(hlaId,"interval","UKBAxiom")
+save(interval.A,interval.B,interval.C,interval.DPB1,interval.DQA1,interval.DQB1,interval.DRB1,
+     file=file.path(analysis,"work","interval.hla"))
 
 # Notes
 
-bc58()
-HIBAG(hlaId,"bc58")
-
-# fail with wrong assembly
-HIBAG(hlaId,"bc58hatk")
-
-f_backup <- function()
+bc58 <- function()
 {
+  bed.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bed")
+  fam.fn <- file.path(hpc_work,"CookHLA","example","1958BC.fam")
+  bim.fn <- file.path(hpc_work,"CookHLA","example","1958BC.bim")
+  bc58.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg19",rm.invalid.allele=TRUE,import.chr="6")
+  assign("bc58.geno",bc58.geno,envir=.GlobalEnv)
+}
+
+bc58hatk <- function()
+{
+  bed.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.bed")
+  fam.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.fam")
+  bim.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.bim")
+  bc58hatk.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg18",rm.invalid.allele=TRUE,import.chr="6")
+  assign("bc58hatk.geno",bc58hatk.geno,envir=.GlobalEnv)
+}
+
+tests <- function()
+{
+  hlaId <- "A"
+  plot(model.list[[hlaId]])
+  bc58()
+  HIBAG(hlaId,"bc58")
+# fail with wrong assembly
+  HIBAG(hlaId,"bc58hatk")
+  interval()
+  HapMap_CEU_model()
+  HIBAG(hlaId,"interval")
+
   setwd("~/rds/post_qc_data/interval/genotype/affy_ukbiobank_array/genotyped")
   bed <- "merged_imputation.bed"
   fam <- "merged_imputation.fam"

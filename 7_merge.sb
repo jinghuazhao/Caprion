@@ -35,7 +35,7 @@ function pgz()
 {
 # zcat METAL/{}-1.tbl.gz | head -1
   zcat ${analysis}/METAL${suffix}/${p}-1.tbl.gz | \
-  awk 'NR>1 && $6>=0.001 && $12<=log(5e-8)/log(10)' | \
+  awk 'NR>1 && $6>=0.01 && $6<=0.99 && $12<=log(5e-8)/log(10)' | \
   sort -k1,1n -k2,2n | \
   gzip -f > ${analysis}/METAL${suffix}/sentinels/${p}.p.gz
 }

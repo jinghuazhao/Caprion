@@ -10,7 +10,7 @@ function signals()
   head -1 | \
   awk -v FS="\t" '{print "prot",$0}'
   cat ${analysis}/work/caprion${suffix}.varlist | \
-  parallel -C' ' '
+  parallel -C' ' -j5 '
     if [ -f ${analysis}/METAL${suffix}/sentinels/{}${suffix}.signals ]; then
        awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${analysis}/METAL${suffix}/sentinels/{}${suffix}.signals
     fi
@@ -172,7 +172,7 @@ function fp()
     setdiff(mutate(tbl,prot_SNP=paste0(prot,"-",SNP)) |>
     pull(prot_SNP),prot_SNP)
     pdf("~/Caprion/analysis/work/fp.pdf",width=8,height=5)
-    METAL_forestplot(tbl,all,rsid,package="metafor",method="FE",cex=1.2,cex.axis=1.2,,cex.lab=1.2,xlab="Effect",split=TRUE)
+    METAL_forestplot(tbl,all,rsid,package="metafor",method="FE",cex=1.2,cex.axis=1.2,cex.lab=1.2,xlab="Effect")
     dev.off()
   '
 }
@@ -248,4 +248,5 @@ function fplz()
 }
 
 # for cmd in signals merge cistrans; do $cmd; fi
+fp_data
 fp

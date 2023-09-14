@@ -23,8 +23,7 @@
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz//slurm/_qqmanhattan_%A_%a.e
 
 #SBATCH --job-name=_lz
-##SBATCH --array=1-987
-#SBATCH --array=462
+#SBATCH --array=1-987
 #SBATCH --mem 6800
 #SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
 #SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
@@ -132,6 +131,7 @@ function qqmanhattan()
 
 function missing_rsid()
 {
+# #SBATCH --array=462
 # Warning: rs114800762 is not the current name in genome build (should be: rs3982708)
   export old=rs114800762
   export new=rs3982708
@@ -156,13 +156,11 @@ function missing_rsid()
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly \
-                 --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --svg --refsnp {4}
+                 --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --refsnp {4}
      rm ${analysis}/work/${phenoname}-{4}.lz
      # --no-snp-name handling
        mv ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_chr{1}_{2}-{3}.pdf \
           ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}-${old}.pdf
-       mv ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_chr{1}_{2}-{3}.svg \
-          ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}-${old}.svg
      '
   fi
 }
@@ -186,10 +184,10 @@ function lz()
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {print \$1,\$2,\$3,-\$12}" | \
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz
-       locuszoom --source interval --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
+       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --svg --refsnp {4}
+                 --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --refsnp {4}
        rm ${analysis}/work/${phenoname}-{4}.lz
      '
   fi
@@ -209,16 +207,16 @@ function lz()
          sort -k1,1n -k2,2n | \
          sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
        ) > ${analysis}/work/${phenoname}-chrX-{4}.lz
-       locuszoom --source interval --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-chrX-{4}.lz \
+       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-chrX-{4}.lz \
                  --delim tab title="${phenoname}-chr{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL${suffix}/qqmanhattanlz \
-                 --svg --refsnp $(echo chr{4} | sed "s/_[A-Z]*_[A-Z]*//")
+                 --refsnp $(echo chr{4} | sed "s/_[A-Z]*_[A-Z]*//")
        rm ${analysis}/work/${phenoname}-chrX-{4}.lz
      '
   fi
 }
-
+# to check for missing files, diff <(ls *pdf) <(ls lz)
 
 function pairs()
 # all variants

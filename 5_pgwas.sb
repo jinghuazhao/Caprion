@@ -129,42 +129,6 @@ function qqmanhattan()
 # R --no-save < utils/qqman.R
 }
 
-function missing_rsid()
-{
-# #SBATCH --array=462
-# Warning: rs114800762 is not the current name in genome build (should be: rs3982708)
-  export old=rs114800762
-  export new=rs3982708
-  module load python/2.7
-  export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)${suffix}
-  if [ -f ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals ]; then
-     (
-       awk -vold=$old '$6==old {print old}' ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals | \
-       parallel -j1 -C' ' --env analysis --env phenoname '
-         zgrep -w {} ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
-         awk -v rsid=${old} "{print \$1,\$2-5e5,\$2+5e5,rsid}"
-       '
-     ) | \
-     parallel -j1 -C ' ' --env analysis --env phenoname '
-       (
-         echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
-         gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
-         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {print \$1,\$2,\$3,-\$12}" | \
-         sort -k1,1n -k2,2n
-       ) > ${analysis}/work/${phenoname}-{4}.lz
-       locuszoom --source interval --build interval37 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
-                 --delim tab title="${phenoname}-{4}" \
-                 --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly \
-                 --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --refsnp {4}
-     rm ${analysis}/work/${phenoname}-{4}.lz
-     # --no-snp-name handling
-       mv ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_chr{1}_{2}-{3}.pdf \
-          ${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}-${old}.pdf
-     '
-  fi
-}
-
 function lz()
 {
   module load python/2.7
@@ -178,6 +142,7 @@ function lz()
        '
      ) | \
      parallel -j1 -C ' ' --env analysis --env phenoname '
+     if [ {1} != "X" ]; then
        (
          echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
          gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
@@ -188,21 +153,10 @@ function lz()
                  --delim tab title="${phenoname}-{4}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --refsnp {4}
-       rm ${analysis}/work/${phenoname}-{4}.lz
-     '
-  fi
-  if [ -f ${analysis}/METAL${suffix}/sentinels/${phenoname}-chrX.signals ]; then
-     (
-       awk 'NR>1{print $6}' ${analysis}/METAL${suffix}/sentinels/${phenoname}-chrX.signals | \
-       parallel -j1 -C' ' --env analysis --env phenoname '
-         zgrep -w {} ${analysis}/METAL${suffix}/${phenoname}-chrX-1.tbl.gz | \
-         awk -v rsid={} "{print \$1,\$2-5e5,\$2+5e5,rsid}"
-       '
-     ) | \
-     parallel -j1 -C ' ' --env analysis --env phenoname '
+     else
        (
          echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
-         gunzip -c ${analysis}/METAL${suffix}/${phenoname}-chrX-1.tbl.gz | \
+         gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {print \$1,\$2,\$3,-\$12}}" | \
          sort -k1,1n -k2,2n | \
          sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
@@ -212,11 +166,30 @@ function lz()
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL${suffix}/qqmanhattanlz \
                  --refsnp $(echo chr{4} | sed "s/_[A-Z]*_[A-Z]*//")
-       rm ${analysis}/work/${phenoname}-chrX-{4}.lz
+       rm ${analysis}/work/${phenoname}-{4}.lz
+     fi
      '
   fi
 }
-# to check for missing files, diff <(ls *pdf) <(ls lz)
+# HSPB1_dr_rs114800762.pdf would fail with 1000G_Nov2014 --hg19 --pop EUR, so we get around (actually copy) with interval/interval37
+# #SBATCH --array=462
+# Warning: rs114800762 is not the current name in genome build (should be: rs3982708)
+# export old=rs114800762
+# export new=rs3982708
+# On the other hand, the following list is missing from interval/interval37 which are copied from 1000G_Nov2014/hg19
+# cp lz-interval37/*pdf .
+# diff <(ls lz-interval37) <(ls lz) | grep '>' | sed 's/> //' | xargs -I {} cp lz/{} .
+# ACE_dr_rs587729126.pdf
+# B3GN7_dr_rs537179722.pdf
+# CFAB_dr_rs575150094.pdf
+# CYTC_dr_rs55727201.pdf
+# FCN3_dr_rs75318474.pdf
+# I13R1_dr_rs55727201.pdf
+# ICAM1_dr_rs587745765.pdf
+# ICAM2_dr_rs587745765.pdf
+# LFA3_dr_rs587729126.pdf
+# NQO2_dr_rs370546929.pdf
+# PODXL_dr_rs587729126.pdf
 
 function pairs()
 # all variants
@@ -421,7 +394,6 @@ function miamiplot2()
 #fastLR 3
 #qqmanhattan
 #lz
-missing_rsid
 #pairs_p
 #miamiplot
 #miamiplot2

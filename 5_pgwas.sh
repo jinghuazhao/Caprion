@@ -252,7 +252,7 @@ function pdf()
      export n=$(awk -v i=${i} '$1==i' ${N} | wc -l)
      export n2=$(expr ${n} \* 2)
      qpdf --empty --pages $(awk -v i=${i} '$1==i' ${N} | \
-                            awk -v d=${d}/lz -v suffix=${suffix} '{print d"/"$2 suffix"_"$5".pdf"}' | \
+                            awk -v d=${d} -v suffix=${suffix} '{print d"/"$2 suffix"_"$5".pdf"}' | \
                             sort -k1,1 | \
                             tr '\n' ' ';echo) \
           -- lz2-${i}.pdf

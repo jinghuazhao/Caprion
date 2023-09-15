@@ -75,6 +75,7 @@ function cistrans()
     caprion_modified[433,"Gene"] <- "HIST"
     caprion_modified[435,"Gene"] <- "HBA"
     caprion_modified[845,"Gene"] <- "SEPT2"
+    check_list <- c(55,237,278,385,390,433,435,845)
     APOC <- subset(glist_hg19,gene %in%c("APOC2","APOC4")) %>%
             rename(Gene=gene)
     ucsc_modified <- bind_rows(ucsc,APOC,AMY,C4B,HIST,HBA)
@@ -158,19 +159,13 @@ function fp()
                   prot=unlist(lapply(batch_prot_chr,"[",2)),
                   CHR=unlist(lapply(batch_prot_chr,"[",3)),CHR=gsub("chrX","23",CHR)) %>%
            mutate(MarkerName=paste0(CHR,":",POS),
-                  study=case_when(batch == batch[1] ~ paste0("1. ZWK (",N,")"),
-                                  batch == batch[2] ~ paste0("2. ZYQ (",N,")"),
-                                  batch == batch[3] ~ paste0("3. UDP (",N,")"),
+                  study=case_when(batch == "1" ~ paste0("1. ZWK (",N,")"),
+                                  batch == "2" ~ paste0("2. ZYQ (",N,")"),
+                                  batch == "3" ~ paste0("3. UDP (",N,")"),
                                   TRUE ~ "---")) %>%
            arrange(study) %>%
            select(-batch_prot_chr)
     rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
-    tbl_reml <- tbl[-22,][-40,][-80,][-118,][-181,][-225,][-446,][-500,][-628,][-743,][-941,][-949,][-1033,][-1075,][-1098,]
-    prot_SNP <- tbl_reml |>
-                mutate(prot_SNP=paste0(prot,"-",SNP)) |>
-                pull(prot_SNP)
-    setdiff(mutate(tbl,prot_SNP=paste0(prot,"-",SNP)) |>
-    pull(prot_SNP),prot_SNP)
     pdf("~/Caprion/analysis/work/fp.pdf",width=8,height=5)
     METAL_forestplot(tbl,all,rsid,package="metafor",method="FE",cex=1.2,cex.axis=1.2,cex.lab=1.2,xlab="Effect")
     dev.off()
@@ -247,6 +242,6 @@ function fplz()
        -- HetISq75.pdf
 }
 
-# for cmd in signals merge cistrans; do $cmd; fi
+for cmd in signals merge cistrans; do $cmd; done
 fp_data
 fp

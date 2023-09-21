@@ -222,6 +222,7 @@ function annotate()
          transmute(acc=Accession,prot=Protein,gene=Gene,chrom,start,end)
     ucsc2 <- ucsc %>%
              mutate(prot=nodup(prot),chrom=nodup(chrom),gene=nodup(gene)) %>%
+             mutate(chrom=gsub("chrX","chr23",chrom),chrom=gsub("chrY","chr24",chrom))
              bind_rows(a)
     load("~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda")
     refgene_gene_coordinates_h19 <- ucsc2 %>%

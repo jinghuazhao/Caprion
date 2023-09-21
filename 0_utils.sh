@@ -59,10 +59,14 @@ function pgwas()
     knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
   '
 }
+
+function INHBE
+{
 (
   pgwas INHBE rs149830883
   pgwas INHBE rs11172187
 ) > ~/Caprion/analysis/work/INHBE.txt
+}
 
 function hist_corr_lm()
 {
@@ -165,3 +169,72 @@ Rscript -e '
   dev.off()
 '
 }
+
+export analysis=~/Caprion/analysis
+export suffix=_dr
+
+function annotate()
+{
+  Rscript -e '
+    options(width=200)
+    library(dplyr)
+    library(valr)
+    analysis <- Sys.getenv("analysis")
+    suffix <- Sys.getenv("suffix")
+    cis.vs.trans <- read.csv(file=file.path(analysis,"work",paste0("caprion",suffix,".cis.vs.trans"))) %>%
+                    arrange(prot,SNPChrom,SNPPos,Type) %>%
+                    transmute(prot,chrom=paste0("chr",SNPChrom),start=SNPPos,end=SNPPos,cistrans=Type)
+    library(pQTLdata)
+    nodup <- function(x) sapply(x, function(s) unique(unlist(strsplit(s,";")))[1])
+    ucsc <- hg19Tables %>%
+            group_by(acc) %>%
+            summarize(
+                 prot=paste(uniprotName,collapse=";"),
+                 chrom=paste(X.chrom,collapse=";"),
+                 start=min(chromStart),
+                 end=max(chromEnd),
+                 gene=paste(geneName,collapse=";")
+            )
+    # uniprot IDs are the same if proteins are the same
+    p <- select(caprion,Accession,Protein,Gene) %>%
+         left_join(ucsc,by=c("Protein"="prot")) %>%
+         select(Accession,Protein,Gene,gene,acc,chrom,start,end)
+    # however even with same uniprotID their protein names may be different
+    u <- select(caprion,Accession,Protein,Gene) %>%
+         left_join(ucsc,by=c("Accession"="acc")) %>%
+         mutate(chrom=nodup(chrom)) %>%
+         filter(!is.na(Protein)) %>%
+         select(Accession,Protein,gene,Gene,prot,chrom,start,end)
+    # The following check shows merge by uniprot is more sensible
+    filter(p,Accession!=acc)
+    filter(p,Gene!=gene)
+    filter(p,is.na(start))
+    filter(u,Protein!=prot)
+    umiss <- with(u,is.na(start))
+    filter(u,umiss) %>% pull(Accession)
+    # "P04745" "P02655" "P55056" "P0C0L5" "P62805" "P69905"
+    # confirmed form UniProt.org that Gene is more up-to-date
+    # (obsolute), (APOC2), (APOC4), (C4B; C4B_2), (H4C1; H4C2; H4C3; H4C4; H4C5; H4C6; H4C8; H4C9; H4C11; H4C12; H4C13; H4C14; H4C15; H4C16), (HBA1; HBA2)
+    # They are amended according to glist-hg19 in the function below.
+    u[umiss,"Protein"] <- paste0(c("AMY1","APOC2","APOC4","CO4B","H4","HBA"),"_HUMAN")
+    u[umiss,"Gene"] <- c("AMY1","APOC2","APOC4","CO4B","H4C","HBA")
+    u[umiss,"chrom"] <- c("chr1","chr19","chr19","chr6","chr6","chr16")
+    u[umiss,"start"] <- c(104198140,45449238,45445494,31949833,26021906,222845)
+    u[umiss,"end"] <- c(104301311,45452822,45452822,32003195,27841289,227520)
+    caprion_modified <- u
+    a <- filter(u,umiss) %>%
+         transmute(acc=Accession,prot=Protein,gene=Gene,chrom,start,end)
+    ucsc2 <- ucsc %>%
+             mutate(prot=nodup(prot),chrom=nodup(chrom),gene=nodup(gene)) %>%
+             bind_rows(a)
+    load("~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda")
+    refgene_gene_coordinates_h19 <- ucsc2 %>%
+                                    transmute(chromosome=gsub("chr","",chrom),
+                                              gene_transcription_start=start,
+                                              gene_transcription_stop=end,
+                                              gene_name=gene,acc,prot)
+    save(refgene_gene_coordinates_h19,file="ucsc_hg19_reference_data.rda")
+'
+}
+
+annotate

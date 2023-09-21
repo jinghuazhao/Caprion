@@ -58,7 +58,7 @@ function cistrans()
                rename(prot=Protein)
     quadruple <- function(d,label) data.frame(Gene=label,chr=min(d$chr),start=min(d$start),end=max(d$end))
     caprion[c(55,237,433,435),]
-    subset(glist_hg19,grepl("^AMY1",gene))
+    subset(glist_hg19,grepl("^AMY",gene))
     subset(glist_hg19,grepl("^C4B",gene)&chr=="6")
     subset(glist_hg19,grepl("^HIST1H4|^HIST2H4[A-B]|HIST4H4",gene))
     subset(glist_hg19,grepl("^HBA",gene))
@@ -87,7 +87,7 @@ function cistrans()
     cis.vs.trans <- qtlClassifier(pqtls,posSNP,ucsc_modified,1e6) %>%
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)
-    write.csv(cis.vs.trans,file=file.path(analysis,"work","caprion.cis.vs.trans"),row.names=FALSE,quote=FALSE)
+    write.csv(cis.vs.trans,file=file.path(analysis,"work",paste0("caprion",suffix,".cis.vs.trans")),row.names=FALSE,quote=FALSE)
     png(file.path(analysis,"work",paste0("caprion",suffix,".pqtl2d.png")),width=12,height=10,unit="in",res=300)
     r <- qtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                    gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",

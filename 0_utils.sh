@@ -178,12 +178,8 @@ function annotate()
   Rscript -e '
     options(width=200)
     library(dplyr)
-    library(valr)
     analysis <- Sys.getenv("analysis")
     suffix <- Sys.getenv("suffix")
-    cis.vs.trans <- read.csv(file=file.path(analysis,"work",paste0("caprion",suffix,".cis.vs.trans"))) %>%
-                    arrange(prot,SNPChrom,SNPPos,Type) %>%
-                    transmute(prot,chrom=paste0("chr",SNPChrom),start=SNPPos,end=SNPPos,cistrans=Type)
     library(pQTLdata)
     nodup <- function(x) sapply(x, function(s) unique(unlist(strsplit(s,";")))[1])
     ucsc <- hg19Tables %>%
@@ -232,8 +228,16 @@ function annotate()
                                     transmute(chromosome=gsub("chr","",chrom),
                                               gene_transcription_start=start,
                                               gene_transcription_stop=end,
-                                              gene_name=gene,acc,prot)
-    save(refgene_gene_coordinates_h19,file="ucsc_hg19_reference_data.rda")
+                                              gene_name=gene,acc,prot,
+                                              gene_transcription_midposition=(start+end)/2)
+    save(ld_block_breaks_pickrell_hg19_eur,refgene_gene_coordinates_h19,file="ucsc_hg19_reference_data.rda")
+    cis.vs.trans <- read.csv(file=file.path(analysis,"work",paste0("caprion",suffix,".cis.vs.trans"))) %>%
+                    arrange(prot,SNPChrom,SNPPos,Type) %>%
+                    transmute(prot,chrom=paste0("chr",SNPChrom),start=SNPPos,end=SNPPos,cistrans=Type)
+    library(valr)
+    d <- bed_intersect(cis.vs.trans,ucsc2) %>%
+         transmute(chromosome=gsub("chr","",chrom),position=start.x,nearest_gene_name=gene.y,cistrans=cistrans.x,protein=prot.x)
+    write.table(d,file="~/cambridge-ceu/turboman/caprion.txt",quote=FALSE,row.names=FALSE)
 '
 }
 

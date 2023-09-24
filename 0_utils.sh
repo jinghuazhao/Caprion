@@ -268,11 +268,14 @@ function vep_annotate()
         --plugin LoF,loftee_path:.,human_ancestor_fa:human_ancestor.fa.gz,conservation_file:phylocsf_gerp.sql.gz \
         --tab
     cd -
-    awk -vFS="," -vprot={} "\$3==prot {print \$2,\$8,\$9,\$10}" ${cvt} | \
-    sort -k1,1 | \
-    join - <(awk "!/#/{print \$1,\$21}" ${analysis}/METAL${suffix}/vep/{}.tab | sort -k1,1) | \
-    awk "{print \$2,\$3,\$5,\$4}" | \
-    sort -k1,1n -k2,2n > ${analysis}/METAL${suffix}/vep/{}.txt
+    (
+      echo chromosome position nearest_gene_name cistrans
+      awk -vFS="," -vprot={} "\$3==prot {print \$2,\$8,\$9,\$10}" ${cvt} | \
+      sort -k1,1 | \
+      join - <(awk "!/#/{print \$1,\$21}" ${analysis}/METAL${suffix}/vep/{}.tab | sort -k1,1) | \
+      awk "{print \$2,\$3,\$5,\$4}" | \
+      sort -k1,1n -k2,2n
+    ) > ${analysis}/METAL${suffix}/vep/{}.txt
   '
 }
 

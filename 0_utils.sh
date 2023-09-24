@@ -173,7 +173,7 @@ Rscript -e '
 export analysis=~/Caprion/analysis
 export suffix=_dr
 
-function annotate()
+function ucsc_annotate()
 {
   Rscript -e '
     options(width=200)
@@ -242,4 +242,37 @@ function annotate()
 '
 }
 
-annotate
+function vep_annotate()
+{
+  if [ ! -d ${analysis}/METAL${suffix}/vep ]; then mkdir ${analysis}/METAL${suffix}/vep; fi
+  export cvt=${analysis}/work/caprion${suffix}.cis.vs.trans
+  cut -d"," -f3 ${cvt} | \
+  sort -k1,1 | \
+  uniq | \
+  parallel -C' ' '
+    (
+      echo "##fileformat=VCFv4.0"
+      echo "#CHROM" "POS" "ID" "REF" "ALT" "QUAL" "FILTER" "INFO"
+      awk -vFS="," -vprot={} "\$3==prot {print \$2}" ${cvt} | \
+      sort -k1,1 | \
+      zgrep -f - -w ${analysis}/METAL${suffix}/{}${suffix}-1.tbl.gz | \
+      cut -f1-5 | \
+      awk "{print \$1,\$2,\$3,toupper(\$4),toupper(\$5),\".\",\".\",\".\"}"
+    ) | \
+    tr " " "\t" > ${analysis}/METAL${suffix}/vep/{}.vcf
+  # VEP annotation
+    cd ${HPC_WORK}/loftee
+    vep --input_file ${analysis}/METAL${suffix}/vep/{1}.vcf --output_file ${analysis}/METAL${suffix}/vep/{1}.tab --force_overwrite \
+        --cache --dir_cache ${HPC_WORK}/ensembl-vep/.vep --dir_plugins ${HPC_WORK}/loftee --offline \
+        --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol --plugin TSSDistance \
+        --plugin LoF,loftee_path:.,human_ancestor_fa:human_ancestor.fa.gz,conservation_file:phylocsf_gerp.sql.gz \
+        --tab
+    cd -
+    awk -vFS="," -vprot={} "\$3==prot {print \$2,\$8,\$9,\$10}" ${cvt} | \
+    sort -k1,1 | \
+    join <(awk "!/#/{print \$1,\$21}" ${analysis}/METAL${suffix}/vep/{}.tab | sort -k1,1) - | \
+    awk "{print \$2,\$3,\$4,\$5}" > ${analysis}/METAL${suffix}/vep/{}.txt
+  '
+}
+
+vep_annotate

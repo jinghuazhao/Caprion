@@ -271,7 +271,7 @@ function vep_annotate()
     awk -vFS="," -vprot={} "\$3==prot {print \$2,\$8,\$9,\$10}" ${cvt} | \
     sort -k1,1 | \
     join - <(awk "!/#/{print \$1,\$21}" ${analysis}/METAL${suffix}/vep/{}.tab | sort -k1,1) | \
-    awk "{print \$2,\$3,\$4,\$5}" | \
+    awk "{print \$2,\$3,\$5,\$4}" | \
     sort -k1,1n -k2,2n > ${analysis}/METAL${suffix}/vep/{}.txt
   '
 }

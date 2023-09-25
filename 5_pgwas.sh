@@ -227,7 +227,7 @@ function pdf()
   export d=${analysis}/METAL${suffix}/qqmanhattanlz
   module load ceuadmin/pdfjam gcc/6
 # qq-manhattan
-  ls ${d}/*_qq.png | xargs -l basename -s _qq.png | \
+  ls *_qq.png | xargs -l basename -s _qq.png | \
   parallel -C' ' 'convert -resize 150% {}_qq.png {}_qq.pdf;convert {}_manhattan.png {}_manhattan.pdf'
   qpdf --empty --pages $(ls *_qq.pdf) -- qq.pdf
   qpdf --empty --pages $(ls *_manhattan.pdf) -- manhattan.pdf

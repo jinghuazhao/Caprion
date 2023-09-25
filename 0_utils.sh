@@ -259,10 +259,11 @@ function vep_annotate()
       cut -f1-5 | \
       awk "{print \$1,\$2,\$3,toupper(\$4),toupper(\$5),\".\",\".\",\".\"}"
     ) | \
-    tr " " "\t" > ${analysis}/METAL${suffix}/vep/{}.vcf
+    tr " " "\t" > ${analysis}/METAL${suffix}/vep/{}${suffix}.vcf
   # VEP annotation
     cd ${HPC_WORK}/loftee
-    vep --input_file ${analysis}/METAL${suffix}/vep/{1}.vcf --output_file ${analysis}/METAL${suffix}/vep/{1}.tab --force_overwrite \
+    vep --input_file ${analysis}/METAL${suffix}/vep/{1}${suffix}.vcf \
+        --output_file ${analysis}/METAL${suffix}/vep/{1}${suffix}.tab --force_overwrite \
         --cache --dir_cache ${HPC_WORK}/ensembl-vep/.vep --dir_plugins ${HPC_WORK}/loftee --offline \
         --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol --plugin TSSDistance \
         --plugin LoF,loftee_path:.,human_ancestor_fa:human_ancestor.fa.gz,conservation_file:phylocsf_gerp.sql.gz \
@@ -272,10 +273,10 @@ function vep_annotate()
       echo chromosome position nearest_gene_name cistrans
       awk -vFS="," -vprot={} "\$3==prot {print \$2,\$8,\$9,\$10}" ${cvt} | \
       sort -k1,1 | \
-      join - <(awk "!/#/{print \$1,\$21}" ${analysis}/METAL${suffix}/vep/{}.tab | sort -k1,1) | \
+      join - <(awk "!/#/{print \$1,\$21}" ${analysis}/METAL${suffix}/vep/{}${suffix}.tab | sort -k1,1) | \
       awk "{print \$2,\$3,\$5,\$4}" | \
       sort -k1,1n -k2,2n
-    ) > ${analysis}/METAL${suffix}/vep/{}.txt
+    ) > ${analysis}/METAL${suffix}/vep/{}${suffix}.txt
   '
 }
 

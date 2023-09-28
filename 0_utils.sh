@@ -280,4 +280,28 @@ function vep_annotate()
   '
 }
 
-vep_annotate
+function signal_comparison()
+{
+  Rscript -e '
+    options(width=200)
+    library(dplyr)
+    cvt <- read.csv("~/Caprion/analysis/work/caprion.cis.vs.trans") %>%
+           arrange(prot) %>%
+           mutate(chrom=paste0("chr",SNPChrom),start=SNPPos,end=SNPPos)
+    dim(cvt)
+    head(cvt)
+    cvt_dr <- read.csv("~/Caprion/analysis/work/caprion_dr.cis.vs.trans") %>%
+              arrange(prot) %>%
+              mutate(chrom=paste0("chr",SNPChrom),start=SNPPos,end=SNPPos)
+    dim(cvt_dr)
+    head(cvt_dr)
+    library(valr)
+    intersect(cvt,cvt_dr)
+    right_join(cvt,cvt_dr,by=c("prot","SNP"))
+    intersect(select(cvt,chrom,start,end),select(cvt_dr,chrom,start,end)) %>% nrow
+  # 394
+    intersect(select(cvt,chrom,start,end,prot,SNP),select(cvt_dr,chrom,start,end,prot,SNP)) %>% dim
+  # 446
+  # potential to add novelty check
+  '
+}

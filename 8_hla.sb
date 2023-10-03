@@ -26,7 +26,7 @@
 ##SBATCH --output=/rds/user/jhz22/hpc-work/work/_HIBAG_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_HIBAG_%A_%a.e
 
-export caprion=~/Caprion/analysis
+export analysis=~/Caprion/analysis
 export cookhla=${HPC_WORK}/CookHLA
 export snp2hla=~/genetics/SNP2HLA_package_v1.0.3/SNP2HLA
 export hatk=~/hpc-work/HATK/
@@ -40,13 +40,15 @@ function SNP2HLA()
 {
   cd ${snp2hla}
 # HapMap
-# csh SNP2HLA.csh ${caprion}/hla ${snp2hla}/HM_CEU_REF ${caprion}/hla_IMPUTED plink 250000 100
+# csh SNP2HLA.csh ${analysis}/hla ${snp2hla}/HM_CEU_REF ${analysis}/hla_IMPUTED plink 250000 100
 # 1000Genomes
-  csh SNP2HLA.csh ${caprion}/work/hla ${snp2hla}/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC ${caprion}/HLA/SNP2HLA/hla_SNP2HLA plink 250000 100
-  plink --dosage ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage noheader format=1 \
-        --fam ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.fam \
-        --pheno ${caprion}/work/hla.pheno \
-        --out ${caprion}/HLA/SNP2HLA/hla_SNP2HLA.dosage
+  csh SNP2HLA.csh ${analysis}/work/hla \
+                  ${snp2hla}/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
+                  ${analysis}/HLA/SNP2HLA/hla_SNP2HLA plink 250000 100
+  plink --dosage ${analysis}/HLA/SNP2HLA/hla_SNP2HLA.dosage noheader format=1 \
+        --fam ${analysis}/HLA/SNP2HLA/hla_SNP2HLA.fam \
+        --pheno ${analysis}/work/hla.pheno \
+        --out ${analysis}/HLA/SNP2HLA/hla_SNP2HLA.dosage
 }
 
 function CookHLA()
@@ -56,18 +58,18 @@ function CookHLA()
   source ~/COVID-19/py37/bin/activate
 
   python -m MakeGeneticMap \
-         -i ${caprion}/work/hla \
+         -i ${analysis}/work/hla \
          -hg 19 \
          -ref ${cookhla}/1000G_REF/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
-         -o ${caprion}/HLA/CookHLA/hla_IMPUTED
+         -o ${analysis}/HLA/CookHLA/hla_IMPUTED
 
   python CookHLA.py \
-         -i ${caprion}/work/hla \
+         -i ${analysis}/work/hla \
          -hg 19 \
-         -o ${caprion}/HLA/CookHLA/hla_CookHLA \
+         -o ${analysis}/HLA/CookHLA/hla_CookHLA \
          -ref ${cookhla}/1000G_REF/1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC \
-         -gm ${caprion}/HLA/CookHLA/hla_IMPUTED.mach_step.avg.clpsB \
-         -ae ${caprion}/HLA/CookHLA/hla_IMPUTED.aver.erate \
+         -gm ${analysis}/HLA/CookHLA/hla_IMPUTED.mach_step.avg.clpsB \
+         -ae ${analysis}/HLA/CookHLA/hla_IMPUTED.aver.erate \
          -mem 250g
   deactivate
 }
@@ -98,12 +100,12 @@ function hatk()
   ln -sf ${hatk}/bMarkerGenerator
   python3 ${hatk}/HATK.py \
           --logistic \
-          --variants ${caprion}/HLA/CookHLA/hla.COPY.LiftDown_hg18 \
-          --hped ${caprion}/HLA/CookHLA/hla_CookHLA.MHC.HLA_IMPUTATION_OUT.hped \
+          --variants ${analysis}/HLA/CookHLA/hla.COPY.LiftDown_hg18 \
+          --hped ${analysis}/HLA/CookHLA/hla_CookHLA.MHC.HLA_IMPUTATION_OUT.hped \
           --2field \
-          --pheno ${caprion}/work/hla.pheno \
+          --pheno ${analysis}/work/hla.pheno \
           --pheno-name sex \
-          --out ${caprion}/work/hla_assoc \
+          --out ${analysis}/work/hla_assoc \
           --imgt 3320 \
           --hg 18 \
           --imgt-dir ${hatk}/example/IMGTHLA3320 \

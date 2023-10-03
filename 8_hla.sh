@@ -60,8 +60,8 @@ function hla2hped()
 
 function hla_tapas()
 {
-export CookHLA=${analysis}/HLA/CookHLA
-export results=${CookHLA}/results
+export cookhla=${analysis}/HLA/CookHLA
+export results=${cookhla}/results
 if [ ! -d ${results} ]; then mkdir ${results}; fi
 for batch in 1 2 3
   do
@@ -70,12 +70,12 @@ for batch in 1 2 3
     for exon in 2.0.5 2.1.5 2.1 3.0.5 3.1.5 3.1 4.0.5 4.1.5 4.1
     do
     python -m HLAassoc LINEAR \
-           --vcf ${CookHLA}/hla_CookHLA.MHC.QC.exon${exon}.raw_imputation_out.vcf \
+           --vcf ${cookhla}/hla_CookHLA.MHC.QC.exon${exon}.raw_imputation_out.vcf \
            --out ${results}/${prot}-${exon} \
            --pheno ${analysis}/work/caprion-${batch}${suffix}.phenotype \
            --pheno-name ${prot} \
-           --hped ${CookHLA}/hla_CookHLA.MHC.HLA_IMPUTATION_OUT.hped \
-           --chped ${CookHLA}/interval.imgt3320.4field.chped
+           --hped ${cookhla}/hla_CookHLA.MHC.HLA_IMPUTATION_OUT.hped \
+           --chped ${cookhla}/interval.imgt3320.4field.chped
     done
   done
 done

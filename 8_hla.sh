@@ -58,6 +58,22 @@ function hla2hped()
            ${analysis}/HLA/HIBAG/hla-DRB1.txt
 }
 
+function hla_signals()
+{
+  awk '$2==6 {print $7}' ${analysis}/work/caprion${suffix}.signals | \
+  grep -f - -w ${INF}/work/INTERVAL.rsid | \
+  sed 's/chr6://;s/_/\t/' | \
+  awk -v start=25392021 -v end=33392022 'start <= $1 && $1<= end {print $1,$3}' | \
+  sort -k2,2 | \
+  join -12 -27 - <(awk '$2==6' ${analysis}/work/caprion${suffix}.signals | sort -k7,7) | \
+  cut -d' ' -f3 > ${analysis}/work/hla.prot
+  grep -f ${analysis}/work/hla.prot ${analysis}/work/krishna23/Supplementary_Table1.csv
+
+# prot <- scan("hla.prot",what="")
+# gene <- subset(pQTLdata::caprion[1:3],Protein %in% paste0(prot,"_HUMAN"))
+# write.table(gene,file="hla.gene",quote=FALSE,row.names=FALSE,sep="\t")
+}
+
 function hla_tapas()
 {
 export cookhla=${analysis}/HLA/CookHLA
@@ -65,7 +81,7 @@ export results=${cookhla}/results
 if [ ! -d ${results} ]; then mkdir ${results}; fi
 for batch in 1 2 3
   do
-  for prot in P1R7 MXRA5 COCA1 HEM2 CHIT1 KIF4A CO4A TCPQ CALU NAR3 CO4B ANXA6 HEG1 CO2 LMNA CFAB TIE1 TRY3 TENX
+  for prot in $(cat ${analysis}/work/hla.prot)
   do
     for exon in 2.0.5 2.1.5 2.1 3.0.5 3.1.5 3.1 4.0.5 4.1.5 4.1
     do
@@ -80,18 +96,3 @@ for batch in 1 2 3
   done
 done
 }
-
-function hla_signals()
-{
-  awk '$2==6 {print $7}' ${analysis}/work/caprion${suffix}.signals | \
-  grep -f - -w ${INF}/work/INTERVAL.rsid | \
-  sed 's/chr6://;s/_/\t/' | \
-  awk -v start=25392021 -v end=33392022 'start <= $1 && $1<= end {print $1,$3}' | \
-  sort -k2,2 | \
-  join -12 -27 - <(awk '$2==6' ${analysis}/work/caprion${suffix}.signals | sort -k7,7) | \
-  cut -d' ' -f3 > ${analysis}/work/hla.prot
-}
-
-# prot <- scan("hla.prot",what="")
-# gene <- subset(pQTLdata::caprion[1:3],Protein %in% paste0(prot,"_HUMAN"))
-# write.table(gene,file="hla.gene",quote=FALSE,row.names=FALSE,sep="\t")

@@ -242,6 +242,11 @@ function pdf()
   rm temp*
 }
 
+function mean()
+{
+  awk '{gsub(/NA/,"0",$NF);print}' ${analysis}/work/caprion}.sample > ${analysis}/work/caprion${suffix}.sample
+}
+
 function INHBE
 {
 (
@@ -497,13 +502,14 @@ function ukb_ppp()
   Rscript -e '
     options(width=200)
     library(dplyr)
+    library(gap)
     f <- Sys.getenv("f")
-    d <- read.delim(f)
-    d  <- within(d,{LOG10P=-LOG10P})
+    d <- read.delim(f) %>%
+         mutate(LOG10P=-LOG10P)
     qtls <- qtlFinder(d,Chromosome="CHROM",Position="GENPOS",
                       MarkerName="ID",Allele1="ALLELE0",Allele2="ALLELE1",
                       EAF="A1FREQ",Effect="BETA",StdErr="SE",log10P="LOG10P") %>%
             mutate(rsid=gsub(":imp:v1","",rsid)) %>%
-            select(-a1,-a2,-.overlap)
+            select(-.overlap)
   '
 }

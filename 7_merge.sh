@@ -109,9 +109,4 @@ function cistrans()
   '
 }
 
-function mean()
-{
-  awk '{gsub(/NA/,"0",$NF);print}' ${analysis}/work/caprion}.sample > ${analysis}/work/caprion${suffix}.sample
-}
-
 for cmd in signals merge cistrans; do $cmd; done

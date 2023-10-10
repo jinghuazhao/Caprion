@@ -60,6 +60,188 @@ function pgwas()
   '
 }
 
+
+function fp_data()
+{
+  cp  ${analysis}/work/caprion${suffix}.merge ${analysis}/work/tbl.tsv
+  cut -f2-4 ${analysis}/work/tbl.tsv | \
+  awk 'NR>1' | \
+  sort -k1,2n | \
+  uniq | \
+  awk -vOFS="\t" '{print $1":"$2,$3}' > ${analysis}/work/rsid.tsv
+  (
+    gunzip -c ${analysis}/pgwas${suffix}/caprion-*fastGWA.gz | head -1
+    awk 'NR>1' ${analysis}/work/tbl.tsv | \
+    cut -f1,4,14 --output-delimiter=' ' | \
+    parallel -j10 -C' ' '
+      export direction=$(zgrep -w {2} ${analysis}/METAL${suffix}/{1}${suffix}-1.tbl.gz | cut -f13)
+      let j=1
+      for i in $(grep "Input File" ${analysis}/METAL${suffix}/{1}${suffix}-1.tbl.info | cut -d" " -f7)
+      do
+         export n=$(awk -vj=$j "BEGIN{split(ENVIRON[\"direction\"],a,\"\");print a[j]}")
+         if [ "$n" != "?" ]; then zgrep -H -w {2} $i; fi
+         let j=$j+1
+      done
+  '
+  ) | \
+  sed 's/.gz//g' > ${analysis}/work/all.tsv
+}
+
+function fp()
+{
+  if [ ! -d ${analysis}/METAL${suffix}/fp ]; then mkdir -o mkdir -p ${analysis}/METAL${suffix}/fp; fi
+  Rscript -e '
+    require(gap)
+    require(dplyr)
+    suffix <- Sys.getenv("suffix")
+    tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
+           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
+           arrange(prot,SNP)
+    all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
+           rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
+           mutate(CHR=gsub(suffix,"",CHR),
+                  CHR=gsub("/home/jhz22/Caprion/analysis/pgwas/caprion-|.fastGWA","",CHR)) %>%
+           mutate(batch_prot_chr=strsplit(CHR,"-|:"),
+                  batch=unlist(lapply(batch_prot_chr,"[",1)),
+                  prot=unlist(lapply(batch_prot_chr,"[",2)),
+                  CHR=unlist(lapply(batch_prot_chr,"[",3)),CHR=gsub("chrX","23",CHR)) %>%
+           mutate(MarkerName=paste0(CHR,":",POS),
+                  study=case_when(batch == "1" ~ paste0("1. ZWK (",N,")"),
+                                  batch == "2" ~ paste0("2. ZYQ (",N,")"),
+                                  batch == "3" ~ paste0("3. UDP (",N,")"),
+                                  TRUE ~ "---")) %>%
+           arrange(study) %>%
+           select(-batch_prot_chr)
+    rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
+    pdf("~/Caprion/analysis/work/fp.pdf",width=8,height=5)
+    METAL_forestplot(tbl,all,rsid,package="metafor",method="FE",cex=1.2,cex.axis=1.2,cex.lab=1.2,xlab="Effect")
+    dev.off()
+  '
+}
+
+function HetISq()
+# Code extracted from caprion.Rmd
+{
+  Rscript -e '
+    suppressMessages(require(dplyr))
+    suffix <- Sys.getenv("suffix")
+    all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
+           mutate(CHR=gsub("/home/jhz22/Caprion/analysis/work/pgwas/caprion-|.fastGWA","",CHR),CHR=gsub(suffix,"",CHR)) %>%
+           mutate(batch_prot_chr=strsplit(CHR,"-|:"),
+                  batch=unlist(lapply(batch_prot_chr,"[",1)),
+                  prot=unlist(lapply(batch_prot_chr,"[",2)),
+                  CHR=unlist(lapply(batch_prot_chr,"[",3))) %>%
+           mutate(MarkerName=paste0(CHR,":",POS),
+                  Batch=case_when(batch == batch[1] ~ "1. ZWK",
+                                  batch == batch[2] ~ "2. ZYQ",
+                                  batch == batch[3] ~ "3. UDP",
+                                  TRUE ~ "---"),
+                  direction=case_when(sign(BETA) == -1 ~ "-", sign(BETA) == 1 ~ "+", sign(BETA) == 0 ~ "0", TRUE ~ "---")) %>%
+           select(Batch,prot,-batch_prot_chr,MarkerName,SNP,A1,A2,N,AF1,BETA,SE,P,INFO,direction)
+    b1 <- subset(all,Batch=="1. ZWK")
+    names(b1) <- paste0(names(all),".ZWK")
+    b1 <- rename(b1, prot=prot.ZWK, SNP=SNP.ZWK)
+    b2 <- subset(all,Batch=="2. ZYQ")
+    names(b2) <- paste0(names(all),".ZYQ")
+    b3 <- subset(all,Batch=="3. UDP")
+    names(b3) <- paste0(names(all),".UDP")
+    b <- full_join(b1,b2,by=c('prot'='prot.ZYQ','SNP'='SNP.ZYQ')) %>%
+         full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
+         mutate(directions=gsub("NA","?",paste0(direction.ZWK,direction.ZYQ,direction.UDP))) %>%
+         select(-Batch.ZWK,-Batch.ZYQ,-Batch.UDP,direction.ZWK,direction.ZYQ,direction.UDP)
+    tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
+           arrange(prot,MarkerName) %>%
+           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position), index=1:n())
+    Het <- filter(tbl,HetISq>=75) %>%
+           select(prot,SNP,Direction,HetISq,index) %>%
+           left_join(select(b,prot,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
+    write.csv(Het,file=file.path(analysis,"work", paste0("HetISq75",suffix,".csv"),row.names=FALSE,quote=FALSE)
+    write(Het[['index']],file=file.path(analysis, "work", paste0("HetISq75",suffix,".index"),sep=",",ncolumns=nrow(Het))
+  '
+}
+
+function fplz()
+{
+  export metal=${analysis}/METAL${suffix}
+# HSPB1_rs114800762 is missing as dug by the following code.
+  join -a1 <(sed '1d' ${analysis}/work/caprion${suffix}.merge | awk '{print $1"_"$4}' | sort -k1,1 ) \
+           <(ls ${analysis}/METAL${suffix}/qqmanhattanlz/lz/*pdf | xargs -l basename -s .pdf | awk '{print $1,NR}') | \
+  awk 'NF<2' | \
+  sed 's/_/ /' | \
+  parallel -C' ' 'ls ${analysis}/METAL${suffix}/qqmanhattanlz/lz/{1}*pdf'
+# forest/locuszoom left-right format
+  ulimit -n
+  ulimit -S -n 2048
+  qpdf --empty --pages $(sed '1d' ${analysis}/work/caprion${suffix}.merge | sort -k1,1 -k4,4 | cut -f1,4 --output-delimiter=' ' | \
+                         parallel -C' ' 'ls $(echo ${analysis}/METAL${suffix}/qqmanhattanlz/lz/{1}_{2}.pdf | sed "s/:/_/")') -- lz2.pdf
+  export npages=$(qpdf -show-npages lz2.pdf)
+  qpdf --pages . 1-$npages:odd -- lz2.pdf lz.pdf
+# Split files, note the naming scheme
+  pdfseparate lz.pdf temp-%04d-lz.pdf
+  pdfseparate ${metal}/fp/fp.pdf temp-%04d-fp.pdf
+# left-right with very small file size
+# Combine the final pdf
+  pdfjam temp-*-*.pdf --nup 2x1 --landscape --papersize '{7in,16in}' --outfile fp+lz.pdf
+  rm temp*pdf
+# qpdf fp+lz.pdf --pages . $(cat HetISq75.index) -- HetISq75.pdf
+  qpdf fp+lz.pdf --pages . \
+                 $(sed '1d' ${analysis}/work/caprion${suffix}.merge | sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') \
+       -- HetISq75.pdf
+}
+
+function pdf()
+{
+  export f=${analysis}/work/caprion${suffix}.signals
+  export N=$(sed '1d' ${f} | wc -l)
+  export g=10
+  export d=${analysis}/METAL${suffix}/qqmanhattanlz
+  module load ceuadmin/pdfjam gcc/6
+# qq-manhattan
+  ls *_qq.png | xargs -l basename -s _qq.png | \
+  parallel -C' ' 'convert -resize 150% {}_qq.png {}_qq.pdf;convert {}_manhattan.png {}_manhattan.pdf'
+  qpdf --empty --pages $(ls *_qq.pdf) -- qq.pdf
+  qpdf --empty --pages $(ls *_manhattan.pdf) -- manhattan.pdf
+  pdfseparate qq.pdf temp-%04d-qq.pdf
+  pdfseparate manhattan.pdf temp-%04d-manhattan.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR<=500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile qq-manhattan1.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>500 && NR<=1000') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile qq-manhattan2.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>1000 && NR<=1500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile qq-manhattan3.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>1500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile qq-manhattan4.pdf
+  qpdf --empty --pages qq-manhattan*pdf -- qq-manhattan.pdf
+  rm temp*
+# lz
+  sed '1d' ${f} | \
+  awk -vN=${N} -vg=${g} '
+  function ceil(v) {return(v+=v<0?0:0.999)}
+  {
+     gsub(":","_",$7)
+     printf "%d %s %d %d %s\n", ceil(NR*g/N), $1, $2, $4, $7
+  } ' > ${N}
+  for i in `seq ${g}`
+  do
+     export n=$(awk -v i=${i} '$1==i' ${N} | wc -l)
+     export n2=$(expr ${n} \* 2)
+     qpdf --empty --pages $(awk -v i=${i} '$1==i' ${N} | \
+                            awk -v d=${d} -v suffix=${suffix} '{print d"/"$2 suffix"_"$5".pdf"}' | \
+                            sort -k1,1 | \
+                            tr '\n' ' ';echo) \
+          -- lz2-${i}.pdf
+     qpdf --pages . 1-${n2}:odd -- lz2-${i}.pdf lz-${i}.pdf
+     rm lz2-${i}.pdf
+  done
+  qpdf --empty --pages $(echo lz-{1..10}.pdf) -- lz.pdf
+  rm ${N}
+# fp-lz
+  pdfseparate ${analysis}/work/fp.pdf temp-%04d-fp.pdf
+  pdfseparate ${analysis}/METAL${suffix}/qqmanhattanlz/lz.pdf temp-%04d-lz.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR<=500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile fp-lz1.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>500 && NR<=1000') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile fp-lz2.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>1000 && NR<=1500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile fp-lz3.pdf
+  pdfjam $(ls temp-*-*.pdf|awk 'NR>1500') --nup 2x1 --landscape --papersize '{5in,16in}' --outfile fp-lz4.pdf
+  qpdf --empty --pages fp-lz*pdf -- fp-lz.pdf
+  rm temp*
+}
+
 function INHBE
 {
 (
@@ -303,5 +485,25 @@ function signal_comparison()
     intersect(select(cvt,chrom,start,end,prot,SNP),select(cvt_dr,chrom,start,end,prot,SNP)) %>% dim
   # 446
   # potential to add novelty check
+  '
+}
+
+function ukb_ppp()
+{
+  export rt=~/rds/results/public/proteomics/UKB-PPP/sun23
+  export f=A1BG.tsv
+  gunzip -c ${rt}/UKB-PPP\ pGWAS\ summary\ statistics\ \(reformatted\)/European\ \(discovery\)/A1BG_*gz | \
+  awk 'NR==1||$13>=7.30103' > ${f}
+  Rscript -e '
+    options(width=200)
+    library(dplyr)
+    f <- Sys.getenv("f")
+    d <- read.delim(f)
+    d  <- within(d,{LOG10P=-LOG10P})
+    qtls <- qtlFinder(d,Chromosome="CHROM",Position="GENPOS",
+                      MarkerName="ID",Allele1="ALLELE0",Allele2="ALLELE1",
+                      EAF="A1FREQ",Effect="BETA",StdErr="SE",log10P="LOG10P") %>%
+            mutate(rsid=gsub(":imp:v1","",rsid)) %>%
+            select(-a1,-a2,-.overlap)
   '
 }

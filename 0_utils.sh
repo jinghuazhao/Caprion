@@ -496,20 +496,79 @@ function signal_comparison()
 function ukb_ppp()
 {
   export rt=~/rds/results/public/proteomics/UKB-PPP/sun23
-  export f=A1BG.tsv
+  export f=A1BG
   gunzip -c ${rt}/UKB-PPP\ pGWAS\ summary\ statistics\ \(reformatted\)/European\ \(discovery\)/A1BG_*gz | \
   awk 'NR==1||$13>=7.30103' > ${f}
   Rscript -e '
     options(width=200)
     library(dplyr)
     library(gap)
+    library(valr)
     f <- Sys.getenv("f")
-    d <- read.delim(f) %>%
-         mutate(LOG10P=-LOG10P)
+    tsv <- paste0(f,".tsv")
+    d <- read.delim(tsv) %>%
+         mutate(LOG10P=-LOG10P) %>%
+         mutate(chrom=paste0("chr",CHROM),start=GENPOS,end=GENPOS)
     qtls <- qtlFinder(d,Chromosome="CHROM",Position="GENPOS",
                       MarkerName="ID",Allele1="ALLELE0",Allele2="ALLELE1",
-                      EAF="A1FREQ",Effect="BETA",StdErr="SE",log10P="LOG10P") %>%
+                      EAF="A1FREQ",Effect="BETA",StdErr="SE",log10P="LOG10P",
+                      build = "hg38") %>%
             mutate(rsid=gsub(":imp:v1","",rsid)) %>%
-            select(-.overlap)
+            select(-.overlap) %>%
+            bed_sort(by_chrom=TRUE) %>%
+            distinct()
+    geneSNP <- data.frame(gene="A1BG",rsid=pull(qtls,rsid),prot="A1BG")
+    SNPPos <- data.frame(qtls) %>% select(rsid,chrom,start)
+    genePos <- filter(pQTLdata::hg19,SYMBOL=="A1BG") %>% rename(chrom=chr) %>% bed_merge %>% cbind(gene="A1BG") %>% select(gene,chrom,start,end)
+    cvt <- qtlClassifier(geneSNP,SNPPos,genePos,1e6)
+    write.table(select(cvt,rsid,SNPChrom,SNPPos,Type),file=paste0(f,".cis.vs.trans"),quote=FALSE,row.names=FALSE)
+    vcf <- paste0(f,".vcf")
+    cat("##fileformat=VCFv4.0\n",file=vcf)
+    cat("#CHROM POS ID REF ALT QUAL FILTER INFO\n",file=vcf,append=TRUE)
+    cat(sprintf("%s %d %s %s %s %s %s %s\n",qtls[[1]],qtls[[2]],qtls[[4]],qtls[[5]],qtls[[6]],".",".","."),file=vcf,append=TRUE,sep="")
   '
+# VEP annotation
+  set -i 's/ /\t/g' ${f}.vcf
+  export cwd=${PWD}
+  cd ${HPC_WORK}/loftee
+  vep --input_file ${cwd}/${f}.vcf \
+      --output_file ${cwd}/${f}.tab --force_overwrite \
+      --cache --dir_cache ${HPC_WORK}/ensembl-vep/.vep --dir_plugins ${HPC_WORK}/loftee --offline \
+      --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol --plugin TSSDistance \
+      --plugin LoF,loftee_path:.,human_ancestor_fa:human_ancestor.fa.gz,conservation_file:phylocsf_gerp.sql.gz \
+      --tab
+  cd -
+  (
+      echo chromosome position nearest_gene_name cistrans
+      sort -k1,1 ${f}.cis.vs.trans | \
+      join - <(awk '!/#/{print $1,$21}' ${f}.tab | sort -k1,1) | \
+      awk '{gsub("chr","",$2);print $2,$3,$5,$4}' | \
+      sort -k1,1n -k2,2n
+  ) > ${f}.txt
+  export phenoname=${f}
+  gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
+  awk '{if (NR==1) print "chromsome","position","log_pvalue","beta","se";
+        else if ($1!=23) print $1,$2,-$12,$10,$11}' | \
+  gzip -f > ${analysis}/work/${phenoname}.txt.gz
+  R --slave --vanilla --args \
+      input_data_path=${analysis}/work/${phenoname}.txt.gz \
+      output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_qq \
+      plot_title="${phenoname}" < ~/cambridge-ceu/turboqq/turboqq.r
+  if [ ! -f ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals ]; then
+     R --slave --vanilla --args \
+       input_data_path=${analysis}/work/${phenoname}.txt.gz \
+       output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_manhattan \
+       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
+       pvalue_sign=5e-8 \
+       plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
+  else
+    R --slave --vanilla --args \
+      input_data_path=${analysis}/work/${phenoname}.txt.gz \
+      output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_manhattan \
+      custom_peak_annotation_file_path=${analysis}/METAL${suffix}/vep/${phenoname}.txt \
+      reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
+      pvalue_sign=5e-8 \
+      plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
+  fi
+  rm ${analysis}/work/${phenoname}.txt.gz
 }

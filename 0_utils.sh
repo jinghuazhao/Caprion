@@ -528,7 +528,7 @@ function ukb_ppp()
     cat(sprintf("%s %d %s %s %s %s %s %s\n",qtls[[1]],qtls[[2]],qtls[[4]],qtls[[5]],qtls[[6]],".",".","."),file=vcf,append=TRUE,sep="")
   '
 # VEP annotation
-  set -i 's/ /\t/g' ${f}.vcf
+  sed -i 's/ /\t/g' ${f}.vcf
   export cwd=${PWD}
   cd ${HPC_WORK}/loftee
   vep --input_file ${cwd}/${f}.vcf \
@@ -545,30 +545,38 @@ function ukb_ppp()
       awk '{gsub("chr","",$2);print $2,$3,$5,$4}' | \
       sort -k1,1n -k2,2n
   ) > ${f}.txt
-  export phenoname=${f}
-  gunzip -c ${analysis}/METAL${suffix}/${phenoname}-1.tbl.gz | \
-  awk '{if (NR==1) print "chromsome","position","log_pvalue","beta","se";
-        else if ($1!=23) print $1,$2,-$12,$10,$11}' | \
-  gzip -f > ${analysis}/work/${phenoname}.txt.gz
+  export ukb_ppp="/rds/project/jmmh2/rds-jmmh2-results/public/proteomics/UKB-PPP/sun23"
+  export bgz="${ukb_ppp}/European/A1BG_P04217_OID30771_v1_Inflammation_II.bgz"
+  gunzip -c ${bgz} | \
+  awk '{
+        split($3,a,":")
+        if(a[1]=="X") a[1]=23
+        if (NR==1) print "chromsome","position","log_pvalue","beta","se";
+        else if (a[1]!=23) print a[1],a[2],$13,$10,$11
+       }' | \
+  gzip -f > ${f}.txt.gz
   R --slave --vanilla --args \
-      input_data_path=${analysis}/work/${phenoname}.txt.gz \
-      output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_qq \
-      plot_title="${phenoname}" < ~/cambridge-ceu/turboqq/turboqq.r
-  if [ ! -f ${analysis}/METAL${suffix}/sentinels/${phenoname}.signals ]; then
+      input_data_path=${f}.txt.gz \
+      output_data_rootname=${f}_qq \
+      plot_title="${f}" < ~/cambridge-ceu/turboqq/turboqq.r
+  if [ ! -f ${analysis}/METAL${suffix}/sentinels/${f}${suffix}.signals ]; then
      R --slave --vanilla --args \
-       input_data_path=${analysis}/work/${phenoname}.txt.gz \
-       output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_manhattan \
+       input_data_path=${f}.txt.gz \
+       output_data_rootname=${f}_manhattan \
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
        pvalue_sign=5e-8 \
-       plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
+       plot_title="${f}" < ~/cambridge-ceu/turboman/turboman.r
   else
     R --slave --vanilla --args \
-      input_data_path=${analysis}/work/${phenoname}.txt.gz \
-      output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_manhattan \
-      custom_peak_annotation_file_path=${analysis}/METAL${suffix}/vep/${phenoname}.txt \
+      input_data_path=${f}.txt.gz \
+      output_data_rootname=${f}_manhattan \
+      custom_peak_annotation_file_path=${f}.txt \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5e-8 \
-      plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
+      plot_title="${f}" < ~/cambridge-ceu/turboman/turboman.r
   fi
-  rm ${analysis}/work/${phenoname}.txt.gz
+# rm ${f}.txt.gz
+  echo ${f} | parallel -C' ' 'convert -resize 150% {}_qq.png {}_qq.pdf;convert {}_manhattan.png {}_manhattan.pdf'
+  module load ceuadmin/pdfjam
+  pdfjam $(ls ${f}_qq.pdf ${f}_manhattan.pdf) --nup 2x1 --landscape --papersize '{7in,14in}' --outfile ${f}-qq-manhattan.pdf
 }

@@ -514,9 +514,7 @@ function ukb_ppp()
                       EAF="A1FREQ",Effect="BETA",StdErr="SE",log10P="LOG10P",
                       build = "hg38") %>%
             mutate(rsid=gsub(":imp:v1","",rsid)) %>%
-            select(-.overlap) %>%
-            bed_sort(by_chrom=TRUE) %>%
-            distinct()
+            select(-.overlap)
     geneSNP <- data.frame(gene="A1BG",rsid=pull(qtls,rsid),prot="A1BG")
     SNPPos <- data.frame(qtls) %>% select(rsid,chrom,start)
     genePos <- filter(pQTLdata::hg19,SYMBOL=="A1BG") %>% rename(chrom=chr) %>% bed_merge %>% cbind(gene="A1BG") %>% select(gene,chrom,start,end)
@@ -578,5 +576,5 @@ function ukb_ppp()
 # rm ${f}.txt.gz
   echo ${f} | parallel -C' ' 'convert -resize 150% {}_qq.png {}_qq.pdf;convert {}_manhattan.png {}_manhattan.pdf'
   module load ceuadmin/pdfjam
-  pdfjam $(ls ${f}_qq.pdf ${f}_manhattan.pdf) --nup 2x1 --landscape --papersize '{7in,14in}' --outfile ${f}-qq-manhattan.pdf
+  pdfjam $(ls ${f}_qq.pdf ${f}_manhattan.pdf) --nup 2x1 --landscape --papersize '{7in,14in}' --outfile UKB-PPP-European-${f}-qq-manhattan.pdf
 }

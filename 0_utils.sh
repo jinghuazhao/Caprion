@@ -1,5 +1,19 @@
 #!/usr/bin/bash
 
+#SBATCH --job-name=_mean
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=icelake-himem
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+
+##SBATCH --array=1-797
+##SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_png_%A_%a.o
+##SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_png_%A_%a.e
+
+export TMPDIR=${HPC_WORK}/work
+export analysis=~/Caprion/analysis
+export suffix=_dr
+
 function pgwas()
 {
   export protein=${1}
@@ -59,7 +73,6 @@ function pgwas()
     knitr::kable(d,caption=paste("Effect sizes of",pqtl),digits=3)
   '
 }
-
 
 function fp_data()
 {
@@ -480,9 +493,6 @@ Rscript -e '
 '
 }
 
-export analysis=~/Caprion/analysis
-export suffix=_dr
-
 function ucsc_annotate()
 {
   Rscript -e '
@@ -710,3 +720,6 @@ function maf()
   ) | \
   sort -k1,1 -k2,2 > ${analysis}/work/caprion${suffix}.maf
 }
+
+mean_by_genotype_gen_sample
+mean_by_genotype_dosage

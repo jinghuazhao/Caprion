@@ -152,7 +152,7 @@ function lz()
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
-                 --delim tab title="${phenoname}-chr{4} ($type)" \
+                 --delim tab title="${phenoname}-{4} ($type)" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --refsnp {4}
      else

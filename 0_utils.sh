@@ -197,7 +197,7 @@ function pdf()
   export f=${analysis}/work/caprion${suffix}.signals
   export N=$(sed '1d' ${f} | wc -l)
   export g=10
-  export d=${analysis}/METAL${suffix}/qqmanhattanlz
+  export d=${analysis}/METAL${suffix}/qqmanhattanlz/
   module load ceuadmin/pdfjam gcc/6
 # qq-manhattan
   ls *_qq.png | xargs -l basename -s _qq.png | \
@@ -225,7 +225,7 @@ function pdf()
      export n=$(awk -v i=${i} '$1==i' ${N} | wc -l)
      export n2=$(expr ${n} \* 2)
      qpdf --empty --pages $(awk -v i=${i} '$1==i' ${N} | \
-                            awk -v d=${d} -v suffix=${suffix} '{print d"/"$2 suffix"_"$5".pdf"}' | \
+                            awk -v d=${d} -v suffix=${suffix} '{print d"/lz/"$2 suffix"_"$5".pdf"}' | \
                             sort -k1,1 | \
                             tr '\n' ' ';echo) \
           -- lz2-${i}.pdf

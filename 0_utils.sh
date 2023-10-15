@@ -245,6 +245,126 @@ function pdf()
   rm temp*
 }
 
+function mean_by_genotype_gen_sample()
+{
+  read prot chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${analysis}/work/caprion${suffix}.merge)
+  export prot=${prot}
+  export chr=${chr}
+  export bp=${bp}
+  export pqtl=${pqtl}
+  for batch in {1..3}
+  do
+    export batch=${batch}
+    export out=${analysis}/pgwas${suffix}/means/caprion-${batch}-${prot}-${pqtl}
+    if [ ! -f ${out}.dat ]; then
+       plink-2 --bgen ${analysis}/work/chr${chr}.bgen ref-unknown \
+               --sample ${analysis}/work/caprion.sample \
+               --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
+               --keep ${analysis}/work/caprion-${batch}.id \
+               --pheno ${analysis}/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --recode oxford \
+               --out ${out}
+       paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
+             <(awk '{for(i=0;i<(NF-5)/3;i++) print $1,$2,$3,$4,$5, $(6+i),$(7+i),$(8+i)}' ${out}.gen) > ${out}.dat
+       rm ${out}.gen ${out}.sample ${out}.log
+    fi
+  done
+  Rscript -e '
+     options(width=120)
+     analysis <- Sys.getenv("analysis")
+     suffix <- Sys.getenv("suffix")
+     prot <- Sys.getenv("prot")
+     pqtl <- Sys.getenv("pqtl")
+     invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
+     process_batch <- function(batch, genotypes=c("100","010","001"))
+     {
+       datfile <- file.path(analysis,paste0("pgwas","suffix"),"means",paste("caprion",batch,prot,pqtl,sep="-"))
+       dat <- read.table(paste0(datfile,".dat"),
+                         colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
+                         col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
+              mutate(g=paste0(round(g1),round(g2),round(g3)),
+                     Genotype=as.factor(case_when(g == genotypes[1] ~ paste0(A1,"/",A1),
+                                                  g == genotypes[2] ~ paste0(A1,"/",A2),
+                                                  g == genotypes[3] ~ paste0(A2,"/",A2),
+                                                  TRUE ~ "---")))
+       means <- group_by(dat,Genotype) %>%
+                summarise(N=n(),Mean=mean(Phenotype))
+       invisible(list(dat=dat,means=means))
+     }
+     v <- m <- list()
+     for (batch in 1:3)
+     {
+         x <- process_batch(batch)
+         v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
+                       geom_violin() +
+                       geom_boxplot(width=0.1) +
+                       theme_minimal()
+         m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
+     }
+     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
+     ggsave(file.path(analysis,paste0("pgwas",suffix),"means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+  '
+}
+
+function mean_by_genotype_dosage()
+{
+  read prot chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${analysis}/work/caprion${suffix}.merge)
+  export prot=${prot}
+  export chr=${chr}
+  export bp=${bp}
+  export pqtl=${pqtl}
+  for batch in {1..3}
+  do
+    export batch=${batch}
+    export out=${analysis}/pgwas${suffix}/means/caprion-${batch}-${prot}-${pqtl}
+    if [ ! -f ${out}.dat ]; then
+       plink-2 --bgen ${analysis}/work/chr${chr}.bgen ref-unknown \
+               --sample ${analysis}/work/caprion.sample \
+               --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
+               --keep ${analysis}/work/caprion-${batch}.id \
+               --pheno ${analysis}/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --recode A include-alt \
+               --out ${out}
+       rm ${out}.log
+    fi
+  done
+  Rscript -e '
+     options(width=120)
+     analysis <- Sys.getenv("analysis")
+     suffix <- Sys.getenv("suffix")
+     prot <- Sys.getenv("prot")
+     pqtl <- Sys.getenv("pqtl")
+     invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
+     process_batch <- function(batch,digits=3)
+     {
+       datfile <- file.path(analysis,paste0("pgwas",suffix)"means",paste("caprion",batch,prot,pqtl,sep="-"))
+       dat <- read.delim(paste0(datfile,".raw"),check.names=FALSE,
+                         colClasses=c("character","character","character","character","integer","numeric","numeric"))
+       n7 <- names(dat)[7]
+       names(dat)[6:7] <- c("Phenotype","Genotype")
+       dat <- mutate(dat,Genotype=as.character(round(Genotype)))
+       means <- group_by(dat,Genotype) %>%
+                summarise(N=n(),Mean=signif(mean(Phenotype),digits))
+       invisible(list(dat=dat,means=means,id=n7))
+     }
+     v <- m <- list()
+     for (batch in 1:3)
+     {
+         x <- process_batch(batch)
+         v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
+                       geom_violin() +
+                       geom_boxplot(width=0.1) +
+                       xlab(with(x,id)) +
+                       theme_minimal()
+         m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
+     }
+     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
+     ggsave(file.path(analysis,paste0("pgwas",suffix),"means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+  '
+}
+
+# mean_by_genotype_dosage
+
 function mean()
 {
   awk '{gsub(/NA/,"0",$NF);print}' ${analysis}/work/caprion}.sample > ${analysis}/work/caprion${suffix}.sample
@@ -580,4 +700,13 @@ function ukb_ppp()
   echo ${f} | parallel -C' ' 'convert -resize 150% {}_qq.png {}_qq.pdf;convert {}_manhattan.png {}_manhattan.pdf'
   module load ceuadmin/pdfjam
   pdfjam $(ls ${f}_qq.pdf ${f}_manhattan.pdf) --nup 2x1 --landscape --papersize '{7in,14in}' --outfile UKB-PPP-European-${f}-qq-manhattan.pdf
+}
+
+function maf()
+{
+  (
+    awk -vFS="," 'NR>1{print $2,$3}' ${analysis}/work/caprion_dr.cis.vs.trans | \
+    parallel -C' ' -j10 'zgrep -w {1} ${analysis}/METAL${suffix}/{2}${suffix}-1.tbl.gz | awk -vprot={2} "{print prot,\$3,\$6}"'
+  ) | \
+  sort -k1,1 -k2,2 > ${analysis}/work/caprion${suffix}.maf
 }

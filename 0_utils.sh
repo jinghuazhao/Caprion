@@ -94,8 +94,11 @@ function fp()
     require(gap)
     require(dplyr)
     suffix <- Sys.getenv("suffix")
+    cvt <- read.csv("~/Caprion/analysis/work/caprion_dr.cis.vs.trans") %>%
+           select(prot,SNP,Type)
     tbl <- read.delim("~/Caprion/analysis/work/tbl.tsv") %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
+           left_join(cvt) %>%
            arrange(prot,SNP)
     all <- read.delim("~/Caprion/analysis/work/all.tsv") %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
@@ -114,7 +117,7 @@ function fp()
            select(-batch_prot_chr)
     rsid <- read.table("~/Caprion/analysis/work/rsid.tsv",col.names=c("MarkerName","rsid"))
     pdf("~/Caprion/analysis/work/fp.pdf",width=8,height=5)
-    METAL_forestplot(tbl,all,rsid,package="metafor",method="FE",cex=1.2,cex.axis=1.2,cex.lab=1.2,xlab="Effect")
+    METAL_forestplot(tbl,all,rsid,flag="Type",package="metafor",method="FE",cex=1.2,cex.axis=1.2,cex.lab=1.2,xlab="Effect")
     dev.off()
   '
 }

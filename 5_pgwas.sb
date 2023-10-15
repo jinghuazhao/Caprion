@@ -17,16 +17,16 @@
 ##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
 
-#SBATCH --job-name=_qqmanhattan
-#SBATCH --array=1-987
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz//slurm/_qqmanhattan_%A_%a.e
-
-##SBATCH --job-name=_lz
+##SBATCH --job-name=_qqmanhattan
 ##SBATCH --array=1-987
-##SBATCH --mem 6800
-##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
-##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz//slurm/_qqmanhattan_%A_%a.e
+
+#SBATCH --job-name=_lz
+#SBATCH --array=1-987
+#SBATCH --mem 6800
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
 
 ##SBATCH --job-name=pairs
 ##SBATCH --array=1-987
@@ -142,6 +142,8 @@ function lz()
        '
      ) | \
      parallel -j1 -C ' ' --env analysis --env phenoname '
+     export type=$(awk "\$2==rsid {\$3=\$3 suffix; if(\$3==prot) print \$10}" FS="," rsid={4} prot=${phenoname} suffix=${suffix} \
+                   ${analysis}/work/caprion${suffix}.cis.vs.trans)
      if [ {1} != "X" ]; then
        (
          echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
@@ -150,7 +152,7 @@ function lz()
          sort -k1,1n -k2,2n
        ) > ${analysis}/work/${phenoname}-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
-                 --delim tab title="${phenoname}-{4}" \
+                 --delim tab title="${phenoname}-chr{4} ($type)" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/qqmanhattanlz --refsnp {4}
      else
@@ -162,7 +164,7 @@ function lz()
          sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
        ) > ${analysis}/work/${phenoname}-chrX-{4}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-chrX-{4}.lz \
-                 --delim tab title="${phenoname}-chr{4}" \
+                 --delim tab title="${phenoname}-chr{4} ($type)" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix=${phenoname}-chrX --rundir ${analysis}/METAL${suffix}/qqmanhattanlz \
                  --refsnp $(echo chr{4} | sed "s/_[A-Z]*_[A-Z]*//")
@@ -439,8 +441,8 @@ function miamiplot2()
 #fastLR 1
 #fastLR 2
 #fastLR 3
-qqmanhattan
-#lz
+#qqmanhattan
+lz
 #pairs_p
 #miamiplot
 #miamiplot2

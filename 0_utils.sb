@@ -296,7 +296,7 @@ function mean_by_genotype_gen_sample()
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
      process_batch <- function(batch, genotypes=c("100","010","001"))
      {
-       datfile <- file.path(analysis,paste0("pgwas","suffix"),"means",paste("caprion",batch,prot,pqtl,sep="-"))
+       datfile <- file.path(analysis,paste0("pgwas",suffix),"means",paste("caprion",batch,prot,pqtl,sep="-"))
        dat <- read.table(paste0(datfile,".dat"),
                          colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
                          col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
@@ -336,7 +336,7 @@ function mean_by_genotype_dosage()
   do
     export batch=${batch}
     export out=${analysis}/pgwas${suffix}/means/caprion-${batch}-${prot}-${pqtl}
-    if [ ! -f ${out}.dat ]; then
+    if [ ! -f ${out}.raw ]; then
        plink-2 --bgen ${analysis}/work/chr${chr}.bgen ref-unknown \
                --sample ${analysis}/work/caprion.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
@@ -356,7 +356,7 @@ function mean_by_genotype_dosage()
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
      process_batch <- function(batch,digits=3)
      {
-       datfile <- file.path(analysis,paste0("pgwas",suffix)"means",paste("caprion",batch,prot,pqtl,sep="-"))
+       datfile <- file.path(analysis,paste0("pgwas",suffix),"means",paste("caprion",batch,prot,pqtl,sep="-"))
        dat <- read.delim(paste0(datfile,".raw"),check.names=FALSE,
                          colClasses=c("character","character","character","character","integer","numeric","numeric"))
        n7 <- names(dat)[7]
@@ -378,7 +378,7 @@ function mean_by_genotype_dosage()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
      p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(analysis,paste0("pgwas",suffix),"means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+     ggsave(file.path(analysis,paste0("pgwas",suffix),"means",paste0(prot,"-",pqtl,"-raw.png")),device="png",width=16, height=10, units="in")
   '
 }
 

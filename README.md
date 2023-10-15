@@ -99,7 +99,7 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
 [^pGWAS]: Protein GWAS
 
-    GCTA/fastGWA employs MAF>=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
+    GCTA/fastGWA employs MAF>=0.001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
 
     GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
 

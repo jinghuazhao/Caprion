@@ -228,7 +228,7 @@ source ${csd3path}/bin/activate</code></p>
 </li>
 <li id="fn:pGWAS">
 <p>Protein GWAS</p>
-<p>GCTA/fastGWA employs MAF&gt;=0.0001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
+<p>GCTA/fastGWA employs MAF&gt;=0.001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
 <p>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</p>
 <p><code>sed -i '1d' ${caprion}/work/caprion-1.pheno
 sed -i '1d' ${caprion}/work/caprion-2.pheno
@@ -396,5 +396,5 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </html>
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2023-10-15 10:45:11.031496+00:00
+Build Date UTC : 2023-10-15 18:47:46.865251+00:00
 -->

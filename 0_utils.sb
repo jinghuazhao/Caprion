@@ -6,7 +6,7 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --array=1-797
+#SBATCH --array=127,156,325,471,567,691,748,792
 #SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
 #SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
 
@@ -270,13 +270,18 @@ function mean_by_genotype_gen_sample()
   export chr=${chr}
   export bp=${bp}
   export pqtl=${pqtl}
+  if [ "${chr}" != "X" ]; then
+     export sample=${analysis}/work/caprion.sample
+  else
+     export sample=${analysis}/work/caprion-reduced.sample
+  fi
   for batch in {1..3}
   do
     export batch=${batch}
     export out=${analysis}/pgwas${suffix}/means/caprion-${batch}-${prot}-${pqtl}
     if [ ! -f ${out}.dat ]; then
        plink-2 --bgen ${analysis}/work/chr${chr}.bgen ref-unknown \
-               --sample ${analysis}/work/caprion.sample \
+               --sample ${sample} \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${analysis}/work/caprion-${batch}.id \
                --pheno ${analysis}/work/caprion-${batch}.pheno --pheno-name ${prot} \
@@ -332,19 +337,25 @@ function mean_by_genotype_dosage()
   export chr=${chr}
   export bp=${bp}
   export pqtl=${pqtl}
+  if [ "${chr}" != "X" ]; then
+     export sample=${analysis}/work/caprion.sample
+  else
+     export sample=${analysis}/work/caprion-reduced.sample
+  fi
   for batch in {1..3}
   do
     export batch=${batch}
     export out=${analysis}/pgwas${suffix}/means/caprion-${batch}-${prot}-${pqtl}
-    if [ ! -f ${out}.raw ]; then
+    if [ ! -f ${out}.dosage ]; then
        plink-2 --bgen ${analysis}/work/chr${chr}.bgen ref-unknown \
-               --sample ${analysis}/work/caprion.sample \
+               --sample ${sample} \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${analysis}/work/caprion-${batch}.id \
                --pheno ${analysis}/work/caprion-${batch}.pheno --pheno-name ${prot} \
                --recode A include-alt \
                --out ${out}
        rm ${out}.log
+       mv ${out}.raw {out}.dosage
     fi
   done
   Rscript -e '
@@ -357,7 +368,7 @@ function mean_by_genotype_dosage()
      process_batch <- function(batch,digits=3)
      {
        datfile <- file.path(analysis,paste0("pgwas",suffix),"means",paste("caprion",batch,prot,pqtl,sep="-"))
-       dat <- read.delim(paste0(datfile,".raw"),check.names=FALSE,
+       dat <- read.delim(paste0(datfile,".dosage"),check.names=FALSE,
                          colClasses=c("character","character","character","character","integer","numeric","numeric"))
        n7 <- names(dat)[7]
        names(dat)[6:7] <- c("Phenotype","Genotype")
@@ -378,7 +389,7 @@ function mean_by_genotype_dosage()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
      p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(analysis,paste0("pgwas",suffix),"means",paste0(prot,"-",pqtl,"-raw.png")),device="png",width=16, height=10, units="in")
+     ggsave(file.path(analysis,paste0("pgwas",suffix),"means",paste0(prot,"-",pqtl,"-dosage.png")),device="png",width=16, height=10, units="in")
   '
 }
 
@@ -725,5 +736,19 @@ function maf()
   sort -k1,1 -k2,2 > ${analysis}/work/caprion${suffix}.maf
 }
 
+function bgenX()
+{
+  (
+    head -2 ~/Caprion/analysis/work/caprion.sample
+    grep -f ~/Caprion/analysis/work/chrX.idlist  ~/Caprion/analysis/work/chrX.sample
+  ) > ${analysis}/work/caprion-reduced.sample
+  bgenix -g /home/jhz22/Caprion/analysis/work/chrX.bgen -list | \
+  cut -f2 | \
+  sed '1,2d' | \
+  rev | \
+  sed '1d' | \
+  rev > ${analysis}/work/chrX.snpid
+}
+
 mean_by_genotype_gen_sample
-mean_by_genotype_dosage
+# mean_by_genotype_dosage

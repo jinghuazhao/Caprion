@@ -20,33 +20,6 @@ interval <- function()
   }
 }
 
-HapMap_CEU_model <- function()
-{
-  set.seed(seed)
-  for (hlaId in hlaLoci)
-  {
-  # when removing lines containing NA's
-  # l <- apply(!apply(HLA_Type_Table, 1, is.na),2,all)
-  # HLA_Type_Table <- HLA_Type_Table[l,]
-    H1 <- HLA_Type_Table[, paste0(hlaId, ".1")]
-    H2 <- HLA_Type_Table[, paste0(hlaId, ".2")]
-    hla <- hlaAllele(HLA_Type_Table$sample.id, H1, H2, locus=hlaId, assembly="hg19")
-    hlatab <- hlaSplitAllele(hla, train.prop=0.3)
-    id <- hlaId
-    assign(id,hla,envir=.GlobalEnv)
-    snpid <- hlaFlankingSNP(HapMap_CEU_Geno$snp.id, HapMap_CEU_Geno$snp.position,hlaId, region*1000, assembly="hg19")
-    train.geno <- hlaGenoSubset(HapMap_CEU_Geno, snp.sel=match(snpid, HapMap_CEU_Geno$snp.id),
-                                samp.sel=match(hlatab$training$value$sample.id, HapMap_CEU_Geno$sample.id))
-    test.geno <- hlaGenoSubset(HapMap_CEU_Geno, samp.sel=match(hlatab$validation$value$sample.id, HapMap_CEU_Geno$sample.id))
-    hlaModel <- hlaAttrBagging(hlatab$training, train.geno, nclassifier=4, verbose.detail=TRUE)
-    summary(hlaModel)
-    assign(paste0(id,".model"),hlaModel,envir=.GlobalEnv)
-    pred <- hlaPredict(A.model, HapMap_CEU_Geno, type="response+dosage")
-    summary(pred)
-    assign(paste0(id,".pred"),pred,envir=.GlobalEnv)
-  }
-}
-
 HIBAG <- function(hlaId,cohort,reference="HapMap")
 {
   cat(hlaId,"\n")
@@ -64,18 +37,21 @@ HIBAG <- function(hlaId,cohort,reference="HapMap")
 
 lookup <- function(rsid=NULL)
 {
-  model.list <- get(load(file.path(analysis,"HLA","HIBAG","AffyAxiomUKB-European-HLA4-hg19.RData")))
   if (!is.null(rsid)) print(grepl(rsid,lapply(model.list,"[[",3)))
-  invisible(model.list)
 }
 
-cl <- makeCluster(8)
-model.list <- lookup("rs2229092")
-load(file.path(analysis,"work","hla.rda"))
-for (hlaId in hlaLoci) HIBAG(hlaId,"interval","UKBAxiom")
-save(interval.A,interval.B,interval.C,interval.DPB1,interval.DQA1,interval.DQB1,interval.DRB1,
-     file=file.path(analysis,"work","interval.hla"))
+hla_main <- function()
+{
+  cl <- makeCluster(8)
+  model.list <- get(load(file.path(analysis,"HLA","HIBAG","AffyAxiomUKB-European-HLA4-hg19.RData")))
+  lookup("rs2229092")
+  load(file.path(analysis,"work","hla.rda"))
+  for (hlaId in hlaLoci) HIBAG(hlaId,"interval","UKBAxiom")
+  save(interval.A,interval.B,interval.C,interval.DPB1,interval.DQA1,interval.DQB1,interval.DRB1,
+       file=file.path(analysis,"work","interval.hla"))
+}
 
+# hla_main()
 # Notes
 
 bc58 <- function()
@@ -94,6 +70,33 @@ bc58hatk <- function()
   bim.fn <- file.path(hpc_work,"HATK","example","wtccc_filtered_58C_RA.hatk.300+300.chr6.hg18.bim")
   bc58hatk.geno <- hlaBED2Geno(bed.fn,fam.fn,bim.fn,assembly="hg18",rm.invalid.allele=TRUE,import.chr="6")
   assign("bc58hatk.geno",bc58hatk.geno,envir=.GlobalEnv)
+}
+
+HapMap_CEU_model <- function()
+{
+  set.seed(seed)
+  for (hlaId in hlaLoci)
+  {
+    # when removing lines containing NA's
+    # l <- apply(!apply(HLA_Type_Table, 1, is.na),2,all)
+    # HLA_Type_Table <- HLA_Type_Table[l,]
+    H1 <- HLA_Type_Table[, paste0(hlaId, ".1")]
+    H2 <- HLA_Type_Table[, paste0(hlaId, ".2")]
+    hla <- hlaAllele(HLA_Type_Table$sample.id, H1, H2, locus=hlaId, assembly="hg19")
+    hlatab <- hlaSplitAllele(hla, train.prop=0.3)
+    id <- hlaId
+    assign(id,hla,envir=.GlobalEnv)
+    snpid <- hlaFlankingSNP(HapMap_CEU_Geno$snp.id, HapMap_CEU_Geno$snp.position,hlaId, region*1000, assembly="hg19")
+    train.geno <- hlaGenoSubset(HapMap_CEU_Geno, snp.sel=match(snpid, HapMap_CEU_Geno$snp.id),
+                                samp.sel=match(hlatab$training$value$sample.id, HapMap_CEU_Geno$sample.id))
+    test.geno <- hlaGenoSubset(HapMap_CEU_Geno, samp.sel=match(hlatab$validation$value$sample.id, HapMap_CEU_Geno$sample.id))
+    hlaModel <- hlaAttrBagging(hlatab$training, train.geno, nclassifier=4, verbose.detail=TRUE)
+    summary(hlaModel)
+    assign(paste0(id,".model"),hlaModel,envir=.GlobalEnv)
+    pred <- hlaPredict(A.model, HapMap_CEU_Geno, type="response+dosage")
+    summary(pred)
+    assign(paste0(id,".pred"),pred,envir=.GlobalEnv)
+  }
 }
 
 tests <- function()

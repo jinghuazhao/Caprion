@@ -299,7 +299,7 @@ function mean_by_genotype_gen_sample()
      prot <- Sys.getenv("prot")
      pqtl <- Sys.getenv("pqtl")
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
-     process_batch <- function(batch, genotypes=c("100","010","001"))
+     process_batch <- function(batch,digits=3, genotypes=c("100","010","001"))
      {
        datfile <- file.path(analysis,paste0("pgwas",suffix),"means",paste(paste0("caprion",suffix),batch,prot,pqtl,sep="-"))
        dat <- read.table(paste0(datfile,".dat"),
@@ -311,7 +311,7 @@ function mean_by_genotype_gen_sample()
                                                   g == genotypes[3] ~ paste0(A2,"/",A2),
                                                   TRUE ~ "---")))
        means <- group_by(dat,Genotype) %>%
-                summarise(N=n(),Mean=mean(Phenotype))
+                summarise(N=sum(!is.na(Phenotype)),Mean=signif(mean(Phenotype,na.rm=TRUE),digits))
        invisible(list(dat=dat,means=means))
      }
      v <- m <- list()
@@ -374,7 +374,7 @@ function mean_by_genotype_dosage()
        names(dat)[6:7] <- c("Phenotype","Genotype")
        dat <- mutate(dat,Genotype=as.character(round(Genotype)))
        means <- group_by(dat,Genotype) %>%
-                summarise(N=n(),Mean=signif(mean(Phenotype),digits))
+                summarise(sum(!is.na(Phenotype)),Mean=signif(mean(Phenotype,na.rm=TRUE),digits))
        invisible(list(dat=dat,means=means,id=n7))
      }
      v <- m <- list()

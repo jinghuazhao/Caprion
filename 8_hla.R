@@ -42,13 +42,13 @@ lookup <- function(rsid=NULL)
   if (!is.null(rsid)) print(grepl(rsid,lapply(model.list,"[[",3)))
 }
 
-hlaAssocTestBatch <- function(hlaLoci,batch)
+hlaAssocTestBatch <- function(hlaLocus,batch)
 {
   f <- file.path(analysis,"work",paste0("caprion",suffix,"-",batch,".pheno"))
   d <- read.delim(f,check.names=FALSE)
   id <- pull(d,IID)
   p <- select(d,-FID,-IID)
-  dst <- hlaLoci
+  dst <- hlaLocus
   dst$value <- subset(dst$value,sample.id %in% id)
   dst$postprob <- dst$postprob[,colnames(dst$postprob) %in% id]
   z <- sapply(names(p),function(col)
@@ -70,6 +70,12 @@ hla_main <- function()
        file=file.path(analysis,"work","interval.hla"))
   f <- file.path(analysis,"work",paste0("caprion",suffix,".pheno"))
   pheno <- read.delim(f,check.names=FALSE)
+  h <- r <- list()
+  for(hlaLocus in hlaLoci)
+  {
+    for(i in 1:3) r[i] <- hlaAssocTestBatch(get(paste("interval",hlaLocus,sep="."),i)
+    h[i] <- list(hlaLocus=hlaLocus,results=r)
+  }
 }
 
 # hla_main()

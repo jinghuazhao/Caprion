@@ -1,10 +1,12 @@
 options(width=200)
 analysis <- "~/Caprion/analysis"
+suffix <- Sys.getenv("suffix")
 hpc_work <- Sys.getenv("HPC_WORK")
 region <- 500 # kb
 hlaLoci <- c("A","B","C","DPB1","DQA1","DQB1","DRB1")
 seed <- 123456
 suppressMessages(library(HIBAG))
+suppressMessages(library(dplyr))
 suppressMessages(library(parallel))
 
 interval <- function()
@@ -40,6 +42,23 @@ lookup <- function(rsid=NULL)
   if (!is.null(rsid)) print(grepl(rsid,lapply(model.list,"[[",3)))
 }
 
+hlaAssocTestBatch <- function(hlaLoci,batch)
+{
+  f <- file.path(analysis,"work",paste0("caprion",suffix,"-",batch,".pheno"))
+  d <- read.delim(f,check.names=FALSE)
+  id <- pull(d,IID)
+  p <- select(d,-FID,-IID)
+  dst <- hlaLoci
+  dst$value <- subset(dst$value,sample.id %in% id)
+  dst$postprob <- dst$postprob[,colnames(dst$postprob) %in% id]
+  z <- sapply(names(p),function(col)
+       {
+         cat(col,"\n",sep="")
+         y <- p[[col]]
+         hlaAssocTest(dst,formula(y~1),model="additive")
+       })
+}
+
 hla_main <- function()
 {
   cl <- makeCluster(8)
@@ -49,6 +68,8 @@ hla_main <- function()
   for (hlaId in hlaLoci) HIBAG(hlaId,"interval","UKBAxiom")
   save(interval.A,interval.B,interval.C,interval.DPB1,interval.DQA1,interval.DQB1,interval.DRB1,
        file=file.path(analysis,"work","interval.hla"))
+  f <- file.path(analysis,"work",paste0("caprion",suffix,".pheno"))
+  pheno <- read.delim(f,check.names=FALSE)
 }
 
 # hla_main()

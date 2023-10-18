@@ -67,29 +67,29 @@ function fastLR()
   export batch=${1}
   gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
            --sample ${analysis}/work/caprion.sample \
-           --keep ${analysis}/work/caprion-${batch}${suffix}.id \
+           --keep ${analysis}/work/caprion${suffix}-${batch}.id \
            --fastGWA-lr \
-           --pheno ${analysis}/work/caprion-${batch}${suffix}.pheno --mpheno ${phenocol} \
+           --pheno ${analysis}/work/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
            --threads 10 \
-           --out ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}
+           --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}
 
   gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
            --sample ${analysis}/work/caprion.sample \
-           --keep ${analysis}/work/chrX-${batch}${suffix}.id \
+           --keep ${analysis}/work/chrX${suffix}-${batch}.id \
            --fastGWA-lr --model-only \
-           --pheno ${analysis}/work/caprion-${batch}${suffix}.pheno --mpheno ${phenocol} \
+           --pheno ${analysis}/work/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
            --threads 10 \
-           --out ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}
+           --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}
 
   gcta-1.9 --bgen ${analysis}/work/chrX.bgen \
            --sample ${analysis}/work/chrX.sample \
-           --keep ${analysis}/work/chrX-${batch}${suffix}.id \
-           --load-model ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}.fastGWA \
+           --keep ${analysis}/work/chrX${suffix}-${batch}$.id \
+           --load-model ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}.fastGWA \
            --extract ${analysis}/work/chrX.snplist --geno 0.1 \
            --threads 10 \
-           --out ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}-chrX
-  bgzip -f ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}.fastGWA
-  bgzip -f ${analysis}/pgwas${suffix}/caprion-${batch}-${phenoname}${suffix}-chrX.fastGWA
+           --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}-chrX
+  bgzip -f ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}.fastGWA
+  bgzip -f ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}-chrX.fastGWA
 }
 
 # export phenocol=$(grep -n -f ${caprion}/work/caprion.lrlist ${caprion}/work/caprion.varlist | \

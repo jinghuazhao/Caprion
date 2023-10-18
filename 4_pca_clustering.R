@@ -120,7 +120,7 @@ normalise_lr <- function(d,batches)
   caprion_lr <- data.frame(d[c("FID","IID")],z)
   names(caprion_lr) <- gsub("^X([0-9])","\\1",names(caprion_lr))
   write.table(d[c("FID","IID")],file=paste0("~/Caprion/analysis/work/caprion-",batches,suffix,".id"),col.names=FALSE,row.names=FALSE)
-  write.table(caprion_lr,file=paste0("~/Caprion/analysis/work/caprion-",batches,suffix,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
+  write.table(caprion_lr,file=paste0("~/Caprion/analysis/work/caprion",suffix,"-",batches,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
 }
 
 normalise <- function(prot)

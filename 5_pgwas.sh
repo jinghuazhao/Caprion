@@ -28,9 +28,9 @@ function fastGWAsetup()
   cut -f1-38 --complement ${analysis}/work/caprion${suffix}.pheno | \
   head -1 | \
   tr '\t' '\n' > ${analysis}/work/caprion${suffix}.varlist
-  sed -i '1d' ${analysis}/work/caprion-1${suffix}.pheno
-  sed -i '1d' ${analysis}/work/caprion-2${suffix}.pheno
-  sed -i '1d' ${analysis}/work/caprion-3${suffix}.pheno
+  sed -i '1d' ${analysis}/work/caprion${suffix}-1.pheno
+  sed -i '1d' ${analysis}/work/caprion${suffix}-2.pheno
+  sed -i '1d' ${analysis}/work/caprion${suffix}-3.pheno
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/qqmanhattanlz/slurm ]; then mkdir ~/Caprion/analysis/METAL${suffix}/qqmanhattanlz/slurm; fi
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/pairs/slurm ]; then mkdir -p ~/Caprion/analysis/METAL${suffix}/pairs/slurm; fi
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/miamiplot/slurm ]; then mkdir -p ~/Caprion/analysis/METAL${suffix}/miamiplot/slurm; fi
@@ -56,9 +56,9 @@ function X()
          --set-missing-var-ids @:#_\$r_\$a --new-id-max-allele-len 680 \
          --out ${analysis}/work/chrX
   bgenix -g ${analysis}/work/chrX.bgen -index -clobber
-  cut -d' ' -f1 ${analysis}/work/caprion-1${suffix}.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX-1${suffix}.id
-  cut -d' ' -f1 ${analysis}/work/caprion-2${suffix}.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX-2${suffix}.id
-  cut -d' ' -f1 ${analysis}/work/caprion-3${suffix}.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX-3${suffix}.id
+  cut -d' ' -f1 ${analysis}/work/caprion${suffix}-1.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-1.id
+  cut -d' ' -f1 ${analysis}/work/caprion${suffix}-2.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-2.id
+  cut -d' ' -f1 ${analysis}/work/caprion${suffix}-3.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-3.id
 }
 
 function lrlist()

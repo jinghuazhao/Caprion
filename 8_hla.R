@@ -70,11 +70,18 @@ hla_main <- function()
        file=file.path(analysis,"work","interval.hla"))
   f <- file.path(analysis,"work",paste0("caprion",suffix,".pheno"))
   pheno <- read.delim(f,check.names=FALSE)
+  load(file=file.path(analysis,"work","interval.hla"))
   h <- r <- list()
   for(hlaLocus in hlaLoci)
   {
-    for(i in 1:3) r[i] <- hlaAssocTestBatch(get(paste("interval",hlaLocus,sep="."),i)
-    h[i] <- list(hlaLocus=hlaLocus,results=r)
+    for(i in 1:3)
+    {
+      z <- hlaAssocTestBatch(get(paste("interval",hlaLocus,sep=".")),i)
+      f <- file.path(analysis,"work",paste0(paste("interval",i,hlaLocus,sep="-"),".rda"))
+      save(z,file=f)
+      r[[i]] <- z
+    }
+    h[[hlaLocus]] <- r
   }
 }
 

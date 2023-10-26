@@ -88,9 +88,8 @@ cat << 'EOL' > ${root}/${protein}-METAL.sb
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --qos=cardio
+#SBATCH --account PETERS-SL3-CPU
+#SBATCH --partition cclake-himem
 
 #SBATCH --output=PROTEIN-METAL.o
 #SBATCH --error=PROTEIN-METAL.e

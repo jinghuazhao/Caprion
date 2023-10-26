@@ -83,9 +83,56 @@ hla_main <- function()
     }
     h[[hlaLocus]] <- r
   }
+  save(h,file=file.path(analysis,"work","interval-hlaAsoocTest.rda"))
 }
 
 # hla_main()
+boosting <- function(id="A",impute=FALSE,seed=100)
+# interval.A[...], interval.geno
+{
+  hla.id <- id
+  hla <- get(paste("interval",hla.id,.sep=".")
+  set.seed(seed)
+  if (! impute)
+  {
+    hlatab <- hlaSplitAllele(hla, train.prop=0.5)
+    names(hlatab)
+    summary(hlatab$training)
+    summary(hlatab$validation)
+    region <- 500
+    snpid <- hlaFlankingSNP(interval.geno$snp.id,interval.geno$snp.position, hla.id, region*1000, assembly="hg19")
+    length(snpid)
+    train.geno <- hlaGenoSubset(interval.geno, snp.sel=match(snpid,interval.geno$snp.id),
+    samp.sel=match(hlatab$training$value$sample.id,interval.geno$sample.id))
+    test.geno <- hlaGenoSubset(interval.geno, samp.sel=match(hlatab$validation$value$sample.id,interval.geno$sample.id))
+    set.seed(100)
+    model <- hlaAttrBagging(hlatab$training, train.geno, nclassifier=100, verbose.detail=TRUE)
+    summary(model)
+    pred <- hlaPredict(model, test.geno)
+    summary(pred)
+    mobj <- hlaModelToObj(model)
+    save(mobj, file=file.path(analysis,"work",paste0("HIBAG_model_",hla.id,".RData")))
+    save(test.geno, file=file.path(analysis,"work",paste0("testgeno_",hla.id,".RData")))
+    save(hlatab, file=file.path(analysis,"work",paste0("HLASplit_",hla.id,".RData")))
+    hlaClose(model)
+  } else {
+    mobj <- get(load(paste0("HIBAG_model_",hla.id,".RData")))
+    model <- hlaModelFromObj(mobj)
+    test.geno <- get(load(paste0("testgeno",hla.id,".RData")))
+    hlatab <- get(load(paste0("HLASplit_",hla.id,".RData"))
+    pred <- hlaPredict(model, test.geno, type="response")
+    summary(pred)
+    (comp <- hlaCompareAllele(hlatab$validation, pred, allele.limit=model, call.threshold=0))
+    (comp <- hlaCompareAllele(hlatab$validation, pred, allele.limit=model, call.threshold=0.5))
+  }
+}
+
+load(file.path(analysis,"work","hla.rda"))
+load(file.path(analysis,"work","interval.hla"))
+
+boosting(id="A")
+boosting(id="A",impute=TRUE)
+
 # Notes
 
 bc58 <- function()

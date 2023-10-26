@@ -3,11 +3,15 @@
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
+export suffix=_dr
 
 function sb()
 {
   export SLURM_ARRAY_TASK_ID=${1}
-  export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
+# all proteins
+# export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
+# only those with pQTLs
+  export protein=$(awk 'NR>1{print $1}' ${analysis}/work/caprion${suffix}.signals | sort -k1,1 | uniq | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
   if [ ! -d ${analysis}/peptide/${protein} ]; then mkdir ${analysis}/peptide/${protein}; fi
   export sbatch=${analysis}/peptide/${protein}/${protein}-pgwas.sb
 
@@ -74,11 +78,10 @@ function sb()
 cat << 'EOL' > ${sbatch}
 #!/usr/bin/bash
 
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --qos=cardio
+#SBATCH --account PETERS-SL3-CPU
+#SBATCH --partition cclake
 #SBATCH --mem=28800
-#SBATCH --time=3-00:00:00
+#SBATCH --time=12:00:00
 #SBATCH --job-name=PROTEIN
 #SBATCH --output=ANALYSIS/peptide/PROTEIN/PROTEIN.o
 #SBATCH --error=ANALYSIS/peptide/PROTEIN/PROTEIN.e
@@ -133,7 +136,9 @@ fastLR 3
 EOL
 
 sed -i "s|ANALYSIS|${analysis}|;s|PROTEIN|${protein}|g" ${sbatch}
-echo sbatch ${sbatch}
+sbatch ${sbatch}
 }
 
-for i in $(seq 987); do sb ${i}; done
+for i in $(seq 100); do sb ${i}; done
+
+# for i in $(seq 987); do sb ${i}; done

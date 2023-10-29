@@ -86,12 +86,12 @@ hla_main <- function()
   save(h,file=file.path(analysis,"work","interval-hlaAsoocTest.rda"))
 }
 
-# hla_main()
+# hla_main2
 boosting <- function(id="A",impute=FALSE,seed=100)
 # interval.A[...], interval.geno
 {
   hla.id <- id
-  hla <- get(paste("interval",hla.id,.sep=".")
+  hla <- get(paste("interval",hla.id,sep="."))
   set.seed(seed)
   if (! impute)
   {
@@ -119,7 +119,7 @@ boosting <- function(id="A",impute=FALSE,seed=100)
     mobj <- get(load(paste0("HIBAG_model_",hla.id,".RData")))
     model <- hlaModelFromObj(mobj)
     test.geno <- get(load(paste0("testgeno",hla.id,".RData")))
-    hlatab <- get(load(paste0("HLASplit_",hla.id,".RData"))
+    hlatab <- get(load(paste0("HLASplit_",hla.id,".RData")))
     pred <- hlaPredict(model, test.geno, type="response")
     summary(pred)
     (comp <- hlaCompareAllele(hlatab$validation, pred, allele.limit=model, call.threshold=0))

@@ -12,7 +12,6 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 
 and use `--unlock` when necessary.
 
-
 ## Programs[^directory]
 
 Earlier work was done in a named sequence.
@@ -31,7 +30,7 @@ Earlier work was done in a named sequence.
 
 ## 1. Data handling and PCA projection
 
-The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected. 
+The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected.
 
 ## 2. GGM
 
@@ -64,6 +63,7 @@ This follows from the SCALLOP/INF implementation, as designed analogous to a Mak
 ```bash
 6_meta_analysis <task>
 ```
+
 where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.
 
 To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log(10)' 1433B-1.tbl`, say.
@@ -81,63 +81,66 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 ## 9. Lookup
 
 [^directory]: Directories
-
+    
     This is per Caprion project
-
+    
     ```
     module load miniconda3/4.5.1
     export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/miniconda37
     source ${csd3path}/bin/activate
     ```
-
-    Name | Description
-    ------|------------
-    pgwas | pGWAS
-    METAL | Meta-analysis
-    HLA | HLA imputation
-    reports | Reports
-
+    
+    
+    | Name    | Description    |
+    | --------- | ---------------- |
+    | pgwas   | pGWAS          |
+    | METAL   | Meta-analysis  |
+    | HLA     | HLA imputation |
+    | reports | Reports        |
+    
 [^pGWAS]: Protein GWAS
-
+    
     GCTA/fastGWA employs MAF>=0.001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
-
+    
     GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
-
+    
     ```
     sed -i '1d' ${caprion}/work/caprion-1.pheno
     sed -i '1d' ${caprion}/work/caprion-2.pheno
     sed -i '1d' ${caprion}/work/caprion-3.pheno
     ```
-
+    
     at `pilot/work` while the original version is saved at `analysis/work/`.
     
     It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
-
+    
 [^metal]: incomplete gamma function
-
+    
     The .info files for proteins BROX and CT027 could not be obtained from METAL 2020-05-05 with the following error message,
-
+    
     ```
     FATAL ERROR -
     a too large, ITMAX too small in gamma countinued fraction (gcf)
     ```
-
+    
     An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository ([`https://github.com/statgen/METAL/issues/24`](https://github.com/statgen/METAL/issues/24)).
     This has enabled Forest plots for the associate pQTLs.
-
+    
 [^HLA]: Whole cohort imputation is feasible with a HIBAG reference panel,
-
-    **Locus** |   A  |   B  |   C  | DPB1 | DQA1 | DQB1 | DRB1
-    ----------|------|------|------|------|------|------|-----
-    **N**     | 1857 | 2572 | 1866 | 1624 | 1740 | 1924 | 2436
-    SNPs      |  891 |  990 | 1041 |  689 |  948 |  979 |  891
-
+    
+    
+    | **Locus** | A    | B    | C    | DPB1 | DQA1 | DQB1 | DRB1 |
+    | ----------- | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
+    | **N**     | 1857 | 2572 | 1866 | 1624 | 1740 | 1924 | 2436 |
+    | SNPs      | 891  | 990  | 1041 | 689  | 948  | 979  | 891  |
+    
     while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.
-
+    
     It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 1000Genomes reference panel has 465 variants with HLA prefix and the partition is as follows,
-
-    **Locus** |  A  |  B  |  C | DPB1 | DQA1 | DQB1 | DRB1
-    ----------|-----|-----|----|------|------|------|-----
-    **HLA_**  |  98 | 183 | 69 |   0  |  0   |  33  |  82
-
-    A recent update: PGG.HLA, <https://pog.fudan.edu.cn/pggmhc/>, requires data submission.
+    
+    
+    | **Locus** | A  | B   | C  | DPB1 | DQA1 | DQB1 | DRB1 |
+    | ----------- | ---- | ----- | ---- | ------ | ------ | ------ | ------ |
+    | **HLA_**  | 98 | 183 | 69 | 0    | 0    | 33   | 82   |
+    
+    A recent update: PGG.HLA, [https://pog.fudan.edu.cn/pggmhc/](https://pog.fudan.edu.cn/pggmhc/), requires data submission.

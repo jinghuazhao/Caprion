@@ -753,3 +753,46 @@ function bgenX()
 mean_by_genotype_gen_sample
 mean_by_genotype_dosage
 # X: 127,156,325,471,567,691,748,792
+
+function lookup()
+{
+	Rscript -e '
+	   options(width=200)
+	   library(pQTLdata)
+	   library(dplyr)
+	   analysis <- Sys.getenv("analysis")
+	   suffix <- Sys.getenv("suffix")
+	   overlap_olink_1536 <- intersect(caprion[[2]],Olink_Explore_1536[[1]])
+	   overlap_olink_ht <- intersect(caprion[[2]],Olink_Explore_HT[[1]])
+	   signals <- read.csv(file.path(analysis,"work",paste0("caprion",suffix,".cis.vs.trans"))) %>%
+	              select(-Gene) %>%
+	              mutate(Protein=paste0(prot,"_HUMAN")) %>%
+	              left_join(select(caprion,Protein,Accession,Gene),by="Protein") %>%
+	              filter(Accession %in% overlap_olink_1536)
+	'
+}
+
+function lz_js()
+# LocusZoom.js/d3.js data
+{
+  (
+    echo Chromosome Position Ref_allele Alt_allele Alt_allele_freq mlog10p beta se
+    tabix ~/Caprion/analysis/METAL_dr/1433S_dr-1.tbl.gz 7:60800000-61600000 | \
+    awk '{print $1,$2,toupper($5),toupper($4),$6,-$12,$10,$11}' | \
+    sort -k1,1n -k2,2n
+  ) | \
+  tr ' ' '\t' | \
+  bgzip -f > ~/1433S.gz
+  tabix -S1 -s1 -b2 -e2 ~/1433S.gz
+  Rscript -e '
+    library(dplyr)
+    library(jsonlite)
+    d <- read.delim("~/1433S.gz") %>%
+         mutate(variant=paste(Chromosome,Position,sep=":")) %>%
+         rename(position=Position,alt_allele=Alt_allele,alt_allele_freq=Alt_allele_freq,log_pvalue=mlog10p) %>%
+         select(variant,position,alt_allele,alt_allele_freq,beta,log_pvalue)
+   sink("~/1433S.json")
+   toJSON(list(assoc=d),auto_unbox=TRUE,pretty=FALSE)
+   sink()
+  '
+}

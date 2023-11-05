@@ -139,6 +139,12 @@ sed -i "s|ANALYSIS|${analysis}|;s|PROTEIN|${protein}|g" ${sbatch}
 sbatch ${sbatch}
 }
 
-for i in $(seq 100); do sb ${i}; done
+for i in $(seq 201 300); do sb ${i}; done
 
 # for i in $(seq 987); do sb ${i}; done
+
+function error_check()
+{
+  cd ${analysis}/peptide
+  grep error */*.e
+}

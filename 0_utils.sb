@@ -775,23 +775,28 @@ function lookup()
 function lz_js()
 # LocusZoom.js/d3.js data
 {
+  export prot=ACE
+  export chr=17
+  export pos=61570422
+  export flanking=250000
+  export r=$(echo ${chr}:$(expr ${pos} - ${flanking})-$(expr ${pos} + ${flanking}))
   (
-    echo Chromosome Position Ref_allele Alt_allele Alt_allele_freq mlog10p beta se
-    tabix ~/Caprion/analysis/METAL_dr/1433S_dr-1.tbl.gz 7:60800000-61600000 | \
-    awk '{print $1,$2,toupper($5),toupper($4),$6,-$12,$10,$11}' | \
+    tabix ~/Caprion/analysis/METAL_dr/${prot}_dr-1.tbl.gz ${r} | \
+    awk '{print $1,$2,$1":"$2,toupper($5),toupper($4),$6,-$12,$10,$11}' | \
     sort -k1,1n -k2,2n
   ) | \
   tr ' ' '\t' | \
-  bgzip -f > ~/1433S.gz
-  tabix -S1 -s1 -b2 -e2 ~/1433S.gz
+  bgzip -f > ${prot}.gz
+  tabix -s1 -b2 -e2 ${prot}.gz
   Rscript -e '
     library(dplyr)
     library(jsonlite)
-    d <- read.delim("~/1433S.gz") %>%
-         mutate(variant=paste(Chromosome,Position,sep=":")) %>%
-         rename(position=Position,alt_allele=Alt_allele,alt_allele_freq=Alt_allele_freq,log_pvalue=mlog10p) %>%
-         select(variant,position,alt_allele,alt_allele_freq,beta,log_pvalue)
-   sink("~/1433S.json")
+    prot <- Sys.getenv("prot")
+    d <- read.delim(paste0(prot,".gz")) %>%
+         setNames(c("Chromosome","Position","variant","Ref_allele","Alt_allele","Alt_allele_freq","mlog10p","beta","se")) %>%
+         rename(position=Position,alt_allele=Alt_allele,ref_allele=Ref_allele,alt_allele_freq=Alt_allele_freq,log_pvalue=mlog10p) %>%
+         select(variant,position,alt_allele,ref_allele,alt_allele_freq,beta,se,log_pvalue)
+   sink(paste0(prot,".json"))
    toJSON(list(assoc=d),auto_unbox=TRUE,pretty=FALSE)
    sink()
   '

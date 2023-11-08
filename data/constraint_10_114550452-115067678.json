@@ -1,0 +1,78 @@
+{
+  "errors": [
+    {
+      "message": "Gene not found"
+    },
+    {
+      "message": "Constraint not found for transcript ENST00000564352"
+    },
+    {
+      "message": "Constraint not found for transcript ENST00000428766"
+    },
+    {
+      "message": "Constraint not found for transcript ENST00000369391"
+    },
+    {
+      "message": "Constraint not found for transcript ENST00000420976"
+    }
+  ],
+  "data": {
+    "VTI1A": {
+      "gnomad_constraint": {
+        "exp_syn": 45.96999843014132,
+        "obs_syn": 39,
+        "syn_z": 0.8080936395821224,
+        "oe_syn": 0.8483794068269693,
+        "oe_syn_lower": 0.656,
+        "oe_syn_upper": 1.108,
+        "exp_mis": 129.1265254408911,
+        "obs_mis": 124,
+        "mis_z": 0.16031755135682893,
+        "oe_mis": 0.9602984326931508,
+        "oe_mis_lower": 0.829,
+        "oe_mis_upper": 1.115,
+        "exp_lof": 16.78485712967592,
+        "obs_lof": 8,
+        "pLI": 0.0005417333080260623,
+        "oe_lof": 0.4766200831019205,
+        "oe_lof_lower": 0.279,
+        "oe_lof_upper": 0.86
+      }
+    },
+    "AL158212_3": {
+      "gnomad_constraint": null
+    },
+    "AL158212_4": null,
+    "AL158212_1": {
+      "gnomad_constraint": null
+    },
+    "TCF7L2": {
+      "gnomad_constraint": {
+        "exp_syn": 168.21182745386096,
+        "obs_syn": 203,
+        "syn_z": -2.1084805717361723,
+        "oe_syn": 1.2068116913816962,
+        "oe_syn_lower": 1.076,
+        "oe_syn_upper": 1.356,
+        "exp_mis": 354.04931087054916,
+        "obs_mis": 227,
+        "mis_z": 2.399419166103715,
+        "oe_mis": 0.6411536275606475,
+        "oe_mis_lower": 0.574,
+        "oe_mis_upper": 0.716,
+        "exp_lof": 33.549020888679706,
+        "obs_lof": 4,
+        "pLI": 0.9953718384354076,
+        "oe_lof": 0.1192285167806403,
+        "oe_lof_lower": 0.058,
+        "oe_lof_upper": 0.273
+      }
+    },
+    "AL158212_2": {
+      "gnomad_constraint": null
+    },
+    "RPS15AP30": {
+      "gnomad_constraint": null
+    }
+  }
+}

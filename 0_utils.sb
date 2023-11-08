@@ -782,7 +782,7 @@ function lz_js()
   export r=$(echo ${chr}:$(expr ${pos} - ${flanking})-$(expr ${pos} + ${flanking}))
   (
     tabix ~/Caprion/analysis/METAL_dr/${prot}_dr-1.tbl.gz ${r} | \
-    awk '{print $1,$2,$1":"$2,toupper($5),toupper($4),$6,-$12,$10,$11}' | \
+    awk '{print $1,$2,$1":"$2,$3,toupper($5),toupper($4),$6,-$12,$10,$11}' | \
     sort -k1,1n -k2,2n
   ) | \
   tr ' ' '\t' | \
@@ -791,13 +791,13 @@ function lz_js()
   Rscript -e '
     library(dplyr)
     library(jsonlite)
+    null_value <- NULL
     prot <- Sys.getenv("prot")
     d <- read.delim(paste0(prot,".gz")) %>%
-         setNames(c("Chromosome","Position","variant","Ref_allele","Alt_allele","Alt_allele_freq","mlog10p","beta","se")) %>%
-         rename(position=Position,alt_allele=Alt_allele,ref_allele=Ref_allele,alt_allele_freq=Alt_allele_freq,log_pvalue=mlog10p) %>%
-         select(variant,position,alt_allele,alt_allele_freq,beta,log_pvalue)
+         setNames(c("chromosome","position","variant","rsid","ref_allele","alt_allele","alt_allele_freq","log_pvalue","beta","se")) %>%
+         mutate(analysis=toJSON(null_value)) %>%
+         select(chromosome,position,variant,rsid,ref_allele,alt_allele,alt_allele_freq,beta,se,log_pvalue,analysis)
    sink(paste0(prot,".json"))
-   toJSON(list(assoc=d),auto_unbox=TRUE,pretty=FALSE)
+   toJSON(list(data=d),auto_unbox=TRUE,pretty=FALSE)
    sink()
   '
-}

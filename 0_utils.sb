@@ -772,33 +772,64 @@ function lookup()
 	'
 }
 
-function lz_js()
-# LocusZoom.js/d3.js data
+function tojson()
 {
-  export prot=ACE
-  export chr=17
-  export pos=61570422
   export flanking=250000
   export r=$(echo ${chr}:$(expr ${pos} - ${flanking})-$(expr ${pos} + ${flanking}))
   (
+    echo chromosome position variant rsid ref_allele alt_allele alt_allele_freq log_pvalue beta se
     tabix ~/Caprion/analysis/METAL_dr/${prot}_dr-1.tbl.gz ${r} | \
     awk '{print $1,$2,$1":"$2,$3,toupper($5),toupper($4),$6,-$12,$10,$11}' | \
     sort -k1,1n -k2,2n
   ) | \
   tr ' ' '\t' | \
-  bgzip -f > ${prot}.gz
-  tabix -s1 -b2 -e2 ${prot}.gz
+  bgzip -f > ${prot}-${rsid}.gz
+  tabix -S1 -s1 -b2 -e2 ${prot}-${rsid}.gz
   Rscript -e '
     library(dplyr)
     library(jsonlite)
-    null_value <- NULL
     prot <- Sys.getenv("prot")
-    d <- read.delim(paste0(prot,".gz")) %>%
-         setNames(c("chromosome","position","variant","rsid","ref_allele","alt_allele","alt_allele_freq","log_pvalue","beta","se")) %>%
-         mutate(analysis=toJSON(null_value)) %>%
-         select(chromosome,position,variant,rsid,ref_allele,alt_allele,alt_allele_freq,beta,se,log_pvalue,analysis)
-   sink(paste0(prot,".js"))
-   cat("input=")
-   toJSON(list(data=d),auto_unbox=TRUE,pretty=FALSE)
-   sink()
+    pqtl <- Sys.getenv("rsid")
+    d <- read.delim(paste0(prot,"-",pqtl,".gz"))
+    sink(paste0(prot,"-",pqtl,".json"))
+    toJSON(list(data=d,analysis=paste0(prot,"-",pqtl)),auto_unbox=TRUE,pretty=FALSE)
+    sink()
   '
+}
+export -f tojson
+
+function lz_json()
+{
+  awk 'NR>1{print $1,$7}' ${analysis}/work/caprion${suffix}.signals | \
+  parallel -C' ' '
+    export prot={1}
+    export rsid={2}
+    export chrpos=$(grep -w ${rsid} ~/INF/work/INTERVAL.rsid | awk "{gsub(/chr|_[A-Z]*/,\"\",\$1);print \$1}")
+    export chr=$(echo ${chrpos} | cut -d ":" -f1)
+    export pos=$(echo ${chrpos} | cut -d ":" -f2)
+    echo ${prot} ${rsid} ${chr} ${pos}
+    tojson
+  '
+}
+
+function()
+{
+  Rscript -e '
+    library(dplyr)
+    library(jsonlite)
+    suffix <- Sys.getenv("suffix")
+    merged_data <- list()
+    flist <- dir(pattern="json")
+    for (i in 1:length(flist))
+    {
+      s <- unlist(strsplit(flist[i],"-|[.]"))
+      f <- list(data=fromJSON(flist[i])$data[c("variant","position","ref_allele","alt_allele_freq","beta","log_pvalue")],analysis=paste0(s[1],"-",s[2]))
+      merged_data <- c(merged_data,list(f))
+    }
+    merged_json <- toJSON(merged_data)
+    sink(paste0("caprion",suffix,".js"))
+    cat("input=")
+    writeLines(merged_json)
+    sink()
+  '
+}

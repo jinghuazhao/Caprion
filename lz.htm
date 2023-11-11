@@ -60,7 +60,7 @@
   var stateUrlMapping = {chr: "chrom", start: "start", end: "end", ldrefvar: 'ld_variant' };
   var initialState = LzDynamicUrls.paramsFromUrl(stateUrlMapping);
   if (!Object.keys(initialState).length) {
-    new_initialState = {chr: '10', start: 114550452, end: 115067678};
+    initialState = {chr: '10', start: 114550452, end: 115067678};
   }
   layout = LocusZoom.Layouts.get("plot", "standard_association", {state: initialState});
   var plot = LocusZoom.populate("#lz-plot", data_sources, layout);

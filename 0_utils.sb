@@ -823,7 +823,7 @@ function()
     for (i in 1:length(flist))
     {
       s <- unlist(strsplit(flist[i],"-|[.]"))
-      f <- list(data=fromJSON(flist[i])$data[c("variant","position","ref_allele","alt_allele_freq","beta","log_pvalue")],analysis=paste0(s[1],"-",s[2]))
+      f <- list(ppid=paste0(s[1],"-",s[2]),data=fromJSON(flist[i])$data[c("variant","position","ref_allele","alt_allele_freq","beta","log_pvalue")])
       merged_data <- c(merged_data,list(f))
     }
     merged_json <- toJSON(merged_data)

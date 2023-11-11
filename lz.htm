@@ -49,6 +49,7 @@
   data_sources = new LocusZoom.DataSources()
   .add("assoc", ["AssociationLZ", { url: apiBase + "statistic/single/", source: 45 }])
   .add("credset", ["CredibleSetLZ", { threshold: 0.95, significance_threshold: 7.301 }])
+  .add("catalog", ["GwasCatalogLZ", { url: apiBase + 'annotation/gwascatalog/results/', build: 'GRCh37' }])
   .add("ld", ["LDServer", { url: "https://portaldev.sph.umich.edu/ld/", source: '1000G', build: 'GRCh37', population: 'ALL' }])
   .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", build: 'GRCh37' }])
   .add("recomb", ["RecombLZ", { url: apiBase + "annotation/recomb/results/", build: 'GRCh37' }])
@@ -58,9 +59,9 @@
   if (!Object.keys(initialState).length) {
     initialState = {chr: '10', start: 114550452, end: 115067678};
   }
+//layout = LocusZoom.Layouts.get("plot", "association_catalog", {state: initialState});
   layout = LocusZoom.Layouts.get("plot", "association_credible_set", {state: initialState});
   var plot = LocusZoom.populate("#lz-plot", data_sources, layout);
-  LzDynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
   LzDynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
   function jumpTo(region) {
     var target = region.split(":");
@@ -76,6 +77,7 @@
     var new_data_sources = new LocusZoom.DataSources()
     .add("assoc", ["StaticJSON", { data: input[no].data } ])
     .add("credset", ["CredibleSetLZ", { threshold: 0.95, significance_threshold: 7.301 }])
+    .add("catalog", ["GwasCatalogLZ", { url: apiBase + 'annotation/gwascatalog/results/', build: 'GRCh37' }])
     .add("ld", ["LDServer", { url: "https://portaldev.sph.umich.edu/ld/", source: '1000G', build: 'GRCh37', population: 'ALL' }])
     .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", build: 'GRCh37' }])
     .add("recomb", ["RecombLZ", { url: apiBase + "annotation/recomb/results/", build: 'GRCh37' }])
@@ -85,6 +87,7 @@
     if (!Object.keys(new_initialState).length) {
       new_initialState = {chr: chr, start: start, end: end};
     }
+//  var new_layout = LocusZoom.Layouts.get("plot", "association_catalog", {state: new_initialState});
     var new_layout = LocusZoom.Layouts.get("plot", "association_credible_set", {state: new_initialState});
     plot = LocusZoom.populate("#lz-plot", new_data_sources, new_layout);
     LzDynamicUrls.plotUpdatesUrl(plot, new_stateUrlMapping);

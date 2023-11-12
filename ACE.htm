@@ -31,7 +31,7 @@
   </head>
   <body>
     <div id="lz-plot"></div>
-    <a href="ACE.json">ACE: data</a>,
+    <h3><a href="ACE.json">ACE: data</a></h3>
     <div id="assoc-container"></div>
     <script src="ACE.js"></script>
     <script type="text/javascript">
@@ -61,7 +61,6 @@
         ],
     });
     window.plot = LocusZoom.populate("#lz-plot", data_sources, layout);
-    plot.applyState({ chr: 17, start: 61320422, end: 61820422, ldrefvar: "" });
     LzDynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
     LzDynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
     fetch('ACE.json')

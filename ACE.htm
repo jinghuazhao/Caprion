@@ -29,7 +29,6 @@
     </style>
   </head>
   <body>
-    <h4>LocusZoom.js</h4>
     <div id="lz-plot"></div>
     <a href="ACE.json">ACE: data</a>,
     <div id="assoc-container"></div>
@@ -66,7 +65,6 @@
       return false;
     }
     jumpTo('17:61570422');
-//  https://statgen.github.io/locuszoom/docs/api/module-ext_lz-tabix-source.html
     fetch('ACE.json')
       .then(response => response.json())
       .then(data => {

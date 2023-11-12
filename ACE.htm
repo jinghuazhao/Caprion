@@ -43,40 +43,28 @@
     .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", build: 'GRCh37' }])
     .add("recomb", ["RecombLZ", { url: apiBase + "annotation/recomb/results/", build: 'GRCh37' }])
     .add("constraint", ["GeneConstraintLZ", { url: "https://gnomad.broadinstitute.org/api/", build: 'GRCh37' }]);
-    function jumpTo(region) {
-      var stateUrlMapping = {chr: "chrom", start: "start", end: "end", ldrefvar: 'ld_variant' };
-      var initialState = LzDynamicUrls.paramsFromUrl(stateUrlMapping);
-      var target = region.split(":");
-      var chr = target[0];
-      var pos = target[1];
-      var start = 0;
-      var end = 0;
-      if (!pos.match(/[-+]/)) {
-        start = +pos - 250000;
-        end = +pos + 250000
-      }
-      if (!Object.keys(initialState).length) {
-        initialState = {chr: chr, start: start, end: end};
-      }
-      layout = LocusZoom.Layouts.get("plot", "standard_association", {state: initialState});
-      window.plot = LocusZoom.populate("#lz-plot", data_sources, layout);
-      LzDynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
-      plot.applyState({ chr: chr, start: start, end: end, ldrefvar: "" });
-      return false;
+    var stateUrlMapping = {chr: "chrom", start: "start", end: "end", ldrefvar: 'ld_variant' };
+    var initialState = LzDynamicUrls.paramsFromUrl(stateUrlMapping);
+    if (!Object.keys(initialState).length) {
+       initialState = {chr: '17', start: 61320422, end: 61820422 };
     }
-    jumpTo('17:61570422');
+    layout = LocusZoom.Layouts.get("plot", "standard_association", {state: initialState});
+    window.plot = LocusZoom.populate("#lz-plot", data_sources, layout);
+    plot.applyState({ chr: 17, start: 61320422, end: 61820422, ldrefvar: "" });
+    LzDynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
+    LzDynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
     fetch('ACE.json')
-      .then(response => response.json())
-      .then(data => {
-         const assoc = data.assoc;
-         const assocContainer = document.getElementById('assoc-container');
-         assoc.forEach(assoc => {
-           const assocElement = document.createElement('div');
-           assocElement.innerHTML = `${assoc.variant}, ${assoc.position}, ${assoc.alt_allele}, {assoc.beta}, ${assoc.log_pvalue}<br>`;
-           assocContainer.appendChild(assocElement);
-         });
-        })
-        .catch(error => {console.error('Error fetching data:', error);});
+    .then(response => response.json())
+    .then(data => {
+       const assoc = data.assoc;
+       const assocContainer = document.getElementById('assoc-container');
+       assoc.forEach(assoc => {
+         const assocElement = document.createElement('div');
+         assocElement.innerHTML = `${assoc.variant}, ${assoc.position}, ${assoc.alt_allele}, {assoc.beta}, ${assoc.log_pvalue}<br>`;
+         assocContainer.appendChild(assocElement);
+       });
+     })
+     .catch(error => {console.error('Error fetching data:', error);});
     </script>
   </body>
 </html>

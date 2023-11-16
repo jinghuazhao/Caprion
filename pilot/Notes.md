@@ -11,7 +11,7 @@ The charge of an ion is a crucial piece of information in mass spectrometry. It 
 The formula for calculating m/z is:
 
 $$
-m/z=\frac{\mbox{Mass of the ion}}{\mbox{Mass of the ion​}}
+m/z=\frac{\mbox{Mass of the ion}}{\mbox{Charge of the ion​}}
 $$
 
 The charge of an ion is essential for interpreting mass spectrometry data, particularly in determining the mass-to-charge ratio (m/z) of ions, which is fundamental for identifying and characterizing molecules in a sample.

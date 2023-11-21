@@ -198,7 +198,7 @@ function ukb_ppp_lz()
        gunzip -c ${ukb_ppp}/European/${phenoname}_*bgz | \
        awk -v chr={1} -v pos={2} -v OFS="\t" "
        {
-         split(\$3,a,":")
+         split(\$3,a,\":\")
          if (\$1==chr && a[2]>=pos-5e5 && a[2]<pos+5e5) {print a[1],a[2],\"chr\"a[1]\":\"a[2],\$13}
        }" | \
        sort -k1,1n -k2,2n
@@ -212,6 +212,9 @@ function ukb_ppp_lz()
      rm ${analysis}/work/${phenoname}-{4}.lz
      '
   fi
+  # export n2=$(expr $(ls *pdf | wc -l | cut -d' ' -f2) \* 2)
+  # qpdf --empty --pages $(ls *pdf) -- UKB_PPP_LZ.pdf
+  # qpdf --pages . 1-${n2}:odd -- UKB_PPP_LZ.pdf UKB_PPP-lz.pdf
 }
 
 function fplz()

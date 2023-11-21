@@ -1,14 +1,17 @@
 #!/usr/bin/bash
 
-#SBATCH --job-name=_mean
+#SBATCH --job-name=_lz_ukb_ppp
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake-himem
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
 #SBATCH --array=1-987
-#SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
-#SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
+#SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_lz_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_lz_%A_%a.e
+
+##SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
+##SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export analysis=~/Caprion/analysis
@@ -179,6 +182,36 @@ function HetISq()
     write.csv(Het,file=file.path(analysis,"work", paste0("HetISq75",suffix,".csv"),row.names=FALSE,quote=FALSE)
     write(Het[['index']],file=file.path(analysis, "work", paste0("HetISq75",suffix,".index"),sep=",",ncolumns=nrow(Het))
   '
+}
+
+function ukb_ppp_lz()
+{
+  module load python/2.7
+  export ukb_ppp=~/rds/results/public/proteomics/UKB-PPP/sun23
+  export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)
+  export flanking=500000
+  if [ -f ${analysis}/METAL${suffix}/sentinels/${phenoname}${suffix}.signals ]; then
+     awk '$3==prot{print $8,$9,$10,$2}' FS="," prot=${phenoname} ${analysis}/work/caprion${suffix}.cis.vs.trans | \
+     parallel -j1 -C ' ' --env analysis --env phenoname '
+     (
+       echo -e "Chromosome\tPosition\tMarkerName\tlog10P"
+       gunzip -c ${ukb_ppp}/European/${phenoname}_*bgz | \
+       awk -v chr={1} -v pos={2} -v OFS="\t" "
+       {
+         split(\$3,a,":")
+         if (\$1==chr && a[2]>=pos-5e5 && a[2]<pos+5e5) {print a[1],a[2],\"chr\"a[1]\":\"a[2],\$13}
+       }" | \
+       sort -k1,1n -k2,2n
+     ) > ${analysis}/work/${phenoname}-{4}.lz
+     locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${analysis}/work/${phenoname}-{4}.lz \
+               --delim tab title="${phenoname}-{4} ({3})" \
+               --markercol MarkerName --pvalcol log10P --no-transform --cache None \
+               --chr {1} --start $(expr {2} - ${flanking}) --end $(expr {2} + ${flanking}) \
+               --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/ukb_ppp \
+               --refsnp $(echo chr{1}:{2})
+     rm ${analysis}/work/${phenoname}-{4}.lz
+     '
+  fi
 }
 
 function fplz()
@@ -641,7 +674,7 @@ function signal_comparison()
   '
 }
 
-function ukb_ppp()
+function ukb_ppp_a1bg()
 {
   export rt=~/rds/results/public/proteomics/UKB-PPP/sun23
   export f=A1BG
@@ -693,7 +726,29 @@ function ukb_ppp()
   ) > ${f}.txt
   export ukb_ppp="/rds/project/jmmh2/rds-jmmh2-results/public/proteomics/UKB-PPP/sun23"
   export bgz="${ukb_ppp}/European/A1BG_P04217_OID30771_v1_Inflammation_II.bgz"
+# https://www.cog-genomics.org/static/bin/plink/glist-hg19
+  read -r chr start end < <(grep -w A1BG ${INF}/csd3/glist-hg19 | grep -v AS1 | cut -d' ' -f1-3)
   gunzip -c ${bgz} | \
+  awk -vchr=${chr} -vstart=${start} -vend=${end} -vflanking=250000 -vOFS="\t" '{
+        split($3,a,":")
+        if (NR==1) print "chromsome","position","variant","ref_allele","alt_allele","alt_allele_freq","log_pvalue","beta","se";
+        else if (a[1]==chr && a[2]>=start-flanking && a[2]<=end+flanking) print a[1],a[2],a[1]":"a[2],$4,$5,$6,$13,$10,$11
+       }' | \
+  bgzip -f > ${analysis}/work/${f}-ukb.tab.gz
+  tabix -f -S1 -s1 -b2 -e2 ${analysis}/work/${f}-ukb.tab.gz
+  Rscript -e '
+    library(dplyr)
+    library(jsonlite)
+    analysis <- Sys.getenv("analysis")
+    f <- Sys.getenv("f")
+    merged_data <- list()
+    d <- read.table(file.path(analysis,"work",paste0(f,"-ukb.tab.gz")),header=TRUE)
+    json <- toJSON(list(data=d))
+    sink(paste0(f,"-ukb.js"))
+    cat("a1bg=")
+    writeLines(json)
+    sink()
+  '
   awk '{
         split($3,a,":")
         if(a[1]=="X") a[1]=23
@@ -701,6 +756,7 @@ function ukb_ppp()
         else if (a[1]!=23) print a[1],a[2],$13,$10,$11
        }' | \
   gzip -f > ${f}.txt.gz
+  gunzip -c ${bgz} | \
   R --slave --vanilla --args \
       input_data_path=${f}.txt.gz \
       output_data_rootname=${f}_qq \
@@ -725,6 +781,17 @@ function ukb_ppp()
   echo ${f} | parallel -C' ' 'convert -resize 150% {}_qq.png {}_qq.pdf;convert {}_manhattan.png {}_manhattan.pdf'
   module load ceuadmin/pdfjam
   pdfjam $(ls ${f}_qq.pdf ${f}_manhattan.pdf) --nup 2x1 --landscape --papersize '{7in,14in}' --outfile UKB-PPP-European-${f}-qq-manhattan.pdf
+  Rscript -e '
+   options(width=200)
+   library(dplyr)
+   library(pQTLdata)
+   d <- left_join(caprion[1:3],Olink_Explore_3072,by=c('Accession'='UniProt.ID')) %>%
+        filter(!is.na(Protein.name))
+   cvt <- read.table("work/caprion_dr.cis.vs.trans",header=TRUE)
+   dd <- left_join(cvt,d) %>%
+         filter(!is.na(Protein.name)) %>%
+         select(prot,SNP,geneChrom,geneStart,geneEnd,Protein,Accession)
+  '
 }
 
 function maf()
@@ -749,10 +816,6 @@ function bgenX()
   sed '1d' | \
   rev > ${analysis}/work/chrX.snpid
 }
-
-mean_by_genotype_gen_sample
-mean_by_genotype_dosage
-# X: 127,156,325,471,567,691,748,792
 
 function lookup()
 {
@@ -812,7 +875,7 @@ function lz_json()
   '
 }
 
-function()
+function json()
 {
   Rscript -e '
     library(dplyr)
@@ -833,3 +896,9 @@ function()
     sink()
   '
 }
+
+# mean_by_genotype_gen_sample
+# mean_by_genotype_dosage
+# X: 127,156,325,471,567,691,748,792
+
+ukb_ppp_lz

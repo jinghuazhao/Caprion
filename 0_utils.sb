@@ -735,7 +735,7 @@ function ukb_ppp_a1bg()
   awk -vchr=${chr} -vstart=${start} -vend=${end} -vflanking=250000 -vOFS="\t" '{
         split($3,a,":")
         if (NR==1) print "chromsome","position","variant","ref_allele","alt_allele","alt_allele_freq","log_pvalue","beta","se";
-        else if (a[1]==chr && a[2]>=start-flanking && a[2]<=end+flanking) print a[1],a[2],a[1]":"a[2],$4,$5,$6,$13,$10,$11
+        else if (a[1]==chr && a[2]>=start-flanking && a[2]<=end+flanking) print a[1],a[2],a[1]":"a[2]"_"a[3]"/"a[4],$4,$5,$6,$13,$10,$11
        }' | \
   bgzip -f > ${analysis}/work/${f}-ukb.tab.gz
   tabix -f -S1 -s1 -b2 -e2 ${analysis}/work/${f}-ukb.tab.gz
@@ -788,9 +788,10 @@ function ukb_ppp_a1bg()
    options(width=200)
    library(dplyr)
    library(pQTLdata)
+   analysis <- Sys.getenv("analysis")
    d <- left_join(caprion[1:3],Olink_Explore_3072,by=c('Accession'='UniProt.ID')) %>%
         filter(!is.na(Protein.name))
-   cvt <- read.table("work/caprion_dr.cis.vs.trans",header=TRUE)
+   cvt <- read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans"),header=TRUE)
    dd <- left_join(cvt,d) %>%
          filter(!is.na(Protein.name)) %>%
          select(prot,SNP,geneChrom,geneStart,geneEnd,Protein,Accession)
@@ -845,7 +846,10 @@ function tojson()
   (
     echo chromosome position variant rsid ref_allele alt_allele alt_allele_freq log_pvalue beta se
     tabix ~/Caprion/analysis/METAL_dr/${prot}_dr-1.tbl.gz ${r} | \
-    awk '{print $1,$2,$1":"$2,$3,toupper($5),toupper($4),$6,-$12,$10,$11}' | \
+    awk '{
+          $5=toupper($5);$4=toupper($4)
+          print $1,$2,$1":"$2"_"$5"/"$4,$3,$5,$4,$6,-$12,$10,$11
+    }' | \
     sort -k1,1n -k2,2n
   ) | \
   tr ' ' '\t' | \
@@ -897,6 +901,24 @@ function json()
     cat("input=")
     writeLines(merged_json)
     sink()
+  '
+}
+
+function umich()
+{
+  curl https://portaldev.sph.umich.edu/api/v1/statistic/single/ > single.json
+  cat single.json | jq
+  curl -G "https://portaldev.sph.umich.edu/api/v1/statistic/phewas/?build=GRCh37&format=objects" \
+       --data-urlencode "filter=variant eq '10:114758349_C/T'" > t2d.json
+  curl -G "https://portaldev.sph.umich.edu/api/v1/statistic/single/results/" \
+       --data-urlencode "filter=analysis in 45 and chromosome in '10' and position ge 114258349 and position le 115258349" \
+       --data-urlencode "fields=variant, position, log_pvalue"  --data-urlencode "sort=log_pvalue" > tcf7l2.json
+  Rsript -e '
+   options(width=200)
+   library(jsonlite)
+   single <- fromJSON("single.json")
+   names(single)
+   data.frame(single$data)[45,]
   '
 }
 

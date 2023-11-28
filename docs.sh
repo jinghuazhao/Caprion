@@ -17,7 +17,7 @@ git add .gitignore
 git commit -m ".gitignore"
 git add README.md pilot/README.md
 git commit -m "README"
-git add peptide_progs/ 0_compare.sh 0_utils.sb
+git add peptide_progs/ 0_compare.sb 0_utils.sb
 git add 1_pca_projection.sh 2_ggm.R 3_wgcna.R 4_pca_clustering.R 5_pgwas.* 6_meta_analysis.* 7_merge* 8_hla.* 9_lookup.* ToDo.sh
 git commit -m "Analysis"
 git add pilot/caprion.ini pilot/caprion.R pilot/caprion.ipynb

@@ -31,7 +31,7 @@ function pgwas()
   cat <(gunzip -c caprion-?-${protein}.fastGWA.gz | head -1 | paste <(echo Batch-Protein) -|sed 's/-/\t/') \
       <(zgrep -w ${pqtl} caprion-?-${protein}.fastGWA.gz) | \
   sed 's/caprion-//;s/.fastGWA.gz:/\t/;s/-/\t/' | \
-  Rscript -e '
+ Rscript -e '
     suppressMessages(library(dplyr))
     pqtl <- Sys.getenv("pqtl")
     d <- read.table("stdin",header=TRUE) %>%
@@ -209,7 +209,7 @@ function ukb_ppp_lz()
                --chr {1} --start $(expr {2} - ${flanking}) --end $(expr {2} + ${flanking}) \
                --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/ukb_ppp \
                --refsnp $(echo chr{1}:{2})
-     rm ${analysis}/work/${phenoname}-{4}.lz
+     if [ $(wc -l ${analysis}/work/${phenoname}-{4}.lz|cut -d' ' -f1) -eq 1 ]; then rm ${analysis}/work/${phenoname}-{4}.lz; fi
      '
   fi
   # export n2=$(expr $(ls *pdf | wc -l | cut -d' ' -f2) \* 2)

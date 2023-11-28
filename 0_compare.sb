@@ -1,0 +1,77 @@
+#!/usr/bin/bash
+
+#SBATCH --job-name=_comp
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+
+#SBATCH --array=1-987
+#SBATCH --output=/home/jhz22/Caprion/analysis/compare/slurm/_comp_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/compare/slurm/_comp_%A_%a.e
+
+export TMPDIR=${HPC_WORK}/work
+export analysis=~/Caprion/analysis
+export suffix=_dr
+
+. /etc/profile.d/modules.sh
+module purge
+module load rhel7/default-ccl
+module load ceuadmin/readline/8.0
+
+function idx()
+{
+  export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${analysis}/work/caprion${suffix}.varlist)
+  export d=$1
+  export s=$2
+  (
+    cat <(gunzip -c ${analysis}/${d}/${prot}-1.tbl.gz | head -1) \
+        <(gunzip -c ${analysis}/${d}/${prot}-1.tbl.gz | sed '1d' | sort -k1,1n -k2,2n) \
+        <(gunzip -c ${analysis}/${d}/${prot}-chrX-1.tbl.gz | sed '1d' | sort -k1,1n -k2,2n)
+  ) | \
+  bgzip -f > ${analysis}/METAL${s}/${prot}${s}-1.tbl.gz
+  tabix -f -S1 -s1 -b2 -e2 ${analysis}/METAL${s}/${prot}${s}-1.tbl.gz
+}
+
+function assoc()
+{
+  (
+    awk 'NR>1{print $3,$2,$8,$9,$10}' FS="," ${analysis}/work/caprion${suffix}.cis.vs.trans  | \
+    parallel -C' ' 'tabix ${analysis}/METAL${2}/{1}${1}-1.tbl.gz {3}:{4}-{4}'
+  ) > ${analysis}/work/caprion${s}.assoc
+}
+
+function ukb_ppp_assoc()
+{
+  (
+#   echo \#CHROM start end chrpos| tr ' ' '\t'
+    awk 'NR>1{print "chr"$8,$8,$9-1,$9,$8":"$9}' FS="," OFS="\t" ${analysis}/work/caprion${suffix}.cis.vs.trans | \
+    sort -k2,2n -k3,3n | \
+    cut -f2 --complement | \
+    sed 's/chr23/chrX/' | \
+    uniq
+  ) > ${analysis}/work/caprion${suffix}.hg19
+  liftOver $analysis/work/caprion${suffix}.hg19 ~/hpc-work/bin/hg19ToHg38.over.chain.gz \
+           ${analysis}/work/caprion${suffix}-b38.bed \
+           ${analysis}/work/caprion${suffix}-b38.unlifted.bed
+  (
+    echo $(sed 's/,/ /g' ${analysis}/work/caprion${suffix}.cis.vs.trans | head -1) pos38
+    cut -f1,2 --complement ${analysis}/work/caprion${suffix}-b38.bed | \
+    sed 's/chr//' | \
+    sort -k2,2 | \
+    join -22 -a1 <(sed '1d;s/,/ /g' ${analysis}/work/caprion${suffix}.cis.vs.trans | awk '{print $8":"$9,$0}' | sort -k1,1) - | \
+    cut -d' ' -f1 --complement
+   ) > ${analysis}/work/caprion${suffix}.cvt
+  export ukb_ppp=~/rds/results/public/proteomics/UKB-PPP/sun23
+  (
+    gunzip -c tabix ${ukb_ppp}/European/*bgz | head -1
+    awk '{print $3,$8,$12}' ${analysis}/work/caprion${suffix}.cvt | \
+    parallel -j1 -C ' ' 'tabix ${ukb_ppp}/European/{1}_*bgz {2}:{3}-{3} | awk -vprot={1} "{print prot,\$0}"'
+  ) > ${analysis}/work/caprion_ukb_ppp.assoc
+}
+
+#idx METAL3 _3
+#idx METAL _2
+
+assoc _dr
+assoc _3

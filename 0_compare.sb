@@ -35,9 +35,10 @@ function idx()
 
 function assoc()
 {
+  export s=${1}
   (
-    awk 'NR>1{print $3,$2,$8,$9,$10}' FS="," ${analysis}/work/caprion${suffix}.cis.vs.trans  | \
-    parallel -C' ' 'tabix ${analysis}/METAL${2}/{1}${1}-1.tbl.gz {3}:{4}-{4}'
+    awk 'NR>1{print $3,$2,$8,$9}' FS="," ${analysis}/work/caprion${suffix}.cis.vs.trans  | \
+    parallel -C' ' 'tabix ${analysis}/METAL${s}/{1}${s}-1.tbl.gz {3}:{4}-{4}'
   ) > ${analysis}/work/caprion${s}.assoc
 }
 

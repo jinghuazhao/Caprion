@@ -209,7 +209,7 @@ function ukb_ppp_lz()
                --chr {1} --start $(expr {2} - ${flanking}) --end $(expr {2} + ${flanking}) \
                --no-date --plotonly --prefix=${phenoname} --rundir ${analysis}/METAL${suffix}/ukb_ppp \
                --refsnp {4}
-     if [ $(wc -l ${analysis}/work/${phenoname}-{4}.lz|cut -d' ' -f1) -eq 1 ]; then rm ${analysis}/work/${phenoname}-{4}.lz; fi
+     if [ $(wc -l ${analysis}/work/${phenoname}-{4}.lz|cut -d" " -f1) -eq 1 ]; then rm ${analysis}/work/${phenoname}-{4}.lz; fi
      '
   fi
   # export n2=$(expr $(ls *pdf | wc -l | cut -d' ' -f2) \* 2)

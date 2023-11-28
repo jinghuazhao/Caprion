@@ -44,7 +44,7 @@ function assoc()
 function ukb_ppp_assoc()
 {
   (
-#   echo \#CHROM start end chrpos| tr ' ' '\t'
+    echo \#chrom start end chrpos| tr ' ' '\t'
     awk 'NR>1{print "chr"$8,$8,$9-1,$9,$8":"$9}' FS="," OFS="\t" ${analysis}/work/caprion${suffix}.cis.vs.trans | \
     sort -k2,2n -k3,3n | \
     cut -f2 --complement | \

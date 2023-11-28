@@ -20,6 +20,7 @@ module load rhel7/default-ccl
 module load ceuadmin/readline/8.0
 
 function idx()
+#idx METAL3 _3
 {
   export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${analysis}/work/caprion${suffix}.varlist)
   export d=$1
@@ -38,11 +39,12 @@ function assoc()
   export s=${1}
   (
     awk 'NR>1{print $3,$2,$8,$9}' FS="," ${analysis}/work/caprion${suffix}.cis.vs.trans  | \
-    parallel -C' ' 'tabix ${analysis}/METAL${s}/{1}${s}-1.tbl.gz {3}:{4}-{4}'
+    parallel -C' ' 'tabix ${analysis}/METAL${s}/{1}${s}-1.tbl.gz {3}:{4}-{4} | awk -vprot={1} "{print prot, \$0}"'
   ) > ${analysis}/work/caprion${s}.assoc
 }
 
 function ukb_ppp_assoc()
+# ukb_ppp_assoc
 {
   (
     echo \#chrom start end chrpos| tr ' ' '\t'
@@ -65,14 +67,56 @@ function ukb_ppp_assoc()
    ) > ${analysis}/work/caprion${suffix}.cvt
   export ukb_ppp=~/rds/results/public/proteomics/UKB-PPP/sun23
   (
-    gunzip -c tabix ${ukb_ppp}/European/*bgz | head -1
-    awk '{print $3,$8,$12}' ${analysis}/work/caprion${suffix}.cvt | \
-    parallel -j1 -C ' ' 'tabix ${ukb_ppp}/European/{1}_*bgz {2}:{3}-{3} | awk -vprot={1} "{print prot,\$0}"'
+    echo Protein $(gunzip -c ${ukb_ppp}/European/*bgz | head -1) | sed 's/ /\t/g'
+    awk 'NR>1{print $3,$8,$12}' ${analysis}/work/caprion${suffix}.cvt | \
+    parallel -j1 -C ' ' 'tabix ${ukb_ppp}/European/{1}_*bgz {2}:{3}-{3} | awk -vprot={1} -vOFS="\t" "{print prot, \$0}"'
   ) > ${analysis}/work/caprion_ukb_ppp.assoc
 }
 
-#idx METAL3 _3
-#idx METAL _2
+function merge()
+{
+  awk '
+  {
+    a1=toupper($5); a2=toupper($6)
+    if (a1<a2) snpid=$2":"$3":"a1":"a2; else snpid=$2":"$3":"a2":"a1
+    print $1":"snpid,a1,a2,$11,$12,$13
+  }
+  ' ${analysis}/work/caprion${suffix}.assoc | \
+  sort -k1,1 | \
+  join - <(awk '
+           {
+             a1=toupper($5); a2=toupper($6)
+             if (a1<a2) snpid=$2":"$3":"a1":"a2; else snpid=$2":"$3":"a2":"a1
+             print $1":"snpid,a1,a2,$11,$12,$13
+           }
+   ' ${analysis}/work/caprion_3.assoc | \
+   sort -k1,1
+  ) | \
+  join - -a1 <(cut -f1,4-6,11-12,14 work/caprion_ukb_ppp.assoc | \
+    sed '1d;s/:/\t/2' | \
+    cut -f3 --complement | \
+    awk '
+    {
+      a1=$3; a2=$4
+      if (a1<a2) snpid=$2":"a1":"a2; else snpid=$2":"a2":"a1
+      print $1":"snpid,a1,a2,$5,$6,$7
+    }' | \
+    sort -k1,1
+  ) > ${analysis}/work/caprion.assoc
+  Rscript -e '
+    options(width=200)
+    analysis <- Sys.getenv("analysis")
+    library(dplyr)
+    vnames <- c("id","a1","a2","b_DR","se_DR","logp_DR","b1","b2","b_All","se_All","logp_All","c1","c2","b_UKB","se_UKB","logp_UKB")
+    assoc <- read.table(file.path(analysis,"work","caprion.assoc"),col.names=vnames, na.strings="", fill=TRUE) %>%
+             mutate(b_UKB=if_else(a1==c1,b_UKB,-b_UKB))
+    pdf(file.path(analysis,"compare","b_DR_All_UKB.pdf"),width=10,height=10)
+    pairs(assoc[c("b_DR","b_All","b_UKB")],cex=0.6)
+    title("Effect size of DR-filtered, All data and UKB-PPP")
+    dev.off()
+  '
+}
 
 assoc _dr
 assoc _3
+ukb_ppp_assoc

@@ -1,11 +1,14 @@
 .git/
 .Rhistory
 .snakemake
+compare/
 HLA/
 IMGT2Seq
 METAL/
 METAL3/
 METAL_dr
+METAL_2/
+METAL_3/
 bMarkerGenerator
 doc/
 docs/
@@ -16,7 +19,6 @@ pgwas_dr/
 reports/
 site/
 work/
-
 config/
 data/
 results/

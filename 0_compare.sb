@@ -112,17 +112,18 @@ function merge()
     assoc <- read.table(file.path(analysis,"work","caprion.assoc"),col.names=vnames, na.strings="", fill=TRUE) %>%
              mutate(b_UKB=if_else(a1==c2,b_UKB,-b_UKB))
     pdf(file.path(analysis,"compare","b_DR_All_UKB.pdf"),width=10,height=10)
-    pairs(assoc[c("b_DR","b_All","b_UKB")],pch=16,main="Effect size of DR-filtered, All data and UKB-PPP")
-    ggpairs(assoc[c("b_DR","b_All","b_UKB")],title="Effect size of DR-filtered, All data and UKB-PPP")
+    pairs(assoc[c("b_DR","b_All","b_UKB")],pch=16,main="Effect sizes of DR-filtered, All data and UKB-PPP")
+    ggpairs(assoc[c("b_DR","b_All","b_UKB")],title="Effect sizes of DR-filtered, All data and UKB-PPP")
     dev.off()
     library(plotly)
     assoc <- mutate(assoc,  x1 = b_DR,  x2 = b_All,  x3 = b_UKB)
+    library(htmlwidgets)
     scatter <- plot_ly(assoc, x = ~x1, y = ~x2, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
                add_trace(x = ~x1, y = ~x3, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
                add_trace(x = ~x2, y = ~x3, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
-               layout(title = "Comparison of effect sizes", xaxis = list(title = "Effect size"), yaxis = list(title = "Effect size"))
-   library(htmlwidgets)
-   saveWidget(scatter,file=file.path(analysis,"compare","b_DR_All_UKB.html"))
+               layout(title = "Effect sizes of DR−filtered, All data and UKB−PPP",
+                      xaxis = list(title = "Effect size"), yaxis = list(title = "Effect size"))
+    saveWidget(scatter,file=file.path(analysis,"compare","b_DR_All_UKB.html"))
   '
 }
 

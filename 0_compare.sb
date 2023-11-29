@@ -92,6 +92,15 @@ function merge()
    ' ${analysis}/work/caprion_3.assoc | \
    sort -k1,1
   ) | \
+  join - <(awk '
+           {
+             a1=toupper($5); a2=toupper($6)
+             if (a1<a2) snpid=$2":"$3":"a1":"a2; else snpid=$2":"$3":"a2":"a1
+             print $1":"snpid,a1,a2,$11,$12,$13
+           }
+   ' ${analysis}/work/caprion.assoc | \
+   sort -k1,1
+  ) | \
   join - -a1 <(cut -f1,4-6,11-12,14 work/caprion_ukb_ppp.assoc | \
     sed '1d;s/:/\t/2' | \
     cut -f3 --complement | \
@@ -102,31 +111,39 @@ function merge()
       print $1":"snpid,a1,a2,$5,$6,$7
     }' | \
     sort -k1,1
-  ) > ${analysis}/work/caprion.assoc
+  ) > ${analysis}/compare/compare.assoc
   Rscript -e '
     options(width=200)
     analysis <- Sys.getenv("analysis")
     library(dplyr)
     library(GGally)
-    vnames <- c("id","a1","a2","b_DR","se_DR","logp_DR","b1","b2","b_All","se_All","logp_All","c1","c2","b_UKB","se_UKB","logp_UKB")
-    assoc <- read.table(file.path(analysis,"work","caprion.assoc"),col.names=vnames, na.strings="", fill=TRUE) %>%
-             mutate(b_UKB=if_else(a1==c2,b_UKB,-b_UKB))
-    pdf(file.path(analysis,"compare","b_DR_All_UKB.pdf"),width=10,height=10)
-    pairs(assoc[c("b_DR","b_All","b_UKB")],pch=16,main="Effect sizes of DR-filtered, All data and UKB-PPP")
-    ggpairs(assoc[c("b_DR","b_All","b_UKB")],title="Effect sizes of DR-filtered, All data and UKB-PPP")
+    vnames <- c("id","a1","a2","b_DR","se_DR","logp_DR",
+                     "b1","b2","b_All","se_All","logp_All",
+                     "c1","c2","b_ZYQ_UDP","se_ZYQ_UDP","logp_ZYQ_UDP",
+                     "d1","d2","b_UKB","se_UKB","logp_UKB")
+    assoc <- read.table(file.path(analysis,"compare","compare.assoc"),col.names=vnames, na.strings="", fill=TRUE) %>%
+             mutate(b_UKB=if_else(a1==d2,b_UKB,-b_UKB))
+    pdf(file.path(analysis,"compare","b_DR_All_ZYQ+UDP_UKB.pdf"),width=10,height=10)
+    pairs(assoc[c("b_DR","b_All","b_ZYQ_UDP","b_UKB")],pch=16,main="Effect sizes of DR-filtered, All data and UKB-PPP")
+    ggpairs(assoc[c("b_DR","b_All","b_ZYQ_UDP","b_UKB")],title="Effect sizes of DR-filtered, All data and UKB-PPP")
     dev.off()
     library(plotly)
-    assoc <- mutate(assoc,  x1 = b_DR,  x2 = b_All,  x3 = b_UKB)
+    assoc <- mutate(assoc,  x1 = b_DR, x2 = b_All, x3=b_ZYQ_UDP, x4 = b_UKB)
     library(htmlwidgets)
     scatter <- plot_ly(assoc, x = ~x1, y = ~x2, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
                add_trace(x = ~x1, y = ~x3, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               add_trace(x = ~x1, y = ~x4, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
                add_trace(x = ~x2, y = ~x3, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               add_trace(x = ~x2, y = ~x4, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               add_trace(x = ~x3, y = ~x4, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
                layout(title = "Effect sizes of DR−filtered, All data and UKB−PPP",
                       xaxis = list(title = "Effect size"), yaxis = list(title = "Effect size"))
-    saveWidget(scatter,file=file.path(analysis,"compare","b_DR_All_UKB.html"))
+    saveWidget(scatter,file=file.path(analysis,"compare","b_DR_All_ZYQ+UDP_UKB.html"))
   '
 }
 
 #assoc _dr
 #assoc _3
+#assoc
 #ukb_ppp_assoc
+merge

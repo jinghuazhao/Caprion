@@ -123,6 +123,7 @@ function merge()
                      "d1","d2","b_UKB","se_UKB","logp_UKB")
     assoc <- read.table(file.path(analysis,"compare","compare.assoc"),col.names=vnames, na.strings="", fill=TRUE) %>%
              mutate(b_UKB=if_else(a1==d2,b_UKB,-b_UKB))
+    write.csv(assoc,file=file.path(analysis,"compare","compare.csv"),quote=FALSE,row.names=FALSE)
     pdf(file.path(analysis,"compare","b_DR_All_ZYQ+UDP_UKB.pdf"),width=10,height=10)
     pairs(assoc[c("b_DR","b_All","b_ZYQ_UDP","b_UKB")],pch=16,main="Effect sizes of DR-filtered, All data and UKB-PPP")
     ggpairs(assoc[c("b_DR","b_All","b_ZYQ_UDP","b_UKB")],title="Effect sizes of DR-filtered, All data and UKB-PPP")

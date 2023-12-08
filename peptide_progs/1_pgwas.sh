@@ -9,9 +9,9 @@ function sb()
 {
   export SLURM_ARRAY_TASK_ID=${1}
 # all proteins
-# export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
+  export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
 # only those with pQTLs
-  export protein=$(awk 'NR>1{print $1}' ${analysis}/work/caprion${suffix}.signals | sort -k1,1 | uniq | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
+# export protein=$(awk 'NR>1{print $1}' ${analysis}/work/caprion${suffix}.signals | sort -k1,1 | uniq | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
   if [ ! -d ${analysis}/peptide/${protein} ]; then mkdir ${analysis}/peptide/${protein}; fi
   export sbatch=${analysis}/peptide/${protein}/${protein}-pgwas.sb
 
@@ -74,7 +74,6 @@ function sb()
     write.table(caprion,file=paste0(analysis,"/peptide/",protein,"/",protein,".mpheno"),
                 col.names=FALSE,row.names=FALSE,quote=FALSE)
   '
-
 cat << 'EOL' > ${sbatch}
 #!/usr/bin/bash
 
@@ -85,6 +84,10 @@ cat << 'EOL' > ${sbatch}
 #SBATCH --job-name=PROTEIN
 #SBATCH --output=ANALYSIS/peptide/PROTEIN/PROTEIN.o
 #SBATCH --error=ANALYSIS/peptide/PROTEIN/PROTEIN.e
+
+. /etc/profile.d/modules.sh
+module purge
+module load rhel8/default-ccl
 
 export protein=PROTEIN
 export TMPDIR=${HPC_WORK}/work
@@ -139,12 +142,9 @@ sed -i "s|ANALYSIS|${analysis}|;s|PROTEIN|${protein}|g" ${sbatch}
 sbatch ${sbatch}
 }
 
-for i in $(seq 201 300); do sb ${i}; done
-
 # for i in $(seq 987); do sb ${i}; done
 
-function error_check()
-{
-  cd ${analysis}/peptide
-  grep error */*.e
-}
+for i in $(grep error ${analysis}/peptide/*/*.e | sed 's|/|\t|g' | cut -f7 | grep -n -w -f - ${pilot}/work/caprion.varlist | cut -d':' -f1)
+do
+  sb ${i}
+done

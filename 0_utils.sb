@@ -212,6 +212,8 @@ function ukb_ppp_lz()
      if [ $(wc -l ${analysis}/work/${phenoname}-{4}.lz|cut -d" " -f1) -eq 1 ]; then rm ${analysis}/work/${phenoname}-{4}.lz; fi
      '
   fi
+  # for f in $(ls *lz|sed 's/.lz//;s/-/_/'); do if [ ! -f $f.pdf ]; then echo $f; fi done
+  # ANXA1_18:29037502_C_CTTTCTTTCTCTT CD59_X:9782142_A_T (HSPB1_rs114800762) LAMP2_X:119568477_G_C
   # export n2=$(expr $(ls *pdf | wc -l | cut -d' ' -f2) \* 2)
   # qpdf --empty --pages $(ls *pdf) -- UKB_PPP_LZ.pdf
   # qpdf --pages . 1-${n2}:odd -- UKB_PPP_LZ.pdf UKB_PPP-lz.pdf

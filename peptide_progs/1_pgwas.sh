@@ -7,11 +7,11 @@ export suffix=_dr
 
 function sb()
 {
-  export SLURM_ARRAY_TASK_ID=${1}
+  export index=${1}
 # all proteins
-  export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
+  export protein=$(awk 'NR==ENVIRON["index"]{print $1}' ${pilot}/work/caprion.varlist)
 # only those with pQTLs
-# export protein=$(awk 'NR>1{print $1}' ${analysis}/work/caprion${suffix}.signals | sort -k1,1 | uniq | awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]')
+# export protein=$(awk 'NR>1{print $1}' ${analysis}/work/caprion${suffix}.signals | sort -k1,1 | uniq | awk 'NR==ENVIRON["index"]')
   if [ ! -d ${analysis}/peptide/${protein} ]; then mkdir ${analysis}/peptide/${protein}; fi
   export sbatch=${analysis}/peptide/${protein}/${protein}-pgwas.sb
 
@@ -74,6 +74,8 @@ function sb()
     write.table(caprion,file=paste0(analysis,"/peptide/",protein,"/",protein,".mpheno"),
                 col.names=FALSE,row.names=FALSE,quote=FALSE)
   '
+  export pheno=${analysis}/peptide/${protein}/${protein}.pheno
+  export N=$(awk 'NR==1{print NF-2}' ${pheno})
 cat << 'EOL' > ${sbatch}
 #!/usr/bin/bash
 
@@ -82,6 +84,7 @@ cat << 'EOL' > ${sbatch}
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 #SBATCH --job-name=PROTEIN
+#SBATCH --array=1-RUNS
 #SBATCH --output=ANALYSIS/peptide/PROTEIN/PROTEIN.o
 #SBATCH --error=ANALYSIS/peptide/PROTEIN/PROTEIN.e
 
@@ -97,12 +100,9 @@ export analysis=~/Caprion/analysis
 function fastLR()
 {
   export batch=${1}
-  export pheno=${analysis}/peptide/${protein}/${protein}.pheno
-  export N=$(awk 'NR==1{print NF-2}' ${pheno})
   export fastGWA=gcta-1.9
 
-  for col in $(seq ${N})
-  do
+  export col=${SLURM_ARRAY_TASK_ID}
   export peptide=$(awk 'NR==1{print $(col+2)}' col=${col} ${pheno})
   export root=${analysis}/peptide/${protein}/${protein}
   ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
@@ -130,7 +130,6 @@ function fastLR()
              --out ${root}-${batch}-${peptide}-chrX
   bgzip -f ${root}-${batch}-${peptide}.fastGWA
   bgzip -f ${root}-${batch}-${peptide}-chrX.fastGWA
-  done
 }
 
 fastLR 1
@@ -138,7 +137,7 @@ fastLR 2
 fastLR 3
 EOL
 
-sed -i "s|ANALYSIS|${analysis}|;s|PROTEIN|${protein}|g" ${sbatch}
+sed -i "s|ANALYSIS|${analysis}|;s|PROTEIN|${protein}|g;s|RUNS|${N}|" ${sbatch}
 sbatch ${sbatch}
 }
 

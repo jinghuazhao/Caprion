@@ -5,6 +5,7 @@ export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
 export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
+export varlist=${pilot}/work/caprion.varlist
 
 function sb()
 # select from a list of all proteins (either continuously in 1-987 or its subset)
@@ -146,8 +147,11 @@ sbatch ${sbatch}
 # for i in $(grep error ${analysis}/peptide/*/*.e | sed 's|/|\t|g' | cut -f7 | grep -n -w -f - ${pilot}/work/caprion.varlist | cut -d':' -f1)
 # only those with pQTLs:
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-do i in $(seq $(n_with_signals})
+for i in $(seq ${n_with_signals})
+do
   export signal_index=${i}
-  export all_index=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]'|grep -f - -n -w ${signals} | cut -d':' -f1)
-  sb ${all_index}
+  export signal_list=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]' | grep -f - -n -w ${signals} | cut -d':' -f1)
+  export protein_index=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]' | grep -f - -n -w ${varlist} | cut -d':' -f1)
+  echo $signal_index, $protein_index, $signal_list
+  sb ${protein_index}
 done

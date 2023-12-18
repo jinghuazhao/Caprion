@@ -25,10 +25,9 @@ function METAL_list()
   sort -t$'\t' -k2,2n -k4,4 -k3,3n > ${root}/METAL/METAL.list
 }
 
-function METAL_files_suffix()
+function METAL_files()
 # generate individual METAL command files
 {
-  export suffix=${1}
   for isotope in $(head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement)
   do
   (
@@ -55,18 +54,13 @@ function METAL_files_suffix()
      echo STDERR_PRINT_PRECISION 8
      echo GENOMICCONTROL OFF
      echo LOGPVALUE ON
-     echo OUTFILE ${root}/METAL/${isotope}${suffix}- .tbl
-     awk '$2==isotope && ("-"$4==suffix||$4==suffix) {print "PROCESS", $5}' FS="\t" isotope=${isotope} suffix=${suffix} ${root}/METAL/METAL.list
+     echo OUTFILE ${root}/METAL/${isotope}- .tbl
+     awk '$2==isotope && ($4=="") {print "PROCESS", $5}' FS="\t" isotope=${isotope} ${root}/METAL/METAL.list
+     awk '$2==isotope && ($4=="chrX") {print "PROCESS", $5}' FS="\t" isotope=${isotope} ${root}/METAL/METAL.list
      echo ANALYZE HETEROGENEITY
      echo CLEAR
-  ) > ${root}/METAL/${isotope}${suffix}.metal
+  ) > ${root}/METAL/${isotope}.metal
   done
-}
-
-function METAL_files()
-{
-  METAL_files_suffix
-  METAL_files_suffix -chrX
 }
 
 function METAL_analysis_parallel()
@@ -86,7 +80,7 @@ function METAL_analysis_sbatch()
 cat << 'EOL' > ${root}/${protein}-METAL.sb
 #!/usr/bin/bash
 
-#SBATCH --job-name=_METAL
+#SBATCH --job-name=_MA-LABEL
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -109,8 +103,8 @@ parallel -j3 --env rt -C' ' '
 '
 
 EOL
-sed -i "s|PROTEIN|${root}/${protein}|;s|ROOT|${root}|" ${root}/${protein}-METAL.sb
-echo sbatch ${root}/${protein}-METAL.sb
+sed -i "s|PROTEIN|${root}/${protein}|;s|LABEL|${protein}|;s|ROOT|${root}|" ${root}/${protein}-METAL.sb
+sbatch ${root}/${protein}-METAL.sb
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
 #metal ${rt}/${isotope}.metal 2>&1 | tee ${rt}/${isotope}-1.tbl.log;gzip -f ${rt}/${isotope}-1.tbl
@@ -124,6 +118,7 @@ do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
   export root=~/Caprion/analysis/peptide/${protein}
+  echo ${signal_index}, ${protein}
   if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
   METAL_list
   METAL_files

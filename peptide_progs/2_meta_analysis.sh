@@ -83,27 +83,43 @@ cat << 'EOL' > ${root}/${protein}-METAL.sb
 #SBATCH --job-name=_MA-LABEL
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
-
 #SBATCH --account PETERS-SL3-CPU
 #SBATCH --partition cclake-himem
-
-#SBATCH --output=PROTEIN-METAL.o
-#SBATCH --error=PROTEIN-METAL.e
+#SBATCH --array=1-RUNS
+#SBATCH --output=PROTEIN-METAL_%A_%a.o
+#SBATCH --error=PROTEIN-METAL_%A_%a.e
 #SBATCH --export ALL
 
 export TMPDIR=${HPC_WORK}/work
 export rt=ROOT/METAL
 
-ls $rt/*.metal | \
-xargs -l basename -s .metal | \
-parallel -j3 --env rt -C' ' '
-    metal ${rt}/{}.metal 2>&1 | \
-    tee ${rt}/{}-1.tbl.log;
-    bgzip -f ${rt}/{}-1.tbl
-'
+function metal_parallel()
+{
+  ls $rt/*.metal | \
+  xargs -l basename -s .metal | \
+  parallel -j3 --env rt -C' ' '
+      metal ${rt}/{}.metal 2>&1 | \
+      tee ${rt}/{}-1.tbl.log;
+      bgzip -f ${rt}/{}-1.tbl
+  '
+}
+
+function metal_array()
+{
+  ls $rt/*.metal | \
+  xargs -l basename -s .metal | \
+  awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' | \
+  parallel -j3 --env rt -C' ' '
+      metal ${rt}/{}.metal 2>&1 | \
+      tee ${rt}/{}-1.tbl.log;
+      bgzip -f ${rt}/{}-1.tbl
+  '
+}
+
+metal_array
 
 EOL
-sed -i "s|PROTEIN|${root}/${protein}|;s|LABEL|${protein}|;s|ROOT|${root}|" ${root}/${protein}-METAL.sb
+sed -i "s|PROTEIN|${root}/${protein}|;s|LABEL|${protein}|;s|ROOT|${root}|;s|RUNS|${N}|" ${root}/${protein}-METAL.sb
 sbatch ${root}/${protein}-METAL.sb
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake
@@ -118,6 +134,8 @@ do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
   export root=~/Caprion/analysis/peptide/${protein}
+  export pheno=${analysis}/peptide/${protein}/${protein}.pheno
+  export N=$(awk 'NR==1{print NF-2}' ${pheno})
   echo ${signal_index}, ${protein}
   if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
   METAL_list

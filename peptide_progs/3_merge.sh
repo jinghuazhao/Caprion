@@ -17,9 +17,8 @@ cat <<'EOL'> ${root}/${protein}-merge.sb
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --account CARDIO-SL0-CPU
-#SBATCH --partition cardio
-#SBATCH --qos=cardio
+#SBATCH --account PETERS-SL3-CPU
+#SBATCH --partition cclake-himem
 
 #SBATCH --export ALL
 #SBATCH --array=1-_N_
@@ -568,11 +567,20 @@ function fplz()
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
-for i in 754 # 319 # 490 # $(seq 987)
+export suffix=_dr
+export signals=${analysis}/work/caprion${suffix}.signals
+
+# only those with pQTLs
+export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
+for i in $(seq ${n_with_signals})
 do
-  export SLURM_ARRAY_TASK_ID=${i}
-  export protein=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${pilot}/work/caprion.varlist)
+  export signal_index=${i}
+  export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
+  export root=~/Caprion/analysis/peptide/${protein}
+  export pheno=${analysis}/peptide/${protein}/${protein}.pheno
+  export N=$(awk 'NR==1{print NF-2}' ${pheno})
   export root=${analysis}/peptide/${protein}
+  echo ${signal_index}, ${protein}
   setup
   sb
   sbatch --wait ${root}/${protein}-merge.sb

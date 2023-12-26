@@ -219,18 +219,6 @@ function mean_by_genotype_dosage()
   '
 }
 
-# mean_by_genotype_dosage
-
-for cmd in pgz _HLA sentinels; do $cmd; done
-EOL
-
-export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
-sed -i "s|ROOT|${root}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-merge.sb
-
-#SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake
-}
-
 function signals()
 (
   cat ${root}/sentinels/*signals | \
@@ -268,11 +256,12 @@ function cistrans()
   # Directions
     root <- Sys.getenv("root")
     protein <- Sys.getenv("protein")
-    caprion.dir <- within(read.table(paste0(root,"/",protein,".dir"),col.names=c("Count","Direction","Final")),{Direction=gsub(""," ",Direction)})
+    caprion.dir <- within(read.table(paste0(root,"/",protein,".dir"),col.names=c("Count","Direction","Final"),fill=TRUE),
+                          {Direction=gsub(""," ",Direction)})
     knitr::kable(caprion.dir)
   # cis/trans classification
     signals <- read.table(paste0(root,"/",protein,".signals"),header=TRUE) %>% mutate(prot=protein)
-    merged <- read.delim(paste0(root,"/",protein,".merge")) %>% mutate(prot=protein)
+    merged <- read.delim(paste0(root,"/",protein,".merge")) %>% mutate(isotope=prot,prot=protein)
     names(merged)[1:4] <- c("prot","Chr","bp","SNP")
   # glist-hg19
     INF <- Sys.getenv("INF")
@@ -309,10 +298,11 @@ function cistrans()
     APOC <- subset(glist_hg19,gene %in%c("APOC2","APOC4")) %>%
             rename(Gene=gene)
     ucsc_modified <- bind_rows(ucsc,APOC,AMY,C4B,HIST,HBA)
-    pqtls <- select(merged,prot,SNP,log.P.) %>%
+    pqtls <- select(merged,prot,SNP,log.P.,isotope) %>%
              mutate(log10p=-log.P.) %>%
              left_join(caprion_modified) %>%
-             select(Gene,SNP,prot,log10p)
+             filter(complete.cases(.)) %>%
+             select(Gene,SNP,prot,log10p,isotope)
     posSNP <- select(merged,SNP,Chr,bp)
     cis.vs.trans <- qtlClassifier(pqtls,posSNP,ucsc_modified,1e6) %>%
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
@@ -336,6 +326,44 @@ function cistrans()
                      TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
                      xlab="pQTL position",ylab="Gene position")
     htmlwidgets::saveWidget(r,file=file.path(root,paste0(protein,"-pqtl3dplotly.html")))
+  '
+}
+
+function vep_annotate()
+{
+  if [ ! -d $root}/METAL/vep ]; then mkdir ${root}/METAL/vep; fi
+  export cvt=${root}/${protein}.cis.vs.trans
+  cut -d"," -f5 ${cvt} | \
+  sort -k1,1 | \
+  uniq | \
+  parallel -C' ' '
+    (
+      echo "##fileformat=VCFv4.0"
+      echo "#CHROM" "POS" "ID" "REF" "ALT" "QUAL" "FILTER" "INFO"
+      awk -vFS="," "NR>1 {print \$2}" ${cvt} | \
+      sort -k1,1 | \
+      zgrep -f - -w ${root}/METAL/{}-1.tbl.gz | \
+      cut -f1-5 | \
+      awk "{print \$1,\$2,\$3,toupper(\$4),toupper(\$5),\".\",\".\",\".\"}"
+    ) | \
+    tr " " "\t" > ${root}/METAL/vep/{}.vcf
+  # VEP annotation
+    cd ${HPC_WORK}/loftee
+    vep --input_file ${root}/METAL/vep/{}.vcf \
+        --output_file ${root}/METAL/vep/{}.tab --force_overwrite \
+        --cache --dir_cache ${HPC_WORK}/ensembl-vep/.vep --dir_plugins ${HPC_WORK}/loftee --offline \
+        --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol --plugin TSSDistance \
+        --plugin LoF,loftee_path:.,human_ancestor_fa:human_ancestor.fa.gz,conservation_file:phylocsf_gerp.sql.gz \
+        --tab
+    cd -
+    (
+      echo chromosome position nearest_gene_name cistrans
+      awk -vFS="," "NR>1 {print \$2,\$9,\$10,\$11}" ${cvt} | \
+      sort -k1,1 | \
+      join - <(awk "!/#/{print \$1,\$21}" ${root}/METAL/vep/{}.tab | sort -k1,1) | \
+      awk "{print \$2,\$3,\$5,\$4}" | \
+      sort -k1,1n -k2,2n
+    ) > ${root}/METAL/vep/{}.txt
   '
 }
 
@@ -457,7 +485,7 @@ function qqmanhattan()
     R --slave --vanilla --args \
       input_data_path=${root}/work/{}.txt \
       output_data_rootname=${dir}/{}_manhattan \
-      custom_peak_annotation_file_path=${root}/work/{}.annotate \
+      custom_peak_annotation_file_path=${root}/METAL/vep/{}.annotate \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5e-8 \
       plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
@@ -564,6 +592,18 @@ function fplz()
   sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- ${root}/HetISq75.pdf
 }
 
+mean_by_genotype_dosage
+
+for cmd in pgz _HLA sentinels signals merge cistrans fp HetISq qqmanhattan lz fplz; do $cmd; done
+EOL
+
+export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
+sed -i "s|ROOT|${root}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-merge.sb
+
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake
+}
+
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
@@ -583,13 +623,5 @@ do
   echo ${signal_index}, ${protein}
   setup
   sb
-  sbatch --wait ${root}/${protein}-merge.sb
-  signals
-  merge
-  cistrans
-  fp
-  HetISq
-  qqmanhattan
-  lz
-  fplz
+  sbatch ${root}/${protein}-merge.sb
 done

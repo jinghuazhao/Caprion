@@ -13,7 +13,7 @@ function sb()
 cat <<'EOL'> ${root}/${protein}-merge.sb
 #!/usr/bin/bash
 
-#SBATCH --job-name=_merge
+#SBATCH --job-name=_merge-LABEL
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -485,11 +485,10 @@ function qqmanhattan()
     R --slave --vanilla --args \
       input_data_path=${root}/work/{}.txt \
       output_data_rootname=${dir}/{}_manhattan \
-      custom_peak_annotation_file_path=${root}/METAL/vep/{}.annotate \
+      custom_peak_annotation_file_path=${root}/METAL/vep/{}.txt \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5e-8 \
       plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
-    rm ${root}/work/{}.annotate
   fi
   rm ${root}/work/{}.txt
   convert +append ${dir}/{}_manhattan.png ${dir}/{}_qq.png -resize x500 -density 300 ${dir}/{}_qqmanhattan.png
@@ -594,11 +593,11 @@ function fplz()
 
 mean_by_genotype_dosage
 
-for cmd in pgz _HLA sentinels signals merge cistrans fp HetISq qqmanhattan lz fplz; do $cmd; done
+for cmd in pgz _HLA sentinels signals merge cistrans fp HetISq vep_annotate qqmanhattan lz fplz; do $cmd; done
 EOL
 
 export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
-sed -i "s|ROOT|${root}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-merge.sb
+sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-merge.sb
 
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=cclake

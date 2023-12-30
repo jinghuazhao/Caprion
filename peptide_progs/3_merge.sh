@@ -119,19 +119,14 @@ function pqtls()
     if [ -f ${root}/sentinels/{}.signals ]; then
        awk -v FS="\t" -v isotope={} "NR>1 {print isotope,\$0}" ${root}/sentinels/{}.signals
     fi
-    if [ -f ${root}/sentinels/{}-chrX.signals ]; then
-       awk -v FS="\t" -v isotope={} "NR>1 {print isotope,\$0}" ${root}/sentinels/{}-chrX.signals
-    fi
   '
 ) > ${root}/${protein}.signals
 
 function merge()
 {
   cat <(gunzip -c ${root}/METAL/*-1.tbl.gz | head -1 | paste <(echo prot) -) \
-      <(sed '1d;s/\t/ /g' ${root}/${protein}.signals | grep -v 'X:' | \
+      <(sed '1d;s/\t/ /g' ${root}/${protein}.signals | \
         parallel -C' ' -j20 'zgrep -w {7} ${root}/METAL/{1}-1.tbl.gz | paste <(echo {1}) -') \
-      <(sed '1d;s/\t/ /g' ${root}/${protein}.signals | grep 'X:' | \
-        parallel -C' ' -j20 'zgrep -w {7} ${root}/METAL/{1}-chrX-1.tbl.gz | paste <(echo {1}) -') \
       > ${root}/${protein}.merge
   cut -f11,14 ${root}/${protein}.merge | sed '1d' | awk -vOFS="\t" '{printf $2" "; if($1<0) print "-"; else print "+"}' | \
   sort -k1,1 -k2,2 | uniq -c | awk -vOFS="\t" '{print $1,$2,$3}'> ${root}/${protein}.dir
@@ -221,7 +216,7 @@ function cistrans()
 
 function vep_annotate()
 {
-  if [ ! -d $root}/METAL/vep ]; then mkdir ${root}/METAL/vep; fi
+  if [ ! -d ${root}/METAL/vep ]; then mkdir ${root}/METAL/vep; fi
   export cvt=${root}/${protein}.cis.vs.trans
   cut -d"," -f5 ${cvt} | \
   sort -k1,1 | \
@@ -623,7 +618,7 @@ for cmd in pgz _HLA sentinels mean_by_genotype_dosage fp HetISq qqmanhattan lz f
 EOL
 
 export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
-sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-rest.sb
+sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-summary.sb
 }
 
 export TMPDIR=${HPC_WORK}/work
@@ -643,12 +638,16 @@ do
   export N=$(awk 'NR==1{print NF-2}' ${pheno})
   export root=${analysis}/peptide/${protein}
   echo ${signal_index}, ${protein}
-  setup
-  pqtl_list
-  sbatch --wait ${root}/${protein}-merge.sb
+# step 1
+# setup
+# pqtl_list
+# sbatch ${root}/${protein}-merge.sb
+# step 2
   pqtls
   merge
   cistrans
   vep_annotate
-  pqtl_summary
+# step 3
+# pqtl_summary
+# sbatch ${root}/${protein}-summary.sb
 done

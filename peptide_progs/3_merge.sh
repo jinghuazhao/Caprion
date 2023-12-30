@@ -117,7 +117,7 @@ function pqtls()
   head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | tr ' ' '\n' | \
   parallel -C' ' '
     if [ -f ${root}/sentinels/{}.signals ]; then
-       awk -v FS="\t" -v isotope={} "NR>1 {print isotope,\$0}" ${root}/sentinels/{}.signals
+       awk -v FS="\t" -v OFS="\t" -v isotope={} "NR>1 {print isotope,\$0}" ${root}/sentinels/{}.signals
     fi
   '
 ) > ${root}/${protein}.signals
@@ -218,7 +218,8 @@ function vep_annotate()
 {
   if [ ! -d ${root}/METAL/vep ]; then mkdir ${root}/METAL/vep; fi
   export cvt=${root}/${protein}.cis.vs.trans
-  cut -d"," -f5 ${cvt} | \
+  sed "1d" ${cvt}| \
+  cut -d"," -f5 | \
   sort -k1,1 | \
   uniq | \
   parallel -C' ' '

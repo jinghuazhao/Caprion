@@ -8,12 +8,12 @@ function setup()
   done
 }
 
-function pqtl_list()
+function step1_pqtl_list()
 {
-cat <<'EOL'> ${root}/${protein}-merge.sb
+cat <<'EOL'> ${root}/${protein}-step1.sb
 #!/usr/bin/bash
 
-#SBATCH --job-name=_merge-LABEL
+#SBATCH --job-name=_step1-LABEL
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -22,8 +22,8 @@ cat <<'EOL'> ${root}/${protein}-merge.sb
 
 #SBATCH --export ALL
 #SBATCH --array=1-_N_
-#SBATCH --output=ROOT/sentinels/slurm/_merge_%A_%a.o
-#SBATCH --error=ROOT/sentinels/slurm/_merge_%A_%a.e
+#SBATCH --output=ROOT/sentinels/slurm/_step1_%A_%a.o
+#SBATCH --error=ROOT/sentinels/slurm/_step1_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
@@ -106,8 +106,28 @@ for cmd in pgz _HLA sentinels; do $cmd; done
 EOL
 
 export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
-sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-merge.sb
+sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-step1.sb
 }
+
+function step2_pqtl_collect()
+{
+cat <<'EOL'> ${root}/${protein}-step2.sb
+#!/usr/bin/bash
+
+#SBATCH --job-name=_step2-LABEL
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+
+#SBATCH --account PETERS-SL3-CPU
+#SBATCH --partition cclake
+
+#SBATCH --export ALL
+#SBATCH --output=ROOT/sentinels/slurm/_step2_LABEL.o
+#SBATCH --error=ROOT/sentinels/slurm/_step2_LABEL.e
+
+export TMPDIR=${HPC_WORK}/work
+export protein=PROTEIN
+export isotope=$(head -1 ${root}/${protein}.pheno | awk -vn=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
 
 function pqtls()
 (
@@ -126,7 +146,7 @@ function merge()
 {
   cat <(gunzip -c ${root}/METAL/*-1.tbl.gz | head -1 | paste <(echo prot) -) \
       <(sed '1d;s/\t/ /g' ${root}/${protein}.signals | \
-        parallel -C' ' -j20 'zgrep -w {7} ${root}/METAL/{1}-1.tbl.gz | paste <(echo {1}) -') \
+        parallel -C' ' -j10 'zgrep -w {7} ${root}/METAL/{1}-1.tbl.gz | paste <(echo {1}) -') \
       > ${root}/${protein}.merge
   cut -f11,14 ${root}/${protein}.merge | sed '1d' | awk -vOFS="\t" '{printf $2" "; if($1<0) print "-"; else print "+"}' | \
   sort -k1,1 -k2,2 | uniq -c | awk -vOFS="\t" '{print $1,$2,$3}'> ${root}/${protein}.dir
@@ -253,12 +273,18 @@ function vep_annotate()
   '
 }
 
-function pqtl_summary()
+for cmd in pqtls merge cistrans vep_annotate; do $cmd; done
+EOL
+
+sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|" ${root}/${protein}-step2.sb
+}
+
+function step3_pqtl_summary()
 {
-cat <<'EOL'> ${root}/${protein}-summary.sb
+cat <<'EOL'> ${root}/${protein}-step3.sb
 #!/usr/bin/bash
 
-#SBATCH --job-name=_merge-LABEL
+#SBATCH --job-name=_step3-LABEL
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -267,8 +293,8 @@ cat <<'EOL'> ${root}/${protein}-summary.sb
 
 #SBATCH --export ALL
 #SBATCH --array=1-_N_
-#SBATCH --output=ROOT/sentinels/slurm/_merge_%A_%a.o
-#SBATCH --error=ROOT/sentinels/slurm/_merge_%A_%a.e
+#SBATCH --output=ROOT/sentinels/slurm/_step3_%A_%a.o
+#SBATCH --error=ROOT/sentinels/slurm/_step3_%A_%a.e
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
@@ -619,7 +645,7 @@ for cmd in pgz _HLA sentinels mean_by_genotype_dosage fp HetISq qqmanhattan lz f
 EOL
 
 export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
-sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-summary.sb
+sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-step3.sb
 }
 
 export TMPDIR=${HPC_WORK}/work
@@ -639,16 +665,10 @@ do
   export N=$(awk 'NR==1{print NF-2}' ${pheno})
   export root=${analysis}/peptide/${protein}
   echo ${signal_index}, ${protein}
-# step 1
-# setup
-# pqtl_list
-# sbatch ${root}/${protein}-merge.sb
-# step 2
-  pqtls
-  merge
-  cistrans
-  vep_annotate
-# step 3
-# pqtl_summary
-# sbatch ${root}/${protein}-summary.sb
+# step1_pqtl_list
+# sbatch ${root}/${protein}-step1.sb
+  step2_pqtl_collect
+  sbatch ${root}/${protein}-step2.sb
+# step3_pqtl_summary
+# sbatch ${root}/${protein}-step3.sb
 done

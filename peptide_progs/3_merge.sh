@@ -2,7 +2,7 @@
 
 function setup()
 {
-  for d in sentinels/slurm means work qqmanhattanlz
+  for d in sentinels/slurm fp means work qqmanhattanlz
   do
     if [ ! -d ${root}/${d} ]; then mkdir -p ${root}/${d}; fi
   done
@@ -408,15 +408,15 @@ function mean_by_genotype_dosage()
 
 function fp()
 {
-  awk 'NR==1||$1==ENVIRON["isotope"]' ${root}/${protein}.merge > ${root}/tbl.tsv
-  cut -f2-4 ${root}/tbl.tsv | \
+  awk 'NR==1||$1==ENVIRON["isotope"]' ${root}/${protein}.merge > ${root}/fp/${isotope}-tbl.tsv
+  cut -f2-4 ${root}/fp/${isotope}-tbl.tsv | \
   awk 'NR>1' | \
   sort -k1,2n | \
   uniq | \
-  awk -vOFS="\t" '{print $1":"$2,$3}' > ${root}/rsid.tsv
+  awk -vOFS="\t" '{print $1":"$2,$3}' > ${root}/fp/${isotope}-rsid.tsv
   (
     gunzip -c ${root}/${protein}-*fastGWA.gz | head -1
-    awk 'NR>1' ${root}/tbl.tsv | \
+    awk 'NR>1' ${root}/fp/${isotope}-tbl.tsv | \
     cut -f1,4,14 --output-delimiter=' ' | \
     parallel -j10 -C' ' '
       export direction=$(zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | cut -f13)
@@ -429,16 +429,17 @@ function fp()
       done
   '
   ) | \
-  sed 's/.gz//g' > ${root}/all.tsv
+  sed 's/.gz//g' > ${root}/fp/${isotope}-all.tsv
   Rscript -e '
     require(gap)
     require(dplyr)
     root <- Sys.getenv("root")
     protein <- Sys.getenv("protein")
-    tbl <- read.delim(file.path(root,"tbl.tsv")) %>%
+    isotope <- Sys.getenv("isotope")
+    tbl <- read.delim(file.path(root,fp,paste0(isotope,"-tbl.tsv"))) %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
            arrange(prot,SNP)
-    all <- read.delim(file.path(root,"all.tsv")) %>%
+    all <- read.delim(file.path(root,fp,paste0(isotope,"-all.tsv"))) %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
            mutate(CHR=gsub(paste0(root,"/",protein,"-|.fastGWA"),"",CHR)) %>%
            mutate(batch_prot_chr=strsplit(CHR,"-|:"),
@@ -451,8 +452,8 @@ function fp()
                                   batch == 3 ~ "3. UDP",
                                   TRUE ~ "---")) %>%
            select(-batch_prot_chr)
-    rsid <- read.table(file.path(root,"rsid.tsv"),col.names=c("MarkerName","rsid"))
-    pdf(file.path(root,"fp.pdf"),width=10,height=8)
+    rsid <- read.table(file.path(root,fp,paste0(isotope,"-rsid.tsv")),col.names=c("MarkerName","rsid"))
+    pdf(file.path(root,fp,paste0(isotope,"-fp.pdf")),width=10,height=8)
     METAL_forestplot(tbl,all,rsid)
     dev.off()
   '
@@ -599,6 +600,20 @@ function lz()
   fi
 }
 
+awk '$1==ENVIRON["isotope"]{gsub(/23/,"X",$2);print $2,$3,$4}' ${root}/${protein}.merge | \
+parallel -C' ' '
+  export chr={1}
+  export bp={2}
+  export pqtl={3}
+  mean_by_genotype_dosage
+'
+
+for cmd in fp HetISq qqmanhattan lz; do $cmd; done
+EOL
+
+sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_array_|${array}|" ${root}/${protein}-step3.sb
+}
+
 function fplz()
 {
   module load texlive
@@ -628,20 +643,6 @@ function fplz()
   sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- ${root}/HetISq75.pdf
 }
 
-awk '$1==ENVIRON["isotope"]{gsub(/23/,"X",$2);print $2,$3,$4}' ${root}/${protein}.merge | \
-parallel -C' ' '
-  export chr={1}
-  export bp={2}
-  export pqtl={3}
-  mean_by_genotype_dosage
-'
-
-for cmd in fp HetISq qqmanhattan lz fplz; do $cmd; done
-EOL
-
-sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_array_|${array}|" ${root}/${protein}-step3.sb
-}
-
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
@@ -650,7 +651,7 @@ export signals=${analysis}/work/caprion${suffix}.signals
 
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in $(seq ${n_with_signals})
+for i in 6 # $(seq ${n_with_signals})
 do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
@@ -665,6 +666,7 @@ do
 # step1_pqtl_list
 # sbatch ${root}/${protein}-step1.sb
 # step2_pqtl_collect
+# fplz should be here
 # sbatch ${root}/${protein}-step2.sb
   step3_pqtl_summary
   sbatch ${root}/${protein}-step3.sb

@@ -2,7 +2,7 @@
 
 function setup()
 {
-  for d in sentinels/slurm work qqmanhattanlz
+  for d in sentinels/slurm means work qqmanhattanlz
   do
     if [ ! -d ${root}/${d} ]; then mkdir -p ${root}/${d}; fi
   done
@@ -127,7 +127,6 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
-export isotope=$(head -1 ${root}/${protein}.pheno | awk -vn=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
 
 function pqtls()
 (
@@ -292,7 +291,7 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 #SBATCH --partition cclake-himem
 
 #SBATCH --export ALL
-#SBATCH --array=1-_N_
+#SBATCH --array=_array_
 #SBATCH --output=ROOT/sentinels/slurm/_step3_%A_%a.o
 #SBATCH --error=ROOT/sentinels/slurm/_step3_%A_%a.e
 
@@ -302,11 +301,6 @@ export isotope=$(head -1 ${root}/${protein}.pheno | awk -vn=${SLURM_ARRAY_TASK_I
 
 function mean_by_genotype_gen_sample()
 {
-  read isotope chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${root}/${protein}.merge)
-  export isotope=${isotope}
-  export chr=${chr}
-  export bp=${bp}
-  export pqtl=${pqtl}
   for batch in {1..3}
   do
     export batch=${batch}
@@ -363,11 +357,6 @@ function mean_by_genotype_gen_sample()
 
 function mean_by_genotype_dosage()
 {
-  read isotope chr bp pqtl < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]+1{gsub(/23/,"X",$2);print $1,$2,$3,$4}' ${analysis}/work/caprion.merge)
-  export isotope=${isotope}
-  export chr=${chr}
-  export bp=${bp}
-  export pqtl=${pqtl}
   for batch in {1..3}
   do
     export batch=${batch}
@@ -419,7 +408,7 @@ function mean_by_genotype_dosage()
 
 function fp()
 {
-  cp  ${root}/${protein}.merge ${root}/tbl.tsv
+  awk 'NR==1||$1==ENVIRON["isotope"]' ${root}/${protein}.merge > ${root}/tbl.tsv
   cut -f2-4 ${root}/tbl.tsv | \
   awk 'NR>1' | \
   sort -k1,2n | \
@@ -513,7 +502,7 @@ function qqmanhattan()
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
   export dir=${root}/qqmanhattanlz
-  head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | tr ' ' '\n' | \
+  head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | cut -d' ' -f${array} | tr ' ' '\n' | \
   parallel -C' ' --env root '
   gunzip -c ${root}/METAL/{}-1.tbl.gz | \
   awk "{if (NR==1) print \"chromsome\",\"position\",\"log_pvalue\",\"beta\",\"se\"; else print \$1,\$2,-\$12,\$10,\$11}" > ${root}/work/{}.txt
@@ -558,9 +547,9 @@ function lz()
   module load python/2.7
   if [ -f ${root}/${protein}.signals ]; then
      (
-       cat ${root}/${protein}.signals | \
+       awk '$1==ENVIRON["isotope"]' ${root}/${protein}.signals | \
        tr '\t' ' ' | \
-       awk 'NR>1 && $2!="23" {print $6, $7}' | \
+       awk '$2!="23" {print $6, $7}' | \
        parallel -j1 -C' ' --env root '
          zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
          awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}"
@@ -581,23 +570,21 @@ function lz()
                  --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --svg --refsnp {5}
        rm ${root}/work/{4}-{5}.lz
      '
-  fi
-  if [ -f ${root}/${protein}.signals ]; then
      (
-       cat ${root}/${protein}.signals | \
+       awk '$1==ENVIRON["isotope"]' ${root}/${protein}.signals | \
        tr '\t' ' ' | \
-       awk 'NR>1 && $2=="23" {print $6,$7}' ${root}/${protein}.signals | \
+       awk '$2=="23" {print $6,$7}' ${root}/${protein}.signals | \
        parallel -j1 -C' ' --env root '
-         zgrep -w {2} ${root}/METAL/{1}-chrX-1.tbl.gz | \
+         zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
          awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}"
        '
      ) | \
      parallel -j1 -C ' ' --env root '
        (
-         gunzip -c ${root}/METAL/{4}-chrX-1.tbl.gz | \
+         gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
          awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}" | \
          cut -f1-3,12
-         gunzip -c ${root}/METAL/{4}-chrX-1.tbl.gz | \
+         gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}}" | \
          sort -k1,1n -k2,2n | \
          sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
@@ -641,11 +628,18 @@ function fplz()
   sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- ${root}/HetISq75.pdf
 }
 
-for cmd in pgz _HLA sentinels mean_by_genotype_dosage fp HetISq qqmanhattan lz fplz; do $cmd; done
+awk '$1==ENVIRON["isotope"]{gsub(/23/,"X",$2);print $2,$3,$4}' ${root}/${protein}.merge | \
+parallel -C' ' '
+  export chr={1}
+  export bp={2}
+  export pqtl={3}
+  mean_by_genotype_dosage
+'
+
+for cmd in fp HetISq qqmanhattan lz fplz; do $cmd; done
 EOL
 
-export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
-sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-step3.sb
+sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_array_|${array}|" ${root}/${protein}-step3.sb
 }
 
 export TMPDIR=${HPC_WORK}/work
@@ -660,15 +654,18 @@ for i in $(seq ${n_with_signals})
 do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
-  export root=~/Caprion/analysis/peptide/${protein}
-  export pheno=${analysis}/peptide/${protein}/${protein}.pheno
-  export N=$(awk 'NR==1{print NF-2}' ${pheno})
   export root=${analysis}/peptide/${protein}
+  export pheno=${root}/${protein}.pheno
+  export N=$(awk 'NR==1{print NF-2}' ${pheno})
+  export all_peptides=$(head -1 ${pheno} | cut -f1,2 --complement)
+  export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
+  export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',')
   echo ${signal_index}, ${protein}
+  setup
 # step1_pqtl_list
 # sbatch ${root}/${protein}-step1.sb
-  step2_pqtl_collect
-  sbatch ${root}/${protein}-step2.sb
-# step3_pqtl_summary
-# sbatch ${root}/${protein}-step3.sb
+# step2_pqtl_collect
+# sbatch ${root}/${protein}-step2.sb
+  step3_pqtl_summary
+  sbatch ${root}/${protein}-step3.sb
 done

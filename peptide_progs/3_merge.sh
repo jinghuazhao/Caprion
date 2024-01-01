@@ -249,7 +249,7 @@ function vep_annotate()
       sort -k1,1 | \
       zgrep -f - -w ${root}/METAL/{}-1.tbl.gz | \
       cut -f1-5 | \
-      awk "{print \$1,\$2,\$3,toupper(\$4),toupper(\$5),\".\",\".\",\".\"}"
+      awk "{gsub(/23/,\"X\",\$1);print \$1,\$2,\$3,toupper(\$4),toupper(\$5),\".\",\".\",\".\"}"
     ) | \
     tr " " "\t" > ${root}/METAL/vep/{}.vcf
   # VEP annotation
@@ -454,7 +454,7 @@ function fp()
                                   TRUE ~ "---")) %>%
            select(-batch_prot_chr)
     rsid <- read.table(file.path(root,"fp",paste0(isotope,"-rsid.tsv")),col.names=c("MarkerName","rsid"))
-    pdf(file.path(root,fp,paste0(isotope,"-fp.pdf")),width=10,height=8)
+    pdf(file.path(root,"fp",paste0(isotope,"-fp.pdf")),width=10,height=8)
     METAL_forestplot(tbl,all,rsid)
     dev.off()
   '

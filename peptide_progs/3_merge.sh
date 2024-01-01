@@ -267,7 +267,8 @@ function vep_annotate()
       sort -k1,1 | \
       join - <(awk "!/#/{print \$1,\$21}" ${root}/METAL/vep/{}.tab | sort -k1,1) | \
       awk "{print \$2,\$3,\$5,\$4}" | \
-      sort -k1,1n -k2,2n
+      sort -k1,1n -k2,2n | \
+      uniq
     ) > ${root}/METAL/vep/{}.txt
   '
 }
@@ -436,10 +437,10 @@ function fp()
     root <- Sys.getenv("root")
     protein <- Sys.getenv("protein")
     isotope <- Sys.getenv("isotope")
-    tbl <- read.delim(file.path(root,fp,paste0(isotope,"-tbl.tsv"))) %>%
+    tbl <- read.delim(file.path(root,"fp",paste0(isotope,"-tbl.tsv"))) %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position)) %>%
            arrange(prot,SNP)
-    all <- read.delim(file.path(root,fp,paste0(isotope,"-all.tsv"))) %>%
+    all <- read.delim(file.path(root,"fp",paste0(isotope,"-all.tsv"))) %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
            mutate(CHR=gsub(paste0(root,"/",protein,"-|.fastGWA"),"",CHR)) %>%
            mutate(batch_prot_chr=strsplit(CHR,"-|:"),
@@ -452,7 +453,7 @@ function fp()
                                   batch == 3 ~ "3. UDP",
                                   TRUE ~ "---")) %>%
            select(-batch_prot_chr)
-    rsid <- read.table(file.path(root,fp,paste0(isotope,"-rsid.tsv")),col.names=c("MarkerName","rsid"))
+    rsid <- read.table(file.path(root,"fp",paste0(isotope,"-rsid.tsv")),col.names=c("MarkerName","rsid"))
     pdf(file.path(root,fp,paste0(isotope,"-fp.pdf")),width=10,height=8)
     METAL_forestplot(tbl,all,rsid)
     dev.off()
@@ -519,9 +520,6 @@ function qqmanhattan()
        pvalue_sign=5e-8 \
        plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
   else
-    cat <(echo chromosome position) \
-        <(awk "NR>1{print \$1,\$2}" ${root}/sentinels/{}.signals) \
-        > ${root}/work/{}.annotate
     R --slave --vanilla --args \
       input_data_path=${root}/work/{}.txt \
       output_data_rootname=${dir}/{}_manhattan \

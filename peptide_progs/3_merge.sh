@@ -586,7 +586,7 @@ function lz()
          awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}" | \
          cut -f1-3,12
          gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}}" | \
+         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
          sort -k1,1n -k2,2n | \
          sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
        ) > ${root}/work/{4}-chrX-{5}.lz
@@ -660,7 +660,7 @@ do
   export N=$(awk 'NR==1{print NF-2}' ${pheno})
   export all_peptides=$(head -1 ${pheno} | cut -f1,2 --complement)
   export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
-  export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',')
+  export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
   echo ${signal_index}, ${protein}
   setup
 # step1_pqtl_list

@@ -425,11 +425,13 @@ function qqmanhattan()
       pvalue_sign=5e-8 \
       plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
   fi
-  rm ${root}/work/{}.txt
-  convert +append ${dir}/{}_manhattan.png ${dir}/{}_qq.png -resize x500 -density 300 ${dir}/{}_qqmanhattan.png
-  convert ${dir}/{}_qqmanhattan.png -quality 0 ${dir}/{}_qqmanhattan.jp2
-  img2pdf -o ${dir}/{}_qqmanhattan.pdf ${dir}/{}_qqmanhattan.jp2
-  rm ${dir}/{}_qqmanhattan.jp2
+  # rm ${root}/work/{}.txt
+  if [ -f ${dir}/{}_manhattan.png ]; then
+     convert +append ${dir}/{}_manhattan.png ${dir}/{}_qq.png -resize x500 -density 300 ${dir}/{}_qqmanhattan.png
+     convert ${dir}/{}_qqmanhattan.png -quality 0 ${dir}/{}_qqmanhattan.jp2
+     img2pdf -o ${dir}/{}_qqmanhattan.pdf ${dir}/{}_qqmanhattan.jp2
+     rm ${dir}/{}_qqmanhattan.jp2
+  fi
   '
   deactivate
 }
@@ -503,7 +505,7 @@ function mean_by_genotype_sample()
                --sample ${analysis}/work/caprion.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${pilot}/caprion-${batch}.id \
-               --pheno ${pilot}/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \
                --recode oxford \
                --out ${out}
        paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
@@ -559,7 +561,7 @@ function mean_by_genotype_dosage()
                --sample ${analysis}/work/caprion.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${pilot}/work/caprion-${batch}.id \
-               --pheno ${pilot}/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \
                --recode A include-alt \
                --out ${out}
        rm ${out}.log
@@ -672,9 +674,16 @@ do
 # step2_pqtl_collect
 # fplz should be here
 # sbatch ${root}/${protein}-step2.sb
+  for batch in {1..3}
+  do
+  (
+    head -1 ${root}/${protein}.pheno
+    grep -f <(cut -d' ' -f1 ${pilot}/work/caprion-${batch}.id) ${root}/${protein}.pheno
+  ) > ${root}/work/${protein}-${batch}.pheno
+  done
   step3_pqtl_summary
   sbatch ${root}/${protein}-step3.sb
-  module load texlive
+# module load texlive
 # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
 # qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
 done

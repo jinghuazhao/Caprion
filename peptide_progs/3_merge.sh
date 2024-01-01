@@ -492,7 +492,7 @@ function lz()
   fi
 }
 
-function mean_by_genotype_gen_sample()
+function mean_by_genotype_sample()
 {
   for batch in {1..3}
   do
@@ -600,6 +600,9 @@ function mean_by_genotype_dosage()
   '
 }
 
+export -f mean_by_genotype_sample
+export -f mean_by_genotype_dosage
+
 awk '$1==ENVIRON["isotope"]{gsub(/23/,"X",$2);print $2,$3,$4}' ${root}/${protein}.merge | \
 parallel -C' ' '
   export chr={1}
@@ -673,5 +676,5 @@ do
   sbatch ${root}/${protein}-step3.sb
   module load texlive
 # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
-  qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
+# qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
 done

@@ -397,12 +397,12 @@ function qqmanhattan()
 {
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
-  head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | cut -d' ' -f${array} | tr ' ' '\n' | \
+  head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | cut -d' ' -f${SLURM_ARRAY_TASK_ID} | tr ' ' '\n' | \
   parallel -C' ' --env root '
   (
     echo chromosome position log_pvalue beta se
     gunzip -c ${root}/METAL/{}-1.tbl.gz | \
-    awk "N>1{print \$1,\$2,-\$12,\$10,\$11}" | \
+    awk "NR>1{print \$1,\$2,-\$12,\$10,\$11}" | \
     sort -k1,1n -k2,2n
   ) > ${root}/work/{}.txt
   R --slave --vanilla --args \

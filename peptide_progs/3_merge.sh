@@ -300,113 +300,6 @@ export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
 export isotope=$(head -1 ${root}/${protein}.pheno | awk -vn=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
 
-function mean_by_genotype_gen_sample()
-{
-  for batch in {1..3}
-  do
-    export batch=${batch}
-    export out=${root}/means/${root}-${batch}-${pqtl}
-    if [ ! -f ${out}.dat ]; then
-       plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
-               --sample ${analysis}/work/caprion.sample \
-               --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-               --keep ${pilot}/caprion-${batch}.id \
-               --pheno ${pilot}/work/caprion-${batch}.pheno --pheno-name ${prot} \
-               --recode oxford \
-               --out ${out}
-       paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
-             <(awk '{for(i=0;i<(NF-5)/3;i++) print $1,$2,$3,$4,$5, $(6+i),$(7+i),$(8+i)}' ${out}.gen) > ${out}.dat
-       rm ${out}.gen ${out}.sample ${out}.log
-    fi
-  done
-  Rscript -e '
-     options(width=120)
-     root <- Sys.getenv("root")
-     protein <- Sys.getenv("protein")
-     isotope <- Sys.getenv("isotope")
-     pqtl <- Sys.getenv("pqtl")
-     invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
-     process_batch <- function(batch, genotypes=c("100","010","001"))
-     {
-       datfile <- file.path(root,"means",paste(protein,batch,isotope,pqtl,sep="-"))
-       dat <- read.table(paste0(datfile,".dat"),
-                         colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
-                         col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
-              mutate(g=paste0(round(g1),round(g2),round(g3)),
-                     Genotype=as.factor(case_when(g == genotypes[1] ~ paste0(A1,"/",A1),
-                                                  g == genotypes[2] ~ paste0(A1,"/",A2),
-                                                  g == genotypes[3] ~ paste0(A2,"/",A2),
-                                                  TRUE ~ "---")))
-       means <- group_by(dat,Genotype) %>%
-                summarise(N=n(),Mean=mean(Phenotype))
-       invisible(list(dat=dat,means=means))
-     }
-     v <- m <- list()
-     for (batch in 1:3)
-     {
-         x <- process_batch(batch)
-         v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
-                       geom_violin() +
-                       geom_boxplot(width=0.1) +
-                       theme_minimal()
-         m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
-     }
-     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(root,"means",paste0(prot,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
-  '
-}
-
-function mean_by_genotype_dosage()
-{
-  for batch in {1..3}
-  do
-    export batch=${batch}
-    export out=${root}/${protein}-${batch}-${isotope}-${pqtl}
-    if [ ! -f ${out}.dat ]; then
-       plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
-               --sample ${analysis}/work/caprion.sample \
-               --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-               --keep ${pilot}/work/caprion-${batch}.id \
-               --pheno ${pilot}/work/caprion-${batch}.pheno --pheno-name ${prot} \
-               --recode A include-alt \
-               --out ${out}
-       rm ${out}.log
-    fi
-  done
-  Rscript -e '
-     options(width=120)
-     root <- Sys.getenv("root")
-     protein <- Sys.getenv("protein")
-     pqtl <- Sys.getenv("pqtl")
-     invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
-     process_batch <- function(batch,digits=3)
-     {
-       datfile <- file.path(root,"means",paste("caprion",batch,prot,pqtl,sep="-"))
-       dat <- read.delim(paste0(datfile,".raw"),check.names=FALSE,
-                         colClasses=c("character","character","character","character","integer","numeric","numeric"))
-       n7 <- names(dat)[7]
-       names(dat)[6:7] <- c("Phenotype","Genotype")
-       dat <- mutate(dat,Genotype=as.character(round(Genotype)))
-       means <- group_by(dat,Genotype) %>%
-                summarise(N=n(),Mean=signif(mean(Phenotype),digits))
-       invisible(list(dat=dat,means=means,id=n7))
-     }
-     v <- m <- list()
-     for (batch in 1:3)
-     {
-         x <- process_batch(batch)
-         v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
-                       geom_violin() +
-                       geom_boxplot(width=0.1) +
-                       xlab(with(x,id)) +
-                       theme_minimal()
-         m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
-     }
-     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(root,"means",paste0(protein,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
-  '
-}
-
 function fp()
 {
   awk 'NR==1||$1==ENVIRON["isotope"]' ${root}/${protein}.merge > ${root}/fp/${isotope}-tbl.tsv
@@ -467,7 +360,8 @@ function HetISq()
     suppressMessages(require(dplyr))
     root <- Sys.getenv("root")
     protein <- Sys.getenv("protein")
-    all <- read.delim(file.path(root,"all.tsv")) %>%
+    isotope <- Sys.getenv("isotope")
+    all <- read.delim(file.path(root,"fp",paste0(isotope,"-all.tsv"))) %>%
            mutate(CHR=gsub(paste0(root,"/",protein,"-|.fastGWA"),"",CHR)) %>%
            mutate(batch_pept_chr=strsplit(CHR,"-|:"),
                   batch=unlist(lapply(batch_pept_chr,"[",1)),
@@ -487,15 +381,15 @@ function HetISq()
          full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
          mutate(directions=gsub("NA","?",paste0(direction.ZWK,direction.ZYQ,direction.UDP))) %>%
          select(-Batch.ZWK,-Batch.ZYQ,-Batch.UDP,direction.ZWK,direction.ZYQ,direction.UDP)
-    tbl <- read.delim(file.path(root,"tbl.tsv")) %>%
+    tbl <- read.delim(file.path(root,"fp",paste0(isotope,"-tbl.tsv"))) %>%
            arrange(protein,MarkerName) %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position), index=1:n())
     Het <- filter(tbl,HetISq>=75) %>%
            mutate(prot=as.character(prot)) %>%
            select(prot,SNP,Direction,HetISq,index) %>%
            left_join(select(b,prot,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
-    write.csv(Het,file=file.path(root,"HetISq75.csv"),row.names=FALSE,quote=FALSE)
-    write(Het[['index']],file=file.path(root,'HetISq75.index'),sep=",",ncolumns=nrow(Het))
+    write.csv(Het,file=file.path(root,"fp",paste0(isotope,"-HetISq75.csv")),row.names=FALSE,quote=FALSE)
+    write(Het[['index']],file=file.path(root,"fp",paste0(isotope,'-HetISq75.index')),sep=",",ncolumns=nrow(Het))
   '
 }
 
@@ -503,11 +397,14 @@ function qqmanhattan()
 {
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
-  export dir=${root}/qqmanhattanlz
   head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | cut -d' ' -f${array} | tr ' ' '\n' | \
   parallel -C' ' --env root '
-  gunzip -c ${root}/METAL/{}-1.tbl.gz | \
-  awk "{if (NR==1) print \"chromsome\",\"position\",\"log_pvalue\",\"beta\",\"se\"; else print \$1,\$2,-\$12,\$10,\$11}" > ${root}/work/{}.txt
+  (
+    echo chromosome position log_pvalue beta se
+    gunzip -c ${root}/METAL/{}-1.tbl.gz | \
+    awk "N>1{print \$1,\$2,-\$12,\$10,\$11}" | \
+    sort -k1,1n -k2,2n
+  ) > ${root}/work/{}.txt
   R --slave --vanilla --args \
       input_data_path=${root}/work/{}.txt \
       output_data_rootname=${dir}/{}_qq \
@@ -534,9 +431,6 @@ function qqmanhattan()
   img2pdf -o ${dir}/{}_qqmanhattan.pdf ${dir}/{}_qqmanhattan.jp2
   rm ${dir}/{}_qqmanhattan.jp2
   '
-  module load texlive
-# pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
-  qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
   deactivate
 }
 
@@ -596,6 +490,114 @@ function lz()
        rm ${root}/work/{4}-chrX-{5}.lz
      '
   fi
+}
+
+function mean_by_genotype_gen_sample()
+{
+  for batch in {1..3}
+  do
+    export batch=${batch}
+    export out=${root}/means/${root}-${batch}-${pqtl}
+    if [ ! -f ${out}.dat ]; then
+       plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
+               --sample ${analysis}/work/caprion.sample \
+               --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
+               --keep ${pilot}/caprion-${batch}.id \
+               --pheno ${pilot}/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --recode oxford \
+               --out ${out}
+       paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
+             <(awk '{for(i=0;i<(NF-5)/3;i++) print $1,$2,$3,$4,$5, $(6+i),$(7+i),$(8+i)}' ${out}.gen) > ${out}.dat
+       rm ${out}.gen ${out}.sample ${out}.log
+    fi
+  done
+  Rscript -e '
+     options(width=120)
+     root <- Sys.getenv("root")
+     protein <- Sys.getenv("protein")
+     isotope <- Sys.getenv("isotope")
+     pqtl <- Sys.getenv("pqtl")
+     invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
+     process_batch <- function(batch, genotypes=c("100","010","001"))
+     {
+       datfile <- file.path(root,"means",paste(protein,batch,isotope,pqtl,sep="-"))
+       dat <- read.table(paste0(datfile,".dat"),
+                         colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
+                         col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
+              mutate(g=paste0(round(g1),round(g2),round(g3)),
+                     Genotype=as.factor(case_when(g == genotypes[1] ~ paste0(A1,"/",A1),
+                                                  g == genotypes[2] ~ paste0(A1,"/",A2),
+                                                  g == genotypes[3] ~ paste0(A2,"/",A2),
+                                                  TRUE ~ "---")))
+       means <- group_by(dat,Genotype) %>%
+                summarise(N=n(),Mean=mean(Phenotype))
+       invisible(list(dat=dat,means=means))
+     }
+     v <- m <- list()
+     for (batch in 1:3)
+     {
+         x <- process_batch(batch)
+         v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
+                       geom_violin() +
+                       geom_boxplot(width=0.1) +
+                       theme_minimal()
+         m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
+     }
+     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
+     ggsave(file.path(root,"means",paste0(protein,"-",isotope,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+  '
+}
+
+function mean_by_genotype_dosage()
+{
+  for batch in {1..3}
+  do
+    export batch=${batch}
+    export out=${root}/means/${protein}-${batch}-${isotope}-${pqtl}
+    if [ ! -f ${out}.raw ]; then
+       plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
+               --sample ${analysis}/work/caprion.sample \
+               --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
+               --keep ${pilot}/work/caprion-${batch}.id \
+               --pheno ${pilot}/work/caprion-${batch}.pheno --pheno-name ${prot} \
+               --recode A include-alt \
+               --out ${out}
+       rm ${out}.log
+    fi
+  done
+  Rscript -e '
+     options(width=120)
+     root <- Sys.getenv("root")
+     protein <- Sys.getenv("protein")
+     isotope <- Sys.getenv("isotope")
+     pqtl <- Sys.getenv("pqtl")
+     invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
+     process_batch <- function(batch,digits=3)
+     {
+       datfile <- file.path(root,"means",paste(protein,batch,isotope,pqtl,sep="-"))
+       dat <- read.delim(paste0(datfile,".raw"),check.names=FALSE,
+                         colClasses=c("character","character","character","character","integer","numeric","numeric"))
+       n7 <- names(dat)[7]
+       names(dat)[6:7] <- c("Phenotype","Genotype")
+       dat <- mutate(dat,Genotype=as.character(round(Genotype)))
+       means <- group_by(dat,Genotype) %>%
+                summarise(N=n(),Mean=signif(mean(Phenotype),digits))
+       invisible(list(dat=dat,means=means,id=n7))
+     }
+     v <- m <- list()
+     for (batch in 1:3)
+     {
+         x <- process_batch(batch)
+         v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
+                       geom_violin() +
+                       geom_boxplot(width=0.1) +
+                       xlab(with(x,id)) +
+                       theme_minimal()
+         m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
+     }
+     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
+     ggsave(file.path(root,"means",paste0(protein,"-",isotope,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+  '
 }
 
 awk '$1==ENVIRON["isotope"]{gsub(/23/,"X",$2);print $2,$3,$4}' ${root}/${protein}.merge | \
@@ -659,6 +661,7 @@ do
   export all_peptides=$(head -1 ${pheno} | cut -f1,2 --complement)
   export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
   export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
+  export dir=${root}/qqmanhattanlz
   echo ${signal_index}, ${protein}
   setup
 # step1_pqtl_list
@@ -668,4 +671,7 @@ do
 # sbatch ${root}/${protein}-step2.sb
   step3_pqtl_summary
   sbatch ${root}/${protein}-step3.sb
+  module load texlive
+# pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
+  qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
 done

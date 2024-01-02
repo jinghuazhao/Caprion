@@ -353,7 +353,6 @@ function fp()
 }
 
 function HetISq()
-# Code extracted from caprion.Rmd
 {
   Rscript -e '
     suppressMessages(require(dplyr))
@@ -380,10 +379,10 @@ function HetISq()
          full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
          mutate(directions=gsub("NA","?",paste0(direction.ZWK,direction.ZYQ,direction.UDP))) %>%
          select(-Batch.ZWK,-Batch.ZYQ,-Batch.UDP,direction.ZWK,direction.ZYQ,direction.UDP)
-    tbl <- read.delim(file.path(root,"fp",paste0(isotope,"-tbl.tsv"))) %>%
+    Het <- read.delim(file.path(root,"fp",paste0(isotope,"-tbl.tsv"))) %>%
            arrange(protein,MarkerName) %>%
-           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position), index=1:n())
-    Het <- filter(tbl,HetISq>=75) %>%
+           mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position), index=1:n()) %>%
+           filter(HetISq>=75) %>%
            mutate(prot=as.character(prot)) %>%
            select(prot,SNP,Direction,HetISq,index) %>%
            left_join(select(b,prot,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
@@ -462,7 +461,7 @@ function lz()
                  --delim tab title="{4}-{5}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --svg --refsnp {5}
-#      rm ${root}/work/{4}-{5}.lz
+       rm ${root}/work/{4}-{5}.lz
      '
      (
        awk '$1==ENVIRON["isotope"]' ${root}/${protein}.signals | \
@@ -470,7 +469,7 @@ function lz()
        awk '$2=="23" {print $6,$7}' ${root}/${protein}.signals | \
        parallel -j1 -C' ' --env root '
          zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
-         awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}"
+         awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}" | sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//"
        '
      ) | \
      parallel -j1 -C ' ' --env root '
@@ -481,13 +480,13 @@ function lz()
          gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
          sort -k1,1n -k2,2n | \
-         sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
+         sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12
        ) > ${root}/work/{4}-{5}.lz
        locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
                  --delim tab title="{4}-{5}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz \
-                 --svg --refsnp $(echo chr{5} | sed "s/_[A-Z]*_[A-Z]*//")
+                 --svg --refsnp {5}
 #      rm ${root}/work/{4}-{5}.lz
      '
   fi

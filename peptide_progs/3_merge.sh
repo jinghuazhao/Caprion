@@ -2,7 +2,7 @@
 
 function setup()
 {
-  for d in sentinels/slurm fp means work qqmanhattanlz
+  for d in sentinels/slurm fp means work qqmanhattanlz METAL/vep
   do
     if [ ! -d ${root}/${d} ]; then mkdir -p ${root}/${d}; fi
   done
@@ -235,17 +235,16 @@ function cistrans()
 
 function vep_annotate()
 {
-  if [ ! -d ${root}/METAL/vep ]; then mkdir ${root}/METAL/vep; fi
   export cvt=${root}/${protein}.cis.vs.trans
-  sed "1d" ${cvt}| \
-  cut -d"," -f5 | \
+  awk -v FS="," 'NR>1{print $5}' ${cvt} | \
   sort -k1,1 | \
   uniq | \
   parallel -C' ' '
+    export isotope={}
     (
       echo "##fileformat=VCFv4.0"
       echo "#CHROM" "POS" "ID" "REF" "ALT" "QUAL" "FILTER" "INFO"
-      awk -vFS="," "NR>1 {print \$2}" ${cvt} | \
+      awk -vFS="," "\$5==ENVIRON[\"isotope\"] {print \$2}" ${cvt} | \
       sort -k1,1 | \
       zgrep -f - -w ${root}/METAL/{}-1.tbl.gz | \
       cut -f1-5 | \
@@ -263,7 +262,7 @@ function vep_annotate()
     cd -
     (
       echo chromosome position nearest_gene_name cistrans
-      awk -vFS="," "NR>1 {print \$2,\$9,\$10,\$11}" ${cvt} | \
+      awk -vFS="," "\$5==ENVIRON[\"isotope\"] {print \$2,\$9,\$10,\$11}" ${cvt} | \
       sort -k1,1 | \
       join - <(awk "!/#/{print \$1,\$21}" ${root}/METAL/vep/{}.tab | sort -k1,1) | \
       awk "{print \$2,\$3,\$5,\$4}" | \
@@ -415,7 +414,7 @@ function qqmanhattan()
        output_data_rootname=${dir}/{}_manhattan \
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
        pvalue_sign=5e-8 \
-       plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
+       plot_title="{}" < ~/cambridge-ceu/turboman/test.r
   else
     R --slave --vanilla --args \
       input_data_path=${root}/work/{}.txt \
@@ -423,7 +422,7 @@ function qqmanhattan()
       custom_peak_annotation_file_path=${root}/METAL/vep/{}.txt \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5e-8 \
-      plot_title="{}" < ~/cambridge-ceu/turboman/turboman.r
+      plot_title="{}" < ~/cambridge-ceu/turboman/test.r
   fi
   # rm ${root}/work/{}.txt
   if [ -f ${dir}/{}_manhattan.png ]; then
@@ -463,7 +462,7 @@ function lz()
                  --delim tab title="{4}-{5}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
                  --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --svg --refsnp {5}
-       rm ${root}/work/{4}-{5}.lz
+#      rm ${root}/work/{4}-{5}.lz
      '
      (
        awk '$1==ENVIRON["isotope"]' ${root}/${protein}.signals | \
@@ -483,18 +482,18 @@ function lz()
          awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
          sort -k1,1n -k2,2n | \
          sed "s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12 | sed "s/X/chr23/"
-       ) > ${root}/work/{4}-chrX-{5}.lz
-       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-chrX-{5}.lz \
-                 --delim tab title="{4}-chrX-{5}" \
+       ) > ${root}/work/{4}-{5}.lz
+       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
+                 --delim tab title="{4}-{5}" \
                  --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix={4}-chrX --rundir ${root}/qqmanhattanlz \
+                 --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz \
                  --svg --refsnp $(echo chr{5} | sed "s/_[A-Z]*_[A-Z]*//")
-       rm ${root}/work/{4}-chrX-{5}.lz
+#      rm ${root}/work/{4}-{5}.lz
      '
   fi
 }
 
-function mean_by_genotype_sample()
+function mean_by_genotype()
 {
   for batch in {1..3}
   do
@@ -546,11 +545,11 @@ function mean_by_genotype_sample()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
      p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(root,"means",paste0(protein,"-",isotope,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+     ggsave(file.path(root,"means",paste0(protein,"-",isotope,"-",pqtl,"-genotype.png")),device="png",width=16, height=10, units="in")
   '
 }
 
-function mean_by_genotype_dosage()
+function mean_by_dosage()
 {
   for batch in {1..3}
   do
@@ -598,19 +597,20 @@ function mean_by_genotype_dosage()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
      p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(root,"means",paste0(protein,"-",isotope,"-",pqtl,".png")),device="png",width=16, height=10, units="in")
+     ggsave(file.path(root,"means",paste0(protein,"-",isotope,"-",pqtl,"-dosage.png")),device="png",width=16, height=10, units="in")
   '
 }
 
-export -f mean_by_genotype_sample
-export -f mean_by_genotype_dosage
+export -f mean_by_genotype
+export -f mean_by_dosage
 
 awk '$1==ENVIRON["isotope"]{gsub(/23/,"X",$2);print $2,$3,$4}' ${root}/${protein}.merge | \
 parallel -C' ' '
   export chr={1}
   export bp={2}
   export pqtl={3}
-  mean_by_genotype_dosage
+  mean_by_genotype
+  mean_by_dosage
 '
 
 for cmd in fp HetISq qqmanhattan lz; do $cmd; done
@@ -654,6 +654,7 @@ export analysis=~/Caprion/analysis
 export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
 
+# module load texlive
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
 for i in 6 # $(seq ${n_with_signals})
@@ -683,7 +684,6 @@ do
   done
   step3_pqtl_summary
   sbatch ${root}/${protein}-step3.sb
-# module load texlive
 # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
 # qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
 done

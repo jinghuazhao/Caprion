@@ -297,7 +297,7 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
-export isotope=$(head -1 ${root}/${protein}.pheno | awk -vn=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
+export isotope=$(head -1 ${root}/${protein}.pheno | awk -v n=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
 
 function fp()
 {
@@ -497,7 +497,7 @@ function mean_by_genotype()
   for batch in {1..3}
   do
     export batch=${batch}
-    export out=${root}/means/${root}-${batch}-${pqtl}
+    export out=${root}/means/${protein}-${batch}-${isotope}-${pqtl}
     if [ ! -f ${out}.dat ]; then
        plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
                --sample ${analysis}/work/caprion.sample \

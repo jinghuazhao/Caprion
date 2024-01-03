@@ -360,10 +360,10 @@ function HetISq()
     protein <- Sys.getenv("protein")
     isotope <- Sys.getenv("isotope")
     all <- read.delim(file.path(root,"fp",paste0(isotope,"-all.tsv"))) %>%
-           mutate(CHR=gsub(paste0(root,"/",protein,"-|.fastGWA"),"",CHR)) %>%
+           mutate(CHR=gsub(paste0(root,"/",protein,"-|-chrX|.fastGWA"),"",CHR)) %>%
            mutate(batch_pept_chr=strsplit(CHR,"-|:"),
                   batch=unlist(lapply(batch_pept_chr,"[",1)),
-                  prot=unlist(lapply(batch_pept_chr,"[",2)),
+                  peptide=unlist(lapply(batch_pept_chr,"[",2)),
                   CHR=unlist(lapply(batch_pept_chr,"[",3))) %>%
            mutate(MarkerName=paste0(CHR,":",POS),
                   Batch=case_when(batch == 1 ~ "1. ZWK",
@@ -371,21 +371,22 @@ function HetISq()
                                   batch == 3 ~ "3. UDP",
                                   TRUE ~ "---"),
                   direction=case_when(sign(BETA) == -1 ~ "-", sign(BETA) == 1 ~ "+", sign(BETA) == 0 ~ "0", TRUE ~ "---")) %>%
-           select(Batch,prot,-batch_pept_chr,MarkerName,SNP,A1,A2,N,AF1,BETA,SE,P,INFO,direction)
-    b1 <- subset(all,Batch=="1. ZWK") %>% setNames(paste0(names(all),".ZWK")) %>% rename(prot=prot.ZWK, SNP=SNP.ZWK)
+           select(Batch,peptide,-batch_pept_chr,MarkerName,SNP,A1,A2,N,AF1,BETA,SE,P,INFO,direction)
+    b1 <- subset(all,Batch=="1. ZWK") %>% setNames(paste0(names(all),".ZWK")) %>% rename(peptide=peptide.ZWK, SNP=SNP.ZWK)
     b2 <- subset(all,Batch=="2. ZYQ") %>% setNames(paste0(names(all),".ZYQ"))
     b3 <- subset(all,Batch=="3. UDP") %>% setNames(paste0(names(all),".UDP"))
-    b <- full_join(b1,b2,by=c('prot'='prot.ZYQ','SNP'='SNP.ZYQ')) %>%
-         full_join(b3,by=c('prot'='prot.UDP','SNP'='SNP.UDP')) %>%
+    b <- full_join(b1,b2,by=c('peptide'='peptide.ZYQ','SNP'='SNP.ZYQ')) %>%
+         full_join(b3,by=c('peptide'='peptide.UDP','SNP'='SNP.UDP')) %>%
          mutate(directions=gsub("NA","?",paste0(direction.ZWK,direction.ZYQ,direction.UDP))) %>%
          select(-Batch.ZWK,-Batch.ZYQ,-Batch.UDP,direction.ZWK,direction.ZYQ,direction.UDP)
     Het <- read.delim(file.path(root,"fp",paste0(isotope,"-tbl.tsv"))) %>%
-           arrange(protein,MarkerName) %>%
+           rename(peptide=prot) %>%
+           arrange(peptide,MarkerName) %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position), index=1:n()) %>%
            filter(HetISq>=75) %>%
-           mutate(prot=as.character(prot)) %>%
-           select(prot,SNP,Direction,HetISq,index) %>%
-           left_join(select(b,prot,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
+           mutate(peptide=as.character(peptide)) %>%
+           select(peptide,SNP,Direction,HetISq,index) %>%
+           left_join(select(b,peptide,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
     write.csv(Het,file=file.path(root,"fp",paste0(isotope,"-HetISq75.csv")),row.names=FALSE,quote=FALSE)
     write(Het[['index']],file=file.path(root,"fp",paste0(isotope,'-HetISq75.index')),sep=",",ncolumns=nrow(Het))
   '
@@ -485,7 +486,7 @@ function lz_X()
               --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
               --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz \
               --svg --refsnp {5}
-#   rm ${root}/work/{4}-{5}.lz
+    rm ${root}/work/{4}-{5}.lz
   '
   module unload python/2.7
 }
@@ -500,7 +501,7 @@ function mean_by_genotype()
        plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
                --sample ${analysis}/work/caprion.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-               --keep ${pilot}/caprion-${batch}.id \
+               --keep ${pilot}/work/caprion-${batch}.id \
                --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \
                --recode oxford \
                --out ${out}
@@ -611,7 +612,7 @@ parallel -C' ' '
 '
 
 # for cmd in fp HetISq qqmanhattan lz_autosomes lz_X; do $cmd; done
-for cmd in fp HetISq lz_X; do $cmd; done
+for cmd in fp HetISq; do $cmd; done
 EOL
 
 sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_array_|${array}|" ${root}/${protein}-step3.sb

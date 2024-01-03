@@ -125,6 +125,11 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 #SBATCH --output=ROOT/sentinels/slurm/_step2_LABEL.o
 #SBATCH --error=ROOT/sentinels/slurm/_step2_LABEL.e
 
+. /etc/profile.d/modules.sh
+module purge
+module load rhel7/default-ccl
+module load gcc/9 texlive
+
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
 
@@ -295,6 +300,11 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 #SBATCH --output=ROOT/sentinels/slurm/_step3_%A_%a.o
 #SBATCH --error=ROOT/sentinels/slurm/_step3_%A_%a.e
 
+. /etc/profile.d/modules.sh
+module purge
+module load rhel7/default-ccl
+module load gcc/9 texlive
+
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
 export isotope=$(head -1 ${root}/${protein}.pheno | awk -v n=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
@@ -360,12 +370,12 @@ function HetISq()
     protein <- Sys.getenv("protein")
     isotope <- Sys.getenv("isotope")
     all <- read.delim(file.path(root,"fp",paste0(isotope,"-all.tsv"))) %>%
-           mutate(CHR=gsub(paste0(root,"/",protein,"-|-chrX|.fastGWA"),"",CHR)) %>%
-           mutate(batch_pept_chr=strsplit(CHR,"-|:"),
+           mutate(CHR=gsub(paste0(root,"/",protein,"-|-chrX|.fastGWA"),"",CHR),
+                  batch_pept_chr=strsplit(CHR,"-|:"),
                   batch=unlist(lapply(batch_pept_chr,"[",1)),
                   peptide=unlist(lapply(batch_pept_chr,"[",2)),
-                  CHR=unlist(lapply(batch_pept_chr,"[",3))) %>%
-           mutate(MarkerName=paste0(CHR,":",POS),
+                  CHR=unlist(lapply(batch_pept_chr,"[",3)),
+                  MarkerName=paste0(CHR,":",POS),
                   Batch=case_when(batch == 1 ~ "1. ZWK",
                                   batch == 2 ~ "2. ZYQ",
                                   batch == 3 ~ "3. UDP",
@@ -384,7 +394,6 @@ function HetISq()
            arrange(peptide,MarkerName) %>%
            mutate(SNP=MarkerName,MarkerName=paste0(Chromosome,":",Position), index=1:n()) %>%
            filter(HetISq>=75) %>%
-           mutate(peptide=as.character(peptide)) %>%
            select(peptide,SNP,Direction,HetISq,index) %>%
            left_join(select(b,peptide,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
     write.csv(Het,file=file.path(root,"fp",paste0(isotope,"-HetISq75.csv")),row.names=FALSE,quote=FALSE)
@@ -620,7 +629,6 @@ sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_array_|${ar
 
 function fplz()
 {
-  module load texlive
   export metal=${root}/METAL
 # HSPB1_rs114800762 is missing as dug by the following code.
   join -a1 <(sed '1d' ${root}/${protein}.merge | awk '{print $1"_"$4}' | sort -k1,1 ) \
@@ -653,7 +661,6 @@ export analysis=~/Caprion/analysis
 export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
 
-# module load texlive
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
 for i in 6 # $(seq ${n_with_signals})

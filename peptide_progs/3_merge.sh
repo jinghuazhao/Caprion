@@ -620,8 +620,7 @@ parallel -C' ' '
   mean_by_dosage
 '
 
-# for cmd in fp HetISq qqmanhattan lz_autosomes lz_X; do $cmd; done
-for cmd in fp HetISq; do $cmd; done
+for cmd in fp HetISq qqmanhattan lz_autosomes lz_X; do $cmd; done
 EOL
 
 sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_array_|${array}|" ${root}/${protein}-step3.sb
@@ -663,7 +662,7 @@ export signals=${analysis}/work/caprion${suffix}.signals
 
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in 6 # $(seq ${n_with_signals})
+for i in $(seq ${n_with_signals})
 do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')

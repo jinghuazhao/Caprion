@@ -334,7 +334,7 @@ function fp()
            arrange(prot,SNP)
     all <- read.delim(file.path(root,"fp",paste0(isotope,"-all.tsv"))) %>%
            rename(EFFECT_ALLELE=A1,REFERENCE_ALLELE=A2) %>%
-           mutate(CHR=gsub(paste0(root,"/",protein,"-|.fastGWA"),"",CHR)) %>%
+           mutate(CHR=gsub(paste0(root,"/",protein,"-|-chrX|.fastGWA"),"",CHR)) %>%
            mutate(batch_prot_chr=strsplit(CHR,"-|:"),
                   batch=unlist(lapply(batch_prot_chr,"[",1)),
                   prot=unlist(lapply(batch_prot_chr,"[",2)),
@@ -423,7 +423,7 @@ function qqmanhattan()
       pvalue_sign=5e-8 \
       plot_title="{}" < ~/cambridge-ceu/turboman/test.r
   fi
-  # rm ${root}/work/{}.txt
+  rm ${root}/work/{}.txt
   if [ -f ${dir}/{}_manhattan.png ]; then
      convert +append ${dir}/{}_manhattan.png ${dir}/{}_qq.png -resize x500 -density 300 ${dir}/{}_qqmanhattan.png
      convert ${dir}/{}_qqmanhattan.png -quality 0 ${dir}/{}_qqmanhattan.jp2
@@ -434,62 +434,60 @@ function qqmanhattan()
   deactivate
 }
 
-function lz()
-# for variant not in the reference panel, drop --refsnp, and then rename.
+function lz_autosomes()
 {
   module load python/2.7
-  if [ -f ${root}/${protein}.signals ]; then
-     (
-       awk '$1==ENVIRON["isotope"]' ${root}/${protein}.signals | \
-       tr '\t' ' ' | \
-       awk '$2!="23" {print $6, $7}' | \
-       parallel -j1 -C' ' --env root '
-         zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
-         awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}"
-       '
-     ) | \
-     parallel -j1 -C ' ' --env root '
-       (
-         gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-         awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}" | \
-         cut -f1-3,12
-         gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
-         sort -k1,1n -k2,2n
-       ) > ${root}/work/{4}-{5}.lz
-       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
-                 --delim tab title="{4}-{5}" \
-                 --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --svg --refsnp {5}
-       rm ${root}/work/{4}-{5}.lz
-     '
-     (
-       awk '$1==ENVIRON["isotope"]' ${root}/${protein}.signals | \
-       tr '\t' ' ' | \
-       awk '$2=="23" {print $6,$7}' ${root}/${protein}.signals | \
-       parallel -j1 -C' ' --env root '
-         zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
-         awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}" | sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//"
-       '
-     ) | \
-     parallel -j1 -C ' ' --env root '
-       (
-         gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-         awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print}" | \
-         cut -f1-3,12
-         gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-         awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "NR>1 && \$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
-         sort -k1,1n -k2,2n | \
-         sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//" | cut -f1-3,12
-       ) > ${root}/work/{4}-{5}.lz
-       locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
-                 --delim tab title="{4}-{5}" \
-                 --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-                 --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz \
-                 --svg --refsnp {5}
-#      rm ${root}/work/{4}-{5}.lz
-     '
-  fi
+  (
+    awk '$1==ENVIRON["isotope"] && $2!=23 {print $6, $7}' ${root}/${protein}.signals | \
+    parallel -j1 -C' ' --env root '
+      zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
+      awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}"
+    '
+  ) | \
+  parallel -j1 -C ' ' --env root '
+    (
+      gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
+      awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print \$1,\$2,\$3,\$12}"
+      gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
+      awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
+      sort -k1,1n -k2,2n
+    ) > ${root}/work/{4}-{5}.lz
+    locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
+              --delim tab title="{4}-{5}" \
+              --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
+              --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --svg --refsnp {5}
+    rm ${root}/work/{4}-{5}.lz
+  '
+  module unload python/2.7
+}
+
+function lz_X()
+{
+  module load python/2.7
+  (
+    awk '$1==ENVIRON["isotope"] && $2==23 {print $6, $7}' ${root}/${protein}.signals | \
+    parallel -j1 -C' ' --env root '
+      zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
+      awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}" | sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//"
+    '
+  ) | \
+  parallel -j1 -C ' ' --env root '
+    (
+      gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
+      awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print \$1,\$2,\$3,\$12}"
+      gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
+      awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
+      sort -k1,1n -k2,2n | \
+      sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//"
+    ) > ${root}/work/{4}-{5}.lz
+    locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
+              --delim tab title="{4}-{5}" \
+              --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
+              --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz \
+              --svg --refsnp {5}
+#   rm ${root}/work/{4}-{5}.lz
+  '
+  module unload python/2.7
 }
 
 function mean_by_genotype()
@@ -612,7 +610,8 @@ parallel -C' ' '
   mean_by_dosage
 '
 
-for cmd in fp HetISq qqmanhattan lz; do $cmd; done
+# for cmd in fp HetISq qqmanhattan lz_autosomes lz_X; do $cmd; done
+for cmd in fp HetISq lz_X; do $cmd; done
 EOL
 
 sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_array_|${array}|" ${root}/${protein}-step3.sb

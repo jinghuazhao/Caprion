@@ -13,7 +13,7 @@ function step1_pqtl_list()
 cat <<'EOL'> ${root}/${protein}-step1.sb
 #!/usr/bin/bash
 
-#SBATCH --job-name=_step1-LABEL
+#SBATCH --job-name=_1-LABEL
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -114,7 +114,7 @@ function step2_pqtl_collect()
 cat <<'EOL'> ${root}/${protein}-step2.sb
 #!/usr/bin/bash
 
-#SBATCH --job-name=_step2-LABEL
+#SBATCH --job-name=_2-LABEL
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -288,7 +288,7 @@ function step3_pqtl_summary()
 cat <<'EOL'> ${root}/${protein}-step3.sb
 #!/usr/bin/bash
 
-#SBATCH --job-name=_step3-LABEL
+#SBATCH --job-name=_3-LABEL
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 

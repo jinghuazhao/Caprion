@@ -58,9 +58,42 @@ function sb()
                                row.names=FALSE,quote=FALSE)
       peptide_lr
     }
-    ZWK <- normalise_peptide(1)
-    ZYQ <- normalise_peptide(2)
-    UDP <- normalise_peptide(3)
+    ZWK <- tryCatch(
+      {
+        normalise_peptide(1)
+      },
+      error = function(e) {
+        cat("An error occurred:", conditionMessage(e), "\n")
+        return(data.frame())
+      },
+      finally = {
+        cat("Finished ZWK block.\n")
+      }
+    )
+    ZYQ <- tryCatch(
+      {
+        normalise_peptide(2)
+      },
+      error = function(e) {
+        cat("An error occurred:", conditionMessage(e), "\n")
+        return(data.frame())
+      },
+      finally = {
+        cat("Finished ZYQ block.\n")
+      }
+    )
+    UDP <- tryCatch(
+      {
+        normalise_peptide(3)
+      },
+      error = function(e) {
+        cat("An error occurred:", conditionMessage(e), "\n")
+        return(data.frame())
+      },
+      finally = {
+        cat("Finished UDP block.\n")
+      }
+    )
     caprion <- bind_rows(ZWK,ZYQ,UDP)
     write.table(caprion,file=paste0(analysis,"/peptide/",protein,"/",protein,".pheno"),
                 col.names=gsub("^X([0-9])","\\1",names(caprion)),row.names=FALSE,quote=FALSE)
@@ -144,7 +177,7 @@ export varlist=${pilot}/work/caprion.varlist
 module load gcc/9
 # only those with pQTLs:
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in 72 160 237 # $(seq ${n_with_signals})
+for i in $(seq ${n_with_signals})
 do
   export signal_index=${i}
   export signal_list=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]' | grep -f - -n -w ${signals} | cut -d':' -f1)
@@ -158,3 +191,5 @@ done
 # for i in $(seq 987)
 # 79 proteins have errors since they took longer than 12hrs to finish:
 # for i in $(grep error ${analysis}/peptide/*/*.e | sed 's|/|\t|g' | cut -f7 | grep -n -w -f - ${pilot}/work/caprion.varlist | cut -d':' -f1)
+# Some batches contain no data
+# 72 160 237 for BROX, CT027, GHRL

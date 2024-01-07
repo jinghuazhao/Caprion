@@ -201,46 +201,55 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
 <h2 id="9-lookup">9. Lookup</h2>
 <h2 id="10-peptide-level-analysis">10. Peptide-level analysis</h2>
-<p>This mirrors protein-level analysis as in peptide_progs/, with respect to 1. association analysis, 2. meta-analysis, 3. Signal detection/classification, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.</p>
-<pre><code>| Name    | Description    |
-| --------- | ---------------- |
-| pgwas   | pGWAS          |
-| METAL   | Meta-analysis  |
-| HLA     | HLA imputation |
-| reports | Reports        |
-
-
-| **Locus** | A    | B    | C    | DPB1 | DQA1 | DQB1 | DRB1 |
-| ----------- | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
-| **N**     | 1857 | 2572 | 1866 | 1624 | 1740 | 1924 | 2436 |
-| SNPs      | 891  | 990  | 1041 | 689  | 948  | 979  | 891  |
-
-while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.
-
-It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 1000Genomes reference panel has 465 variants with HLA prefix and the partition is as follows,
-
-
-| **Locus** | A  | B   | C  | DPB1 | DQA1 | DQB1 | DRB1 |
-| ----------- | ---- | ----- | ---- | ------ | ------ | ------ | ------ |
-| **HLA_**  | 98 | 183 | 69 | 0    | 0    | 33   | 82   |
-
-A recent update: PGG.HLA, [https://pog.fudan.edu.cn/pggmhc/](https://pog.fudan.edu.cn/pggmhc/), requires data submission.
-</code></pre>
+<p>This mirrors protein-level analysis as in peptide_progs/, with respect to 1. association analysis, 2. meta-analysis, 3. Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.</p>
 <div class="footnote">
 <hr />
 <ol>
 <li id="fn:directory">
 <p>Directories</p>
 <p>This is per Caprion project</p>
-<p><code>module load miniconda3/4.5.1
+<p><code>bash
+module load miniconda3/4.5.1
 export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/miniconda37
-source ${csd3path}/bin/activate</code>&#160;<a class="footnote-backref" href="#fnref:directory" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+source ${csd3path}/bin/activate</code></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pgwas</td>
+<td>pGWAS</td>
+</tr>
+<tr>
+<td>METAL</td>
+<td>Meta-analysis</td>
+</tr>
+<tr>
+<td>HLA</td>
+<td>HLA imputation</td>
+</tr>
+<tr>
+<td>peptide_progs</td>
+<td>peptide analysis</td>
+</tr>
+<tr>
+<td>reports</td>
+<td>Reports</td>
+</tr>
+</tbody>
+</table>
+<p><a class="footnote-backref" href="#fnref:directory" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 <li id="fn:pGWAS">
 <p>Protein GWAS</p>
 <p>GCTA/fastGWA employs MAF&gt;=0.001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
 <p>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</p>
-<p><code>sed -i '1d' ${caprion}/work/caprion-1.pheno
+<p><code>bash
+sed -i '1d' ${caprion}/work/caprion-1.pheno
 sed -i '1d' ${caprion}/work/caprion-2.pheno
 sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 <p>at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
@@ -255,7 +264,72 @@ a too large, ITMAX too small in gamma countinued fraction (gcf)</code></p>
 This has enabled Forest plots for the associate pQTLs.&#160;<a class="footnote-backref" href="#fnref:metal" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 <li id="fn:HLA">
-<p>Whole cohort imputation is feasible with a HIBAG reference panel,&#160;<a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+<p>Whole cohort imputation is feasible with a HIBAG reference panel,</p>
+<table>
+<thead>
+<tr>
+<th><strong>Locus</strong></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>DPB1</th>
+<th>DQA1</th>
+<th>DQB1</th>
+<th>DRB1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>N</strong></td>
+<td>1857</td>
+<td>2572</td>
+<td>1866</td>
+<td>1624</td>
+<td>1740</td>
+<td>1924</td>
+<td>2436</td>
+</tr>
+<tr>
+<td>SNPs</td>
+<td>891</td>
+<td>990</td>
+<td>1041</td>
+<td>689</td>
+<td>948</td>
+<td>979</td>
+<td>891</td>
+</tr>
+</tbody>
+</table>
+<p>while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.</p>
+<p>It is of note that <code>1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers</code> in the 1000Genomes reference panel has 465 variants with HLA prefix and the partition is as follows,</p>
+<table>
+<thead>
+<tr>
+<th><strong>Locus</strong></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>DPB1</th>
+<th>DQA1</th>
+<th>DQB1</th>
+<th>DRB1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HLA_</strong></td>
+<td>98</td>
+<td>183</td>
+<td>69</td>
+<td>0</td>
+<td>0</td>
+<td>33</td>
+<td>82</td>
+</tr>
+</tbody>
+</table>
+<p>A recent update: PGG.HLA, <a href="https://pog.fudan.edu.cn/pggmhc/">https://pog.fudan.edu.cn/pggmhc/</a>, requires data submission.&#160;<a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 4 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div></div>
@@ -344,5 +418,5 @@ This has enabled Forest plots for the associate pQTLs.&#160;<a class="footnote-b
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-01-07 12:24:50.040743+00:00
+Build Date UTC : 2024-01-07 17:49:57.698668+00:00
 -->

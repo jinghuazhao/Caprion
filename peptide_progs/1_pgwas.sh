@@ -192,4 +192,4 @@ done
 # 79 proteins have errors since they took longer than 12hrs to finish:
 # for i in $(grep error ${analysis}/peptide/*/*.e | sed 's|/|\t|g' | cut -f7 | grep -n -w -f - ${pilot}/work/caprion.varlist | cut -d':' -f1)
 # Some batches contain no data
-# 72 160 237 for BROX, CT027, GHRL
+# 72 160 237 382 for BROX, CT027, GHRL, NCF2

@@ -1,11 +1,5 @@
 #!/usr/bin/bash
 
-export TMPDIR=${HPC_WORK}/work
-export pilot=~/Caprion/pilot
-export analysis=~/Caprion/analysis
-export suffix=_dr
-export signals=${analysis}/work/caprion${suffix}.signals
-
 function METAL_list()
 # build the complete list of files
 {
@@ -126,6 +120,12 @@ sbatch ${root}/${protein}-METAL.sb
 #metal ${rt}/${isotope}.metal 2>&1 | tee ${rt}/${isotope}-1.tbl.log;gzip -f ${rt}/${isotope}-1.tbl
 #metal ${rt}/${isotope}-chrX.metal 2>&1 | tee ${rt}/${isotope}-chrX-1.tbl.log; gzip -f ${rt}/${isotope}-chrX-1.tbl
 }
+
+export TMPDIR=${HPC_WORK}/work
+export pilot=~/Caprion/pilot
+export analysis=~/Caprion/analysis
+export suffix=_dr
+export signals=${analysis}/work/caprion${suffix}.signals
 
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)

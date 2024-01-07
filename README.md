@@ -82,24 +82,24 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
 ## 10. Peptide-level analysis
 
-This mirrors protein-level analysis as in peptide_progs/, with respect to 1. association analysis, 2. meta-analysis, 3. Signal detection/classification, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.
+This mirrors protein-level analysis as in peptide_progs/, with respect to 1. association analysis, 2. meta-analysis, 3. Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.
 
 [^directory]: Directories
     
     This is per Caprion project
     
-    ```
+    ```bash
     module load miniconda3/4.5.1
     export csd3path=/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/miniconda37
     source ${csd3path}/bin/activate
     ```
-    
     
     | Name    | Description    |
     | --------- | ---------------- |
     | pgwas   | pGWAS          |
     | METAL   | Meta-analysis  |
     | HLA     | HLA imputation |
+    | peptide_progs | peptide analysis|
     | reports | Reports        |
     
 [^pGWAS]: Protein GWAS
@@ -108,7 +108,7 @@ This mirrors protein-level analysis as in peptide_progs/, with respect to 1. ass
     
     GCTA uses headerless phenotype files, so **the following section from `5_pgwas.sh` is run** in preparation.
     
-    ```
+    ```bash
     sed -i '1d' ${caprion}/work/caprion-1.pheno
     sed -i '1d' ${caprion}/work/caprion-2.pheno
     sed -i '1d' ${caprion}/work/caprion-3.pheno
@@ -132,7 +132,6 @@ This mirrors protein-level analysis as in peptide_progs/, with respect to 1. ass
     
 [^HLA]: Whole cohort imputation is feasible with a HIBAG reference panel,
     
-    
     | **Locus** | A    | B    | C    | DPB1 | DQA1 | DQB1 | DRB1 |
     | ----------- | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
     | **N**     | 1857 | 2572 | 1866 | 1624 | 1740 | 1924 | 2436 |
@@ -141,7 +140,6 @@ This mirrors protein-level analysis as in peptide_progs/, with respect to 1. ass
     while the reference panel is based on the 1000Genomes data (N=503) with SNP2HLA and CookHLA.
     
     It is of note that `1000G_REF.EUR.chr6.hg18.29mb-34mb.inT1DGC.markers` in the 1000Genomes reference panel has 465 variants with HLA prefix and the partition is as follows,
-    
     
     | **Locus** | A  | B   | C  | DPB1 | DQA1 | DQB1 | DRB1 |
     | ----------- | ---- | ----- | ---- | ------ | ------ | ------ | ------ |

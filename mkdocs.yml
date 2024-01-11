@@ -3,11 +3,13 @@ repo_url: https://github.com/jinghuazhao/Caprion
 edit_uri: ""
 nav:
   - "": README.md
-  - README.md  
-  - pilot/README.md
-  - peptide_progs/README.md
-  - pilot/gwas2.md
-  - pilot/autoencoder.md
+  - Pilot:
+    - pilot/autoencoder.md
+    - pilot/README.md
+    - pilot/gwas2.md
+  - Analysis:
+    - README.md
+    - peptide_progs/README.md
   - pilot/Notes.md
 theme:
     name: mkdocs

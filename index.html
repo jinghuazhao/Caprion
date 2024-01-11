@@ -49,6 +49,9 @@
                                 <a href="pilot/" class="nav-link">Pilot studies</a>
                             </li>
                             <li class="navitem">
+                                <a href="peptide_progs/" class="nav-link">Peptides</a>
+                            </li>
+                            <li class="navitem">
                                 <a href="pilot/gwas2/" class="nav-link">gwas2</a>
                             </li>
                             <li class="navitem">
@@ -142,10 +145,6 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#10-peptide-level-analysis" class="nav-link">10. Peptide-level analysis</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
               </ul>
             </li>
         </ul>
@@ -200,8 +199,6 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 <p>This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed <a href="https://cambridge-ceu.github.io/csd3/applications/CookHLA.html">here</a>. The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.</p>
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
 <h2 id="9-lookup">9. Lookup</h2>
-<h2 id="10-peptide-level-analysis">10. Peptide-level analysis</h2>
-<p>This mirrors protein-level analysis as in peptide_progs/, with respect to 1. association analysis, 2. meta-analysis, 3. Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.</p>
 <div class="footnote">
 <hr />
 <ol>
@@ -418,5 +415,5 @@ This has enabled Forest plots for the associate pQTLs.&#160;<a class="footnote-b
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-01-11 20:48:47.614734+00:00
+Build Date UTC : 2024-01-11 21:11:13.830549+00:00
 -->

@@ -1,4 +1,4 @@
-# Proteins
+# Protein analysis
 
 ## workflow (experimental)
 

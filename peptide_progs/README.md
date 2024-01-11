@@ -1,4 +1,4 @@
-# Peptides
+# Peptide analysis
 
 Peptide-level analysis
 

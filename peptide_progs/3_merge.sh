@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-function setup()
+function initialise()
 {
   for d in sentinels/slurm fp means work qqmanhattanlz METAL/vep
   do
@@ -662,21 +662,21 @@ export signals=${analysis}/work/caprion${suffix}.signals
 
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in $(seq ${n_with_signals})
+for i in $(seq ${n_with_signals}) 452
 do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
   export root=${analysis}/peptide/${protein}
   export pheno=${root}/${protein}.pheno
   export N=$(awk 'NR==1{print NF-2}' ${pheno})
-  export all_peptides=$(head -1 ${pheno} | cut -f1,2 --complement)
+  export all_peptides=$(head -1 ${pheno} | cut -d' ' -f1,2 --complement)
   export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
   export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
   export dir=${root}/qqmanhattanlz
   echo ${signal_index}, ${protein}
-  setup
-# step1_pqtl_list
-# sbatch ${root}/${protein}-step1.sb
+  initialise
+  step1_pqtl_list
+  sbatch ${root}/${protein}-step1.sb
 # step2_pqtl_collect
 # fplz should be here
 # sbatch ${root}/${protein}-step2.sb
@@ -687,8 +687,8 @@ do
     grep -f <(cut -d' ' -f1 ${pilot}/work/caprion-${batch}.id) ${root}/${protein}.pheno
   ) > ${root}/work/${protein}-${batch}.pheno
   done
-  step3_pqtl_summary
-  sbatch ${root}/${protein}-step3.sb
+# step3_pqtl_summary
+# sbatch ${root}/${protein}-step3.sb
 # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
 # qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
 done

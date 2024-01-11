@@ -114,7 +114,7 @@ END
 # Note also fasta_sequences <- readDNAStringSet(fasta_file_path, format = "fasta")
 R --no-save <<END
 library(Biostrings)
-fasta_file_path <- 'P04217.fasta'
+fasta_file_path <- 'https://rest.uniprot.org/uniprotkb/P04217.fasta'
 search_442688365 <- 'TDGEGALSEPSATVTIEELAAPPPPVLMHHGESSQVLHPGNK'
 fasta_sequences <- readAAStringSet(fasta_file_path, format = "fasta")
 first_sequence <- fasta_sequences[[1]]

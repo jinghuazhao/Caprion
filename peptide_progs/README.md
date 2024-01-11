@@ -13,7 +13,6 @@ This mirrors protein-level analysis as in peptide_progs/,
 
 with respect to 
 
-0. Utitlies
 1. Association analysis.
 2. Meta-analysis.
 3. Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.

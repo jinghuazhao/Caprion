@@ -4,11 +4,11 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="None">
+        
         
         
         <link rel="shortcut icon" href="img/favicon.ico">
-        <title>Caprion</title>
+        <title>Proteins - Caprion</title>
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/font-awesome.min.css" rel="stylesheet">
         <link href="css/base.css" rel="stylesheet">
@@ -26,7 +26,7 @@
         <script>hljs.highlightAll();</script> 
     </head>
 
-    <body class="homepage">
+    <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href=".">Caprion</a>
@@ -42,20 +42,35 @@
                             <li class="navitem">
                                 <a href="." class="nav-link"></a>
                             </li>
-                            <li class="navitem active">
-                                <a href="." class="nav-link">Analysis</a>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pilot <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="pilot/autoencoder/" class="dropdown-item">Autoencoder</a>
+</li>
+                                    
+<li>
+    <a href="pilot/" class="dropdown-item">Pilot studies</a>
+</li>
+                                    
+<li>
+    <a href="pilot/gwas2/" class="dropdown-item">gwas2</a>
+</li>
+                                </ul>
                             </li>
-                            <li class="navitem">
-                                <a href="pilot/" class="nav-link">Pilot studies</a>
-                            </li>
-                            <li class="navitem">
-                                <a href="peptide_progs/" class="nav-link">Peptides</a>
-                            </li>
-                            <li class="navitem">
-                                <a href="pilot/gwas2/" class="nav-link">gwas2</a>
-                            </li>
-                            <li class="navitem">
-                                <a href="pilot/autoencoder/" class="nav-link">Autoencoder</a>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Analysis <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="." class="dropdown-item active">Proteins</a>
+</li>
+                                    
+<li>
+    <a href="peptide_progs/" class="dropdown-item">Peptides</a>
+</li>
+                                </ul>
                             </li>
                             <li class="navitem">
                                 <a href="pilot/Notes/" class="nav-link">Notes</a>
@@ -69,12 +84,12 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" href="." class="nav-link">
+                                <a rel="prev" href="pilot/gwas2/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" href="pilot/" class="nav-link">
+                                <a rel="next" href="peptide_progs/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -99,7 +114,7 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#analysis" class="nav-link">Analysis</a>
+            <li class="nav-item" data-level="1"><a href="#proteins" class="nav-link">Proteins</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#workflow-experimental" class="nav-link">workflow (experimental)</a>
               <ul class="nav flex-column">
@@ -152,7 +167,7 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="analysis">Analysis</h1>
+<h1 id="proteins">Proteins</h1>
 <h2 id="workflow-experimental">workflow (experimental)</h2>
 <pre><code class="language-bash">module add ceuadmin/snakemake
 
@@ -412,8 +427,3 @@ This has enabled Forest plots for the associate pQTLs.&#160;<a class="footnote-b
 
     </body>
 </html>
-
-<!--
-MkDocs version : 1.5.3
-Build Date UTC : 2024-01-11 21:11:13.830549+00:00
--->

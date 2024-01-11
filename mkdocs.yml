@@ -5,8 +5,8 @@ nav:
   - "": README.md
   - "Pilot studies":
     - pilot/autoencoder.md
-    - pilot/README.md
     - pilot/gwas2.md
+    - pilot/README.md
   - Analysis:
     - README.md
     - peptide_progs/README.md

@@ -5,6 +5,7 @@ nav:
   - "": README.md
   - README.md  
   - pilot/README.md
+  - peptide_progs/README.md
   - pilot/gwas2.md
   - pilot/autoencoder.md
   - pilot/Notes.md

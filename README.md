@@ -80,10 +80,6 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
 ## 9. Lookup
 
-## 10. Peptide-level analysis
-
-This mirrors protein-level analysis as in peptide_progs/, with respect to 1. association analysis, 2. meta-analysis, 3. Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.
-
 [^directory]: Directories
     
     This is per Caprion project

@@ -115,10 +115,17 @@ END
 R --no-save <<END
 library(Biostrings)
 fasta_file_path <- 'https://rest.uniprot.org/uniprotkb/P04217.fasta'
-search_442688365 <- 'TDGEGALSEPSATVTIEELAAPPPPVLMHHGESSQVLHPGNK'
+iso_442688365 <- 'TDGEGALSEPSATVTIEELAAPPPPVLMHHGESSQVLHPGNK'
 fasta_sequences <- readAAStringSet(fasta_file_path, format = "fasta")
-first_sequence <- fasta_sequences[[1]]
-cat("Sequence:", toString(first_sequence), "\n")
-match_position <- regexpr(search_442688365, first_sequence)
+AA_sequence <- fasta_sequences[[1]]
+cat("Sequence:", toString(AA_sequence), "\n")
+match_position <- regexpr(iso_442688365, AA_sequence)
 match_position
+mp <- matchPattern(iso_442688365,AA_sequence)
+mp
+mpData <- as.data.frame(mp)
+iso_442744832 <- subset(Mapping,Protein=="A1BG_HUMAN" & Isotope.Group.ID==442744832)[["Modified.Peptide.Sequence"]]
+iso_442744832X <- gsub("\\[\\d+\\.\\d+\\]", "X", iso_442744832)
+mpindel <- matchPattern(iso_442744832X,AA_sequence,with.indels=TRUE,max.mismatch=5)
+mpindel
 END

@@ -98,6 +98,7 @@ function sentinels()
     print(p)
     m <- subset(t,MarkerName!=".")
     cols <- c(1:5,9)
+    unlink(file.path(d,paste0(isotope,".signals")))
     write.table(m[,cols],file=file.path(d,paste0(isotope,".signals")),row.names=FALSE,quote=FALSE,sep="\t")
   '
 }

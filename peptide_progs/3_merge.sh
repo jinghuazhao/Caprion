@@ -675,13 +675,24 @@ do
   export dir=${root}/qqmanhattanlz
   echo ${signal_index}, ${protein}
   initialise
+# 1. Extraction of signals
+  {
+  echo Step 1.
 # step1_pqtl_list
 # sbatch ${root}/${protein}-step1.sb
-  step2_pqtl_collect
-  sbatch ${root}/${protein}-step2.sb
-# export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
-# export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
+  }
+# 2. Collection of signals
+  {
+  echo Step 2.
+# step2_pqtl_collect
 # fplz should be here
+# sbatch ${root}/${protein}-step2.sb
+  }
+# 3. Graphical representation
+  {
+  echo Step 3.
+  export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
+  export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
   for batch in {1..3}
   do
   (
@@ -689,8 +700,9 @@ do
     grep -f <(cut -d' ' -f1 ${pilot}/work/caprion-${batch}.id) ${root}/${protein}.pheno
   ) > ${root}/work/${protein}-${batch}.pheno
   done
-# step3_pqtl_summary
-# sbatch ${root}/${protein}-step3.sb
+  step3_pqtl_summary
+  sbatch ${root}/${protein}-step3.sb
+  }
 # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
 # qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
 done

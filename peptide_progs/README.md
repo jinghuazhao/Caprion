@@ -16,3 +16,5 @@ with respect to
 1. Association analysis.
 2. Meta-analysis.
 3. Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.
+
+NB. `3_merge.sh` itself is comprised of three steps on signal extraction, collection, and graphical representation which is operationally done through commenting/uncommenting calls to each step exclusively.

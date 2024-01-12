@@ -98,8 +98,9 @@ function sentinels()
     print(p)
     m <- subset(t,MarkerName!=".")
     cols <- c(1:5,9)
-    unlink(file.path(d,paste0(isotope,".signals")))
-    write.table(m[,cols],file=file.path(d,paste0(isotope,".signals")),row.names=FALSE,quote=FALSE,sep="\t")
+    signal_file <- file.path(d,paste0(isotope,".signals"))
+    if (exists(signal_file)) unlink(signal_file)
+    write.table(m[,cols],file=signal_file,row.names=FALSE,quote=FALSE,sep="\t")
   '
 }
 
@@ -671,16 +672,16 @@ do
   export pheno=${root}/${protein}.pheno
   export N=$(awk 'NR==1{print NF-2}' ${pheno})
   export all_peptides=$(head -1 ${pheno} | cut -d' ' -f1,2 --complement)
-  export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
-  export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
   export dir=${root}/qqmanhattanlz
   echo ${signal_index}, ${protein}
   initialise
-  step1_pqtl_list
-  sbatch ${root}/${protein}-step1.sb
-# step2_pqtl_collect
+# step1_pqtl_list
+# sbatch ${root}/${protein}-step1.sb
+  step2_pqtl_collect
+  sbatch ${root}/${protein}-step2.sb
+# export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
+# export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
 # fplz should be here
-# sbatch ${root}/${protein}-step2.sb
   for batch in {1..3}
   do
   (

@@ -17,4 +17,4 @@ with respect to
 2. Meta-analysis.
 3. Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.
 
-NB. `3_merge.sh` itself is comprised of three steps on signal extraction, collection, and graphical representation which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after 12hr threshold for SLURM.
+NB. `3_merge.sh` itself is comprised of three steps on signal extraction, collection, and graphical representation which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.

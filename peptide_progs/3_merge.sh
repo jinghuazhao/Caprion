@@ -510,7 +510,7 @@ function mean_by_genotype()
     export out=${root}/means/${protein}-${batch}-${isotope}-${pqtl}
     if [ ! -f ${out}.dat ]; then
        plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
-               --sample ${analysis}/work/caprion.sample \
+               --sample ${analysis}/work/chr${chr}.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${pilot}/work/caprion-${batch}.id \
                --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \
@@ -566,7 +566,7 @@ function mean_by_dosage()
     export out=${root}/means/${protein}-${batch}-${isotope}-${pqtl}
     if [ ! -f ${out}.raw ]; then
        plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
-               --sample ${analysis}/work/caprion.sample \
+               --sample ${analysis}/work/chr${chr}.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${pilot}/work/caprion-${batch}.id \
                --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \

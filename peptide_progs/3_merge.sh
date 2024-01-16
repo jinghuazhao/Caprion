@@ -696,7 +696,7 @@ do
 # 12hr-timeout proteins
 # export i=129, 299 for CO3, ITIH2
 # export todo_peptides=$(ls ${analysis}/peptide/CO3/fp/*pdf | xargs -l basename -s -fp.pdf | sort -k1,1 | uniq | grep -f - -v <(sed 's/ /\n/g' <(echo ${pqtl_peptides})))
-  export array=$(grep -n -f <(echo ${todo_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
+# export array=$(grep -n -f <(echo ${todo_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
   for batch in {1..3}
   do
   (

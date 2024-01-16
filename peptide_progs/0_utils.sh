@@ -21,7 +21,6 @@ cat <(cat ${analysis}/peptide/*/*cis.vs.trans | head -1) \
 sed '1d' ${analysis}/reports/peptide.signals | \
 cut -f1 | \
 sort | \
-grep -e PROC -e EPCR -e INHBE -v | \
 uniq -c | \
 wc -l
 

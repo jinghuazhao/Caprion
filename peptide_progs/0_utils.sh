@@ -24,7 +24,17 @@ sort | \
 uniq -c | \
 wc -l
 
+Rscript -e '
+  signals <- read.delim("~/Caprion/analysis/reports/peptide.signals")
+  dim(signals)
+  tbl <- with(signals,table(protein))
+  png("~/Caprion/analysis/reports/peptide.png",width=6,height=4,res=300,units="in")
+  hist(tbl,main="Number of proteins by signal",xlab="No. signals", ylab="No. proteins")
+  dev.off()
+'
+
 # Left-over
+## proteins
 (
   export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
   for i in $(seq 300) # $(seq ${n_with_signals})
@@ -42,6 +52,11 @@ wc -l
   done
 ) | \
 grep -f <(sed '1d' ${analysis}/reports/peptide.signals | cut -f1 | sort | uniq) -v - | cut -d',' -f1 > ${analysis}/left-over
+
+## peptides
+## CO3, ITIH2 dosage>>genotype since dosage.png is complete but its raw files may be missing as well
+ls *dosage.png | sed 's/-dosage.png//'  | grep -v -f <(ls *genotype.png | sed 's/-genotype.png//'| sort -k1,1) | sed 's/-/\t/g' | cut -f2 | uniq
+ls *.dat | sed 's/.dat//'  | grep -v -f <(ls *.raw | sed 's/.raw//'| sort -k1,1) | sed 's/-/\t/g' | cut -f3 | uniq
 
 # Protein-peptides
 sed '1d' ${analysis}/reports/peptide.signals | \
@@ -109,22 +124,38 @@ match_position = find_matching_position(amino_acid_sequence, search_442688365)
 print(f"Match found at position: {match_position}")
 END
 
-# R counterpart
-# Note also fasta_sequences <- readDNAStringSet(fasta_file_path, format = "fasta")
+#' Peptide mappings to given protein sequence, via
+#' 1. accession from panel file, pQTLdata::caprion
+#' 2. protein sequence from UniProt
+#' 2. modified peptide squence from mapping_ZWK
+#' 3. mapping of peptide sequences to protein sequence
+#'
+#' Note protein name could be with/without _HUMAN suffix & readDNAStringSet
+#' It remains to implement a sequence plot with signals
+
 R --no-save <<END
-library(Biostrings)
-fasta_file_path <- 'https://rest.uniprot.org/uniprotkb/P04217.fasta'
-iso_442688365 <- 'TDGEGALSEPSATVTIEELAAPPPPVLMHHGESSQVLHPGNK'
-fasta_sequences <- readAAStringSet(fasta_file_path, format = "fasta")
-AA_sequence <- fasta_sequences[[1]]
-cat("Sequence:", toString(AA_sequence), "\n")
-match_position <- regexpr(iso_442688365, AA_sequence)
-match_position
-mp <- matchPattern(iso_442688365,AA_sequence)
-mp
-mpData <- as.data.frame(mp)
-iso_442744832 <- subset(Mapping,Protein=="A1BG_HUMAN" & Isotope.Group.ID==442744832)[["Modified.Peptide.Sequence"]]
-iso_442744832X <- gsub("\\[\\d+\\.\\d+\\]", "X", iso_442744832)
-mpindel <- matchPattern(iso_442744832X,AA_sequence,with.indels=TRUE,max.mismatch=5)
-mpindel
+peptideMapping <- function(protein,batch="ZWK")
+{
+  library(Biostrings)
+  accession <- subset(pQTLdata::caprion,grepl(protein,Protein))[["Accession"]]
+  load(paste0("~/Caprion/pilot/",batch,".rda"))
+  mapping <- subset(get(paste0("mapping_",batch)),grepl(protein,Protein))[1:6]
+  fasta_file_path <- paste0("https://rest.uniprot.org/uniprotkb/",accession,".fasta")
+  fasta_sequences <- readAAStringSet(fasta_file_path, format = "fasta")
+  sequence <- fasta_sequences[[1]]
+  cat("Sequence:", toString(sequence), "\n")
+  mp <- sapply(setdiff(mapping[["Modified.Peptide.Sequence"]],"-"),
+        function(x) {
+          y <- gsub("\\[\\d+\\.\\d+\\]", "X", x);
+          mp <- matchPattern(y,sequence,with.indels=TRUE,max.mismatch=5)
+          as.data.frame(mp)
+        })
+  invisible(list(accession=accession,sequence=sequence,mapping=mapping,positions=t(mp)))
+}
+
+options(width=200)
+A1BG <- peptideMapping("A1BG")
+ITIH2 <- peptideMapping("ITIH2")
+subset(ITIH2$mapping,Isotope.Group.ID==442581854)
+APOB <- peptideMapping("APOB")
 END

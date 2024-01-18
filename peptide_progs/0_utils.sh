@@ -154,8 +154,21 @@ peptideMapping <- function(protein,batch="ZWK")
 }
 
 options(width=200)
+library(dplyr)
 A1BG <- peptideMapping("A1BG")
+A1BG_mps <- rename(A1BG$mapping, mz = "Monoisotopic.m/z") %>%
+            group_by(Modified.Peptide.Sequence) %>%
+            reframe(n_isotope=dplyr::n(),
+                   isotope=paste(Isotope.Group.ID,collapse=";"),
+                   mz=paste(mz,collapse=";"),
+                   mtime=paste(Max.Isotope.Time.Centroid,collapse=";"),
+                   charge=paste(Charge,collapse=";"))
+sink("A1BG")
+knitr::kable(A1BG_mps[1:3],"markdown")
+sink()
+unlink("A1BG")
 ITIH2 <- peptideMapping("ITIH2")
 subset(ITIH2$mapping,Isotope.Group.ID==442581854)
+knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(ITIH2$mapping) <13492)[c(1,3,4,5,6)],row.names=FALSE))
 APOB <- peptideMapping("APOB")
 END

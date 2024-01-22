@@ -65,6 +65,11 @@ sort | \
 uniq | \
 wc -l
 
+# peptide-pqtl
+cd CO3
+cut -f1,7 CO3.signals | sed '1d;s/\t/_/;s/X:[0-9]+_[A-Z]+[A-Z]+/X:[0-9]+/' | sort | \
+join -v1 - <(ls qqmanhattanlz/*svg | xargs -l basename -s .svg | sed 's/chr23_/X:/' | sort) | cut -d'_' -f1 | sort | uniq | tr '\n' ','
+
 # discrepancy in signals vs cis/trans classification
 # GP1BA missing
 export f1=${analysis}/reports/peptide.signals

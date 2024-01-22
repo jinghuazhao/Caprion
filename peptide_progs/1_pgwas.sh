@@ -39,7 +39,7 @@ function sb()
                     y <- gap::invnormal(peptide_dat[[col]])
                     l <- lm(y~mod[,-1])
                     r <- y-predict(l,na.action=na.pass)
-                    scale(r)
+                    gap::invnormal(r)
                   })
       colnames(z) <- names(peptide_dat[peptides])
       rownames(z) <- peptide_dat[["IID"]]

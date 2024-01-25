@@ -8,12 +8,12 @@ export signals=${analysis}/work/caprion${suffix}.signals
 
 # All signals
 cat <(cat ${analysis}/peptide/*/*signals | head -1 | paste <(echo protein) -) \
-    <(ls ${analysis}/peptide/*/*signals | xargs -l basename -s .signals | grep -e PROC -e EPCR -e INHBE -v | \
+    <(ls ${analysis}/peptide/*/*signals | xargs -l basename -s .signals | \
       parallel -C' ' 'export prot={};awk -vOFS="\t" "NR>1{print ENVIRON[\"prot\"],\$0}" ${analysis}/peptide/{}/{}.signals') | \
       awk -vOFS="\t" '{print $1,$2,$6,$8}' > ${analysis}/reports/peptide.signals
 # cis/trans
 cat <(cat ${analysis}/peptide/*/*cis.vs.trans | head -1) \
-    <(ls ${analysis}/peptide/*/*cis.vs.trans | xargs -l basename -s .cis.vs.trans | grep -e PROC -e EPCR -e INHBE -v | \
+    <(ls ${analysis}/peptide/*/*cis.vs.trans | xargs -l basename -s .cis.vs.trans | \
       parallel -C' ' 'awk "NR>1" ${analysis}/peptide/{}/{}.cis.vs.trans') \
     > ${analysis}/reports/peptide.cis.vs.trans
 
@@ -139,12 +139,21 @@ END
 #' It remains to implement a sequence plot with signals
 
 R --no-save <<END
-peptideMapping <- function(protein,batch="ZWK")
+peptideMapping <- function(protein,batch="ZWK",mm=5)
 {
   library(Biostrings)
+  library(dplyr)
   accession <- subset(pQTLdata::caprion,grepl(protein,Protein))[["Accession"]]
   load(paste0("~/Caprion/pilot/",batch,".rda"))
-  mapping <- subset(get(paste0("mapping_",batch)),grepl(protein,Protein))[1:6]
+  mapping <- subset(get(paste0("mapping_",batch)),grepl(protein,Protein))[1:6] %>%
+             setNames(c("Isotope.Group.ID","Protein","Modified.Peptide.Sequence", "Monoisotopic.mz", "Max.Isotope.Time.Centroid", "Charge"))
+  mps <- mapping %>%
+            group_by(Modified.Peptide.Sequence) %>%
+            reframe(n_isotope=dplyr::n(),
+                   isotope=paste(Isotope.Group.ID,collapse=";"),
+                   mz=paste(Monoisotopic.mz,collapse=";"),
+                   mtime=paste(Max.Isotope.Time.Centroid,collapse=";"),
+                   charge=paste(Charge,collapse=";"))
   fasta_file_path <- paste0("https://rest.uniprot.org/uniprotkb/",accession,".fasta")
   fasta_sequences <- readAAStringSet(fasta_file_path, format = "fasta")
   sequence <- fasta_sequences[[1]]
@@ -152,28 +161,21 @@ peptideMapping <- function(protein,batch="ZWK")
   mp <- sapply(setdiff(mapping[["Modified.Peptide.Sequence"]],"-"),
         function(x) {
           y <- gsub("\\[\\d+\\.\\d+\\]", "X", x);
-          mp <- matchPattern(y,sequence,with.indels=TRUE,max.mismatch=5)
+          mp <- matchPattern(y,sequence,with.indels=TRUE,max.mismatch=mm)
           as.data.frame(mp)
         })
-  invisible(list(accession=accession,sequence=sequence,mapping=mapping,positions=t(mp)))
+  invisible(list(accession=accession,sequence=sequence,mapping=mapping,mps=mps,positions=t(mp)))
 }
 
 options(width=200)
-library(dplyr)
 A1BG <- peptideMapping("A1BG")
-A1BG_mps <- rename(A1BG$mapping, mz = "Monoisotopic.m/z") %>%
-            group_by(Modified.Peptide.Sequence) %>%
-            reframe(n_isotope=dplyr::n(),
-                   isotope=paste(Isotope.Group.ID,collapse=";"),
-                   mz=paste(mz,collapse=";"),
-                   mtime=paste(Max.Isotope.Time.Centroid,collapse=";"),
-                   charge=paste(Charge,collapse=";"))
 sink("A1BG")
-knitr::kable(A1BG_mps[1:3],"markdown")
+knitr::kable(A1BG$mps[1:3],"markdown")
 sink()
 unlink("A1BG")
 ITIH2 <- peptideMapping("ITIH2")
 subset(ITIH2$mapping,Isotope.Group.ID==442581854)
-knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(ITIH2$mapping) <13492)[c(1,3,4,5,6)],row.names=FALSE))
+knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(ITIH2$mapping) <13492)[c(1,3,4,5,6)],row.names=FALSE)
 APOB <- peptideMapping("APOB")
+ERAP2 <- peptideMapping("ERAP2",mm=1)
 END

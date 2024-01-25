@@ -178,4 +178,23 @@ subset(ITIH2$mapping,Isotope.Group.ID==442581854)
 knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(ITIH2$mapping) <13492)[c(1,3,4,5,6)],row.names=FALSE)
 APOB <- peptideMapping("APOB")
 ERAP2 <- peptideMapping("ERAP2",mm=1)
+
+peptideLines <- function(peptides, main="Peptides")
+{
+  segment_data <- as.data.frame(peptides) %>%
+                  mutate(ID = 1:nrow(peptides))
+  xmin <- min(unlist(segment_data[["start"]]))
+  xmax <- max(unlist(segment_data[["end"]]))
+  opar <- par()
+  par(mfrow=c(2,1))
+  plot(1:10,type="n",axes=FALSE,xlab="",ylab="")
+  plot(segment_data$start,segment_data$ID,type="n",ylab="Segment",xlab="Position",xlim=c(xmin,xmax))
+  for (i in 1:nrow(segment_data)) {
+    lines(c(segment_data$start[i], segment_data$end[i]), c(segment_data$ID[i], segment_data$ID[i]), col = segment_data$ID[[i]], lwd = 2)
+  }
+  par(opar)
+}
+
+peptideLines(ERAP2$positions)
+
 END

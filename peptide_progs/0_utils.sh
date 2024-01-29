@@ -168,6 +168,7 @@ peptideMapping <- function(protein,batch="ZWK",mm=5)
 }
 
 options(width=200)
+analysis <- "~/Caprion/analysis"
 A1BG <- peptideMapping("A1BG")
 sink("A1BG")
 knitr::kable(A1BG$mps[1:3],"markdown")
@@ -178,23 +179,39 @@ subset(ITIH2$mapping,Isotope.Group.ID==442581854)
 knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(ITIH2$mapping) <13492)[c(1,3,4,5,6)],row.names=FALSE)
 APOB <- peptideMapping("APOB")
 ERAP2 <- peptideMapping("ERAP2",mm=1)
+PROC <- peptideMapping("PROC",mm=1)
 
-peptideLines <- function(peptides, main="Peptides")
+peptideAssociationPlot <- function(protein)
 {
+  g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
+  f <- file.path(analysis,"peptide",protein)
+  signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
+  cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
+              mutate(pos=g2d$CM[SNPChrom]+SNPPos)
+# xy <- xy.coords(c(0, max(cistrans[["log10p"]])), c(0, g2d$CM))
+# plot(xy$x, xy$y, type = "n", ann = FALSE, axes = FALSE)
+  png(paste0(f,"/",protein,"-peptides.png"),width=10,height=12,res=300,unit="in")
+  opar <- par()
+  par(mfrow=c(2,1))
+  par(xaxt="n")
+  plot(cistrans$pos,cistrans$log10p,col=c("blue","red")[cistrans$cis+1],pch=19,xlab="Chromosome",ylab="-log10(P)")
+  par(xaxt="s")
+# axis(1,g2d$CM[cistrans[["SNPChrom"]]],labels=cistrans[["SNPChrom"]])
+  axis(1,g2d$CM,labels=1:length(g2d$CM))
+  mapping <- get(protein)
+  peptides <- mapping$positions
   segment_data <- as.data.frame(peptides) %>%
                   mutate(ID = 1:nrow(peptides))
   xmin <- min(unlist(segment_data[["start"]]))
   xmax <- max(unlist(segment_data[["end"]]))
-  opar <- par()
-  par(mfrow=c(2,1))
-  plot(1:10,type="n",axes=FALSE,xlab="",ylab="")
-  plot(segment_data$start,segment_data$ID,type="n",ylab="Segment",xlab="Position",xlim=c(xmin,xmax))
+  plot(segment_data$start,segment_data$ID,type="n",ylab="Segment",xlab="Peptide position",xlim=c(xmin,xmax))
   for (i in 1:nrow(segment_data)) {
     lines(c(segment_data$start[i], segment_data$end[i]), c(segment_data$ID[i], segment_data$ID[i]), col = segment_data$ID[[i]], lwd = 2)
   }
   par(opar)
+  dev.off()
 }
 
-peptideLines(ERAP2$positions)
+peptideAssociationPlot("PROC")
 
 END

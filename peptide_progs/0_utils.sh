@@ -178,6 +178,7 @@ ITIH2 <- peptideMapping("ITIH2")
 subset(ITIH2$mapping,Isotope.Group.ID==442581854)
 knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(ITIH2$mapping) <13492)[c(1,3,4,5,6)],row.names=FALSE)
 APOB <- peptideMapping("APOB")
+EPCR <- peptideMapping("EPCR",mm=1)
 ERAP2 <- peptideMapping("ERAP2",mm=1)
 PROC <- peptideMapping("PROC",mm=1)
 
@@ -206,12 +207,14 @@ peptideAssociationPlot <- function(protein)
   xmax <- max(unlist(segment_data[["end"]]))
   plot(segment_data$start,segment_data$ID,type="n",ylab="Segment",xlab="Peptide position",xlim=c(xmin,xmax))
   for (i in 1:nrow(segment_data)) {
-    lines(c(segment_data$start[i], segment_data$end[i]), c(segment_data$ID[i], segment_data$ID[i]), col = segment_data$ID[[i]], lwd = 2)
+    lines(c(segment_data$start[i], segment_data$end[i]), c(segment_data$ID[i], segment_data$ID[i]), col = segment_data$ID[[i]], lwd = 4)
   }
   par(opar)
   dev.off()
 }
 
+peptideAssociationPlot("EPCR")
+peptideAssociationPlot("ERAP2")
 peptideAssociationPlot("PROC")
 
 END

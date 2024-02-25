@@ -189,7 +189,6 @@ done
 
 # all proteins:
 # for i in $(seq 987)
-\ for i in $(seq ${n_with_signals})
 # 79 proteins have errors since they took longer than 12hrs to finish:
 # for i in $(grep error ${analysis}/peptide/*/*.e | sed 's|/|\t|g' | cut -f7 | grep -n -w -f - ${pilot}/work/caprion.varlist | cut -d':' -f1)
 # Some batches contain no data

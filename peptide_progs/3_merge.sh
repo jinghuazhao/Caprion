@@ -664,7 +664,7 @@ export signals=${analysis}/work/caprion${suffix}.signals
 
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in $(seq ${n_with_signals}) 452
+for i in $(echo $(seq ${n_with_signals} | grep -v -w -f <(sed 's/, /\n/g' benchmark.lst)))
 do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')

@@ -928,4 +928,6 @@ function umich()
 # mean_by_genotype_dosage
 # X: 127,156,325,471,567,691,748,792
 
+# srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i
+
 ukb_ppp_lz

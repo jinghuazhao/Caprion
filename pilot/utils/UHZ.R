@@ -1,9 +1,9 @@
-# Phenotypic information on UDP
+# Phenotypic information on UHZ
 
 options(width=200)
 caprion <- Sys.getenv("caprion")
 caprion <- ifelse(caprion=="",".",caprion)
-load("UDP.rda")
+load("UHZ.rda")
 
 suppressMessages(library(Biobase))
 suppressMessages(library(dplyr))
@@ -17,15 +17,15 @@ cluster <- function(data, interactive=FALSE)
   rownames(pc1pc2) <- rownames(data)
   library(mclust)
   mc <- Mclust(pc1pc2,G=2)
-  with(mc,
-  {
-     png(file.path(caprion,"data3","3d.png"), res=300, width=12, height=10, units="in")
-     scatterplot3d::scatterplot3d(with(pca,x[,c(2,1,3)]), color=c("blue","red")[classification],
-                                  main="Plot of the PC1, PC2 and PC3", pch=16)
-     legend("right", legend=levels(as.factor(classification)), col=c("blue", "red"), pch=16)
-     dev.off()
+  with(mc, {
+      png(file.path(caprion,"data4","3d.png"), res=300, width=12, height=10, units="in")
+      scatterplot3d::scatterplot3d(with(pca,x[,c(2,1,3)]), 
+                                   color=c("blue","red")[classification], 
+                                   main="Plot of the PC1, PC2 and PC3", pch=16)
+      legend("right", legend=levels(as.factor(classification)), col=c("blue", "red"), pch=16)
+      dev.off()
   })
-  if (interactive()) with(mc,{rgl::plot3d(with(pca,x[,c(2,1,3)]),col=classification)})
+  if (interactive()) with(mc, {rgl::plot3d(with(pca,x[,c(2,1,3)]),col=classification)})
   mc
 }
 
@@ -34,11 +34,12 @@ dr_protein <- function(eset,out)
   vars <- c("caprion_id","sexPulse","agePulse","ethnicPulse","ht_bl","wt_bl","classification","Affymetrix_gwasQC_bl",paste0("PC",1:20))
   rhs <- paste(setdiff(vars,c("caprion_id","ethnicPulse","ht_bl","wt_bl","Affymetrix_gwasQC_bl")),collapse="+")
   mc_classification <- with(cluster(t(exprs(eset))),classification)
-  data_omicsmap <- merge(read.csv("pilotsMap_15SEP2021.csv"),read.csv("INTERVAL_OmicsMap_20210915.csv"),by="identifier",all=TRUE) %>%
+  data_omicsmap <- merge(read.csv("pilotsMap_15SEP2021.csv"),
+                   read.csv("INTERVAL_OmicsMap_20210915.csv"),by="identifier",all=TRUE) %>%
                    mutate(caprion_id=if_else(caprion_id=="",CAPRION_BO,caprion_id)) %>%
                    full_join(read.csv("INTERVALdata_15SEP2021.csv"),by="identifier") %>%
                    full_join(data.frame(caprion_id=names(mc_classification),classification=mc_classification),by="caprion_id")
-  print(subset(data_omicsmap,is.na(Affymetrix_gwasQC_bl))[c("caprion_id","identifier","Affymetrix_gwasQC_bl")],row.names=FALSE)
+# print(subset(data_omicsmap,is.na(Affymetrix_gwasQC_bl))[c("caprion_id","identifier","Affymetrix_gwasQC_bl")],row.names=FALSE)
   pheno <- merge(data_omicsmap,data.frame(caprion_id=sampleNames(eset)),by="caprion_id",all.y=TRUE) %>%
            left_join(read.delim(file.path(caprion,"data","merged_imputation.eigenvec")),by=c("Affymetrix_gwasQC_bl"="X.FID")) %>%
            select(all_of(vars))
@@ -47,7 +48,7 @@ dr_protein <- function(eset,out)
   validObject(eset)
   r <- sapply(featureNames(eset),function(r)
               invnormal(resid(lm(formula(paste(paste0("invnormal(",sub("(^[0-9])","X\\1",r),")"),"~",rhs)),
-                                               data=eset,na.action=na.exclude))))
+                        data=eset,na.action=na.exclude))))
   rownames(r) <- sampleNames(eset)
   d <- mutate(data.frame(r),caprion_id=rownames(r)) %>%
        left_join(pheno[c("caprion_id","Affymetrix_gwasQC_bl")]) %>%
@@ -55,15 +56,15 @@ dr_protein <- function(eset,out)
        filter(!is.na(Affymetrix_gwasQC_bl)) %>%
        mutate(caprion_id=Affymetrix_gwasQC_bl)
   names(d) <- c("FID","IID",gsub("HUMAN","invn",featureNames(eset)))
-  write.table(d,file=file.path(caprion,"data3",out),quote=FALSE,row.names=FALSE)
-  write.table(d["IID"],file=file.path(caprion,"data3",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
+  write.table(d,file=file.path(caprion,"data4",out),quote=FALSE,row.names=FALSE)
+  write.table(d["IID"],file=file.path(caprion,"data4",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
   snptest_sample <- right_join(read.table(file.path(caprion,"data","merged_imputation.missing"),col.names=c("IID","missing")),d) %>%
                     rename(ID_1=FID,ID_2=IID)
-  gap::snptest_sample(snptest_sample,file.path(caprion,"data3",paste0(gsub("pheno","",out),"sample")),P=names(snptest_sample[,-(1:3)]))
+  gap::snptest_sample(snptest_sample,file.path(caprion,"data4",paste0(gsub("pheno","",out),"sample")),P=names(snptest_sample[,-(1:3)]))
 }
 
-dr_protein(protein_UDP,"protein.pheno")
-dr_protein(dr_UDP,"dr.pheno")
+dr_protein(protein_UHZ,"protein.pheno")
+dr_protein(dr_UHZ,"dr.pheno")
 
 lm_mclapply <- function(row)
 {
@@ -125,40 +126,11 @@ peptide <- function(eset,out)
        filter(!is.na(Affymetrix_gwasQC_bl)) %>%
        mutate(caprion_id=Affymetrix_gwasQC_bl)
   names(d) <- c("FID","IID",paste0(featureNames(eset),"_invn"))
-  write.table(d,file=file.path(caprion,"data3",out),quote=FALSE,row.names=FALSE)
-  write.table(d["IID"],file=file.path(caprion,"data3",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
+  write.table(d,file=file.path(caprion,"data4",out),quote=FALSE,row.names=FALSE)
+  write.table(d["IID"],file=file.path(caprion,"data4",paste0(gsub("pheno","",out),"ind")),quote=FALSE,col.names=FALSE,row.names=FALSE)
   snptest_sample <- right_join(read.table(file.path(caprion,"data","merged_imputation.missing"),col.names=c("IID","missing")),d) %>%
                     rename(ID_1=FID,ID_2=IID)
-  gap::snptest_sample(snptest_sample,file.path(caprion,"data3",paste0(gsub("pheno","",out),"sample")),P=names(snptest_sample[,-(1:3)]))
+  gap::snptest_sample(snptest_sample,file.path(caprion,"data4",paste0(gsub("pheno","",out),"sample")),P=names(snptest_sample[,-(1:3)]))
 }
 
-peptide(peptide_UDP,"peptide.pheno")
-
-# --- legacy code ---
-
-checks <- function()
-{
-  head(exprs(protein_UDP))
-  head(featureNames(protein_UDP))
-  head(sampleNames(protein_UDP))
-  experimentData(protein_UDP)
-  intersect(OmicsMap$caprion_id,sampleNames(protein_UDP))
-  intersect(OmicsMap$Affymetrix_gwasQC_bl,pData(protein_UDP)$Affymetrix_gwasQC_bl)
-  nrows <- length(featureNames(protein_UDP))
-  ncols <- length(intersect(OmicsMap$caprion_id,sampleNames(protein_UDP)))
-}
-
-array_transpose <- function(x)
-{
-  d <- x[,-1]
-  rownames(d) <- x[,1]
-  td <- t(d)
-}
-
-na_list <- function()
-# sed '1d' ${caprion}/data3/protein.tsv | grep -n NA | cut -f1 | sed 's/:NA//' | tr '\n' ' ' > ${caprion}/data3/na_UDP.lst
-{
-  if(file.exists(file.path(caprion,"data3","na_UDP.lst"))) na_UDP <- scan(file.path(caprion,"data3","na_UDP.lst"))
-  exprs(protein_UDP)[,na_UDP]
-  t(d[na_UDP,])
-}
+peptide(peptide_UHZ,"peptide.pheno")

@@ -93,6 +93,37 @@ udp <- function()
   save(protein_UDP,dr_UDP,peptide_UDP,mapping_UDP,file="UDP.rda")
 }
 
+uhz <- function()
+{
+  dir <- "~/Caprion/pre_qc_data/batch4"
+  wb <- file.path(dir,"UHZ_EDR_20240214_v1_Final.xlsx")
+  Legend <- read.xlsx(wb, sheet=1, startRow=3)
+  Samples <- read.xlsx(wb, sheet=2, startRow=5) %>%
+             setNames(c("LIMS.ID","Sample.ID","Comment")) %>%
+             mutate(LIMS.ID=gsub("L$","",LIMS.ID)) %>%
+             `rownames<-`(.$LIMS.ID) %>%
+             arrange(LIMS.ID)
+  LIMS.ID <- pull(Samples,LIMS.ID)
+  Annotations <- read.xlsx(wb, sheet=3, startRow=1)
+  Mapping <- read.xlsx(wb, sheet=4, startRow=6)
+  Normalized_Peptides <- read.xlsx(wb, sheet=5, startRow=1)
+  Normalized_All <- read.xlsx(wb, sheet=6, startRow=1)
+  Protein_DR_Filt <- read.xlsx(wb, sheet=7, startRow=1)
+  Comp_Raw_Int <- read.csv(file.path(dir,"UHZ_Comp_Raw_Int_20240118_v1.csv"))
+  phenoData <- AnnotatedDataFrame(Samples)
+  proteinData <- array_data(Normalized_All,"Protein",1)
+  drData <- array_data(Protein_DR_Filt,"Protein",1)
+  peptideData <- array_data(Comp_Raw_Int[c("Isotope.Group.ID",LIMS.ID)],"Isotope.Group.ID",1)
+  all(rownames(Samples)==colnames(proteinData))
+  protein_UHZ <- ExpressionSet(proteinData,phenoData)
+  dr_UHZ <- ExpressionSet(drData,phenoData)
+  peptide_UHZ <- ExpressionSet(peptideData,phenoData)
+  mapping_wb_UHZ <- Mapping
+  mapping_UHZ <- peptideData[1:5]
+  save(protein_UHZ,dr_UHZ,peptide_UHZ,mapping_UHZ,mapping_wb_UHZ,file="UHZ.rda")
+}
+
 zwk();
 zyq();
 udp();
+uhz();

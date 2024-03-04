@@ -4,7 +4,8 @@ function setup()
 {
   module load python/3.8
   source ~/rds/public_databases/software/py38/bin/activate
-  for f in .gitignore README.md autoencoder.md caprion.ini caprion.ipynb caprion.R docs.sh gwas2.md mkdocs.yml utils;do cp -r -p ../pilot/${f} pilot; done
+  for f in .gitignore README.md autoencoder.md caprion.ini caprion.ipynb caprion.R docs.sh gwas2.md mkdocs.yml utils
+  do cp -r -p ../pilot/${f} pilot; done
 }
 
 setup

@@ -127,3 +127,16 @@ zwk();
 zyq();
 udp();
 uhz();
+
+contrast <- function()
+{
+  load("ZWK.rda")
+  load("ZYQ.rda")
+  load("UDP.rda")
+  load("UHZ.rda")
+  options(width=200)
+  subset(mapping_ZWK[1:6],grepl("1433B",Protein)) %>% select(-Protein)
+  subset(mapping_ZYQ,grepl("1433B",Protein)) %>% select(-Protein)
+  subset(mapping_UDP,grepl("1433B",Protein)) %>% select(-Protein)
+  subset(mapping_UHZ,grepl("1433B",Protein)) %>% select(-Protein)
+}

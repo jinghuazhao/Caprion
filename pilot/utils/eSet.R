@@ -118,9 +118,9 @@ uhz <- function()
   protein_UHZ <- ExpressionSet(proteinData,phenoData)
   dr_UHZ <- ExpressionSet(drData,phenoData)
   peptide_UHZ <- ExpressionSet(peptideData,phenoData)
-  mapping_wb_UHZ <- Mapping
-  mapping_UHZ <- peptideData[1:5]
-  save(protein_UHZ,dr_UHZ,peptide_UHZ,mapping_UHZ,mapping_wb_UHZ,file="UHZ.rda")
+  mapping_UHZ <- Mapping %>%
+                 left_join(peptideData[1:5])
+  save(protein_UHZ,dr_UHZ,peptide_UHZ,mapping_UHZ,file="UHZ.rda")
 }
 
 zwk();

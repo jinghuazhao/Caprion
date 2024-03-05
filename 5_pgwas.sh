@@ -218,3 +218,8 @@ function caprion_ZYQ_classification()
     quantro_qtest(combat_edata,"_combat")
   '
 }
+
+function UHZ()
+{
+  cut -d, -f1-4 ~/Caprion/pre_qc_data/batch4/UHZ_Comp_Raw_Int_20240118_v1.csv > ~/Caprion/pilot/data4/mapping_UHZ.csv
+}

@@ -219,7 +219,26 @@ function caprion_ZYQ_classification()
   '
 }
 
-function UHZ()
+function protein_mapping()
 {
+  cut -d, -f1-5 ~/Caprion/pre_qc_data/batch2/CAM1184-ZYQ/ZYQ_Comp_Neq1_Norm_Int_20200812.csv > ~/Caprion/pilot/data2/mapping_ZYQ.csv
+  cut -f1-5 ~/Caprion/pre_qc_data/batch3/CAM1184-UDP/UDP_R1_Comp_Neq1_Raw_Int_Clean_20210412.txt > ~/Caprion/pilot/data3/mapping_UDP1.txt
+  cut -f1-5 ~/Caprion/pre_qc_data/batch3/CAM1184-UDP/UDP_R2_Comp_Neq1_Raw_Int_Clean_20210412.txt > ~/Caprion/pilot/data3/mapping_UDP2.txt
+  cut -f1-5 ~/Caprion/pre_qc_data/batch3/CAM1184-UDP/UDP_R3_Comp_Neq1_Raw_Int_Clean_20210412.txt > ~/Caprion/pilot/data3/mapping_UDP3.txt
   cut -d, -f1-4 ~/Caprion/pre_qc_data/batch4/UHZ_Comp_Raw_Int_20240118_v1.csv > ~/Caprion/pilot/data4/mapping_UHZ.csv
+  Rscript -e '
+    library(dplyr)
+    library(VennDiagram)
+    ZWK <- read.csv("~/Caprion/pre_qc_data/pilot/ZWK_protein_list.csv") %>% pull(Protein)
+    ZYQ <- read.csv("~/Caprion/pre_qc_data/batch2/CAM1184-ZYQ/ZYQ_protein_list.csv") %>% pull(Protein)
+    UDP <- read.csv("~/Caprion/pre_qc_data/batch3/CAM1184-UDP/UDP_protein_list.csv") %>% pull(Protein)
+    load("~/Caprion/pilot/UHZ.rda")
+    UHZ <- rownames(exprs(protein_UHZ))
+    proteins <- list(ZWK,ZYQ,UDP,UHZ) %>%
+                setNames(c("ZWK","ZYQ","UDP","UHZ"))
+    venn.diagram(x=proteins,filename="~/Caprion/analysis/work/proteins.png",
+                 disable.logging=TRUE, imagetype="png", output=TRUE,
+                 height=12, width=12, units="cm", resolution=500,
+                 fill=c("yellow","purple","green","blue"), otation.degree = 0)
+)'
 }

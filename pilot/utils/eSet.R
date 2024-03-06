@@ -5,6 +5,7 @@ caprion <- Sys.getenv("caprion")
 caprion <- ifelse(caprion=="",".",caprion)
 
 suppressMessages(library(Biobase))
+suppressMessages(library(dplyr))
 suppressMessages(library(openxlsx))
 suppressMessages(library(pQTLtools))
 
@@ -29,7 +30,7 @@ zwk <- function()
   protein_ZWK <- ExpressionSet(proteinData,phenoData)
   dr_ZWK <- ExpressionSet(drData,phenoData)
   peptide_ZWK <- ExpressionSet(peptideData,phenoData)
-  mapping_ZWK <- rawIGs
+  mapping_ZWK <- rawIGs[1:6]
   save(protein_ZWK,dr_ZWK,peptide_ZWK,mapping_ZWK,file="ZWK.rda")
 }
 
@@ -55,7 +56,8 @@ zyq <- function()
   protein_ZYQ <- ExpressionSet(proteinData,phenoData)
   dr_ZYQ <- ExpressionSet(drData,phenoData)
   peptide_ZYQ <- ExpressionSet(peptideData,phenoData)
-  mapping_ZYQ <- Mapping
+  mapping_ZYQ <- Mapping %>%
+                 left_join(read.csv("data2/mapping_ZYQ.csv"))
   save(protein_ZYQ,dr_ZYQ,peptide_ZYQ,mapping_ZYQ,file="ZYQ.rda")
 }
 
@@ -89,11 +91,15 @@ udp <- function()
   protein_UDP <- make_ExpressionSet(proteinData,phenoData,experimentData=experimentData)
   dr_UDP <- make_ExpressionSet(drData,phenoData,experimentData=experimentData)
   peptide_UDP <- make_ExpressionSet(peptideData,phenoData,experimentData=experimentData)
-  mapping_UDP <- Mapping
+  mapping_UDP <- Mapping %>%
+                 left_join(read.delim("data3/mapping_UDP1.txt")) %>%
+                 left_join(read.delim("data3/mapping_UDP2.txt")) %>%
+                 left_join(read.delim("data3/mapping_UDP3.txt"))
   save(protein_UDP,dr_UDP,peptide_UDP,mapping_UDP,file="UDP.rda")
 }
 
 uhz <- function()
+# batch4, code UHZ
 {
   dir <- "~/Caprion/pre_qc_data/batch4"
   wb <- file.path(dir,"UHZ_EDR_20240214_v1_Final.xlsx")
@@ -135,8 +141,10 @@ contrast <- function()
   load("UDP.rda")
   load("UHZ.rda")
   options(width=200)
-  subset(mapping_ZWK[1:6],grepl("1433B",Protein)) %>% select(-Protein)
-  subset(mapping_ZYQ,grepl("1433B",Protein)) %>% select(-Protein)
-  subset(mapping_UDP,grepl("1433B",Protein)) %>% select(-Protein)
-  subset(mapping_UHZ,grepl("1433B",Protein)) %>% select(-Protein)
+  sink("~/Caprion/analysis/work/1433B.txt")
+  print(subset(mapping_ZWK,grepl("1433B",Protein)) %>% select(-Protein) %>% arrange(Isotope.Group.ID),row.names=FALSE)
+  print(subset(mapping_ZYQ,grepl("1433B",Protein)) %>% select(-Protein) %>% arrange(Isotope.Group.ID),row.names=FALSE)
+  print(subset(mapping_UDP,grepl("1433B",Protein)) %>% select(-Protein) %>% arrange(Isotope.Group.ID),row.names=FALSE)
+  print(subset(mapping_UHZ,grepl("1433B",Protein)) %>% select(-Protein) %>% arrange(Isotope.Group.ID),row.names=FALSE)
+  sink()
 }

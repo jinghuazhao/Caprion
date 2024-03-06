@@ -240,5 +240,11 @@ function protein_mapping()
                  disable.logging=TRUE, imagetype="png", output=TRUE,
                  height=12, width=12, units="cm", resolution=500,
                  fill=c("yellow","purple","green","blue"), otation.degree = 0)
+    ZWK_ZYQ_UDP <- c(ZWK,ZYQ,UDP) %>% unique
+    d1 <- setdiff(UHZ,ZWK_ZYQ_UDP) %>% sort %>% unique
+    d2 <- setdiff(ZWK_ZYQ_UDP,UHZ) %>% sort %>% unique
+    d1d2 <- cbind(d1,d2)
+    d1d2[(length(d2)+1):length(d1),2] <- NA
+    write.csv(d1d2,file="~/Caprion/analysis/work/diffs.csv")
 )'
 }

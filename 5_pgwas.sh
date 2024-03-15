@@ -225,7 +225,7 @@ function protein_mapping()
   cut -f1-5 ~/Caprion/pre_qc_data/batch3/CAM1184-UDP/UDP_R1_Comp_Neq1_Raw_Int_Clean_20210412.txt > ~/Caprion/pilot/data3/mapping_UDP1.txt
   cut -f1-5 ~/Caprion/pre_qc_data/batch3/CAM1184-UDP/UDP_R2_Comp_Neq1_Raw_Int_Clean_20210412.txt > ~/Caprion/pilot/data3/mapping_UDP2.txt
   cut -f1-5 ~/Caprion/pre_qc_data/batch3/CAM1184-UDP/UDP_R3_Comp_Neq1_Raw_Int_Clean_20210412.txt > ~/Caprion/pilot/data3/mapping_UDP3.txt
-  cut -d, -f1-4 ~/Caprion/pre_qc_data/batch4/UHZ_Comp_Raw_Int_20240118_v1.csv > ~/Caprion/pilot/data4/mapping_UHZ.csv
+  cut -d, -f1-5 ~/Caprion/pre_qc_data/batch4/UHZ_Comp_Raw_Int_20240118_v1.csv > ~/Caprion/pilot/data4/mapping_UHZ.csv
   Rscript -e '
     library(dplyr)
     library(VennDiagram)

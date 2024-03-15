@@ -152,12 +152,15 @@ END
 R --no-save <<END
 peptideMapping <- function(protein,batch="ZWK",mm=5)
 {
-  library(Biostrings)
-  library(dplyr)
   accession <- subset(pQTLdata::caprion,grepl(protein,Protein))[["Accession"]]
   load(paste0("~/Caprion/pilot/",batch,".rda"))
   mapping <- subset(get(paste0("mapping_",batch)),grepl(protein,Protein))[1:6] %>%
-             setNames(c("Isotope.Group.ID","Protein","Modified.Peptide.Sequence", "Monoisotopic.mz", "Max.Isotope.Time.Centroid", "Charge"))
+             setNames(c("Isotope.Group.ID",
+                        "Protein",
+                        "Modified.Peptide.Sequence",
+                        "Monoisotopic.mz",
+                        "Max.Isotope.Time.Centroid",
+                        "Charge"))
   mps <- mapping %>%
             group_by(Modified.Peptide.Sequence) %>%
             reframe(n_isotope=dplyr::n(),
@@ -178,8 +181,58 @@ peptideMapping <- function(protein,batch="ZWK",mm=5)
   invisible(list(accession=accession,sequence=sequence,mapping=mapping,mps=mps,positions=t(mp)))
 }
 
+peptideAssociationPlot <- function(protein)
+{
+  png(paste0(f,"/",protein,"-peptides.png"),width=10,height=12,res=300,unit="in")
+  par(mar=c(25,3,1,1))
+  mapping <- get(protein)
+  dseq <- CM[n+1]/length(mapping$sequence)
+  positions <- with(mapping,positions) %>%
+               data.frame %>%
+               mutate(Modified.Peptide.Sequence=rownames(.),ID=1:nrow(.))
+  disp <- 50
+  f <- file.path(analysis,"peptide",protein)
+  signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
+  cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
+              mutate(pos=g2d$CM[SNPChrom]+SNPPos) %>%
+              left_join(mapping$mapping,by=c('isotope'='Isotope.Group.ID')) %>%
+              left_join(positions)
+  g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
+  n <- with(g2d, n-1)
+  CM <- with(g2d, CM)
+  chr <- cistrans[["SNPChrom"]]
+  chr[chr == "X"] <- 23
+  chr[chr == "Y"] <- 24
+  pos <- CM[chr] + cistrans[["SNPPos"]]
+  xy <- xy.coords(c(0, CM), seq(0, max(cistrans[["log10p"]]),length.out=n+3))
+  par(xaxt = "n", yaxt = "n")
+  plot(xy$x, xy$y, type = "n", ann = FALSE, axes = FALSE)
+  par(xaxt = "s", yaxt = "s", xpd = TRUE)
+  axis(2, pos = 2, cex = 1.2)
+  title(xlab="", ylab = "-log10(P)", line = 2)
+  for (x in 1:n) {
+       segments(CM[x], 0, CM[x], max(cistrans[["log10p"]]), col = "black")
+       text(ifelse(x == 1, CM[x+1]/2, (CM[x+1] + CM[x])/2),
+            0, pos = 1, offset = 0.5, xy(x), cex = 1.2)
+
+  }
+  segments(0, 0, CM[n+1], 0)
+  for(iso in unique(cistrans[["isotope"]]))
+  {
+    d <- filter(cistrans,isotope==iso)
+    c <- d[["SNPChrom"]]
+    p <- CM[c]+d[["SNPPos"]]
+    points(p, d[["log10p"]], cex = 0.8, col = ifelse(d[["cis"]], "red", d[["ID"]]), pch = 19)
+    lines(c(as.integer(d[["start"]])*dseq, as.integer(d[["end"]])*dseq), -c(d[["ID"]]+disp, d[["ID"]]+disp), col = d[["ID"]], lwd = 4)
+  }
+  dev.off()
+}
+
 options(width=200)
 analysis <- "~/Caprion/analysis"
+library(Biostrings)
+library(dplyr)
+library(gap)
 A1BG <- peptideMapping("A1BG")
 sink("A1BG")
 knitr::kable(A1BG$mps[1:3],"markdown")
@@ -193,40 +246,27 @@ EPCR <- peptideMapping("EPCR",mm=1)
 ERAP2 <- peptideMapping("ERAP2",mm=1)
 PROC <- peptideMapping("PROC",mm=1)
 
-peptideAssociationPlot <- function(protein)
-{
-  g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
-  f <- file.path(analysis,"peptide",protein)
-  signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
-  cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
-              mutate(pos=g2d$CM[SNPChrom]+SNPPos)
-# xy <- xy.coords(c(0, max(cistrans[["log10p"]])), c(0, g2d$CM))
-# plot(xy$x, xy$y, type = "n", ann = FALSE, axes = FALSE)
-  png(paste0(f,"/",protein,"-peptides.png"),width=10,height=12,res=300,unit="in")
-  opar <- par()
-  par(mfrow=c(2,1))
-  par(xaxt="n")
-  plot(cistrans$pos,cistrans$log10p,col=c("blue","red")[cistrans$cis+1],pch=19,xlab="Chromosome",ylab="-log10(P)")
-  par(xaxt="s")
-# axis(1,g2d$CM[cistrans[["SNPChrom"]]],labels=cistrans[["SNPChrom"]])
-  axis(1,g2d$CM,labels=1:length(g2d$CM))
-  mapping <- get(protein)
-  peptides <- mapping$positions
-  segment_data <- as.data.frame(peptides) %>%
-                  mutate(ID = 1:nrow(peptides))
-  xmin <- min(unlist(segment_data[["start"]]))
-  xmax <- max(unlist(segment_data[["end"]]))
-  plot(segment_data$start,segment_data$ID,type="n",ylab="Segment",xlab="Peptide position",xlim=c(xmin,xmax))
-  for (i in 1:nrow(segment_data)) {
-    lines(c(segment_data$start[i], segment_data$end[i]), c(segment_data$ID[i], segment_data$ID[i]), col = segment_data$ID[[i]], lwd = 4)
-  }
-  par(opar)
-  dev.off()
-}
-
+opar <- par()
 peptideAssociationPlot("APOB")
 peptideAssociationPlot("EPCR")
 peptideAssociationPlot("ERAP2")
 peptideAssociationPlot("PROC")
+par(opar)
 
 END
+
+legacy <- function()
+{
+  plot(cistrans$pos,cistrans$log10p,col=c("blue","red")[cistrans$cis+1],pch=19,xlab="Chromosome",ylab="-log10(P)")
+  axis(1,g2d$CM[cistrans[["SNPChrom"]]],labels=cistrans[["SNPChrom"]])
+  x.start <- unlist(positions[,"start"])*dseq
+  x.end <- unlist(positions[,"end"])*dseq
+  segment_data <- as.data.frame(positions) %>%
+                  mutate(ID = 1:nrow(positions))
+  xmin <- min(unlist(segment_data[["start"]]))
+  xmax <- max(unlist(segment_data[["end"]]))
+  segments(0, 0, 0, max(cistrans[["log10p"]]))
+  for (i in 1:nrow(segment_data)) {
+    lines(c(x.start[i], x.end[i]), -c(segment_data$ID[i]+disp, segment_data$ID[i]+disp), col = segment_data$ID[[i]], lwd = 4)
+  }
+}

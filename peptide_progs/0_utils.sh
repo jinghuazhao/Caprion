@@ -183,23 +183,23 @@ peptideMapping <- function(protein,batch="ZWK",mm=5)
 
 peptideAssociationPlot <- function(protein)
 {
+  f <- file.path(analysis,"peptide",protein)
   png(paste0(f,"/",protein,"-peptides.png"),width=10,height=12,res=300,unit="in")
   par(mar=c(25,3,1,1))
   mapping <- get(protein)
+  g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
+  n <- with(g2d, n-1)
+  CM <- with(g2d, CM)
   dseq <- CM[n+1]/length(mapping$sequence)
   positions <- with(mapping,positions) %>%
                data.frame %>%
                mutate(Modified.Peptide.Sequence=rownames(.),ID=1:nrow(.))
   disp <- 50
-  f <- file.path(analysis,"peptide",protein)
   signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
   cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
               mutate(pos=g2d$CM[SNPChrom]+SNPPos) %>%
               left_join(mapping$mapping,by=c('isotope'='Isotope.Group.ID')) %>%
               left_join(positions)
-  g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
-  n <- with(g2d, n-1)
-  CM <- with(g2d, CM)
   chr <- cistrans[["SNPChrom"]]
   chr[chr == "X"] <- 23
   chr[chr == "Y"] <- 24
@@ -222,8 +222,9 @@ peptideAssociationPlot <- function(protein)
     d <- filter(cistrans,isotope==iso)
     c <- d[["SNPChrom"]]
     p <- CM[c]+d[["SNPPos"]]
-    points(p, d[["log10p"]], cex = 0.8, col = ifelse(d[["cis"]], "red", d[["ID"]]), pch = 19)
+    points(p, d[["log10p"]], cex = 0.8, col = ifelse(d[["cis"]], "red", "blue"), pch = 19)
     lines(c(as.integer(d[["start"]])*dseq, as.integer(d[["end"]])*dseq), -c(d[["ID"]]+disp, d[["ID"]]+disp), col = d[["ID"]], lwd = 4)
+    segments((as.integer(d[["start"]])+as.integer(d[["end"]]))*dseq/2,-(d[["ID"]]+disp), p, d[["log10p"]],col=d[["ID"]])
   }
   dev.off()
 }
@@ -246,27 +247,9 @@ EPCR <- peptideMapping("EPCR",mm=1)
 ERAP2 <- peptideMapping("ERAP2",mm=1)
 PROC <- peptideMapping("PROC",mm=1)
 
-opar <- par()
 peptideAssociationPlot("APOB")
 peptideAssociationPlot("EPCR")
 peptideAssociationPlot("ERAP2")
 peptideAssociationPlot("PROC")
-par(opar)
 
 END
-
-legacy <- function()
-{
-  plot(cistrans$pos,cistrans$log10p,col=c("blue","red")[cistrans$cis+1],pch=19,xlab="Chromosome",ylab="-log10(P)")
-  axis(1,g2d$CM[cistrans[["SNPChrom"]]],labels=cistrans[["SNPChrom"]])
-  x.start <- unlist(positions[,"start"])*dseq
-  x.end <- unlist(positions[,"end"])*dseq
-  segment_data <- as.data.frame(positions) %>%
-                  mutate(ID = 1:nrow(positions))
-  xmin <- min(unlist(segment_data[["start"]]))
-  xmax <- max(unlist(segment_data[["end"]]))
-  segments(0, 0, 0, max(cistrans[["log10p"]]))
-  for (i in 1:nrow(segment_data)) {
-    lines(c(x.start[i], x.end[i]), -c(segment_data$ID[i]+disp, segment_data$ID[i]+disp), col = segment_data$ID[[i]], lwd = 4)
-  }
-}

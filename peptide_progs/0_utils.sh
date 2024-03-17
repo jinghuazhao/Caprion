@@ -184,7 +184,7 @@ peptideMapping <- function(protein,batch="ZWK",mm=5)
 peptideAssociationPlot <- function(protein)
 {
   f <- file.path(analysis,"peptide",protein)
-  png(paste0(f,"/",protein,"-peptides.png"),width=10,height=12,res=300,unit="in")
+  png(paste0(f,"/",protein,"-peptides.png"),width=9,height=12,res=300,unit="in")
   par(mar=c(30,3,1,1))
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
@@ -222,7 +222,7 @@ peptideAssociationPlot <- function(protein)
   for (x in 1:n) {
        segments(CM[x], 0, CM[x], max(cistrans[["log10p"]]), col = "black")
        text(ifelse(x == 1, CM[x+1]/2, (CM[x+1] + CM[x])/2),
-            0, pos = 1, offset = 0.5, xy(x), cex = 1.2)
+            0, pos = 1, offset = 0.5, xy(x), cex = 0.8)
 
   }
   segments(0, 0, CM[n+1], 0)

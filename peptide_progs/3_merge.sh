@@ -25,6 +25,13 @@ cat <<'EOL'> ${root}/${protein}-step1.sb
 #SBATCH --output=ROOT/sentinels/slurm/_step1_%A_%a.o
 #SBATCH --error=ROOT/sentinels/slurm/_step1_%A_%a.e
 
+. /etc/profile.d/modules.sh
+module purge
+module load rhel7/default-ccl
+module load ceuadmin/readline/8.0
+
+module load ceuadmin/R/latest
+
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
 export isotope=$(head -1 ${root}/${protein}.pheno | awk -vn=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
@@ -130,6 +137,9 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 . /etc/profile.d/modules.sh
 module purge
 module load rhel7/default-ccl
+module load ceuadmin/readline/8.0
+
+module load ceuadmin/R/latest
 module load gcc/9 texlive
 
 export TMPDIR=${HPC_WORK}/work
@@ -305,6 +315,9 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 . /etc/profile.d/modules.sh
 module purge
 module load rhel7/default-ccl
+module load ceuadmin/readline/8.0
+
+module load ceuadmin/R/latest
 module load gcc/9 texlive
 
 export TMPDIR=${HPC_WORK}/work

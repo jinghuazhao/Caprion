@@ -185,7 +185,7 @@ peptideAssociationPlot <- function(protein)
 {
   f <- file.path(analysis,"peptide",protein)
   png(paste0(f,"/",protein,"-peptides.png"),width=10,height=12,res=300,unit="in")
-  par(mar=c(25,3,1,1))
+  par(mar=c(30,3,1,1))
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
   n <- with(g2d, n-1)
@@ -194,7 +194,7 @@ peptideAssociationPlot <- function(protein)
   positions <- with(mapping,positions) %>%
                data.frame %>%
                mutate(Modified.Peptide.Sequence=rownames(.),ID=1:nrow(.))
-  disp <- 50
+  disp <- 70
   signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
   cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
               mutate(pos=g2d$CM[SNPChrom]+SNPPos) %>%
@@ -210,13 +210,6 @@ peptideAssociationPlot <- function(protein)
   par(xaxt = "s", yaxt = "s", xpd = TRUE)
   axis(2, pos = 2, cex = 1.2)
   title(xlab="", ylab = "-log10(P)", line = 2)
-  for (x in 1:n) {
-       segments(CM[x], 0, CM[x], max(cistrans[["log10p"]]), col = "black")
-       text(ifelse(x == 1, CM[x+1]/2, (CM[x+1] + CM[x])/2),
-            0, pos = 1, offset = 0.5, xy(x), cex = 1.2)
-
-  }
-  segments(0, 0, CM[n+1], 0)
   for(iso in unique(cistrans[["isotope"]]))
   {
     d <- filter(cistrans,isotope==iso)
@@ -226,6 +219,13 @@ peptideAssociationPlot <- function(protein)
     lines(c(as.integer(d[["start"]])*dseq, as.integer(d[["end"]])*dseq), -c(d[["ID"]]+disp, d[["ID"]]+disp), col = d[["ID"]], lwd = 4)
     segments((as.integer(d[["start"]])+as.integer(d[["end"]]))*dseq/2,-(d[["ID"]]+disp), p, d[["log10p"]],col=d[["ID"]])
   }
+  for (x in 1:n) {
+       segments(CM[x], 0, CM[x], max(cistrans[["log10p"]]), col = "black")
+       text(ifelse(x == 1, CM[x+1]/2, (CM[x+1] + CM[x])/2),
+            0, pos = 1, offset = 0.5, xy(x), cex = 1.2)
+
+  }
+  segments(0, 0, CM[n+1], 0)
   dev.off()
 }
 

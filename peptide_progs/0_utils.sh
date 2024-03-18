@@ -6,6 +6,8 @@ export analysis=~/Caprion/analysis
 export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
 
+module load ceuadmin/R
+
 # All signals
 cat <(cat ${analysis}/peptide/*/*signals | head -1 | paste <(echo protein) -) \
     <(ls ${analysis}/peptide/*/*signals | xargs -l basename -s .signals | \
@@ -181,11 +183,18 @@ peptideMapping <- function(protein,batch="ZWK",mm=5)
   invisible(list(accession=accession,sequence=sequence,mapping=mapping,mps=mps,positions=t(mp)))
 }
 
-peptideAssociationPlot <- function(protein)
+peptideAssociationPlot <- function(protein,suffix="_dr")
 {
-  f <- file.path(analysis,"peptide",protein)
+  f <- file.path(analysis,"peptide",protein,suffix="_dr")
   png(paste0(f,"/",protein,"-peptides.png"),width=9,height=12,res=300,unit="in")
-  par(mar=c(30,3,1,1))
+  par(mfrow=c(2,1),mar=c(12,3,1,1))
+  input <- paste0("~/Caprion/analysis/METAL",suffix,"/gz/",protein,suffix,".txt.gz")
+  annotation <- paste0("~/Caprion/analysis/METAL",suffix,"/vep/",protein,suffix,".txt")
+  reference <- file.path(find.package("pQTLtools"),"turboman",
+                                      "turboman_hg19_reference_data.rda")
+  pvalue_sign <- 5e-8
+  plot_title <- protein
+  pQTLtools::turboman(input, annotation, reference, pvalue_sign, plot_title)
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
   n <- with(g2d, n-1)
@@ -193,7 +202,7 @@ peptideAssociationPlot <- function(protein)
   dseq <- CM[n+1]/length(mapping$sequence)
   positions <- with(mapping,positions) %>%
                data.frame %>%
-               mutate(Modified.Peptide.Sequence=rownames(.),ID=1:nrow(.))
+               mutate(Modified.Peptide.Sequence=rownames(.),ID=(1:nrow(.))/3)
   disp <- 70
   signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
   cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
@@ -216,7 +225,7 @@ peptideAssociationPlot <- function(protein)
     c <- d[["SNPChrom"]]
     p <- CM[c]+d[["SNPPos"]]
     points(p, d[["log10p"]], cex = 0.8, col = ifelse(d[["cis"]], "red", "blue"), pch = 19)
-    lines(c(as.integer(d[["start"]])*dseq, as.integer(d[["end"]])*dseq), -c(d[["ID"]]+disp, d[["ID"]]+disp), col = d[["ID"]], lwd = 4)
+    lines(c(as.integer(d[["start"]]), as.integer(d[["end"]]))*dseq, -c(d[["ID"]]+disp, d[["ID"]]+disp), col = d[["ID"]], lwd = 4)
     segments((as.integer(d[["start"]])+as.integer(d[["end"]]))*dseq/2,-(d[["ID"]]+disp), p, d[["log10p"]],col=d[["ID"]])
   }
   for (x in 1:n) {
@@ -253,3 +262,19 @@ peptideAssociationPlot("ERAP2")
 peptideAssociationPlot("PROC")
 
 END
+
+function gz()
+{
+  if [ ! -d ${analysis}/METAL${suffix}/gz ]; then mkdir ${analysis}/METAL${suffix}/gz; fi
+  ls ${analysis}/METAL${suffix}/*-1.tbl.gz | \
+  xargs -l basename -s -1.tbl.gz | \
+  parallel -j10 -C' ' '
+  echo {}
+  (
+    echo chromsome position log_pvalue beta se
+    gunzip -c ${analysis}/METAL${suffix}/{}-1.tbl.gz | \
+    awk "{print \$1,\$2,-\$12,\$10,\$11}"
+  ) | \
+  bgzip -f > ${analysis}/METAL${suffix}/gz/{}.txt.gz
+  '
+}

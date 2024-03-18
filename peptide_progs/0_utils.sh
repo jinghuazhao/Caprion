@@ -187,7 +187,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
 {
   f <- file.path(analysis,"peptide",protein)
   png(paste0(f,"/",protein,"-peptides.png"),width=9,height=12,res=300,unit="in")
-  par(mfrow=c(2,1),mar=c(12,3,1,1))
+  par(mfrow=c(2,1))
   input <- paste0("~/Caprion/analysis/METAL",suffix,"/gz/",protein,suffix,".txt.gz")
   annotation <- paste0("~/Caprion/analysis/METAL",suffix,"/vep/",protein,suffix,".txt")
   reference <- file.path(find.package("pQTLtools"),"turboman",
@@ -195,6 +195,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   pvalue_sign <- 5e-8
   plot_title <- protein
   pQTLtools::turboman(input, annotation, reference, pvalue_sign, plot_title)
+  par(mar=c(12,3,1,1))
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
   n <- with(g2d, n-1)
@@ -226,7 +227,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
     p <- CM[c]+d[["SNPPos"]]
     points(p, d[["log10p"]], cex = 0.8, col = ifelse(d[["cis"]], "red", "blue"), pch = 19)
     lines(c(as.integer(d[["start"]]), as.integer(d[["end"]]))*dseq, -c(d[["ID"]]+disp, d[["ID"]]+disp), col = d[["ID"]], lwd = 4)
-    segments((as.integer(d[["start"]])+as.integer(d[["end"]]))*dseq/2,-(d[["ID"]]+disp), p, d[["log10p"]],col=d[["ID"]])
+    segments((as.integer(d[["start"]])+as.integer(d[["end"]]))*dseq/2,-(d[["ID"]]+disp), p, d[["log10p"]]*1,col=d[["ID"]])
   }
   for (x in 1:n) {
        segments(CM[x], 0, CM[x], max(cistrans[["log10p"]]), col = "black")

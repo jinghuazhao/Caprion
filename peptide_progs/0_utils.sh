@@ -151,6 +151,22 @@ END
 #' Note protein name could be with/without _HUMAN suffix & readDNAStringSet
 #' It remains to implement a sequence plot with signals
 
+function gz()
+{
+  if [ ! -d ${analysis}/METAL${suffix}/gz ]; then mkdir ${analysis}/METAL${suffix}/gz; fi
+  ls ${analysis}/METAL${suffix}/*-1.tbl.gz | \
+  xargs -l basename -s -1.tbl.gz | \
+  parallel -j10 -C' ' '
+  echo {}
+  (
+    echo chromsome position log_pvalue beta se
+    gunzip -c ${analysis}/METAL${suffix}/{}-1.tbl.gz | \
+    awk "{print \$1,\$2,-\$12,\$10,\$11}"
+  ) | \
+  bgzip -f > ${analysis}/METAL${suffix}/gz/{}.txt.gz
+  '
+}
+
 R --no-save <<END
 peptideMapping <- function(protein,batch="ZWK",mm=5)
 {
@@ -195,7 +211,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   pvalue_sign <- 5e-8
   plot_title <- protein
   pQTLtools::turboman(input, annotation, reference, pvalue_sign, plot_title)
-  par(mar=c(12,3,1,1))
+  par(mar=c(14,3,1,1))
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
   n <- with(g2d, n-1)
@@ -203,8 +219,8 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   dseq <- CM[n+1]/length(mapping$sequence)
   positions <- with(mapping,positions) %>%
                data.frame %>%
-               mutate(Modified.Peptide.Sequence=rownames(.),ID=(1:nrow(.))/3)
-  disp <- 70
+               mutate(Modified.Peptide.Sequence=rownames(.),ID=(1:nrow(.))/2)
+  disp <- 85
   signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
   cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
               mutate(pos=g2d$CM[SNPChrom]+SNPPos) %>%
@@ -219,7 +235,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   plot(xy$x, xy$y, type = "n", ann = FALSE, axes = FALSE)
   par(xaxt = "s", yaxt = "s", xpd = TRUE)
   axis(2, pos = 2, cex = 1.2)
-  title(xlab="", ylab = "-log10(P)", line = 2)
+  title(xlab="", ylab = "-log10(P)", line = 1)
   for(iso in unique(cistrans[["isotope"]]))
   {
     d <- filter(cistrans,isotope==iso)
@@ -263,19 +279,3 @@ peptideAssociationPlot("ERAP2")
 peptideAssociationPlot("PROC")
 
 END
-
-function gz()
-{
-  if [ ! -d ${analysis}/METAL${suffix}/gz ]; then mkdir ${analysis}/METAL${suffix}/gz; fi
-  ls ${analysis}/METAL${suffix}/*-1.tbl.gz | \
-  xargs -l basename -s -1.tbl.gz | \
-  parallel -j10 -C' ' '
-  echo {}
-  (
-    echo chromsome position log_pvalue beta se
-    gunzip -c ${analysis}/METAL${suffix}/{}-1.tbl.gz | \
-    awk "{print \$1,\$2,-\$12,\$10,\$11}"
-  ) | \
-  bgzip -f > ${analysis}/METAL${suffix}/gz/{}.txt.gz
-  '
-}

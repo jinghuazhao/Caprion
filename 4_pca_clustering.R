@@ -51,7 +51,8 @@ pca_clustering <- function(prot)
   table(with(mc,classification))
   if(!interactive()) {
      pdf(paste0("~/Caprion/analysis/work/pca_clustering",suffix,".pdf"))
-     scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]), color=c("blue","red")[mc$classification], main="Plot of the PC1, PC2 and PC3", pch=16)
+     scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]), color=c("blue","red")[mc$classification],
+                                  main="Plot of the PC1, PC2 and PC3", pch=16)
      legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
      screeplot(pca, npcs=20, type="lines", main="PCA screeplot")
      plot(with(pca,rotation)[,1:2],pch=19,cex=0.6)
@@ -138,7 +139,8 @@ normalise <- function(prot)
               left_join(data.frame(with(pca,x)[,1:3],caprion_id=rownames(with(pca,x)))) %>%
               rename(ppc1=PC1,ppc2=PC2,ppc3=PC3)
   detach(pca_km_mc)
-  id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,by="caprion_id")
+  id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,
+                          by="caprion_id")
   pheno <- select(OmicsMap,identifier,Affymetrix_gwasQC_bl,caprion_id) %>%
            merge(eigenvec,by.x="Affymetrix_gwasQC_bl",by.y="X.FID",all.x=TRUE) %>%
            left_join(grouping) %>%
@@ -147,7 +149,8 @@ normalise <- function(prot)
            mutate(batch=match(substr(sampleNames(protein_all),1,3),c("ZWK","ZYQ","UDP")))
   write.table(select(pheno,Affymetrix_gwasQC_bl),file=paste0("~/Caprion/analysis/work/caprion",suffix,".id"),
               quote=FALSE,row.names=FALSE,col.names=FALSE)
-  caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl)[c("FID","IID",ids,"batch",dates,covars,pcs,PCS,xnames)]
+  caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,
+                          IID=Affymetrix_gwasQC_bl)[c("FID","IID",ids,"batch",dates,covars,pcs,PCS,xnames)]
   names(caprion_pheno) <- gsub("^X([0-9])","\\1",names(caprion_pheno))
   write.table(caprion_pheno,file=paste0("~/Caprion/analysis/work/caprion",suffix,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
 

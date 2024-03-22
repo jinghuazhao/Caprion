@@ -16,14 +16,18 @@ suppressMessages(library(visNetwork))
 load("~/Caprion/pilot/ZWK.rda")
 load("~/Caprion/pilot/ZYQ.rda")
 load("~/Caprion/pilot/UDP.rda")
+load("~/Caprion/pilot/UHZ.rda")
 
 protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
-               Biobase::combine(protein_UDP)
+               Biobase::combine(protein_UDP) %>%
+               Biobase::combine(protein_UHZ)
 peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
-               Biobase::combine(peptide_UDP)
+               Biobase::combine(peptide_UDP) %>%
+               Biobase::combine(peptide_UHZ)
 
 protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
-                  Biobase::combine(dr_UDP)
+                  Biobase::combine(dr_UDP) %>%
+                  Biobase::combine(dr_UHZ)
 save(protein_all,protein_dr_all,peptide_all,file=file.path("~/Caprion/analysis/work/es.rda"))
 
 fcheck <- function(es)

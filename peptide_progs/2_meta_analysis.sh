@@ -84,6 +84,12 @@ cat << 'EOL' > ${root}/${protein}-METAL.sb
 #SBATCH --error=PROTEIN-METAL_%A_%a.e
 #SBATCH --export ALL
 
+. /etc/profile.d/modules.sh
+module purge
+module load rhel7/default-ccl
+module load ceuadmin/R/latest
+module load gcc/9 texlive
+
 export TMPDIR=${HPC_WORK}/work
 export rt=ROOT/METAL
 

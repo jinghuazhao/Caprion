@@ -10,6 +10,7 @@ suppressMessages(library(GeneNet))
 suppressMessages(library(igraph))
 suppressMessages(library(RCy3))
 suppressMessages(library(Rgraphviz))
+suppressMessages(library(sva))
 suppressMessages(library(VennDiagram))
 suppressMessages(library(visNetwork))
 
@@ -29,6 +30,19 @@ protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
                   Biobase::combine(dr_UDP) %>%
                   Biobase::combine(dr_UHZ)
 save(protein_all,protein_dr_all,peptide_all,file=file.path("~/Caprion/analysis/work/es.rda"))
+
+col <- exprs(protein_all)%>%colnames
+col_ZWK <- grepl("ZWK",col)
+col_ZYQ <- grepl("ZYQ",col)
+col_UDP <- grepl("UDP",col)
+col_UHZ <- grepl("UHZ",col)
+col[col_ZWK] <- 1
+col[col_ZYQ] <- 2
+col[col_UDP] <- 3
+col[col_UHZ] <- 4
+edata_batch <- list(edata=exprs(protein_all),batch=as.integer(col))
+with(edata_batch,matboxplot(t(edata),groupFactor=batch, ylab="Protein measurement"))
+combat_edata1 <- with(edata_batch,ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE))
 
 fcheck <- function(es)
 {

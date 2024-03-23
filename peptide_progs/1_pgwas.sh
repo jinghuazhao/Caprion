@@ -106,7 +106,7 @@ cat << 'EOL' > ${sbatch}
 #!/usr/bin/bash
 
 #SBATCH --account PETERS-SL3-CPU
-#SBATCH --partition cclake
+#SBATCH --partition icelake-himem
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 #SBATCH --job-name=PROTEIN
@@ -116,7 +116,9 @@ cat << 'EOL' > ${sbatch}
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-ccl
+module load rhel7/default-icl
+module load R/4.3.1-icelake
+module load gcc/9 texlive
 
 export protein=PROTEIN
 export TMPDIR=${HPC_WORK}/work
@@ -133,7 +135,7 @@ function fastLR()
   export root=${analysis}/peptide/${protein}/${protein}
   ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
              --sample ${pilot}/work/caprion.sample \
-             --keep ${pilot}/work/caprion-${batch}.id --geno 0.1 --maf 0.001 \
+             --keep ${pilot}/work/caprion-${batch}.id --geno 0.1 --maf 0.0 \
              --fastGWA-lr \
              --pheno ${root}.mpheno --mpheno ${col} \
              --threads 10 \
@@ -141,7 +143,7 @@ function fastLR()
 
   ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
              --sample ${pilot}/work/caprion.sample \
-             --keep ${pilot}/work/chrX-${batch}.id --geno 0.1 --maf 0.001 \
+             --keep ${pilot}/work/chrX-${batch}.id --geno 0.1 --maf 0.0 \
              --fastGWA-lr --model-only \
              --pheno ${root}.mpheno --mpheno ${col} \
              --threads 10 \
@@ -177,7 +179,7 @@ export varlist=${pilot}/work/caprion.varlist
 module load gcc/9
 # only those with pQTLs:
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in $(echo $(seq ${n_with_signals} | grep -v -w -f <(sed 's/, /\n/g' benchmark.lst)))
+for i in $(echo $(seq ${n_with_signals} | grep -w -f <(sed 's/, /\n/g' benchmark2.lst)))
 do
   export signal_index=${i}
   export signal_list=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]' | grep -f - -n -w ${signals} | cut -d':' -f1)
@@ -189,7 +191,7 @@ done
 
 # all proteins:
 # for i in $(seq 987)
-\ for i in $(seq ${n_with_signals})
+# for i in $(seq ${n_with_signals})
 # 79 proteins have errors since they took longer than 12hrs to finish:
 # for i in $(grep error ${analysis}/peptide/*/*.e | sed 's|/|\t|g' | cut -f7 | grep -n -w -f - ${pilot}/work/caprion.varlist | cut -d':' -f1)
 # Some batches contain no data

@@ -28,8 +28,6 @@ cat <<'EOL'> ${root}/${protein}-step1.sb
 . /etc/profile.d/modules.sh
 module purge
 module load rhel7/default-ccl
-module load ceuadmin/readline/8.0
-
 module load ceuadmin/R/latest
 
 export TMPDIR=${HPC_WORK}/work
@@ -137,8 +135,6 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 . /etc/profile.d/modules.sh
 module purge
 module load rhel7/default-ccl
-module load ceuadmin/readline/8.0
-
 module load ceuadmin/R/latest
 module load gcc/9 texlive
 
@@ -315,8 +311,6 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 . /etc/profile.d/modules.sh
 module purge
 module load rhel7/default-ccl
-module load ceuadmin/readline/8.0
-
 module load ceuadmin/R/latest
 module load gcc/9 texlive
 

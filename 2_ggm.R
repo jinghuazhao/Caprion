@@ -28,9 +28,6 @@ protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
                   Biobase::combine(dr_UDP)
 save(protein_all,protein_dr_all,peptide_all,file="~/work/es.rda")
 
-prot3 <- subset(protein_all,!featureNames(protein_all)%in%featureNames(protein_UHZ))
-comm_all <- subset(protein_all,!featureNames(protein_all)%in%featureNames(prot3))
-
 protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
                Biobase::combine(protein_UDP) %>%
                Biobase::combine(protein_UHZ)
@@ -42,21 +39,32 @@ protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
                   Biobase::combine(dr_UHZ)
 save(protein_all,protein_dr_all,peptide_all,file="~/es.rda")
 
-prot4 <- subset(protein_all,featureNames(protein_all)%in%featureNames(comm_all))
+load("~/work/es.rda")
+prot3 <- subset(protein_all,!featureNames(protein_all)%in%featureNames(protein_UHZ))
+ZYQ.na <- paste(c("BROX","CT027","GHRL","PSB6"),"_HUMAN",sep="")
+UDP.na <- paste(c("BROX","NCF2","SEM7A"),"_HUMAN",sep="")
+comm_all <- subset(protein_all,!featureNames(protein_all)%in%featureNames(prot3))
+load("~/es.rda")
+prot4 <- subset(protein_all,featureNames(protein_all)%in%featureNames(comm_all) &
+                           !featureNames(protein_all)%in%c(ZYQ.na,UDP.na))
 edata <- prot4[,!is.na(apply(exprs(prot4),2,sum))]
-col <- colnames(edata)
-col_ZWK <- grepl("ZWK",col)
-col_ZYQ <- grepl("ZYQ",col)
-col_UDP <- grepl("UDP",col)
-col_UHZ <- grepl("UHZ",col)
-col[col_ZWK] <- 1
-col[col_ZYQ] <- 2
-col[col_UDP] <- 3
-col[col_UHZ] <- 4
+coln <- colnames(edata)
+coln_ZWK <- grepl("ZWK",coln)
+coln_ZYQ <- grepl("ZYQ",coln)
+coln_UDP <- grepl("UDP",coln)
+coln_UHZ <- grepl("UHZ",coln)
+coln[coln_ZWK] <- 1
+coln[coln_ZYQ] <- 2
+coln[coln_UDP] <- 3
+coln[coln_UHZ] <- 4
 
-edata_batch <- list(edata,batch=col)
-with(edata_batch,matboxplot(edata,groupFactor=batch, ylab="Protein measurement"))
-combat_edata1 <- with(edata_batch,ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE))
+png("~/work/matboxplot.png",width=10,height=8,units="in",res=300)
+par(cex=0.8,pch=19)
+matboxplot(edata,groupFactor=col, ylab="Protein measurement")
+dev.off()
+png("~/work/combat.png",width=10,height=8,units="in",res=300)
+combat_edata1 <- ComBat(dat=edata, batch=coln, mod=NULL, par.prior=TRUE, prior.plots=TRUE, ref.batch=3)
+dev.off()
 
 fcheck <- function(es)
 {

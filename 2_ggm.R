@@ -60,7 +60,7 @@ coln[coln_UHZ] <- 4
 
 png("~/work/matboxplot.png",width=10,height=8,units="in",res=300)
 par(cex=0.8,pch=19)
-matboxplot(edata,groupFactor=col, ylab="Protein measurement")
+matboxplot(edata,groupFactor=coln, ylab="Protein measurement")
 dev.off()
 png("~/work/matdensity.png",width=10,height=8,units="in",res=300)
 matdensity(edata, coln, xlab = " ", ylab = "density", ylim=c(0,2),

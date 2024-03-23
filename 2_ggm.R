@@ -68,7 +68,38 @@ matdensity(edata, coln, xlab = " ", ylab = "density", ylim=c(0,2),
 legend('top', c("ZWK", "ZYQ", "UDP", "UHZ"), col = c(1, 2, 3, 4), lty = 1, lwd = 3)
 dev.off()
 png("~/work/combat.png",width=10,height=8,units="in",res=300)
-combat_edata1 <- ComBat(dat=edata, batch=coln, mod=NULL, par.prior=TRUE, prior.plots=TRUE, ref.batch=3)
+combat_edata <- ComBat(dat=edata, batch=coln, mod=NULL, par.prior=TRUE, prior.plots=TRUE, ref.batch=3)
+dev.off()
+
+quantro_qtest  <- function(dat)
+{
+   qtest <- quantro(dat,groupFactor=coln)
+   print(anova(qtest))
+   print(quantroStat(qtest))
+   qsp <- quantroStatPerm(qtest)
+   print(quantroPvalPerm(qtest))
+   matboxplot(dat, groupFactor=coln, cex=0.4, pch=19, xaxt="n",
+              main="Boxplots of all proteins", xlab="Sample", ylab="Abundance level",
+              brewer.n=8, brewer.name="Dark2")
+   legend('ZWK', c("ZYQ", "UDP","UHZ"), col = 1:4, lty = 1, lwd = 3)
+   q2q3 <- apply(dat,2,quantile,c(0.25,0.75))
+   outside <- dat<q2q3[1,]|dat>q2q3[2,]
+   outside_prot <- apply(outside+0,1,sum,na.rm=TRUE)
+   outside_id <- apply(outside+0,2,sum,na.rm=TRUE)
+   upper <- dat>q2q3[2,]
+   upper_prot <- apply(upper+0,1,sum,na.rm=TRUE)
+   upper_id <- apply(upper+0,2,sum,na.rm=TRUE)
+   lower <- dat<q2q3[1,]
+   lower_prot <- apply(lower+0,1,sum,na.rm=TRUE)
+   lower_id <- apply(lower+0,2,sum,na.rm=TRUE)
+   x <- list(outside,outside_prot,outside_id,upper,upper_prot,upper_id,lower,lower_prot,lower_id)
+   setNames(x,c("outside","outside_prot","outside_id","upper","upper_prot","upper_id","lower","lower_prot","lower_id"))
+}
+
+png("~/work/quantro.png",width=10,height=8,units="in",res=300)
+par(mfrow=c(2,1))
+z <- quantro_qtest(edata)
+n <- quantro_qtest(combat_edata)
 dev.off()
 
 fcheck <- function(es)

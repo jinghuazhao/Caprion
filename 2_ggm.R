@@ -10,6 +10,7 @@ suppressMessages(library(GeneNet))
 suppressMessages(library(igraph))
 suppressMessages(library(RCy3))
 suppressMessages(library(Rgraphviz))
+suppressMessages(library(quantro))
 suppressMessages(library(sva))
 suppressMessages(library(VennDiagram))
 suppressMessages(library(visNetwork))
@@ -20,18 +21,30 @@ load("~/Caprion/pilot/UDP.rda")
 load("~/Caprion/pilot/UHZ.rda")
 
 protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
+               Biobase::combine(protein_UDP)
+peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
+               Biobase::combine(peptide_UDP)
+protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
+                  Biobase::combine(dr_UDP)
+save(protein_all,protein_dr_all,peptide_all,file=file.path("~/work/es.rda"))
+
+prot3 <- subset(protein_all,!featureNames(protein_all)%in%featureNames(protein_UHZ))
+comm <- setdiff(featureNames(protein_all),featureNames(prot3))
+comm_all <- subset(protein_all,!featureNames(protein_all)%in%featureNames(prot3))
+
+protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
                Biobase::combine(protein_UDP) %>%
                Biobase::combine(protein_UHZ)
 peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
                Biobase::combine(peptide_UDP) %>%
                Biobase::combine(peptide_UHZ)
-
 protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
                   Biobase::combine(dr_UDP) %>%
                   Biobase::combine(dr_UHZ)
-save(protein_all,protein_dr_all,peptide_all,file=file.path("~/Caprion/analysis/work/es.rda"))
+save(protein_all,protein_dr_all,peptide_all,file="~/Caprion/analysis/work/es.rda")
 
-col <- exprs(protein_all)%>%colnames
+prot4 <- subset(protein_all,featureNames(protein_all)%in%featureNames(comm_all))
+col <- exprs(prot4)%>%colnames
 col_ZWK <- grepl("ZWK",col)
 col_ZYQ <- grepl("ZYQ",col)
 col_UDP <- grepl("UDP",col)
@@ -40,7 +53,8 @@ col[col_ZWK] <- 1
 col[col_ZYQ] <- 2
 col[col_UDP] <- 3
 col[col_UHZ] <- 4
-edata_batch <- list(edata=exprs(protein_all),batch=as.integer(col))
+
+edata_batch <- list(edata=exprs(prot4),batch=as.integer(col))
 with(edata_batch,matboxplot(t(edata),groupFactor=batch, ylab="Protein measurement"))
 combat_edata1 <- with(edata_batch,ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE))
 

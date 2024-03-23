@@ -26,10 +26,9 @@ peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
                Biobase::combine(peptide_UDP)
 protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
                   Biobase::combine(dr_UDP)
-save(protein_all,protein_dr_all,peptide_all,file=file.path("~/work/es.rda"))
+save(protein_all,protein_dr_all,peptide_all,file="~/work/es.rda")
 
 prot3 <- subset(protein_all,!featureNames(protein_all)%in%featureNames(protein_UHZ))
-comm <- setdiff(featureNames(protein_all),featureNames(prot3))
 comm_all <- subset(protein_all,!featureNames(protein_all)%in%featureNames(prot3))
 
 protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
@@ -41,10 +40,11 @@ peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
 protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
                   Biobase::combine(dr_UDP) %>%
                   Biobase::combine(dr_UHZ)
-save(protein_all,protein_dr_all,peptide_all,file="~/Caprion/analysis/work/es.rda")
+save(protein_all,protein_dr_all,peptide_all,file="~/es.rda")
 
 prot4 <- subset(protein_all,featureNames(protein_all)%in%featureNames(comm_all))
-col <- exprs(prot4)%>%colnames
+edata <- prot4[,!is.na(apply(exprs(prot4),2,sum))]
+col <- colnames(edata)
 col_ZWK <- grepl("ZWK",col)
 col_ZYQ <- grepl("ZYQ",col)
 col_UDP <- grepl("UDP",col)
@@ -54,8 +54,8 @@ col[col_ZYQ] <- 2
 col[col_UDP] <- 3
 col[col_UHZ] <- 4
 
-edata_batch <- list(edata=exprs(prot4),batch=as.integer(col))
-with(edata_batch,matboxplot(t(edata),groupFactor=batch, ylab="Protein measurement"))
+edata_batch <- list(edata,batch=col)
+with(edata_batch,matboxplot(edata,groupFactor=batch, ylab="Protein measurement"))
 combat_edata1 <- with(edata_batch,ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE))
 
 fcheck <- function(es)

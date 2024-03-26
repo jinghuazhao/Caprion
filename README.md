@@ -50,7 +50,7 @@ The phenotypic data is generated in accordance with the double transformations a
 
 ## 5. pGWAS[^pGWAS]
 
-The bgen files were extracted from a list of all samples, the variant IDs of which were replaced when RSid is missing (.).
+The bgen files were extracted from a list of all samples, the variant IDs of which were for all RSids to allow for multiallelic loci.
 
 The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH lines.
 

@@ -119,6 +119,7 @@ module purge
 module load rhel7/default-icl
 module load R/4.3.1-icelake
 module load gcc/9 texlive
+module load samtools/1.13/gcc/zwxn7ug3
 
 export protein=PROTEIN
 export TMPDIR=${HPC_WORK}/work
@@ -135,6 +136,7 @@ function fastLR()
   export root=${analysis}/peptide/${protein}/${protein}
   ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
              --sample ${pilot}/work/caprion.sample \
+             --extract ${analysis}/bgen/caprion.snplist \
              --keep ${pilot}/work/caprion-${batch}.id --geno 0.1 --maf 0.0 \
              --fastGWA-lr \
              --pheno ${root}.mpheno --mpheno ${col} \
@@ -143,6 +145,7 @@ function fastLR()
 
   ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
              --sample ${pilot}/work/caprion.sample \
+             --extract ${analysis}/bgen/caprion.snplist \
              --keep ${pilot}/work/chrX-${batch}.id --geno 0.1 --maf 0.0 \
              --fastGWA-lr --model-only \
              --pheno ${root}.mpheno --mpheno ${col} \
@@ -151,6 +154,7 @@ function fastLR()
 
   ${fastGWA} --bgen ${pilot}/work/chrX.bgen \
              --sample ${pilot}/work/chrX.sample \
+             --extract ${analysis}/bgen/caprion.snplist \
              --keep ${pilot}/work/chrX-${batch}.id \
              --load-model ${root}-${batch}-${peptide}-model.fastGWA \
              --extract ${pilot}/work/chrX.snplist --geno 0.1 \

@@ -11,11 +11,11 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_freq_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_freq_%A_%a.e
 
-##SBATCH --job-name=_fastGWA
-##SBATCH --array=1-987
-##SBATCH --mem=28800
-##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis//_pgwas_fastLR_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
+#SBATCH --job-name=_fastGWA
+#SBATCH --array=1-987
+#SBATCH --mem=28800
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/pgwas_dr/slurm/_pgwas_fastLR_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/pgwas_dr/slurm/_pgwas_fastLR_%A_%a.e
 
 ##SBATCH --job-name=_qqmanhattan
 ##SBATCH --array=1-987
@@ -48,6 +48,7 @@ export interval=${HPC_WORK}/data/interval
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
+module load samtools/1.13/gcc/zwxn7ug3
 
 function bgen()
 {

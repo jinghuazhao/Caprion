@@ -65,6 +65,9 @@ function X()
   cut -d' ' -f1 ${analysis}/work/caprion${suffix}-1.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-1.id
   cut -d' ' -f1 ${analysis}/work/caprion${suffix}-2.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-2.id
   cut -d' ' -f1 ${analysis}/work/caprion${suffix}-3.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-3.id
+  (
+    parallel -C' ' 'cat ${analysis}/bgen/chr{}.snplist' ::: $(echo {1..22} X)
+  ) > ${analysis}/bgen/caprion.snplist
 }
 
 function lrlist()

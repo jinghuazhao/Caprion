@@ -5,16 +5,16 @@
 #SBATCH --mem=50000
 #SBATCH --time=12:00:00
 
-#SBATCH --job-name=_bgen
-#SBATCH --array=1-22
-#SBATCH --mem=50000
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_maf_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_maf_%A_%a.e
+##SBATCH --job-name=_freq
+##SBATCH --array=1-22
+##SBATCH --mem=50000
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_freq_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_freq_%A_%a.e
 
 ##SBATCH --job-name=_fastGWA
 ##SBATCH --array=1-987
 ##SBATCH --mem=28800
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.o
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis//_pgwas_fastLR_%A_%a.o
 ##SBATCH --error=/rds/user/jhz22/hpc-work/work/_pgwas_fastLR_%A_%a.e
 
 ##SBATCH --job-name=_qqmanhattan
@@ -59,15 +59,13 @@ function bgen()
   bgenix -g ${analysis}/bgen/${chr}.bgen -index -clobber
 }
 
-function maf()
+function freq()
 {
   export chr=chr${SLURM_ARRAY_TASK_ID}
   plink2 --bgen ${analysis}/bgen/${chr}.bgen ref-unknown --sample ${analysis}/bgen/${chr}.sample \
          --freq \
-         --maf 0.001 \
          --out ${analysis}/bgen/${chr}-freq
-  sed '1d' ${analysis}/bgen/${chr}-freq.afreq | \
-  cut -f2 > ${analysis}/bgen/${chr}.snplist
+  awk 'NR>1 && $5>=0.001 && $5<=0.999' ${analysis}/bgen/${chr}-freq.afreq > ${analysis}/bgen/${chr}.snplist
 
 }
 
@@ -79,6 +77,7 @@ function fastLR()
   export batch=${1}
   gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
            --sample ${analysis}/work/caprion.sample \
+           --extract ${analysis}/bgen/caprion.snplist \
            --keep ${analysis}/work/caprion${suffix}-${batch}.id \
            --fastGWA-lr \
            --pheno ${analysis}/work/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
@@ -87,6 +86,7 @@ function fastLR()
 
   gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
            --sample ${analysis}/work/caprion.sample \
+           --extract ${analysis}/bgen/caprion.snplist \
            --keep ${analysis}/work/chrX${suffix}-${batch}.id \
            --fastGWA-lr --model-only \
            --pheno ${analysis}/work/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
@@ -95,6 +95,7 @@ function fastLR()
 
   gcta-1.9 --bgen ${analysis}/work/chrX.bgen \
            --sample ${analysis}/work/chrX.sample \
+           --extract ${analysis}/bgen/caprion.snplist \
            --keep ${analysis}/work/chrX${suffix}-${batch}$.id \
            --load-model ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}.fastGWA \
            --extract ${analysis}/work/chrX.snplist --geno 0.1 \
@@ -450,10 +451,10 @@ function miamiplot2()
 }
 
 #bgen
-maf
-#fastLR 1
-#fastLR 2
-#fastLR 3
+#freq
+fastLR 1
+fastLR 2
+fastLR 3
 #qqmanhattan
 #lz
 #pairs_p

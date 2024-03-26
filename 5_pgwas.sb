@@ -76,30 +76,29 @@ function fastLR()
   export phenocol=${SLURM_ARRAY_TASK_ID}
   export phenoname=$(awk 'NR==ENVIRON["phenocol"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)
   export batch=${1}
-  gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
-           --sample ${analysis}/work/caprion.sample \
+  gcta-1.9 --mbgen ${analysis}/bgen/caprion.bgenlist \
+           --sample ${analysis}/bgen/caprion.sample \
            --extract ${analysis}/bgen/caprion.snplist \
-           --keep ${analysis}/work/caprion${suffix}-${batch}.id \
+           --keep ${analysis}/output/caprion${suffix}-${batch}.id \
            --fastGWA-lr \
-           --pheno ${analysis}/work/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
+           --pheno ${analysis}/output/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
            --threads 10 \
            --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}
 
-  gcta-1.9 --mbgen ${analysis}/work/caprion.bgenlist \
-           --sample ${analysis}/work/caprion.sample \
+  gcta-1.9 --mbgen ${analysis}/bgen/caprion.bgenlist \
+           --sample ${analysis}/bgen/caprion.sample \
            --extract ${analysis}/bgen/caprion.snplist \
-           --keep ${analysis}/work/chrX${suffix}-${batch}.id \
+           --keep ${analysis}/output/chrX${suffix}-${batch}.id \
            --fastGWA-lr --model-only \
-           --pheno ${analysis}/work/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
+           --pheno ${analysis}/output/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
            --threads 10 \
            --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}
 
-  gcta-1.9 --bgen ${analysis}/work/chrX.bgen \
-           --sample ${analysis}/work/chrX.sample \
-           --extract ${analysis}/bgen/caprion.snplist \
-           --keep ${analysis}/work/chrX${suffix}-${batch}$.id \
+  gcta-1.9 --bgen ${analysis}/bgen/chrX.bgen \
+           --sample ${analysis}/bgen/chrX.sample \
+           --extract ${analysis}/bgen/caprion.snplist --geno 0.1 \
+           --keep ${analysis}/output/chrX${suffix}-${batch}$.id \
            --load-model ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}.fastGWA \
-           --extract ${analysis}/work/chrX.snplist --geno 0.1 \
            --threads 10 \
            --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}-chrX
   bgzip -f ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}.fastGWA

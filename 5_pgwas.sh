@@ -11,60 +11,64 @@ export TMPDIR=${HPC_WORK}/work
 
 function fastGWAsetup()
 {
-  cut -f1 ${analysis}/work/caprion${suffix}.pheno | sed '1d' > ${analysis}/work/caprion${suffix}.id
-  paste -d' ' ${analysis}/work/caprion${suffix}.id ${analysis}/work/caprion${suffix}.id | grep -v NA > ${analysis}/work/caprion${suffix}.id2
-# echo ${caprion}/work/chr{1..22}.bgen | tr ' ' '\n' > ${analysis}/work/caprion${suffix}.bgenlist
+  cut -f1 ${analysis}/output/caprion${suffix}.pheno | sed '1d' > ${analysis}/output/caprion${suffix}.id
+  paste -d' ' ${analysis}/output/caprion${suffix}.id ${analysis}/output/caprion${suffix}.id | \
+  grep -v NA > ${analysis}/output/caprion${suffix}.id2
   seq 22 | \
-  xargs -I {} echo ${analysis}/work/chr{}.bgen > ${analysis}/work/caprion.bgenlist
+  xargs -I {} echo ${analysis}/bgen/chr{}.bgen > ${analysis}/bgen/caprion.bgenlist
+  echo ${analysis}/bgen/chr{1..22}.bgen | tr ' ' '\n' > ${analysis}/bgen/caprion${suffix}.bgenlist
   cat <(head -2 ${caprion}/data/merged_imputation.sample | awk '{if(NR==1) {print $0, "sex"} else {print $0, "D"}}') \
-      <(grep -f ${analysis}/work/caprion${suffix}.id -w ${caprion}/data/merged_imputation.sample | \
+      <(grep -f ${analysis}/output/caprion${suffix}.id -w ${caprion}/data/merged_imputation.sample | \
         cut -d' ' -f1-2 | join - ${caprion}/data/merged_imputation.missing | \
-        awk '{print $0, "NA"}') > ${analysis}/work/caprion.sample
-  gcta-1.9 --bfile ${caprion}/data/merged_imputation --keep ${analysis}/work/caprion${suffix}.id2 \
-           --make-grm --out ${analysis}/work/caprion${suffix} --threads 10
+        awk '{print $0, "NA"}') > ${analysis}/bgen/caprion.sample
+  gcta-1.9 --bfile ${caprion}/data/merged_imputation --keep ${analysis}/output/caprion${suffix}.id2 \
+           --make-grm --out ${analysis}/output/caprion${suffix} --threads 10
 # a sparse GRM from SNP data
-  gcta-1.9 --grm ${analysis}/work/caprion${suffix} --make-bK-sparse 0.05 --out ${analysis}/work/caprion-spgrm${suffix} --threads 10
+  gcta-1.9 --grm ${analysis}/output/caprion${suffix} --make-bK-sparse 0.05 --out ${analysis}/output/caprion-spgrm${suffix} --threads 10
 # fastGWA mixed model
-  cut -f1-38 --complement ${analysis}/work/caprion${suffix}.pheno | \
+  cut -f1-38 --complement ${analysis}/output/caprion${suffix}.pheno | \
   head -1 | \
-  tr '\t' '\n' > ${analysis}/work/caprion${suffix}.varlist
-  sed -i '1d' ${analysis}/work/caprion${suffix}-1.pheno
-  sed -i '1d' ${analysis}/work/caprion${suffix}-2.pheno
-  sed -i '1d' ${analysis}/work/caprion${suffix}-3.pheno
+  tr '\t' '\n' > ${analysis}/output/caprion${suffix}.varlist
+  sed -i '1d' ${caprion}/output/caprion.pheno
+  sed -i '1d' ${analysis}/output/caprion${suffix}-1.pheno
+  sed -i '1d' ${analysis}/output/caprion${suffix}-2.pheno
+  sed -i '1d' ${analysis}/output/caprion${suffix}-3.pheno
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/qqmanhattanlz/slurm ]; then mkdir ~/Caprion/analysis/METAL${suffix}/qqmanhattanlz/slurm; fi
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/pairs/slurm ]; then mkdir -p ~/Caprion/analysis/METAL${suffix}/pairs/slurm; fi
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/miamiplot/slurm ]; then mkdir -p ~/Caprion/analysis/METAL${suffix}/miamiplot/slurm; fi
 }
-# slow but unnecessary
-# gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --sample ${caprion}/work/caprion.sample --make-grm --out ${caprion}/work/caprion --threads 10
-# sed -i '1d' ${caprion}/work/caprion.pheno
+# slow and unnecessary
+gcta-1.9 --mbgen ${analysis}/bgen/caprion.bgenlist --sample ${analysis}/bgen/caprion.sample \
+         --make-grm --out ${analysis}/bgen/caprion --threads 10
 
-# sbatch --export=ALL ${caprion}/5_pgwas.sb
+# sbatch --export=ALL ${analysis}/5_pgwas.sb
 
 function X()
 {
-  awk '!/NA/{print $1"_"$1}' ${analysis}/work/caprion${sufix}.id | \
-  bcftools view -S - --force-samples ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o ${analysis}/work/INTERVAL-X.vcf.gz
-  bcftools query -l ${analysis}/work/INTERVAL-X.vcf.gz | \
+  awk '!/NA/{print $1"_"$1}' ${analysis}/output/caprion${sufix}.id | \
+  bcftools view -S - --force-samples ${X}/INTERVAL_X_imp_ann_filt_v2.vcf.gz -O z -o ${analysis}/output/INTERVAL-X.vcf.gz
+  bcftools query -l ${analysis}/output/INTERVAL-X.vcf.gz | \
   tr '_' ' ' | \
   awk '{print $1}' | \
-  bcftools reheader -s - ${analysis}/work/INTERVAL-X.vcf.gz -o ${analysis}/work/X.vcf.gz --threads 12
-  bcftools index -tf ${analysis}/work/X.vcf.gz
-  bcftools query -l ${analysis}/work/X.vcf.gz | awk '{print $1,$1}' > ${analysis}/work/chrX.idlist
-  bcftools query -f "%ID\n" ${analysis}/work/X.vcf.gz > ${analysis}/work/chrX.snplist
-  plink2 --vcf ${analysis}/work/X.vcf.gz --export bgen-1.2 bits=8 --double-id \
+  bcftools reheader -s - ${analysis}/output/INTERVAL-X.vcf.gz -o ${analysis}/output/X.vcf.gz --threads 12
+  bcftools index -tf ${analysis}/output/X.vcf.gz
+  bcftools query -l ${analysis}/output/X.vcf.gz | awk '{print $1,$1}' > ${analysis}/output/chrX.idlist
+  bcftools query -f "%ID\n" ${analysis}/output/X.vcf.gz > ${analysis}/output/chrX.snplist
+  plink2 --vcf ${analysis}/output/X.vcf.gz --export bgen-1.2 bits=8 --double-id \
          --set-all-var-ids @:#_\$1_\$2 --new-id-max-allele-len 680 \
          --out ${analysis}/bgen/chrX
   bgenix -g ${analysis}/bgen/chrX.bgen -index -clobber
   plink2 --bgen ${analysis}/bgen/chrX.bgen ref-unknown --sample ${analysis}/bgen/chrX.sample \
          --freq \
-         --maf 0.001 \
          --out ${analysis}/bgen/chrX-freq
   sed '1d' ${analysis}/bgen/chrX-freq.afreq | \
   cut -f2 > ${analysis}/bgen/chrX.snplist
-  cut -d' ' -f1 ${analysis}/work/caprion${suffix}-1.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-1.id
-  cut -d' ' -f1 ${analysis}/work/caprion${suffix}-2.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-2.id
-  cut -d' ' -f1 ${analysis}/work/caprion${suffix}-3.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-3.id
+  cut -d' ' -f1 ${analysis}/output/caprion${suffix}-1.id | grep -f - ${analysis}/output/chrX.idlist \
+     > ${analysis}/output/chrX${suffix}-1.id
+  cut -d' ' -f1 ${analysis}/output/caprion${suffix}-2.id | grep -f - ${analysis}/output/chrX.idlist \
+     > ${analysis}/output/chrX${suffix}-2.id
+  cut -d' ' -f1 ${analysis}/output/caprion${suffix}-3.id | grep -f - ${analysis}/output/chrX.idlist \
+     > ${analysis}/output/chrX${suffix}-3.id
   (
     parallel -C' ' 'cat ${analysis}/bgen/chr{}.snplist' ::: $(echo {1..22} X)
   ) > ${analysis}/bgen/caprion.snplist

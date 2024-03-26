@@ -1,3 +1,4 @@
+<a href="https://jinghuazhao.github.io/Caprion/"><img src="docs/qrcode.svg" align="right"></a>
 # Protein analysis
 
 ## workflow (experimental)

@@ -47,7 +47,7 @@ export interval=${HPC_WORK}/data/interval
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-icl
+module load rhel8/default-icl
 
 function bgen()
 {

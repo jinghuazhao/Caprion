@@ -8,8 +8,8 @@
 #SBATCH --job-name=_bgen
 #SBATCH --array=1-22
 #SBATCH --mem=50000
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_bgen_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_bgen_%A_%a.e
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_maf_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_maf_%A_%a.e
 
 ##SBATCH --job-name=_fastGWA
 ##SBATCH --array=1-987
@@ -57,6 +57,18 @@ function bgen()
          --set-all-var-ids @:#_\$1_\$2 --new-id-max-allele-len 680 \
          --out ${analysis}/bgen/${chr}
   bgenix -g ${analysis}/bgen/${chr}.bgen -index -clobber
+}
+
+function maf()
+{
+  export chr=chr${SLURM_ARRAY_TASK_ID}
+  plink2 --bgen ${analysis}/bgen/${chr}.bgen ref-unknown --sample ${analysis}/bgen/${chr}.sample \
+         --freq \
+         --maf 0.001 \
+         --out ${analysis}/bgen/${chr}-freq
+  sed '1d' ${analysis}/bgen/${chr}-freq.afreq | \
+  cut -f2 > ${analysis}/bgen/${chr}.snplist
+
 }
 
 function fastLR()
@@ -437,7 +449,8 @@ function miamiplot2()
   rm ${analysis}/work/${uniprot}-${prot}-phase?.dat.gz
 }
 
-bgen
+#bgen
+maf
 #fastLR 1
 #fastLR 2
 #fastLR 3

@@ -52,10 +52,16 @@ function X()
   bcftools index -tf ${analysis}/work/X.vcf.gz
   bcftools query -l ${analysis}/work/X.vcf.gz | awk '{print $1,$1}' > ${analysis}/work/chrX.idlist
   bcftools query -f "%ID\n" ${analysis}/work/X.vcf.gz > ${analysis}/work/chrX.snplist
-  plink2 --vcf ${analysis}/work/X.vcf.gz --export bgen-1.2 bits=8 --double-id --dosage-erase-threshold 0.001 \
-         --set-missing-var-ids @:#_\$r_\$a --new-id-max-allele-len 680 \
-         --out ${analysis}/work/chrX
-  bgenix -g ${analysis}/work/chrX.bgen -index -clobber
+  plink2 --vcf ${analysis}/work/X.vcf.gz --export bgen-1.2 bits=8 --double-id \
+         --set-all-var-ids @:#_\$1_\$2 --new-id-max-allele-len 680 \
+         --out ${analysis}/bgen/chrX
+  bgenix -g ${analysis}/bgen/chrX.bgen -index -clobber
+  plink2 --bgen ${analysis}/bgen/chrX.bgen ref-unknown --sample ${analysis}/bgen/chrX.sample \
+         --freq \
+         --maf 0.001 \
+         --out ${analysis}/bgen/chrX-freq
+  sed '1d' ${analysis}/bgen/chrX-freq.afreq | \
+  cut -f2 > ${analysis}/bgen/chrX.snplist
   cut -d' ' -f1 ${analysis}/work/caprion${suffix}-1.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-1.id
   cut -d' ' -f1 ${analysis}/work/caprion${suffix}-2.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-2.id
   cut -d' ' -f1 ${analysis}/work/caprion${suffix}-3.id | grep -f - ${analysis}/work/chrX.idlist > ${analysis}/work/chrX${suffix}-3.id

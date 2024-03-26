@@ -26,7 +26,7 @@ peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
                Biobase::combine(peptide_UDP)
 protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
                   Biobase::combine(dr_UDP)
-save(protein_all,protein_dr_all,peptide_all,file="~/work/es.rda")
+save(protein_all,protein_dr_all,peptide_all,file="~/Caprion/pilot/es.rda")
 
 protein_all <- Biobase::combine(protein_ZWK,protein_ZYQ) %>%
                Biobase::combine(protein_UDP) %>%
@@ -37,14 +37,14 @@ peptide_all <- Biobase::combine(peptide_ZWK,peptide_ZYQ) %>%
 protein_dr_all <- Biobase::combine(dr_ZWK,dr_ZYQ) %>%
                   Biobase::combine(dr_UDP) %>%
                   Biobase::combine(dr_UHZ)
-save(protein_all,protein_dr_all,peptide_all,file="~/es.rda")
+save(protein_all,protein_dr_all,peptide_all,file="~/Caprion/analysis/work/es.rda")
 
-load("~/work/es.rda")
+load("~/Caprion/pilot/work/es.rda")
 prot3 <- subset(protein_all,!featureNames(protein_all)%in%featureNames(protein_UHZ))
 ZYQ.na <- paste(c("BROX","CT027","GHRL","PSB6"),"_HUMAN",sep="")
 UDP.na <- paste(c("BROX","NCF2","SEM7A"),"_HUMAN",sep="")
 comm_all <- subset(protein_all,!featureNames(protein_all)%in%featureNames(prot3))
-load("~/es.rda")
+load("~/Caprion/analysis/work/es.rda")
 prot4 <- subset(protein_all,featureNames(protein_all)%in%featureNames(comm_all) &
                            !featureNames(protein_all)%in%c(ZYQ.na,UDP.na))
 edata <- prot4[,!is.na(apply(exprs(prot4),2,sum))]

@@ -1,6 +1,7 @@
 .git/
 .Rhistory
 .snakemake
+bgen/
 compare/
 HLA/
 IMGT2Seq

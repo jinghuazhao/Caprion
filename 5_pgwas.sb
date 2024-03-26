@@ -1,15 +1,15 @@
 #!/usr/bin/bash
 
 #SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake
-#SBATCH --mem=15000
+#SBATCH --partition=icelake-himem
+#SBATCH --mem=50000
 #SBATCH --time=12:00:00
 
-##SBATCH --job-name=_bgen
-##SBATCH --array=1-22
-##SBATCH --mem=50000
-##SBATCH --output=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.o
-##SBATCH --error=/rds/user/jhz22/hpc-work/work/_bgen_%A_%a.e
+#SBATCH --job-name=_bgen
+#SBATCH --array=1-22
+#SBATCH --mem=50000
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_bgen_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_bgen_%A_%a.e
 
 ##SBATCH --job-name=_fastGWA
 ##SBATCH --array=1-987
@@ -20,13 +20,13 @@
 ##SBATCH --job-name=_qqmanhattan
 ##SBATCH --array=1-987
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.o
-##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz//slurm/_qqmanhattan_%A_%a.e
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.e
 
-#SBATCH --job-name=_lz
-#SBATCH --array=1-987
-#SBATCH --mem 6800
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
+##SBATCH --job-name=_lz
+##SBATCH --array=1-987
+##SBATCH --mem 6800
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
 
 ##SBATCH --job-name=pairs
 ##SBATCH --array=1-987
@@ -47,16 +47,16 @@ export interval=${HPC_WORK}/data/interval
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-ccl
+module load rhel7/default-icl
 
 function bgen()
 {
   export chr=chr${SLURM_ARRAY_TASK_ID}
   plink2 --bgen ${interval}/${chr}.bgen ref-unknown --sample ${interval}/interval.sample --keep ${analysis}/work/caprion${suffix}.id2 \
-         --export bgen-1.2 bits=8 --dosage-erase-threshold 0.001 \
-         --set-missing-var-ids @:#_\$r_\$a --new-id-max-allele-len 680 \
-         --out ${analysis}/work/${chr}
-  bgenix -g ${analysis}/work/${chr}.bgen -index -clobber
+         --export bgen-1.2 bits=8 \
+         --set-all-var-ids @:#_\$1_\$2 --new-id-max-allele-len 680 \
+         --out ${analysis}/bgen/${chr}
+  bgenix -g ${analysis}/bgen/${chr}.bgen -index -clobber
 }
 
 function fastLR()
@@ -437,12 +437,12 @@ function miamiplot2()
   rm ${analysis}/work/${uniprot}-${prot}-phase?.dat.gz
 }
 
-#bgen
+bgen
 #fastLR 1
 #fastLR 2
 #fastLR 3
 #qqmanhattan
-lz
+#lz
 #pairs_p
 #miamiplot
 #miamiplot2

@@ -42,7 +42,7 @@ This can be finalised according to the Science paper.
 
 ## 4. PCA and clustering
 
-The groupings based on proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.
+The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.
 
 The PLINK2 has been consistent in the pilot studies, so `scale()` operaions can be used in the inverse normal transformations.
 

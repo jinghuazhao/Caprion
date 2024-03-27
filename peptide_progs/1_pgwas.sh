@@ -137,7 +137,7 @@ function fastLR()
   ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
              --sample ${pilot}/work/caprion.sample \
              --extract ${analysis}/bgen/caprion.snplist \
-             --keep ${pilot}/work/caprion-${batch}.id --geno 0.1 --maf 0.0 \
+             --keep ${pilot}/work/caprion-${batch}.id --geno 0.1 \
              --fastGWA-lr \
              --pheno ${root}.mpheno --mpheno ${col} \
              --threads 10 \
@@ -146,7 +146,7 @@ function fastLR()
   ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
              --sample ${pilot}/work/caprion.sample \
              --extract ${analysis}/bgen/caprion.snplist \
-             --keep ${pilot}/work/chrX-${batch}.id --geno 0.1 --maf 0.0 \
+             --keep ${pilot}/work/chrX-${batch}.id --geno 0.1 \
              --fastGWA-lr --model-only \
              --pheno ${root}.mpheno --mpheno ${col} \
              --threads 10 \

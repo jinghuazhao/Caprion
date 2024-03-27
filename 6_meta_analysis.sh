@@ -9,16 +9,22 @@ if [ ! -d ${analysis}/METAL${suffix} ]; then mkdir ${analysis}/METAL${suffix}; f
 function METAL_list()
 # build the complete list of files
 {
-  ls ${analysis}/pgwas${suffix}/caprion-?-*.fastGWA.gz | \
+  ls ${analysis}/pgwas${suffix}/caprion${suffix}-?-*.fastGWA.gz | \
   xargs -l basename -s .fastGWA.gz | \
-  awk -vdir=${analysis}/pgwas${suffix} -vOFS="\t" '{s=substr($1,9,1);p=$1;gsub("caprion-[0-9]-","",p);print s, p, dir"/"$1".fastGWA.gz"}' | \
+  awk -vdir=${analysis}/pgwas${suffix} -vOFS="\t" '
+  {
+     split($1,a,"-")
+     p=$1;
+     gsub("caprion-[0-9]-","",p)
+     print a[2], p, dir"/"$1".fastGWA.gz"
+  }' | \
   sort -k2,2 -k1,1n > ${analysis}/METAL${suffix}/METAL.list
 }
 
 function METAL_files()
 # generate individual METAL command files
 {
-  for p in $(cat ${analysis}/work/caprion${suffix}.varlist)
+  for p in $(cat ${analysis}/output/caprion${suffix}.varlist)
   do
   (
      echo SEPARATOR TAB
@@ -45,8 +51,8 @@ function METAL_files()
      echo GENOMICCONTROL OFF
      echo LOGPVALUE ON
      echo OUTFILE ${analysis}/METAL${suffix}/$p${suffix}- .tbl
-     awk '$2 == token {print "PROCESS", $3}' token=${p}${suffix} ${analysis}/METAL${suffix}/METAL.list
-     awk '$2 == token {print "PROCESS", $3}' token=${p}${suffix}-chrX ${analysis}/METAL${suffix}/METAL.list
+     awk '$2 == "caprion"ENVIRON["suffix"]"-"$1"-"token {print "PROCESS", $3}' token=${p} ${analysis}/METAL${suffix}/METAL.list
+     awk '$2 == "caprion"ENVIRON["suffix"]"-"$1"-"token {print "PROCESS", $3}' token=${p}-chrX ${analysis}/METAL${suffix}/METAL.list
      echo ANALYZE HETEROGENEITY
      echo CLEAR
   ) > ${analysis}/METAL${suffix}/${p}${suffix}.metal

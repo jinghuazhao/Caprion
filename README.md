@@ -101,7 +101,7 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
     Note that `docs.sh` copies `pilot/utils` directory of the pilot studies, so coding under that directory is preferable to avoid overwrite.
 
-    To accommodate filteredd results, a suffix "_dr" is applied when appropriate.
+    To accommodate filteredd results, a suffix "" or "_dr" is applied when appropriate.
 
 [^pGWAS]: Protein GWAS
     

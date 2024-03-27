@@ -66,7 +66,7 @@ function freq()
   plink2 --bgen ${analysis}/bgen/${chr}.bgen ref-unknown --sample ${analysis}/bgen/${chr}.sample \
          --freq \
          --out ${analysis}/bgen/${chr}-freq
-  awk 'NR>1 && $5>=0.001 && $5<=0.999' ${analysis}/bgen/${chr}-freq.afreq > ${analysis}/bgen/${chr}.snplist
+  awk 'NR>1 && $5>=0.001 && $5<=0.999 {print $2}' ${analysis}/bgen/${chr}-freq.afreq > ${analysis}/bgen/${chr}.snplist
 
 }
 
@@ -97,7 +97,7 @@ function fastLR()
   gcta-1.9 --bgen ${analysis}/bgen/chrX.bgen \
            --sample ${analysis}/bgen/chrX.sample \
            --extract ${analysis}/bgen/caprion.snplist --geno 0.1 \
-           --keep ${analysis}/output/chrX${suffix}-${batch}$.id \
+           --keep ${analysis}/output/chrX${suffix}-${batch}.id \
            --load-model ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}.fastGWA \
            --threads 10 \
            --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}-chrX

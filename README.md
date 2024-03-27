@@ -101,6 +101,8 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
     Note that `docs.sh` copies `pilot/utils` directory of the pilot studies, so coding under that directory is preferable to avoid overwrite.
 
+    To accommodate filteredd results, a suffix "_dr" is applied when appropriate.
+
 [^pGWAS]: Protein GWAS
     
     GCTA/fastGWA employs MAF>=0.001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.

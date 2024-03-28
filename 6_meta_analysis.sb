@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=_METAL
 #SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake-himem
+#SBATCH --partition=icelake-himem
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -10,6 +10,11 @@
 #SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/slurm/_metal_%A_%a.o
 #SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/slurm/_metal_%A_%a.e
 #SBATCH --export ALL
+
+. /etc/profile.d/modules.sh
+module purge
+module load rhel8/default-icl
+module load samtools/1.13/gcc/zwxn7ug3
 
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion

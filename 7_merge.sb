@@ -11,15 +11,15 @@
 #SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/sentinels/slurm/_merge_%A_%a.o
 #SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/sentinels/slurm/_merge_%A_%a.e
 
-export TMPDIR=${HPC_WORK}/work
-export analysis=~/Caprion/analysis
-export suffix=_dr
-export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)${suffix}
-
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
 module load R/4.3.1-icelake
+
+export TMPDIR=${HPC_WORK}/work
+export analysis=~/Caprion/analysis
+export suffix=_dr
+export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)${suffix}
 
 function setup()
 {

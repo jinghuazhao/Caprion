@@ -42,7 +42,7 @@ export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion/pilot
 export analysis=~/Caprion/analysis
 export suffix=_dr
-export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/work/caprion${suffix}.varlist)
+export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${analysis}/output/caprion${suffix}.varlist)
 export interval=${HPC_WORK}/data/interval
 
 . /etc/profile.d/modules.sh

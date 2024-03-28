@@ -22,6 +22,18 @@ module purge
 module load rhel7/default-ccl
 module load ceuadmin/readline/8.0
 
+function duplicates()
+{
+  parallel -j8 -C' ' '
+    echo chr{}
+    bgenix -g ${analysis}/bgen/chr{}.bgen -list | \
+    awk "NF==7" | \
+    awk "a[\$2]++>0 {print \$2}" > ${analysis}/bgen/chr{}.dup
+    bgenix -g ${analysis}/bgen/chr{}.bgen -list | \
+    grep -f ${analysis}/bgen/chr{}.dup -w - > ${analysis}/bgen/chr{}.duplist
+  ' ::: $(echo {1..22} X)
+}
+
 function pgwas()
 {
   export protein=${1}

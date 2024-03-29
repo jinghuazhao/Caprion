@@ -34,8 +34,8 @@ function METAL_files()
      echo TRACKPOSITIONS ON
      echo AVERAGEFREQ ON
      echo MINMAXFREQ ON
-     echo ADDFILTER AF1 ">=" 0.01
-     echo ADDFILTER AF1 "<=" 0.99
+     echo ADDFILTER AF1 ">=" 0.001
+     echo ADDFILTER AF1 "<=" 0.999
      echo MARKERLABEL SNP
      echo ALLELELABELS A1 A2
      echo EFFECTLABEL BETA
@@ -78,7 +78,7 @@ cat << 'EOL' > ${root}/${protein}-METAL.sb
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 #SBATCH --account PETERS-SL3-CPU
-#SBATCH --partition cclake-himem
+#SBATCH --partition icelake-himem
 #SBATCH --array=1-RUNS
 #SBATCH --output=PROTEIN-METAL_%A_%a.o
 #SBATCH --error=PROTEIN-METAL_%A_%a.e
@@ -86,9 +86,9 @@ cat << 'EOL' > ${root}/${protein}-METAL.sb
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-ccl
-module load ceuadmin/R/latest
-module load gcc/9 texlive
+module load rhel7/default-icl
+module load ceuadmin/R/4.3.3-icelake
+module load samtools/1.13/gcc/zwxn7ug3
 
 export TMPDIR=${HPC_WORK}/work
 export rt=ROOT/METAL
@@ -135,7 +135,7 @@ export signals=${analysis}/work/caprion${suffix}.signals
 
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in $(echo $(seq ${n_with_signals} | grep -v -w -f <(sed 's/, /\n/g' benchmark.lst)))
+for i in $(echo $(seq ${n_with_signals} | grep -v -w -f <(sed 's/, /\n/g' benchmark2.lst)))
 do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')

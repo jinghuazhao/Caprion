@@ -18,7 +18,7 @@ cat <<'EOL'> ${root}/${protein}-step1.sb
 #SBATCH --time=12:00:00
 
 #SBATCH --account PETERS-SL3-CPU
-#SBATCH --partition cclake
+#SBATCH --partition icelake-himem
 
 #SBATCH --export ALL
 #SBATCH --array=1-_N_
@@ -27,8 +27,9 @@ cat <<'EOL'> ${root}/${protein}-step1.sb
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-ccl
-module load ceuadmin/R/latest
+module load rhel7/default-icl
+module load ceuadmin/R/4.3.3-icelake
+module load samtools/1.13/gcc/zwxn7ug3
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
@@ -126,7 +127,7 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 #SBATCH --time=12:00:00
 
 #SBATCH --account PETERS-SL3-CPU
-#SBATCH --partition cclake
+#SBATCH --partition icelake
 
 #SBATCH --export ALL
 #SBATCH --output=ROOT/sentinels/slurm/_step2_LABEL.o
@@ -134,9 +135,9 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-ccl
-module load ceuadmin/R/latest
-module load gcc/9 texlive
+module load rhel7/default-icl
+module load ceuadmin/R/4.3.3-icelake
+module load samtools/1.13/gcc/zwxn7ug3
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
@@ -301,7 +302,7 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 #SBATCH --time=12:00:00
 
 #SBATCH --account PETERS-SL3-CPU
-#SBATCH --partition cclake-himem
+#SBATCH --partition iceake-himem
 
 #SBATCH --export ALL
 #SBATCH --array=_array_
@@ -310,9 +311,9 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-ccl
-module load ceuadmin/R/latest
-module load gcc/9 texlive
+module load rhel7/default-icl
+module load ceuadmin/R/4.3.3-icelake
+module load samtools/1.13/gcc/zwxn7ug3
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN

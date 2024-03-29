@@ -118,7 +118,6 @@ cat << 'EOL' > ${sbatch}
 module purge
 module load rhel7/default-icl
 module load R/4.3.1-icelake
-module load gcc/9 texlive
 module load samtools/1.13/gcc/zwxn7ug3
 
 export protein=PROTEIN
@@ -154,10 +153,9 @@ function fastLR()
 
   ${fastGWA} --bgen ${pilot}/work/chrX.bgen \
              --sample ${pilot}/work/chrX.sample \
-             --extract ${analysis}/bgen/caprion.snplist \
+             --extract ${analysis}/bgen/chrX.snplist --geno 0.1 \
              --keep ${pilot}/work/chrX-${batch}.id \
              --load-model ${root}-${batch}-${peptide}-model.fastGWA \
-             --extract ${pilot}/work/chrX.snplist --geno 0.1 \
              --threads 10 \
              --out ${root}-${batch}-${peptide}-chrX
   bgzip -f ${root}-${batch}-${peptide}.fastGWA

@@ -137,13 +137,11 @@ export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
-export -f METAL_list
-export -f METAL_files
-export -f METAL_analysis_sbatch
+xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
 grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
-parallel -C':' '
-    export protein_index={1}
-    export protein={2}
+while IFS=":" read -r protein_index protein; do
+    export protein_index
+    export protein
     echo ${protein_index} ${protein}
     export root=~/Caprion/analysis/peptide/${protein}
     export pheno=${analysis}/peptide/${protein}/${protein}.pheno
@@ -152,7 +150,7 @@ parallel -C':' '
     METAL_list
     METAL_files
     METAL_analysis_sbatch
-'
+done
 
 function with_pQTL_only2()
 # only those with pQTLs

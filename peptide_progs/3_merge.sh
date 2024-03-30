@@ -672,15 +672,12 @@ export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
-export -f initilise
-export -f step1_pqtl_list
-export -f step2_pqtl_collect
-export -f step3_pqtl_summary
-export -f fplz
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -w  ${varlist} | \
-parallel -C':' '
-    export protein_index={1}
-    export protein={2}
+
+xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
+while IFS=":" read -r protein_index protein; do
+    export protein_index
+    export protein
     echo ${protein_index} ${protein}
     export root=~/Caprion/analysis/peptide/${protein}
     export pheno=${analysis}/peptide/${protein}/${protein}.pheno
@@ -720,8 +717,7 @@ parallel -C':' '
     }
   # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize "{7in,12in}" --outfile ${root}/qq+manhattan.pdf
   # qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
-  '
-}
+done
 
 function with_pQTL_only3()
 # only those with pQTLs

@@ -132,19 +132,22 @@ sbatch ${root}/${protein}-METAL.sb
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
-export suffix=_dr
+export suffix=""
 export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -w  ${varlist} | \
+export -f METAL_list
+export -f METAL_files
+export -f METAL_analysis_sbatch
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
 parallel -C':' '
     export protein_index={1}
     export protein={2}
     echo ${protein_index} ${protein}
     export root=~/Caprion/analysis/peptide/${protein}
     export pheno=${analysis}/peptide/${protein}/${protein}.pheno
-    export N=$(awk 'NR==1{print NF-2}' ${pheno})
+    export N=$(awk "NR==1{print NF-2}" ${pheno})
     if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
     METAL_list
     METAL_files

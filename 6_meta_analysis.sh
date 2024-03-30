@@ -15,7 +15,6 @@ function METAL_list()
   {
      split($1,a,"-")
      p=$1;
-     gsub("caprion-[0-9]-","",p)
      print a[2], p, dir"/"$1".fastGWA.gz"
   }' | \
   sort -k2,2 -k1,1n > ${analysis}/METAL${suffix}/METAL.list

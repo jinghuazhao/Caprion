@@ -19,7 +19,7 @@ module load samtools/1.13/gcc/zwxn7ug3
 export TMPDIR=${HPC_WORK}/work
 export caprion=~/Caprion
 export suffix=_dr
-export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/analysis/work/caprion${suffix}.varlist)${suffix}
+export phenoname=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]{print $1}' ${caprion}/analysis/output/caprion${suffix}.varlist)${suffix}
 export rt=${caprion}/analysis/METAL${suffix}
 
 function METAL_analysis_old()

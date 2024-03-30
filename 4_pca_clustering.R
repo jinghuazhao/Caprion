@@ -202,9 +202,8 @@ UDP.na <- c("BROX","NCF2","SEM7A")
 suffix <- "_dr"
 prot <- t(exprs(protein_all))
 colnames(prot) <- gsub("_HUMAN","",colnames(prot))
-if (FALSE)
+if (suffix=="_dr")
 {
-  suffix <- "_dr"
   prot <- t(exprs(protein_dr_all))
   colnames(prot) <- gsub("_HUMAN","",colnames(prot))
   ZYQ.na <- c(ZYQ.na,"A1AG2","CAH13","COF1","CZIB","GBRL2","GLTD2","HPSE","ITA6","K2C5",

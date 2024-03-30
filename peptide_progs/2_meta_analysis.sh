@@ -84,14 +84,16 @@ cat << 'EOL' > ${root}/${protein}-METAL.sb
 #SBATCH --error=PROTEIN-METAL_%A_%a.e
 #SBATCH --export ALL
 
+export TMPDIR=${HPC_WORK}/work
+export rt=ROOT/METAL
+export PERL5LIB=
+
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
-
-export TMPDIR=${HPC_WORK}/work
-export rt=ROOT/METAL
+module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
 
 function metal_parallel()
 {
@@ -122,7 +124,7 @@ EOL
 sed -i "s|PROTEIN|${root}/${protein}|;s|LABEL|${protein}|;s|ROOT|${root}|;s|RUNS|${N}|" ${root}/${protein}-METAL.sb
 sbatch ${root}/${protein}-METAL.sb
 #SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake
+#SBATCH --partition=icelake
 #metal ${rt}/${isotope}.metal 2>&1 | tee ${rt}/${isotope}-1.tbl.log;gzip -f ${rt}/${isotope}-1.tbl
 #metal ${rt}/${isotope}-chrX.metal 2>&1 | tee ${rt}/${isotope}-chrX-1.tbl.log; gzip -f ${rt}/${isotope}-chrX-1.tbl
 }
@@ -132,19 +134,38 @@ export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
 export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
+export varlist=${analysis}/output/caprion${suffix}.varlist
 
+# all proteins:
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -w  ${varlist} | \
+parallel -C':' '
+    export protein_index={1}
+    export protein={2}
+    echo ${protein_index} ${protein}
+    export root=~/Caprion/analysis/peptide/${protein}
+    export pheno=${analysis}/peptide/${protein}/${protein}.pheno
+    export N=$(awk 'NR==1{print NF-2}' ${pheno})
+    if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
+    METAL_list
+    METAL_files
+    METAL_analysis_sbatch
+'
+
+function with_pQTL_only2()
 # only those with pQTLs
-export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in $(echo $(seq ${n_with_signals} | grep -w -f <(sed 's/, /\n/g' benchmark2.lst)))
-do
-  export signal_index=${i}
-  export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
-  export root=~/Caprion/analysis/peptide/${protein}
-  export pheno=${analysis}/peptide/${protein}/${protein}.pheno
-  export N=$(awk 'NR==1{print NF-2}' ${pheno})
-  echo ${signal_index}, ${protein}
-  if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
-  METAL_list
-  METAL_files
-  METAL_analysis_sbatch
-done
+{
+  export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
+  for i in $(echo $(seq ${n_with_signals} | grep -w -f <(sed 's/, /\n/g' benchmark2.lst)))
+  do
+    export signal_index=${i}
+    export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
+    export root=~/Caprion/analysis/peptide/${protein}
+    export pheno=${analysis}/peptide/${protein}/${protein}.pheno
+    export N=$(awk 'NR==1{print NF-2}' ${pheno})
+    echo ${signal_index}, ${protein}
+    if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
+    METAL_list
+    METAL_files
+    METAL_analysis_sbatch
+  done
+}

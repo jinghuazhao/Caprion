@@ -3,13 +3,17 @@
 export analysis=~/Caprion/analysis
 export suffix=_dr
 export TMPDIR=${HPC_WORK}/work
+export PERL5LIB=
+
+module load ceuadmin/R/4.3.3-icelake
+module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
 
 function signals()
 (
   cat ${analysis}/METAL${suffix}/sentinels/*signals | \
   head -1 | \
   awk -v FS="\t" '{print "prot",$0}'
-  cat ${analysis}/work/caprion${suffix}.varlist | \
+  cat ${analysis}/output/caprion${suffix}.varlist | \
   parallel -C' ' -j5 '
     if [ -f ${analysis}/METAL${suffix}/sentinels/{}${suffix}.signals ]; then
        awk -v FS="\t" -v prot={} "NR>1 {print prot,\$0}" ${analysis}/METAL${suffix}/sentinels/{}${suffix}.signals
@@ -19,7 +23,7 @@ function signals()
 
 function merge()
 {
-  cat <(cat ${analysis}/METAL${suffix}/hdr| paste <(echo prot) -) \
+  cat <(cat ${analysis}/work/hdr| paste <(echo prot) -) \
       <(sed '1d;s/\t/ /g' ${analysis}/work/caprion${suffix}.signals | \
         parallel -C' ' -j20 'zgrep -w {7} ${analysis}/METAL${suffix}/{1}${suffix}-1.tbl.gz | paste <(echo {1}) -') \
       > ${analysis}/work/caprion${suffix}.merge

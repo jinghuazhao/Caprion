@@ -179,13 +179,14 @@ export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -w  ${varlist} | \
-parallel -C':' '
-   export protein_index={1}
-   export protein={2}
-   echo ${protein_index} ${protein}
-   sb ${protein_index}
-'
+xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
+while IFS=":" read -r protein_index protein; do
+    export protein_index
+    export protein
+    echo ${protein_index} ${protein}
+    sb ${protein_index}
+done
 
 function with_pQTL_only1()
 # only those with pQTLs:

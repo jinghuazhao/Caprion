@@ -27,7 +27,7 @@ cat <<'EOL'> ${root}/${protein}-step1.sb
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-icl
+module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
 
@@ -135,7 +135,7 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-icl
+module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
 
@@ -311,7 +311,7 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-icl
+module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
 
@@ -672,7 +672,7 @@ export signals=${analysis}/work/caprion${suffix}.signals
 
 # only those with pQTLs
 export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-for i in $(echo $(seq ${n_with_signals} | grep -v -w -f <(sed 's/, /\n/g' benchmark.lst)))
+for i in $(echo $(seq ${n_with_signals} | grep -w -f <(sed 's/, /\n/g' benchmark.lst)))
 do
   export signal_index=${i}
   export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')

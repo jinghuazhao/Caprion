@@ -116,7 +116,7 @@ cat << 'EOL' > ${sbatch}
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-icl
+module load rhel8/default-icl
 module load R/4.3.1-icelake
 module load samtools/1.13/gcc/zwxn7ug3
 

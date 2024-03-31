@@ -126,20 +126,46 @@
 <h1 id="peptide-analysis">Peptide analysis</h1>
 <p>Peptide-level analysis</p>
 <p>This mirrors protein-level analysis as in peptide_progs/,</p>
-<pre><code>0_utils.sh  
-1_pgwas.sh
-2_meta_analysis.sh
-3_merge.sh
-</code></pre>
-<p>with respect to </p>
-<ol>
-<li>Association analysis.</li>
-<li>Meta-analysis.</li>
-<li>Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.</li>
-</ol>
-<p>A prerequiste for a Manhattan/peptide association plot by <code>0_utils.sh</code> is a call to <code>gz()</code> for a compressed DR-filtered data; this is to be followed by execution of the R script inside.</p>
-<p>NB. <code>3_merge.sh</code> itself is comprised of three steps on signal extraction, collection, and graphical representation which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.</p>
-<p>Both <code>0_utils.sh</code> and the second step 3.2 above both requires Ensembl-VEP but <code>ceuadmin/ensembl-vep/104</code> does not work on icelake; a remedy is made with <code>ceuadmin/ensembl-vep/111-icelake</code> however the loftee plugin is likely to require additional work -- as documented this is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</p></div>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0_utils.sh</td>
+<td>Code snippets</td>
+</tr>
+<tr>
+<td>1_pgwas.sh</td>
+<td>Association analysis.</td>
+</tr>
+<tr>
+<td>2_meta_analysis.sh</td>
+<td>Meta-analysis.</td>
+</tr>
+<tr>
+<td>3_merge.sh</td>
+<td>Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.</td>
+</tr>
+<tr>
+<td>-----------</td>
+<td>----------------------</td>
+</tr>
+</tbody>
+</table>
+<p>NB. <code>3_merge.sh</code> itself is comprised of steps:</p>
+<p>3.1. signal extraction
+3.2. collection
+3.3. graphical representation</p>
+<p>which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.</p>
+<p>Prerequistes for a Manhattan/peptide association plot by <code>0_utils.sh</code> are</p>
+<ul>
+<li>a call to <code>gz()</code> for a compressed DR-filtered data; this is to be followed by execution of the R script inside.</li>
+<li>also step 3.2 above requires Ensembl-VEP but <code>ceuadmin/ensembl-vep/104</code> does not work on icelake; a remedy is made with <code>ceuadmin/ensembl-vep/111-icelake</code> however the loftee plugin is likely to require additional work -- as documented this is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</li>
+</ul></div>
             </div>
         </div>
 

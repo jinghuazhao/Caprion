@@ -15,8 +15,6 @@ Name       | Description
   3.3. | graphical representation
 -----------|----------------------
 
-NB. `3_merge.sh` itself is comprised of steps:
-
 3.1-3.3 are operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
 
 Prerequistes for a Manhattan/peptide association plot by `0_utils.sh` are

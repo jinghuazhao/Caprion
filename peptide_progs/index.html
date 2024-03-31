@@ -139,7 +139,7 @@
 <li>Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.</li>
 </ol>
 <p>NB. <code>3_merge.sh</code> itself is comprised of three steps on signal extraction, collection, and graphical representation which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.</p>
-<p>For now, both <code>0_utils.sh</code> and the second step 3.2 above both requires Ensembl-VEP which does not work on icelake.</p></div>
+<p>Both <code>0_utils.sh</code> and the second step 3.2 above both requires Ensembl-VEP but <code>ceuadmin/ensembl-vep/104</code> does not work on icelake; a remedy is made with <code>ceuadmin/ensembl-vep/111-icelake</code> however the loftee plugin is likely to require additional work -- as documented this is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</p></div>
             </div>
         </div>
 

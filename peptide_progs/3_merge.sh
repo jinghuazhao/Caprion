@@ -304,7 +304,7 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 #SBATCH --time=12:00:00
 
 #SBATCH --account PETERS-SL3-CPU
-#SBATCH --partition iceake-himem
+#SBATCH --partition icelake-himem
 
 #SBATCH --export ALL
 #SBATCH --array=_array_
@@ -696,7 +696,7 @@ while IFS=":" read -r protein_index protein; do
     {
     echo Step 2.
     step2_pqtl_collect
-    fplz should be here
+  # fplz should be here
     sbatch ${root}/${protein}-step2.sb
     }
   # 3. Graphical representation
@@ -759,7 +759,7 @@ do
   do
   (
     head -1 ${root}/${protein}.pheno
-    grep -f <(cut -d' ' -f1 ${pilot}/work/caprion-${batch}.id) ${root}/${protein}.pheno
+    grep -f <(cut -d' ' -f1 ${pilot}/output/caprion-${batch}.id) ${root}/${protein}.pheno
   ) > ${root}/work/${protein}-${batch}.pheno
   done
   step3_pqtl_summary

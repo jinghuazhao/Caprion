@@ -11,6 +11,8 @@ This mirrors protein-level analysis as in peptide_progs/,
 3_merge.sh
 ```
 
+A prerequiste for a Manhattan/peptide association plot by `0_utils.sh` is a call to `gz()` for a compressed DR-filtered data; this is to be followed by execution of the R script inside.
+
 with respect to 
 
 1. Association analysis.

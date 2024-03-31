@@ -1,8 +1,6 @@
 # Peptide analysis
 
-Peptide-level analysis
-
-This mirrors protein-level analysis as in peptide_progs/,
+Peptide-level analysis mirrors protein-level analysis as in **peptide_progs/**,
 
 Name       | Description
 -----------|----------------------
@@ -20,4 +18,4 @@ Name       | Description
 Prerequistes for a Manhattan/peptide association plot by `0_utils.sh` are
 
 - a call to `gz()` for a compressed DR-filtered data; this is to be followed by execution of the R script inside.
-- also step 3.2 above requires Ensembl-VEP but `ceuadmin/ensembl-vep/104` does not work on icelake; a remedy is made with `ceuadmin/ensembl-vep/111-icelake` however the loftee plugin is likely to require additional work -- as documented this is feasible with `vep -i variants.vcf --plugin LoFtool,scores_file.txt`.
+- Ensembl-VEP (also step 3.2 above) but `ceuadmin/ensembl-vep/104` does not work on icelake; a remedy is made with `ceuadmin/ensembl-vep/111-icelake` however the loftee plugin is likely to require additional work -- as documented this is feasible with `vep -i variants.vcf --plugin LoFtool,scores_file.txt`.

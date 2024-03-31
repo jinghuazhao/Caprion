@@ -10,15 +10,14 @@ Name       | Description
 1_pgwas.sh | Association analysis.
 2_meta_analysis.sh | Meta-analysis.
 3_merge.sh | Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.
+  3.1. | signal extraction
+  3.2. | collection
+  3.3. | graphical representation
 -----------|----------------------
 
 NB. `3_merge.sh` itself is comprised of steps:
 
-#### 3.1. signal extraction
-#### 3.2. collection
-#### 3.3. graphical representation
-
-which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
+3.1-3.3 are operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
 
 Prerequistes for a Manhattan/peptide association plot by `0_utils.sh` are
 

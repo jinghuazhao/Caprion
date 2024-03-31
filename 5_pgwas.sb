@@ -461,26 +461,26 @@ fastLR 3
 #miamiplot
 #miamiplot2
 
-# --- inactive code ---
+# --- legacy code ---
 
 function fastGWA()
 # fastGWA mixed model
 {
-  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --grm-sparse ${caprion}/work/caprion-spgrm \
-           --sample ${caprion}/work/caprion-chr1.sample \
-           --fastGWA-mlm --pheno ${caprion}/work/caprion.pheno --mpheno ${SLURM_ARRAY_TASK_ID} --threads 10 \
+  gcta-1.9 --mbgen ${caprion}/bgen/caprion.bgenlist --grm-sparse ${caprion}/output/caprion-spgrm \
+           --sample ${caprion}/bgen/caprion.sample \
+           --fastGWA-mlm --pheno ${caprion}/output/caprion.pheno --mpheno ${SLURM_ARRAY_TASK_ID} --threads 10 \
            --out ${caprion}/work/caprion-${phenoname}
 
-  gcta-1.9 --mbgen ${caprion}/work/caprion.bgenlist --grm-sparse ${caprion}/work/caprion-spgrm \
-           --sample ${caprion}/work/caprion.sample \
-           --fastGWA-mlm --model-only --pheno ${caprion}/work/caprion.pheno --mpheno ${SLURM_ARRAY_TASK_ID} \
-           --keep ${caprion}/work/caprion-chrX.idlist --threads 10 \
+  gcta-1.9 --mbgen ${caprion}/bgen/caprion.bgenlist --grm-sparse ${caprion}/output/caprion-spgrm \
+           --sample ${caprion}/bgen/caprion.sample \
+           --fastGWA-mlm --model-only --pheno ${caprion}/output/caprion.pheno --mpheno ${SLURM_ARRAY_TASK_ID} \
+           --keep ${caprion}/output/chrX.idlist --threads 10 \
            --out ${caprion}/work/caprion-${phenoname}
 
-  gcta-1.9 --bgen ${caprion}/work/caprion-chrX.bgen \
-           --sample ${caprion}/work/caprion.sample \
+  gcta-1.9 --bgen ${caprion}/bgen/chrX.bgen \
+           --sample ${caprion}/bgen/caprion.sample \
            --load-model ${caprion}/work/caprion-${phenoname}.fastGWA \
-           --extract ${caprion}/work/caprion-chrX.snplist --geno 0.1 --threads 10 \
+           --extract ${caprion}/output/chrX.snplist --geno 0.1 --threads 10 \
            --out ${caprion}/work/caprion-${phenoname}-chrX
-  gzip -f ${caprion}/work/caprion-${phenoname}*fastGWA
+  bgzip -f ${caprion}/work/caprion-${phenoname}*fastGWA
 }

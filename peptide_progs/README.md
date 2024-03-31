@@ -13,7 +13,6 @@ Name       | Description
 -----------|----------------------
 
 NB. `3_merge.sh` itself is comprised of steps:
-
 3.1. signal extraction
 3.2. collection
 3.3. graphical representation

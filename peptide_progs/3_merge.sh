@@ -133,14 +133,16 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 #SBATCH --output=ROOT/sentinels/slurm/_step2_LABEL.o
 #SBATCH --error=ROOT/sentinels/slurm/_step2_LABEL.e
 
+export TMPDIR=${HPC_WORK}/work
+export protein=PROTEIN
+export PERL5LIB=
+
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
-
-export TMPDIR=${HPC_WORK}/work
-export protein=PROTEIN
+module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
 
 function pqtls()
 (
@@ -309,15 +311,17 @@ cat <<'EOL'> ${root}/${protein}-step3.sb
 #SBATCH --output=ROOT/sentinels/slurm/_step3_%A_%a.o
 #SBATCH --error=ROOT/sentinels/slurm/_step3_%A_%a.e
 
+export TMPDIR=${HPC_WORK}/work
+export protein=PROTEIN
+export isotope=$(head -1 ${root}/${protein}.pheno | awk -v n=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
+export PERL5LIB=
+
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
-
-export TMPDIR=${HPC_WORK}/work
-export protein=PROTEIN
-export isotope=$(head -1 ${root}/${protein}.pheno | awk -v n=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
+module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
 
 function fp()
 {
@@ -672,7 +676,6 @@ export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
-
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
 grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
 while IFS=":" read -r protein_index protein; do
@@ -686,25 +689,21 @@ while IFS=":" read -r protein_index protein; do
   # 1. Extraction of signals
     {
     echo Step 1.
-  # step1_pqtl_list
-  # sbatch ${root}/${protein}-step1.sb
+    step1_pqtl_list
+    sbatch ${root}/${protein}-step1.sb
     }
   # 2. Collection of signals
     {
     echo Step 2.
-  # step2_pqtl_collect
-  # fplz should be here
-  # sbatch ${root}/${protein}-step2.sb
+    step2_pqtl_collect
+    fplz should be here
+    sbatch ${root}/${protein}-step2.sb
     }
   # 3. Graphical representation
     {
     echo Step 3.
-    export pqtl_peptides=$(sed "1d" ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
-    export array=$(grep -n -f <(echo ${pqtl_peptides} | tr " " "\n") <(echo ${all_peptides} | tr " " "\n") | cut -d":" -f1 | tr "\n" "," | sed "s/.$//")
-  # 12hr-timeout proteins
-  # export i=129, 299 for CO3, ITIH2; 47, 179, 184, 492 for APOB, EPCR, ERAP2, PROC
-  # export todo_peptides=$(ls ${analysis}/peptide/CO3/fp/*pdf | xargs -l basename -s -fp.pdf | sort -k1,1 | uniq | grep -f - -v <(sed 's/ /\n/g' <(echo ${pqtl_peptides})))
-  # export array=$(grep -n -f <(echo ${todo_peptides} | tr " " "\n") <(echo ${all_peptides} | tr " " "\n") | cut -d":" -f1 | tr "\n" "," | sed "s/.$//")
+    export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
+    export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
     for batch in {1..3}
     do
     (
@@ -715,7 +714,7 @@ while IFS=":" read -r protein_index protein; do
     step3_pqtl_summary
     sbatch ${root}/${protein}-step3.sb
     }
-  # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize "{7in,12in}" --outfile ${root}/qq+manhattan.pdf
+  # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
   # qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
 done
 

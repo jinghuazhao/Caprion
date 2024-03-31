@@ -202,7 +202,7 @@ peptideMapping <- function(protein,batch="ZWK",mm=5)
 peptideAssociationPlot <- function(protein,suffix="_dr")
 {
   f <- file.path(analysis,"peptide",protein)
-  png(paste0(f,"/",protein,"-peptides.png"),width=10,height=8,res=300,unit="in")
+  png(paste0(f,"/",protein,"-peptides.png"),width=10,height=12,res=300,unit="in")
   par(mfrow=c(2,1))
   input <- paste0("~/Caprion/analysis/METAL",suffix,"/gz/",protein,suffix,".txt.gz")
   annotation <- paste0("~/Caprion/analysis/METAL",suffix,"/vep/",protein,suffix,".txt")
@@ -211,7 +211,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   pvalue_sign <- 5e-8
   plot_title <- protein
   pQTLtools::turboman(input, annotation, reference, pvalue_sign, plot_title)
-  par(mar=c(14,3,1,1))
+  par(mar=c(26,3,1,1))
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
   n <- with(g2d, n-1)
@@ -236,14 +236,19 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   par(xaxt = "s", yaxt = "s", xpd = TRUE)
   axis(2, pos = 2, cex = 1.2)
   title(xlab="", ylab = "-log10(P)", line = 1)
+  all_colors <- colors()
+  all_numbers <- 1:length(all_colors)
+  nonwhite <- !grepl("white",all_colors)
   for(iso in unique(cistrans[["isotope"]]))
   {
     d <- filter(cistrans,isotope==iso)
     c <- d[["SNPChrom"]]
     p <- CM[c]+d[["SNPPos"]]
     points(p, d[["log10p"]], cex = 0.8, col = ifelse(d[["cis"]], "red", "blue"), pch = 19)
-    lines(c(as.integer(d[["start"]]), as.integer(d[["end"]]))*dseq, -c(d[["ID"]]+disp, d[["ID"]]+disp), col = d[["ID"]], lwd = 4)
-    segments((as.integer(d[["start"]])+as.integer(d[["end"]]))*dseq/2,-(d[["ID"]]+disp), p, d[["log10p"]]*1,col=d[["ID"]])
+    lines(c(as.integer(d[["start"]]), as.integer(d[["end"]]))*dseq, -c(d[["ID"]]+disp, d[["ID"]]+disp),
+            col=all_numbers[nonwhite][d[["ID"]]], lwd = 4)
+    segments((as.integer(d[["start"]])+as.integer(d[["end"]]))*dseq/2,-(d[["ID"]]+disp), p, d[["log10p"]]*1,
+            col=all_numbers[nonwhite][d[["ID"]]])
   }
   for (x in 1:n) {
        segments(CM[x], 0, CM[x], max(cistrans[["log10p"]]), col = "black")

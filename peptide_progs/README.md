@@ -20,3 +20,5 @@ with respect to
 3. Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.
 
 NB. `3_merge.sh` itself is comprised of three steps on signal extraction, collection, and graphical representation which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
+
+For now, both `0_utils.sh` and the second step 3.2 above both requires Ensembl-VEP which does not work on icelake.

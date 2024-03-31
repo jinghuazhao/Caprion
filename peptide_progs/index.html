@@ -151,16 +151,25 @@
 <td>Signal detection/classification, forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.</td>
 </tr>
 <tr>
+<td>3.1.</td>
+<td>signal extraction</td>
+</tr>
+<tr>
+<td>3.2.</td>
+<td>collection</td>
+</tr>
+<tr>
+<td>3.3.</td>
+<td>graphical representation</td>
+</tr>
+<tr>
 <td>-----------</td>
 <td>----------------------</td>
 </tr>
 </tbody>
 </table>
 <p>NB. <code>3_merge.sh</code> itself is comprised of steps:</p>
-<h4 id="31-signal-extraction">3.1. signal extraction</h4>
-<h4 id="32-collection">3.2. collection</h4>
-<h4 id="33-graphical-representation">3.3. graphical representation</h4>
-<p>which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.</p>
+<p>3.1-3.3 are operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.</p>
 <p>Prerequistes for a Manhattan/peptide association plot by <code>0_utils.sh</code> are</p>
 <ul>
 <li>a call to <code>gz()</code> for a compressed DR-filtered data; this is to be followed by execution of the R script inside.</li>

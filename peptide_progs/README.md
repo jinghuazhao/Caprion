@@ -14,9 +14,9 @@ Name       | Description
 
 NB. `3_merge.sh` itself is comprised of steps:
 
-### 3.1. signal extraction
-### 3.2. collection
-### 3.3. graphical representation
+#### 3.1. signal extraction
+#### 3.2. collection
+#### 3.3. graphical representation
 
 which is operationally done through commenting/uncommenting calls to each step exclusively. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-#SBATCH --job-name=_lz_ukb_ppp
+#SBATCH --job-name=_utils
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --mem=28800
@@ -12,6 +12,9 @@
 
 ##SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
 ##SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
+
+#SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.e
 
 . /etc/profile.d/modules.sh
 module purge
@@ -943,4 +946,4 @@ function umich()
 
 # srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i
 
-ukb_ppp_lz
+vep_annotate

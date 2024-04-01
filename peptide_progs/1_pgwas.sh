@@ -9,6 +9,7 @@ function sb()
   export sbatch=${analysis}/peptide/${protein}/${protein}-pgwas.sb
 
   Rscript -e '
+    .libPaths("/usr/local/Cluster-Apps/ceuadmin/R/R")
     suppressMessages(library(Biobase))
     suppressMessages(library(dplyr))
     pilot <- Sys.getenv("pilot")
@@ -133,28 +134,28 @@ function fastLR()
   export col=${SLURM_ARRAY_TASK_ID}
   export peptide=$(awk 'NR==1{print $(col+2)}' col=${col} ${pheno})
   export root=${analysis}/peptide/${protein}/${protein}
-  ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
-             --sample ${pilot}/work/caprion.sample \
+  ${fastGWA} --mbgen ${analysis}/bgen/caprion.bgenlist \
+             --sample ${analysis}/bgen/caprion.sample \
              --extract ${analysis}/bgen/caprion.snplist \
-             --keep ${pilot}/work/caprion-${batch}.id --geno 0.1 \
+             --keep ${analysis}/output/caprion-${batch}.id --geno 0.1 \
              --fastGWA-lr \
              --pheno ${root}.mpheno --mpheno ${col} \
              --threads 10 \
              --out ${root}-${batch}-${peptide}
 
-  ${fastGWA} --mbgen ${pilot}/work/caprion.bgenlist \
-             --sample ${pilot}/work/caprion.sample \
+  ${fastGWA} --mbgen ${analysis}/bgen/caprion.bgenlist \
+             --sample ${analysis}/bgen/caprion.sample \
              --extract ${analysis}/bgen/caprion.snplist \
-             --keep ${pilot}/work/chrX-${batch}.id --geno 0.1 \
+             --keep ${analysis}/output/chrX-${batch}.id --geno 0.1 \
              --fastGWA-lr --model-only \
              --pheno ${root}.mpheno --mpheno ${col} \
              --threads 10 \
              --out ${root}-${batch}-${peptide}-model
 
-  ${fastGWA} --bgen ${pilot}/work/chrX.bgen \
-             --sample ${pilot}/work/chrX.sample \
+  ${fastGWA} --bgen ${analysis}/bgen/chrX.bgen \
+             --sample ${analysis}/bgen/chrX.sample \
              --extract ${analysis}/bgen/chrX.snplist --geno 0.1 \
-             --keep ${pilot}/work/chrX-${batch}.id \
+             --keep ${analysis}/output/chrX-${batch}.id \
              --load-model ${root}-${batch}-${peptide}-model.fastGWA \
              --threads 10 \
              --out ${root}-${batch}-${peptide}-chrX
@@ -180,8 +181,7 @@ export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
-head -100 | \
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

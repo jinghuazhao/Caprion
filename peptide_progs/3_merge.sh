@@ -30,6 +30,7 @@ module purge
 module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
+module load libiconv/1.16/intel/64iicvbf
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
@@ -143,6 +144,8 @@ module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
 module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
+module load libiconv/1.16/intel/64iicvbf
+module load ceuadmin/ensembl-vep/111-icelake
 
 function pqtls()
 (
@@ -322,6 +325,7 @@ module load rhel8/default-icl
 module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
 module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
+module load libiconv/1.16/intel/64iicvbf
 
 function fp()
 {

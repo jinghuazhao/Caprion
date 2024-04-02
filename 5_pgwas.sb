@@ -50,6 +50,22 @@ module purge
 module load rhel8/default-icl
 module load samtools/1.13/gcc/zwxn7ug3
 
+function rsid_snpid()
+{
+  seq 22 | \
+  parallel -j1 -C' ' '
+    echo {}
+    export chr=chr${}
+    export snpstats=~/rds/post_qc_data/interval/reference_files/genetic/reference_files_genotyped_imputed/impute_{}_interval.snpstats
+    sed '1d' ${snpstats} | cut -f2-6 | awk "
+    (\$4<\$5) {
+      \$2=\$2+0; print \$2, \$3, \$1, \$2\":\"\$3\"_\"\$4\"_\"\$5
+    }{
+      \$2=\$2+0; print \$2, \$3, \$1, \$2\":\"\$3\"_\"\$5\"_\"\$4
+    } " > ${analysis}/bgen/chr{}.rsid
+  '
+}
+
 function bgen()
 {
   export chr=chr${SLURM_ARRAY_TASK_ID}

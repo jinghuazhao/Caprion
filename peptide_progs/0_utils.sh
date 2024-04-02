@@ -211,7 +211,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   pvalue_sign <- 5e-8
   plot_title <- protein
   pQTLtools::turboman(input, annotation, reference, pvalue_sign, plot_title)
-  par(mar=c(24,3,1,1))
+  par(mar=c(18,3,1,1))
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
   n <- with(g2d, n-1)
@@ -219,15 +219,13 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   dseq <- CM[n+1]/length(mapping$sequence)
   positions <- with(mapping,positions) %>%
                data.frame %>%
-               filter(lapply(positions$start,length)==1) %>%
-               mutate(Modified.Peptide.Sequence=rownames(.),start=as.integer(start),end=as.integer(end),ID=(1:nrow(.))/2)
+               mutate(Modified.Peptide.Sequence=rownames(.),ID=(1:nrow(.))/2)
   disp <- 85
   signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
   cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
               mutate(pos=g2d$CM[SNPChrom]+SNPPos) %>%
               left_join(mapping$mapping,by=c('isotope'='Isotope.Group.ID')) %>%
-              left_join(positions) %>%
-              filter(!is.na(ID))
+              left_join(positions)
   chr <- cistrans[["SNPChrom"]]
   chr[chr == "X"] <- 23
   chr[chr == "Y"] <- 24
@@ -267,7 +265,7 @@ analysis <- "~/Caprion/analysis"
 library(Biostrings)
 library(dplyr)
 library(gap)
-A1BG <- peptideMapping("A1BG")
+A1BG <- peptideMapping("A1BG",mm=0)
 sink("A1BG")
 knitr::kable(A1BG$mps[1:3],"markdown")
 sink()
@@ -275,10 +273,10 @@ unlink("A1BG")
 ITIH2 <- peptideMapping("ITIH2")
 subset(ITIH2$mapping,Isotope.Group.ID==442581854)
 knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(ITIH2$mapping) <13492)[c(1,3,4,5,6)],row.names=FALSE)
-APOB <- peptideMapping("APOB",mm=1)
-EPCR <- peptideMapping("EPCR",mm=1)
-ERAP2 <- peptideMapping("ERAP2",mm=1)
-PROC <- peptideMapping("PROC",mm=1)
+APOB <- peptideMapping("APOB",mm=0)
+EPCR <- peptideMapping("EPCR",mm=0)
+ERAP2 <- peptideMapping("ERAP2",mm=0)
+PROC <- peptideMapping("PROC",mm=0)
 
 peptideAssociationPlot("A1BG")
 peptideAssociationPlot("APOB")

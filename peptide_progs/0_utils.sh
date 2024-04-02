@@ -211,7 +211,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   pvalue_sign <- 5e-8
   plot_title <- protein
   pQTLtools::turboman(input, annotation, reference, pvalue_sign, plot_title)
-  par(mar=c(26,3,1,1))
+  par(mar=c(24,3,1,1))
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
   n <- with(g2d, n-1)
@@ -219,13 +219,15 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   dseq <- CM[n+1]/length(mapping$sequence)
   positions <- with(mapping,positions) %>%
                data.frame %>%
-               mutate(Modified.Peptide.Sequence=rownames(.),ID=(1:nrow(.))/2)
+               filter(lapply(positions$start,length)==1) %>%
+               mutate(Modified.Peptide.Sequence=rownames(.),start=as.integer(start),end=as.integer(end),ID=(1:nrow(.))/2)
   disp <- 85
   signals <- read.table(paste0(f,"/",protein,".signals"),header=TRUE)
   cistrans <- read.csv(paste0(f,"/",protein,".cis.vs.trans")) %>%
               mutate(pos=g2d$CM[SNPChrom]+SNPPos) %>%
               left_join(mapping$mapping,by=c('isotope'='Isotope.Group.ID')) %>%
-              left_join(positions)
+              left_join(positions) %>%
+              filter(!is.na(ID))
   chr <- cistrans[["SNPChrom"]]
   chr[chr == "X"] <- 23
   chr[chr == "Y"] <- 24

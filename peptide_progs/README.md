@@ -11,7 +11,6 @@ Name       | Description
 3.1_merge.sh | Signal extraction
 3.2_merge.sh | Signal collection/classification
 3.3_merge.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots
------------|----------------------
 
 In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
 

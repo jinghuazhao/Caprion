@@ -12,6 +12,10 @@ setup
 mkdocs build
 mkdocs gh-deploy
 
+if [ "$(uname -n | sed 's/-[0-9]*$//')" == "login-q" ]; then
+   module load ceuadmin/openssh/9.7p1-icelake
+fi
+
 git add workflow
 git commit -m "Snakemake profiles"
 git add .gitignore

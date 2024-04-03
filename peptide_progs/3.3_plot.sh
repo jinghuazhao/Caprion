@@ -387,10 +387,14 @@ while IFS=":" read -r protein_index protein; do
     export root=~/Caprion/analysis/peptide/${protein}
     export pheno=${analysis}/peptide/${protein}/${protein}.pheno
     export N=$(awk 'NR==1{print NF-2}' ${pheno})
+    export all_peptides=$(head -1 ${pheno} | cut -d' ' -f1,2 --complement)
+    export dir=${root}/qqmanhattanlz
   # 3. Graphical representation
     echo Step 3:
     export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
-    export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
+    export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') \
+                              <(echo ${all_peptides} | tr ' ' '\n') | \
+                   cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
     for batch in {1..3}
     do
     (

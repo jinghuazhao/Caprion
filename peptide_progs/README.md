@@ -8,12 +8,12 @@ Name       | Description
 1_pgwas.sh | Association analysis.
 2_meta_analysis.sh | Meta-analysis.
 3_merge.sh   | Signal identification
-3.1_merge.sh | signal extraction
-3.2_merge.sh | signals collection/classification
-3.3_merge.sh | forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots
+3.1_merge.sh | Signal extraction
+3.2_merge.sh | Signal collection/classification
+3.3_merge.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots
 -----------|----------------------
 
-3.1-3.3 are spun off. In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
+In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
 
 Prerequistes for a Manhattan/peptide association plot by `0_utils.sh` are
 

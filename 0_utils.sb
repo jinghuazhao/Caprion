@@ -946,4 +946,45 @@ function umich()
 
 # srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i
 
+Rscript -e '
+require(openxlsx)
+suppressMessages(library(dplyr))
+suppressMessages(library(gap))
+require(stringr)
+options(width=2000)
+options("openxlsx.borderColour"="#4F80BD")
+analysis <- Sys.getenv("analysis")
+hs <- createStyle(textDecoration="BOLD", fontColour="#FFFFFF", fontSize=12, fontName="Arial Narrow", fgFill="#4F80BD")
+xlsx <- "https://jhz22.user.srcf.net/Caprion/results.xlsx"
+xlsx <- file.path(analysis,"reports","results.xlsx")
+wb <- createWorkbook(xlsx)
+addWorksheet(wb,"Summary",zoom=150)
+writeData(wb,"Summary","Summary",xy=c(1,1),headerStyle=createStyle(textDecoration="BOLD",
+          fontColour="#FFFFFF", fontSize=14, fontName="Arial Narrow", fgFill="#4F80BD"))
+summary <- data.frame(Sheet=c("Protein","Protein_dr","Peptides"),
+                      Description=c("Unfiltered proteins","DR-filtered proteins", "All peptides"))
+writeDataTable(wb, "Summary", summary, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
+proteins <- c("A1BG","APOB","EPCR","ERAP2","PROC")
+Protein <- read.csv(file.path(analysis,"work","caprion.cis.vs.trans"))
+Protein_dr <- read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans"))
+Peptides <- data.frame()
+for (peptide in proteins)
+    Peptides <- bind_rows(Peptides,read.csv(file.path(analysis,"peptide",peptide,paste0(peptide,".cis.vs.trans"))))
+for (i in c("Protein","Protein_dr","Peptides"))
+{
+    sheetnames <- i
+    cat(sheetnames,"\n")
+    addWorksheet(wb, sheetnames, zoom=150)
+    writeData(wb, sheetnames, sheetnames, xy=c(1,1),
+                  headerStyle=createStyle(textDecoration="BOLD",
+                                          fontColour="#FFFFFF", fontSize=14, fontName="Arial Narrow", fgFill="#4F80BD"))
+    body <- get(i)
+    writeDataTable(wb, sheetnames, body, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
+    freezePane(wb, sheetnames, firstCol=TRUE, firstActiveRow=3)
+}
+bStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
+hStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+saveWorkbook(wb, file=xlsx, overwrite=TRUE)
+'
+
 vep_annotate

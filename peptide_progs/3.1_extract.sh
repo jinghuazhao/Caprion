@@ -132,7 +132,7 @@ while IFS=":" read -r protein_index protein; do
     export N=$(awk 'NR==1{print NF-2}' ${pheno})
     initialise
   # 1. Extraction of signals
-    echo Step 1.
+    echo Step 1:
     step1_pqtl_list
     sbatch ${root}/${protein}-step1.sb
 done

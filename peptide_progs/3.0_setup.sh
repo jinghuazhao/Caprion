@@ -21,21 +21,16 @@ do
   echo ${signal_index}, ${protein}
   initialise
 # 1. Extraction of signals
-  {
-  echo Step 1.
-# step1_pqtl_list
-# sbatch ${root}/${protein}-step1.sb
-  }
+  echo Step 1:
+  step1_pqtl_list
+  sbatch ${root}/${protein}-step1.sb
 # 2. Collection of signals
-  {
-  echo Step 2.
-# step2_pqtl_collect
+  echo Step 2:
+  step2_pqtl_collect
 # fplz should be here
-# sbatch ${root}/${protein}-step2.sb
-  }
+  sbatch ${root}/${protein}-step2.sb
 # 3. Graphical representation
-  {
-  echo Step 3.
+  echo Step 3:
   export pqtl_peptides=$(sed '1d' ${root}/${protein}.signals | cut -f1 | sort -k1,1n | uniq)
   export array=$(grep -n -f <(echo ${pqtl_peptides} | tr ' ' '\n') <(echo ${all_peptides} | tr ' ' '\n') | cut -d':' -f1 | tr '\n' ',' | sed 's/.$//')
 # 12hr-timeout proteins
@@ -51,7 +46,6 @@ do
   done
   step3_pqtl_summary
   sbatch ${root}/${protein}-step3.sb
-  }
 # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
 # qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
 done

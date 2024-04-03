@@ -192,7 +192,7 @@ while IFS=":" read -r protein_index protein; do
     export pheno=${analysis}/peptide/${protein}/${protein}.pheno
     export N=$(awk 'NR==1{print NF-2}' ${pheno})
   # 2. Collection of signals
-    echo Step 2.
+    echo Step 2:
     step2_pqtl_collect
   # fplz should be here
     sbatch ${root}/${protein}-step2.sb

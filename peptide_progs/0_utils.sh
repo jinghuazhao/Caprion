@@ -211,7 +211,7 @@ peptideAssociationPlot <- function(protein,suffix="_dr")
   pvalue_sign <- 5e-8
   plot_title <- protein
   pQTLtools::turboman(input, annotation, reference, pvalue_sign, plot_title)
-  par(mar=c(18,3,1,1))
+  par(mar=c(16,3,1,1))
   mapping <- get(protein)
   g2d <-  gap::grid2d(gap::hg19,plot=FALSE)
   n <- with(g2d, n-1)

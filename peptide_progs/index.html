@@ -139,26 +139,26 @@
 </tr>
 <tr>
 <td>1_pgwas.sh</td>
-<td>Association analysis.</td>
+<td>Association analysis</td>
 </tr>
 <tr>
 <td>2_meta_analysis.sh</td>
-<td>Meta-analysis.</td>
+<td>Meta-analysis</td>
 </tr>
 <tr>
-<td>3_merge.sh</td>
+<td>3</td>
 <td>Signal identification</td>
 </tr>
 <tr>
-<td>3.1_merge.sh</td>
+<td>3.1_extract.sh</td>
 <td>Signal extraction</td>
 </tr>
 <tr>
-<td>3.2_merge.sh</td>
+<td>3.2_collect.sh</td>
 <td>Signal collection/classification</td>
 </tr>
 <tr>
-<td>3.3_merge.sh</td>
+<td>3.3_plot.sh</td>
 <td>Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots</td>
 </tr>
 </tbody>
@@ -166,8 +166,8 @@
 <p>In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.</p>
 <p>Prerequistes for a Manhattan/peptide association plot by <code>0_utils.sh</code> are</p>
 <ul>
-<li>a call to <code>gz()</code> for a compressed DR-filtered data; this is to be followed by execution of the R script inside.</li>
-<li>Ensembl-VEP (also step 3.2 above) but <code>ceuadmin/ensembl-vep/104</code> does not work on icelake; a remedy is made with <code>ceuadmin/ensembl-vep/111-icelake</code> however the loftee plugin is likely to require additional work -- as documented this is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</li>
+<li>a call to <code>gz()</code> for a compressed DR-filtered data.</li>
+<li>Ensembl-VEP (also step 3.2 above) but <code>ceuadmin/ensembl-vep/104</code> does not work on icelake; a remedy is made with <code>ceuadmin/ensembl-vep/111-icelake</code> -- as documented this is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</li>
 </ul></div>
             </div>
         </div>

@@ -9,8 +9,7 @@ function sb()
   export sbatch=${analysis}/peptide/${protein}/${protein}-pgwas.sb
 
   Rscript -e '
-    .libPaths("/usr/local/Cluster-Apps/ceuadmin/R/R")
-    .libPaths("/usr/local/Cluster-Apps/ceuadmin/R/R-icelake")
+    .libPaths()
     suppressMessages(library(Biobase))
     suppressMessages(library(dplyr))
     pilot <- Sys.getenv("pilot")
@@ -18,13 +17,13 @@ function sb()
     protein <- Sys.getenv("protein")
     pcs <- paste0("ppc",1:3)
     ccovars <- c("sexPulse","agePulse",pcs,paste0("PC",1:20))
-    dat <- read.delim(file.path(pilot,"work","caprion.pheno"))[c("FID","IID","caprion_id",ccovars)] %>%
+    dat <- read.delim(file.path(analysis,"output","caprion.pheno"))[c("FID","IID","caprion_id",ccovars)] %>%
            rename(id=caprion_id)
     normalise_peptide <- function(batch,batches=c("ZWK","ZYQ","UDP"),verbose=FALSE)
     {
       if (batch==1) covars <- setdiff(ccovars,pcs) else covars <- ccovars
       code <- batches[batch]
-      load(paste0("~/Caprion/pilot/",code,".rda"))
+      load(paste0(pilot,"/",code,".rda"))
       peptide_ids <- subset(get(paste("mapping",code,sep="_")),Protein==paste0(protein,"_HUMAN"))[["Isotope.Group.ID"]]
       peptide_exprs <- exprs(get(paste("peptide",code,sep="_")))
       peptide_exprs <- subset(peptide_exprs, rownames(peptide_exprs) %in% peptide_ids)
@@ -119,19 +118,16 @@ cat << 'EOL' > ${sbatch}
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
-module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
 
 export protein=PROTEIN
 export TMPDIR=${HPC_WORK}/work
-export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
 
 function fastLR()
 {
   export batch=${1}
   export fastGWA=gcta-1.9
-
   export col=${SLURM_ARRAY_TASK_ID}
   export peptide=$(awk 'NR==1{print $(col+2)}' col=${col} ${pheno})
   export root=${analysis}/peptide/${protein}/${protein}
@@ -180,6 +176,12 @@ export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
+if [ "$(uname -n | sed 's/-[0-9]*$//')" == "login-q" ]; then
+   module load ceuadmin/R/4.3.3-icelake
+else
+   module load ceuadmin/R
+fi
+
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
 grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
@@ -187,8 +189,8 @@ while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein
     echo ${protein_index} ${protein}
-    export root=~/Caprion/analysis/peptide/${protein}
-    export pheno=${analysis}/peptide/${protein}/${protein}.pheno
-    export N=$(awk "NR==1{print NF-2}" ${pheno})
+    export root=${analysis}/peptide/${protein}
     sb ${protein_index}
+    export pheno=${root}/${protein}.pheno
+    export N=$(awk "NR==1{print NF-2}" ${pheno})
 done

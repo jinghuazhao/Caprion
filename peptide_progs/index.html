@@ -168,7 +168,13 @@
 <ul>
 <li>a call to <code>gz()</code> for a compressed DR-filtered data.</li>
 <li>Ensembl-VEP (also step 3.2 above) but <code>ceuadmin/ensembl-vep/104</code> does not work on icelake; a remedy is made with <code>ceuadmin/ensembl-vep/111-icelake</code> -- as documented this is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</li>
-</ul></div>
+</ul>
+<hr />
+<p>On icelake and module ceuadmin/R/4.3.3-icelake, currently there is the following error</p>
+<blockquote>
+<p>libjson-c.so.4: no version information available (required by /usr/lib64/libcryptsetup.so.12</p>
+</blockquote>
+<p>so is run under cclake for R but jobs are sent to <code>icelake-himem</code> for analysis.</p></div>
             </div>
         </div>
 

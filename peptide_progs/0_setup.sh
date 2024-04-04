@@ -5,6 +5,44 @@ export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
+function with_pQTL_only1()
+# only those with pQTLs:
+{
+  export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
+  for i in $(echo $(seq ${n_with_signals} | grep -w -f <(sed 's/, /\n/g' benchmark2.lst)))
+  do
+    export signal_index=${i}
+    export signal_list=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]' | grep -f - -n -w ${signals} | cut -d':' -f1)
+    export protein_index=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]' | grep -f - -n -w ${varlist} | cut -d':' -f1)
+    export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
+    echo $protein, $signal_index, $protein_index, $signal_list
+    sb ${protein_index}
+  done
+}
+# 79 proteins have errors since they took longer than 12hrs to finish:
+# for i in $(grep error ${analysis}/peptide/*/*.e | sed 's|/|\t|g' | cut -f7 | grep -n -w -f - ${pilot}/work/caprion.varlist | cut -d':' -f1)
+# Some batches contain no data
+# 72 160 237 382 for BROX, CT027, GHRL, NCF2
+
+function with_pQTL_only2()
+# only those with pQTLs
+{
+  export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
+  for i in $(echo $(seq ${n_with_signals} | grep -w -f <(sed 's/, /\n/g' benchmark2.lst)))
+  do
+    export signal_index=${i}
+    export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
+    export root=~/Caprion/analysis/peptide/${protein}
+    export pheno=${analysis}/peptide/${protein}/${protein}.pheno
+    export N=$(awk 'NR==1{print NF-2}' ${pheno})
+    echo ${signal_index}, ${protein}
+    if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
+    METAL_list
+    METAL_files
+    METAL_analysis_sbatch
+  done
+}
+
 function with_pQTL_only3()
 # only those with pQTLs
 {

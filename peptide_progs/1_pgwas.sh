@@ -10,6 +10,7 @@ function sb()
 
   Rscript -e '
     .libPaths("/usr/local/Cluster-Apps/ceuadmin/R/R")
+    .libPaths("/usr/local/Cluster-Apps/ceuadmin/R/R-icelake")
     suppressMessages(library(Biobase))
     suppressMessages(library(dplyr))
     pilot <- Sys.getenv("pilot")
@@ -118,7 +119,7 @@ cat << 'EOL' > ${sbatch}
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
-module load R/4.3.1-icelake
+module load ceuadmin/R/4.3.3-icelake
 module load samtools/1.13/gcc/zwxn7ug3
 
 export protein=PROTEIN
@@ -181,29 +182,13 @@ export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein
     echo ${protein_index} ${protein}
+    export root=~/Caprion/analysis/peptide/${protein}
+    export pheno=${analysis}/peptide/${protein}/${protein}.pheno
+    export N=$(awk "NR==1{print NF-2}" ${pheno})
     sb ${protein_index}
 done
-
-function with_pQTL_only1()
-# only those with pQTLs:
-{
-  export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-  for i in $(echo $(seq ${n_with_signals} | grep -w -f <(sed 's/, /\n/g' benchmark2.lst)))
-  do
-    export signal_index=${i}
-    export signal_list=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]' | grep -f - -n -w ${signals} | cut -d':' -f1)
-    export protein_index=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]' | grep -f - -n -w ${varlist} | cut -d':' -f1)
-    export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
-    echo $protein, $signal_index, $protein_index, $signal_list
-    sb ${protein_index}
-  done
-}
-# 79 proteins have errors since they took longer than 12hrs to finish:
-# for i in $(grep error ${analysis}/peptide/*/*.e | sed 's|/|\t|g' | cut -f7 | grep -n -w -f - ${pilot}/work/caprion.varlist | cut -d':' -f1)
-# Some batches contain no data
-# 72 160 237 382 for BROX, CT027, GHRL, NCF2

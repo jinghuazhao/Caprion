@@ -118,11 +118,11 @@ export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
 sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-step1.sb
 }
 
-source 3.0_setup.sh
+source 0_setup.sh
 
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

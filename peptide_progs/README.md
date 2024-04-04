@@ -25,4 +25,4 @@ On icelake and module ceuadmin/R/4.3.3-icelake, currently there is the following
 
 > libjson-c.so.4: no version information available (required by /usr/lib64/libcryptsetup.so.12
 
-so is run under cclake for R but jobs are sent to `icelake-himem` for analysis.
+so is run under cclake for R but jobs are sent to `icelake-himem` for analysis. A possible workaround is to use `R/4.3.1-icelake` instead.

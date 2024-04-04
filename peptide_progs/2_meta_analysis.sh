@@ -138,7 +138,7 @@ export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein
@@ -151,22 +151,3 @@ while IFS=":" read -r protein_index protein; do
     METAL_files
     METAL_analysis_sbatch
 done
-
-function with_pQTL_only2()
-# only those with pQTLs
-{
-  export n_with_signals=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | wc -l)
-  for i in $(echo $(seq ${n_with_signals} | grep -w -f <(sed 's/, /\n/g' benchmark2.lst)))
-  do
-    export signal_index=${i}
-    export protein=$(awk 'NR>1{print $1}' ${signals} | sort -k1,1 | uniq | awk 'NR==ENVIRON["signal_index"]')
-    export root=~/Caprion/analysis/peptide/${protein}
-    export pheno=${analysis}/peptide/${protein}/${protein}.pheno
-    export N=$(awk 'NR==1{print NF-2}' ${pheno})
-    echo ${signal_index}, ${protein}
-    if [ ! -d ${root}/METAL ]; then mkdir ${root}/METAL; fi
-    METAL_list
-    METAL_files
-    METAL_analysis_sbatch
-  done
-}

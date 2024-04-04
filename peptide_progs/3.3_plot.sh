@@ -375,11 +375,11 @@ function fplz()
   sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- ${root}/HetISq75.pdf
 }
 
-source 3.0_setup.sh
+source setup.sh
 
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

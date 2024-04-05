@@ -17,12 +17,12 @@ In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.
 Prerequistes for a Manhattan/peptide association plot by `0_utils.sh` are
 
 - a call to `gz()` for a compressed DR-filtered data.
-- Ensembl-VEP (also step 3.2 above) but `ceuadmin/ensembl-vep/104` does not work on icelake; a remedy is made with `ceuadmin/ensembl-vep/111-icelake` -- as documented this is feasible with `vep -i variants.vcf --plugin LoFtool,scores_file.txt`.
+- Ensembl-VEP (also step 3.2 above) but `ceuadmin/ensembl-vep/104` has to be `ceuadmin/ensembl-vep/111-icelake` so is feasible with `vep -i variants.vcf --plugin LoFtool,scores_file.txt`.
 
 ---
 
-On icelake and module ceuadmin/R/4.3.3-icelake, currently there is the following error
+On icelake and module `ceuadmin/R/4.3.3-icelake`, an error associated with `libjson-c.so.4` is now fixed.
 
-> libjson-c.so.4: no version information available (required by /usr/lib64/libcryptsetup.so.12
+> no version information available (required by /usr/lib64/libcryptsetup.so.12
 
-so is run under cclake for R but jobs are sent to `icelake-himem` for analysis. A possible workaround is to use `R/4.3.1-icelake` instead.
+so it works as smoothly as `ceuadmin/R`.

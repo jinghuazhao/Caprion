@@ -21,8 +21,4 @@ Prerequistes for a Manhattan/peptide association plot by `0_utils.sh` are
 
 ---
 
-On icelake and module `ceuadmin/R/4.3.3-icelake`, an error associated with `libjson-c.so.4` is now fixed.
-
-> no version information available (required by /usr/lib64/libcryptsetup.so.12
-
-so it works as smoothly as `ceuadmin/R`.
+The CSD3 icelake module `ceuadmin/R/4.3.3-icelake` now works as smoothly as `ceuadmin/R` for cclake

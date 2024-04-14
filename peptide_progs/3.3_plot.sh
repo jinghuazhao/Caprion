@@ -375,7 +375,7 @@ function fplz()
   sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- ${root}/HetISq75.pdf
 }
 
-source setup.sh
+source 0_setup.sh
 
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \

@@ -4,7 +4,7 @@
 
 Peptide-level analysis mirrors protein-level analysis as in **peptide_progs/**,
 
-Name       | Description          | Error/Output per Protein
+Name       | Description          | Protein-specific error/Output
 -----------|----------------------|-----------------------------------------------------------
 0_utils.sh | Code snippets
 1_pgwas.sh | Association analysis[^association] | {protein}.e/{protein}.o

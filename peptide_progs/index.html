@@ -157,12 +157,12 @@
 <tr>
 <td>1_pgwas.sh</td>
 <td>Association analysis<sup id="fnref:association"><a class="footnote-ref" href="#fn:association">1</a></sup></td>
-<td>{protein}.e/{protein}.o</td>
+<td>{protein}.e / {protein}.o</td>
 </tr>
 <tr>
 <td>2_meta_analysis.sh</td>
 <td>Meta-analysis</td>
-<td>{protein}-METAL_{SLURM_job_id}_{phenotype_number}.e/{protein}-METAL_{SLURM_job_id}_{phenotype_number}.o</td>
+<td>{protein}-METAL_{SLURM_job_id}_{phenotype_number}.e / {protein}-METAL_{SLURM_job_id}_{phenotype_number}.o</td>
 </tr>
 <tr>
 <td>3</td>
@@ -172,17 +172,17 @@
 <tr>
 <td>3.1_extract.sh</td>
 <td>Signal extraction</td>
-<td>_step1_{SLURM_job_id}_{phenotype_number}.e/_step1_{SLURM_job_id}_{phenotype_number}.o</td>
+<td>_step1_{SLURM_job_id}_{phenotype_number}.e / _step1_{SLURM_job_id}_{phenotype_number}.o</td>
 </tr>
 <tr>
 <td>3.2_collect.sh</td>
 <td>Signal collection/classification</td>
-<td>_step2_{protein}.e/_step2_{protein}.o</td>
+<td>_step2_{protein}.e / _step2_{protein}.o</td>
 </tr>
 <tr>
 <td>3.3_plot.sh</td>
 <td>Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots</td>
-<td>_step3_{SLURM_job_id}_{phenotype_number}.e/_step1_{SLURM_job_id}_{phenotype_number}.o</td>
+<td>_step3_{SLURM_job_id}_{phenotype_number}.e / _step1_{SLURM_job_id}_{phenotype_number}.o</td>
 </tr>
 </tbody>
 </table>

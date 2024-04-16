@@ -8,7 +8,7 @@ Name       | Description          | Error/Output per Protein
 -----------|----------------------|-----------------------------------------------------------
 0_utils.sh | Code snippets
 1_pgwas.sh | Association analysis[^association] | {protein}.e/{protein}.o
-2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
+2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e/{protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
 3 | Signal identification[^location]
 3.1_extract.sh | Signal extraction | \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.e/\_step1\_{SLURM\_job\_id}\_{phenotype\_number}.o
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e/\_step2\_{protein}.o

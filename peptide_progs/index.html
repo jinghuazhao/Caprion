@@ -116,6 +116,14 @@
             
             <li class="nav-item" data-level="1"><a href="#peptide-analysis" class="nav-link">Peptide analysis</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#scripts-logs" class="nav-link">Scripts / Logs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#footnotes" class="nav-link">Footnotes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -124,53 +132,79 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="peptide-analysis">Peptide analysis</h1>
+<h2 id="scripts-logs">Scripts / Logs</h2>
 <p>Peptide-level analysis mirrors protein-level analysis as in <strong>peptide_progs/</strong>,</p>
 <table>
 <thead>
 <tr>
 <th>Name</th>
 <th>Description</th>
+<th>Error/Output per Protein</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0_utils.sh</td>
 <td>Code snippets</td>
+<td></td>
 </tr>
 <tr>
 <td>1_pgwas.sh</td>
-<td>Association analysis</td>
+<td>Association analysis<sup id="fnref:association"><a class="footnote-ref" href="#fn:association">1</a></sup></td>
+<td>{protein}.e/{protein}.o</td>
 </tr>
 <tr>
 <td>2_meta_analysis.sh</td>
 <td>Meta-analysis</td>
+<td>{protein}-METAL_{SLURM_job_id}_{phenotype_number}.o</td>
 </tr>
 <tr>
 <td>3</td>
-<td>Signal identification</td>
+<td>Signal identification<sup id="fnref:location"><a class="footnote-ref" href="#fn:location">2</a></sup></td>
+<td></td>
 </tr>
 <tr>
 <td>3.1_extract.sh</td>
 <td>Signal extraction</td>
+<td><em SLURM_job_id="SLURM_job_id">step1</em>_{phenotype_number}.e</td>
 </tr>
 <tr>
 <td>3.2_collect.sh</td>
 <td>Signal collection/classification</td>
+<td><em protein="protein">step2</em>.e/<em protein="protein">step2</em>.o</td>
 </tr>
 <tr>
 <td>3.3_plot.sh</td>
-<td>Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots</td>
+<td>Various plots<sup id="fnref:plots"><a class="footnote-ref" href="#fn:plots">3</a></sup></td>
+<td><em SLURM_job_id="SLURM_job_id">step3</em><em SLURM_job_id="SLURM_job_id">{phenotype_number}.e/_step1</em>_{phenotype_number}.o</td>
 </tr>
 </tbody>
 </table>
-<p>In particular, CO3 and ITIH2 are resumed after the 12hr threshold for SLURM.</p>
 <p>Prerequistes for a Manhattan/peptide association plot by <code>0_utils.sh</code> are</p>
 <ul>
 <li>a call to <code>gz()</code> for a compressed DR-filtered data.</li>
 <li>Ensembl-VEP (also step 3.2 above) but <code>ceuadmin/ensembl-vep/104</code> has to be <code>ceuadmin/ensembl-vep/111-icelake</code> so is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</li>
 </ul>
+<p>CO3 and ITIH2 initially required re-run after the 12hr threshold for SLURM, but now both appeared furnished within 12hr.</p>
+<p>The CSD3 icelake module <code>ceuadmin/R/4.3.3-icelake</code> now works as smoothly as <code>ceuadmin/R</code> for cclake</p>
+<h2 id="footnotes">Footnotes</h2>
+<div class="footnote">
 <hr />
-<p>The CSD3 icelake module <code>ceuadmin/R/4.3.3-icelake</code> now works as smoothly as <code>ceuadmin/R</code> for cclake</p></div>
+<ol>
+<li id="fn:association">
+<p><strong>Association</strong></p>
+<p>Accidentally, they were removed for the benchmarks: A1BG, APOB EPCR, ERAP2, PROC.&#160;<a class="footnote-backref" href="#fnref:association" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:location">
+<p><strong>Location</strong></p>
+<p><strong>sentinels/slurm</strong>&#160;<a class="footnote-backref" href="#fnref:location" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:plots">
+<p><strong>Plots</strong></p>
+<p>These include forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots.&#160;<a class="footnote-backref" href="#fnref:plots" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div></div>
             </div>
         </div>
 

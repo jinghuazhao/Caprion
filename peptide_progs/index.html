@@ -116,7 +116,11 @@
             
             <li class="nav-item" data-level="1"><a href="#peptide-analysis" class="nav-link">Peptide analysis</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#scripts-logs" class="nav-link">Scripts / Logs</a>
+            <li class="nav-item" data-level="2"><a href="#csd3-directory" class="nav-link">CSD3 directory</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#scripts-and-results" class="nav-link">Scripts and results</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -132,13 +136,14 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="peptide-analysis">Peptide analysis</h1>
-<h2 id="scripts-logs">Scripts / Logs</h2>
-<p>Peptide-level analysis mirrors protein-level counterpart at <strong>/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/</strong>.</p>
-<p>Scripts are in <strong>peptide_progs/</strong>, generating results in <strong>peptide/</strong>.</p>
+<h2 id="csd3-directory">CSD3 directory</h2>
+<p><strong>/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/</strong></p>
+<h2 id="scripts-and-results">Scripts and results</h2>
+<p>The project directory above contains scripts at <strong>peptide_progs/</strong> and results results at <strong>peptide/</strong>, respectively.</p>
 <table>
 <thead>
 <tr>
-<th>Name</th>
+<th>Scripts</th>
 <th>Description</th>
 <th>Protein-specific error/output</th>
 </tr>
@@ -186,8 +191,7 @@
 <li>a call to <code>gz()</code> for a compressed DR-filtered data.</li>
 <li>Ensembl-VEP (also step 3.2 above) but <code>ceuadmin/ensembl-vep/104</code> has to be <code>ceuadmin/ensembl-vep/111-icelake</code> so is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</li>
 </ul>
-<p>CO3 and ITIH2 initially required re-run after the 12hr threshold for SLURM, but now both appeared furnished within 12hr.</p>
-<p>The CSD3 icelake module <code>ceuadmin/R/4.3.3-icelake</code> now works as smoothly as <code>ceuadmin/R</code> for cclake</p>
+<p>The CSD3 icelake module <code>ceuadmin/R/4.3.3-icelake</code> now works as smoothly as <code>ceuadmin/R</code> for cclake.</p>
 <h2 id="footnotes">Footnotes</h2>
 <div class="footnote">
 <hr />

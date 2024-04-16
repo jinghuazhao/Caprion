@@ -2,10 +2,9 @@
 
 ## Scripts / Logs
 
-Peptide-level analysis mirrors protein-level analysis.
+Peptide-level analysis mirrors protein-level counterpart at **/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/**.
 
-Scripts are in **peptide_progs/**, generating results in **/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/peptide**.
-
+Scripts are in **peptide_progs/**, generating results in **peptide/**.
 
 Name       | Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------

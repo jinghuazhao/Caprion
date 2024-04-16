@@ -1,12 +1,14 @@
 # Peptide analysis
 
-## Scripts / Logs
+## CSD3 directory
 
-Peptide-level analysis mirrors protein-level counterpart at **/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/**.
+**/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/**
 
-Scripts are in **peptide_progs/**, generating results in **peptide/**.
+## Scripts and results
 
-Name       | Description          | Protein-specific error/output
+The project directory above contains scripts at **peptide_progs/** and results results at **peptide/**, respectively.
+
+Scripts    | Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
 0_utils.sh | Code snippets
 1_pgwas.sh | Association analysis[^association] | {protein}.e/{protein}.o
@@ -21,9 +23,7 @@ Prerequistes for a Manhattan/peptide association plot by `0_utils.sh` are
 - a call to `gz()` for a compressed DR-filtered data.
 - Ensembl-VEP (also step 3.2 above) but `ceuadmin/ensembl-vep/104` has to be `ceuadmin/ensembl-vep/111-icelake` so is feasible with `vep -i variants.vcf --plugin LoFtool,scores_file.txt`.
 
-CO3 and ITIH2 initially required re-run after the 12hr threshold for SLURM, but now both appeared furnished within 12hr.
-
-The CSD3 icelake module `ceuadmin/R/4.3.3-icelake` now works as smoothly as `ceuadmin/R` for cclake
+The CSD3 icelake module `ceuadmin/R/4.3.3-icelake` now works as smoothly as `ceuadmin/R` for cclake.
 
 ## Footnotes
 

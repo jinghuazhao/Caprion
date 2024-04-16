@@ -8,7 +8,7 @@
 
 The project directory above contains scripts at **peptide_progs/** and results results at **peptide/**, respectively.
 
-Scripts    | Description          | Protein-specific error/output
+Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
 0_utils.sh | Code snippets
 1_pgwas.sh | Association analysis[^association] | {protein}.e / {protein}.o

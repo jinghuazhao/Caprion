@@ -186,10 +186,10 @@
 </tr>
 </tbody>
 </table>
-<p>Prerequistes for a Manhattan/peptide association plot by <code>0_utils.sh</code> are</p>
+<p>Prerequistes for a Manhattan/peptide association plot are</p>
 <ul>
-<li>a call to <code>gz()</code> for a compressed DR-filtered data.</li>
-<li>Ensembl-VEP (also step 3.2 above) but <code>ceuadmin/ensembl-vep/104</code> has to be <code>ceuadmin/ensembl-vep/111-icelake</code> so is feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>.</li>
+<li>a call to <code>gz()</code> (in <code>0_utils.sh</code> for protein) for a compressed DR-filtered data.</li>
+<li>Ensembl-VEP (step 3.2 above) but <code>ceuadmin/ensembl-vep/104</code> has to be <code>ceuadmin/ensembl-vep/111-icelake</code>(so feasible with <code>vep -i variants.vcf --plugin LoFtool,scores_file.txt</code>) but plugins have to be added.</li>
 </ul>
 <p>The CSD3 icelake module <code>ceuadmin/R/4.3.3-icelake</code> now works as smoothly as <code>ceuadmin/R</code> for cclake.</p>
 <h2 id="footnotes">Footnotes</h2>

@@ -18,10 +18,10 @@ Script name| Description          | Protein-specific error/output
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
 
-Prerequistes for a Manhattan/peptide association plot by `0_utils.sh` are
+Prerequistes for a Manhattan/peptide association plot are
 
-- a call to `gz()` for a compressed DR-filtered data.
-- Ensembl-VEP (also step 3.2 above) but `ceuadmin/ensembl-vep/104` has to be `ceuadmin/ensembl-vep/111-icelake` so is feasible with `vep -i variants.vcf --plugin LoFtool,scores_file.txt`.
+- a call to `gz()` (in `0_utils.sh` for protein) for a compressed DR-filtered data.
+- Ensembl-VEP (step 3.2 above) but `ceuadmin/ensembl-vep/104` has to be `ceuadmin/ensembl-vep/111-icelake`(so feasible with `vep -i variants.vcf --plugin LoFtool,scores_file.txt`) but plugins have to be added.
 
 The CSD3 icelake module `ceuadmin/R/4.3.3-icelake` now works as smoothly as `ceuadmin/R` for cclake.
 

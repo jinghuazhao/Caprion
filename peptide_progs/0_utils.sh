@@ -19,6 +19,14 @@ cat <(cat ${analysis}/peptide/*/*cis.vs.trans | head -1) \
       parallel -C' ' 'awk "NR>1" ${analysis}/peptide/{}/{}.cis.vs.trans') \
     > ${analysis}/reports/peptide.cis.vs.trans
 
+Rscript -e '
+  library(dplyr)
+  snplist_01 <- scan("~/Caprion/analysis/bgen/caprion-0.01.snplist",what="")
+  cvt_01 <- read.csv("~/Caprion/analysis/reports/peptide.cis.vs.trans") %>%
+            filter(SNP %in% snplist_01)
+  write.csv(cvt_01,file="~/Caprion/analysis/reports/peptide-01.cis.vs.trans",row.names=FALSE,quote=FALSE)
+'
+
 # Proteins
 sed '1d' ${analysis}/reports/peptide.signals | \
 cut -f1 | \

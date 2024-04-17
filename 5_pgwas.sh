@@ -71,6 +71,10 @@ function X()
   (
     parallel -C' ' 'cat ${analysis}/bgen/chr{}.snplist' ::: $(echo {1..22} X)
   ) > ${analysis}/bgen/caprion.snplist
+  awk 'NR>1 && $5>=0.01 && $5<=0.99 {print $2}' ${analysis}/bgen/chrX-freq.afreq > ${analysis}/bgen/chrX-0.01.snplist
+  (
+    parallel -C' ' 'cat ${analysis}/bgen/chr{}-0.01.snplist' ::: $(echo {1..22} X)
+  ) > ${analysis}/bgen/caprion-0.01.snplist
 }
 
 function lrlist()

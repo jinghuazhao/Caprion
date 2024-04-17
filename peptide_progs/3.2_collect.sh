@@ -10,7 +10,7 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 #SBATCH --time=12:00:00
 
 #SBATCH --account PETERS-SL3-CPU
-#SBATCH --partition icelake
+#SBATCH --partition icelake-himem
 
 #SBATCH --export ALL
 #SBATCH --output=ROOT/sentinels/slurm/_step2_LABEL.o

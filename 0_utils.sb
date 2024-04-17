@@ -961,8 +961,9 @@ wb <- createWorkbook(xlsx)
 addWorksheet(wb,"Summary",zoom=150)
 writeData(wb,"Summary","Summary",xy=c(1,1),headerStyle=createStyle(textDecoration="BOLD",
           fontColour="#FFFFFF", fontSize=14, fontName="Arial Narrow", fgFill="#4F80BD"))
-summary <- data.frame(Sheet=c("Protein","Protein_dr","Peptides"),
-                      Description=c("Unfiltered proteins","DR-filtered proteins", "All peptides"))
+summary <- data.frame(Sheet=c("Protein_0.01","Protein_dr_0.01","Peptides_0.01","Protein","Protein_dr","Peptides"),
+                      Description=c("Unfiltered proteins, MAF>=0.01","DR-filtered proteins, MAF>=0.01","All peptides, MAF>=0.01",
+                                     "Unfiltered proteins","DR-filtered proteins", "All peptides"))
 writeDataTable(wb, "Summary", summary, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
 Protein <- read.csv(file.path(analysis,"work","caprion.cis.vs.trans"))
 Protein_dr <- read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans"))
@@ -979,7 +980,11 @@ for (peptide in proteins)
 }
 repl <- with(Peptides,grepl("1433$",prot))
 Peptides[repl,"prot"] <- "1433E"
-for (i in c("Protein","Protein_dr","Peptides"))
+snplist_0.01 <- scan("~/Caprion/analysis/bgen/caprion-0.01.snplist",what="")
+Protein_0.01 <- filter(Protein,SNP %in% snplist_0.01)
+Protein_dr_0.01 <- filter(Protein_dr,SNP %in% snplist_0.01)
+Peptides_0.01 <- filter(Peptides,SNP %in% snplist_0.01)
+for (i in c("Protein_0.01","Protein_dr_0.01","Peptides_0.01","Protein","Protein_dr","Peptides"))
 {
     sheetnames <- i
     cat(sheetnames,"\n")

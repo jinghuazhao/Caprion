@@ -18,7 +18,6 @@ cat <<'EOL'> ${root}/${protein}-step2.sb
 
 export TMPDIR=${HPC_WORK}/work
 export protein=PROTEIN
-export PERL5LIB=
 
 . /etc/profile.d/modules.sh
 module purge
@@ -156,9 +155,9 @@ function vep_annotate()
     cd ${HPC_WORK}/loftee
     vep --input_file ${root}/METAL/vep/{}.vcf \
         --output_file ${root}/METAL/vep/{}.tab --force_overwrite \
-        --cache --dir_cache ${HPC_WORK}/ensembl-vep/.vep --dir_plugins ${HPC_WORK}/loftee --offline \
-        --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol --plugin TSSDistance \
-        --plugin LoF,loftee_path:.,human_ancestor_fa:human_ancestor.fa.gz,conservation_file:phylocsf_gerp.sql.gz \
+        --cache --dir_cache /usr/local/Cluster-Apps/ceuadmin/ensembl-vep/111-icelake/.vep \
+        --offline \
+        --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol \
         --tab
     cd -
     (

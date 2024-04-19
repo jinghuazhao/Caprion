@@ -967,7 +967,7 @@ summary <- data.frame(Sheet=c("Protein_0.01","Protein_dr_0.01","Peptides_0.01",
                               "Protein_0.01_0.001","Protein_dr_0.01_0.001","Peptides_0.01_0.001",
                               "Protein","Protein_dr","Peptides"),
                       Description=c("Unfiltered proteins, MAF>=0.01","DR-filtered proteins, MAF>=0.01","All peptides, MAF>=0.01",
-                                    "Unfiltered proteins, MAF in (0.01,0.001)","DR-filtered proteins, MAF (0.01,0.001)","All peptides, MAF in (0.01,0.001)",
+                                    "Unfiltered proteins, MAF in (0.01,0.001]","DR-filtered proteins, MAF (0.01,0.001]","All peptides, MAF in (0.01,0.001]",
                                     "Unfiltered proteins","DR-filtered proteins","All peptides"))
 writeDataTable(wb, "Summary", summary, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
 freq <- read.table("~/Caprion/analysis/bgen/caprion.freq",col.names=c("SNP","REF","ALT","ALT_FREQS"))
@@ -1000,7 +1000,7 @@ snplist_0.01 <- filter(freq,ALT_FREQS>=0.01 & ALT_FREQS<=0.99) %>%
 Protein_0.01 <- filter(Protein,SNP %in% snplist_0.01)
 Protein_dr_0.01 <- filter(Protein_dr,SNP %in% snplist_0.01)
 Peptides_0.01 <- filter(Peptides,SNP %in% snplist_0.01)
-snplist_0.01_0.001 <- filter(freq,(ALT_FREQS>0.001 & ALT_FREQS< 0.01)|(ALT_FREQS>0.99 & ALT_FREQS<0.999)) %>%
+snplist_0.01_0.001 <- filter(freq,(ALT_FREQS>=0.001 & ALT_FREQS<0.01)|(ALT_FREQS>0.99 & ALT_FREQS<=0.999)) %>%
                       pull(SNP)
 Protein_0.01_0.001 <- filter(Protein,SNP %in% snplist_0.01_0.001)
 Protein_dr_0.01_0.001 <- filter(Protein_dr,SNP %in% snplist_0.01_0.001)

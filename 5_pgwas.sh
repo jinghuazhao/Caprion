@@ -70,11 +70,13 @@ function X()
      > ${analysis}/output/chrX${suffix}-3.id
   (
     parallel -C' ' 'cat ${analysis}/bgen/chr{}.snplist' ::: $(echo {1..22} X)
-  ) > ${analysis}/bgen/caprion.snplist
+  )  | \
+  uniq > ${analysis}/bgen/caprion.snplist
   awk 'NR>1 && $5>=0.01 && $5<=0.99 {print $2}' ${analysis}/bgen/chrX-freq.afreq > ${analysis}/bgen/chrX-0.01.snplist
   (
     parallel -C' ' 'cat ${analysis}/bgen/chr{}-0.01.snplist' ::: $(echo {1..22} X)
-  ) > ${analysis}/bgen/caprion-0.01.snplist
+  ) | \
+  uniq > ${analysis}/bgen/caprion-0.01.snplist
 }
 
 function lrlist()
@@ -104,6 +106,13 @@ function collect()
        tabix -f -S1 -s2 -b3 -e3 ${analysis}/work/${out}
     fi
   ' ::: $(cat ${analysis}/work/caprion${suffix}.varlist)
+  parallel -C' ' '
+    export chr=chr{}
+    awk "NR>1 && \$5>=0.001 && \$5<=0.999 {print \$2,\$3,\$4,\$5}" ${analysis}/bgen/${chr}-freq.afreq > ${analysis}/bgen/${chr}.freq
+    awk "NR>1 && \$5>=0.01 && \$5<=0.99 {print \$2,\$3,\$4,\$5}" ${analysis}/bgen/${chr}-freq.afreq > ${analysis}/bgen/${chr}-0.01.freq
+  ' ::: $(echo {1..22} X)
+  cat ${analysis}/bgen/chr{1..22}.freq ${analysis}/bgen/chrX.freq > ${analysis}/bgen/caprion.freq
+  cat ${analysis}/bgen/chr{1..22}-0.01.freq ${analysis}/bgen/chrX-0.01.freq > ${analysis}/bgen/caprion-0.01.freq
 }
 
 function tableMAF()

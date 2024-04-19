@@ -83,17 +83,15 @@ function freq()
          --freq \
          --out ${analysis}/bgen/${chr}-freq
   awk 'NR>1 && $5>=0.001 && $5<=0.999 {print $2}' ${analysis}/bgen/${chr}-freq.afreq > ${analysis}/bgen/${chr}.snplist
-
 }
 
-function freq01()
+function freq.01()
 {
   export chr=chr${SLURM_ARRAY_TASK_ID}
   plink2 --bgen ${analysis}/bgen/${chr}.bgen ref-unknown --sample ${analysis}/bgen/${chr}.sample \
          --freq \
          --out ${analysis}/bgen/${chr}-freq
   awk 'NR>1 && $5>=0.01 && $5<=0.99 {print $2}' ${analysis}/bgen/${chr}-freq.afreq > ${analysis}/bgen/${chr}-0.01.snplist
-
 }
 
 function fastLR()
@@ -478,7 +476,7 @@ function miamiplot2()
 
 #bgen
 #freq
-freq01
+freq.01
 #fastLR 1
 #fastLR 2
 #fastLR 3

@@ -21,7 +21,7 @@ Script name| Description          | Protein-specific error/output
 Prerequistes for a Manhattan/peptide association plot are
 
 - a call to `gz()` (in `0_utils.sh` for protein) for a compressed DR-filtered data.
-- Ensembl-VEP (step 3.2 above) but `ceuadmin/ensembl-vep/104` has to be `ceuadmin/ensembl-vep/111-icelake`(so feasible with `vep -i variants.vcf --plugin LoFtool,scores_file.txt`) but plugins have to be added.
+- ensembl-vep (step 3.2 above)[^vep] `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is called.
 
 The CSD3 icelake module `ceuadmin/R/4.3.3-icelake` now works as smoothly as `ceuadmin/R` for cclake.
 
@@ -34,3 +34,7 @@ The CSD3 icelake module `ceuadmin/R/4.3.3-icelake` now works as smoothly as `ceu
 [^location]: **Location**
 
     **{protein}/sentinels/slurm**
+
+[^vep]: **ensembl-vep**
+
+    This is possible since plugin `Set::IntervalTree` has been made available. For cclake, one uses `ceuadmin/ensembl-vep/104`.

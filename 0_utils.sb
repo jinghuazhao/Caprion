@@ -981,25 +981,27 @@ freq <- read.table("~/Caprion/analysis/bgen/caprion.freq",col.names=c("SNP","REF
 tbl <- read.delim(file.path(analysis,"work","tbl.tsv")) %>%
        select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
        mutate(Allele1=toupper(Allele1),Allele2=toupper(Allele2)) %>%
-       rename(Protein=prot,SNP=MarkerName,Log10P=log.P.)
+       rename(Protein=prot,SNP=MarkerName,EA=Allele1,OA=Allele2,EAF=Freq1,Log10P=log.P.)
 tbl_dr <- read.delim(file.path(analysis,"work","tbl_dr.tsv")) %>%
           select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
           mutate(Allele1=toupper(Allele1),Allele2=toupper(Allele2)) %>%
-          rename(Protein=prot,SNP=MarkerName,Log10P=log.P.)
+          rename(Protein=prot,SNP=MarkerName,EA=Allele1,OA=Allele2,EAF=Freq1,Log10P=log.P.)
 Protein <- read.csv(file.path(analysis,"work","caprion.cis.vs.trans")) %>%
            mutate(geneRegion=paste(geneChrom,":",geneStart,"-",geneEnd)) %>%
            left_join(freq) %>%
            arrange(prot,SNPChrom,SNPPos) %>%
            rename(Protein=prot) %>%
            select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
-           left_join(tbl)
+           left_join(tbl) %>%
+           select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
 Protein_dr <- read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")) %>%
            mutate(geneRegion=paste(geneChrom,":",geneStart,"-",geneEnd)) %>%
            left_join(freq) %>%
            arrange(prot,SNPChrom,SNPPos) %>%
            rename(Protein=prot) %>%
            select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
-           left_join(tbl_dr)
+           left_join(tbl_dr) %>%
+           select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
 proteins <- setdiff(dir("~/Caprion/analysis/peptide"),"15-01-2024") # c("A1BG","APOB","EPCR","ERAP2","PROC")
 Peptides <- data.frame()
 for (peptide in proteins)

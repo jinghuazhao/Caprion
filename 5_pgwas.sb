@@ -149,7 +149,7 @@ function qqmanhattan()
        output_data_rootname=${analysis}/METAL${suffix}/qqmanhattanlz/${phenoname}_manhattan \
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
        pvalue_sign=5e-8 \
-       plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
+       plot_title="${phenoname}" < ~/cambridge-ceu/turboman/test.r
   else
     R --slave --vanilla --args \
       input_data_path=${analysis}/work/${phenoname}.txt.gz \
@@ -157,7 +157,7 @@ function qqmanhattan()
       custom_peak_annotation_file_path=${analysis}/METAL${suffix}/vep/${phenoname}.txt \
       reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
       pvalue_sign=5e-8 \
-      plot_title="${phenoname}" < ~/cambridge-ceu/turboman/turboman.r
+      plot_title="${phenoname}" < ~/cambridge-ceu/turboman/test.r
   fi
   rm ${analysis}/work/${phenoname}.txt.gz
 # R --no-save < utils/qqman.R

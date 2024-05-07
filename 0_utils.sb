@@ -13,8 +13,8 @@
 ##SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
 ##SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
 
-#SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.o
-#SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.e
+#SBATCH --output=/home/jhz22/Caprion/analysis/METAL/vep/slurm/_vep_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/METAL/vep/slurm/_vep_%A_%a.e
 
 . /etc/profile.d/modules.sh
 module purge
@@ -28,7 +28,7 @@ module load ceuadmin/ensembl-vep/111-icelake
 
 export TMPDIR=${HPC_WORK}/work
 export analysis=~/Caprion/analysis
-export suffix=
+export suffix=""
 
 function duplicates()
 {
@@ -642,7 +642,8 @@ function vep_annotate()
 {
   if [ ! -d ${analysis}/METAL${suffix}/vep/slurm ]; then mkdir -p ${analysis}/METAL${suffix}/vep/slurm; fi
   export cvt=${analysis}/work/caprion${suffix}.cis.vs.trans
-  cut -d"," -f3 ${cvt} | \
+  sed '1d' ${cvt} | \
+  cut -d"," -f3 | \
   sort -k1,1 | \
   uniq | \
   parallel -C' ' '
@@ -650,7 +651,7 @@ function vep_annotate()
     (
       echo "##fileformat=VCFv4.0"
       echo "#CHROM" "POS" "ID" "REF" "ALT" "QUAL" "FILTER" "INFO"
-      awk -vFS="," "\$5==ENVIRON[\"protein\"] {print \$2}" ${cvt} | \
+      awk -vFS="," "\$3==ENVIRON[\"protein\"] {print \$2}" ${cvt} | \
       sort -k1,1 | \
       zgrep -f - -w ${analysis}/METAL${suffix}/{}${suffix}-1.tbl.gz | \
       cut -f1-5 | \
@@ -666,7 +667,7 @@ function vep_annotate()
         --tab
     (
       echo chromosome position nearest_gene_name cistrans
-      awk -vFS="," "\$5==ENVIRON[\"protein\"] {print \$2,\$9,\$10,\$11}" ${cvt} | \
+      awk -vFS="," "\$3==ENVIRON[\"protein\"] {print \$2,\$9,\$10,\$11}" ${cvt} | \
       sort -k1,1 | \
       join - <(awk "!/#/{print \$1,\$21}" ${analysis}/METAL${suffix}/vep/{}.tab | sort -k1,1) | \
       awk "{print \$2,\$3,\$5,\$4}" | \

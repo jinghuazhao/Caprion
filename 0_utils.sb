@@ -967,21 +967,6 @@ require(stringr)
 options(width=2000)
 options("openxlsx.borderColour"="#4F80BD")
 analysis <- Sys.getenv("analysis")
-hs <- createStyle(textDecoration="BOLD", fontColour="#FFFFFF", fontSize=12, fontName="Arial Narrow", fgFill="#4F80BD")
-xlsx <- "https://jhz22.user.srcf.net/Caprion/results.xlsx"
-xlsx <- file.path(analysis,"reports","results.xlsx")
-wb <- createWorkbook(xlsx)
-addWorksheet(wb,"Summary",zoom=150)
-writeData(wb,"Summary","Summary",xy=c(1,1),headerStyle=createStyle(textDecoration="BOLD",
-          fontColour="#FFFFFF", fontSize=14, fontName="Arial Narrow", fgFill="#4F80BD"))
-summary <- data.frame(Sheet=c("Protein_0.01","Protein_dr_0.01","Peptides_0.01",
-                              "Protein_0.01_0.001","Protein_dr_0.01_0.001","Peptides_0.01_0.001",
-                              "Protein","Protein_dr","Peptides"),
-                      Description=c("Unfiltered proteins, MAF>=0.01","DR-filtered proteins, MAF>=0.01","All peptides, MAF>=0.01",
-                                    "Unfiltered proteins, MAF in (0.01,0.001]","DR-filtered proteins, MAF (0.01,0.001]",
-                                    "All peptides, MAF in (0.01,0.001]",
-                                    "Unfiltered proteins","DR-filtered proteins","All peptides"))
-writeDataTable(wb, "Summary", summary, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
 freq <- read.table("~/Caprion/analysis/bgen/caprion.freq",col.names=c("SNP","REF","ALT","ALT_FREQS"))
 tbl <- read.delim(file.path(analysis,"work","tbl.tsv")) %>%
        select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
@@ -1033,23 +1018,6 @@ snplist_0.01_0.001 <- filter(freq,(ALT_FREQS>=0.001 & ALT_FREQS<0.01)|(ALT_FREQS
 Protein_0.01_0.001 <- filter(Protein,SNP %in% snplist_0.01_0.001)
 Protein_dr_0.01_0.001 <- filter(Protein_dr,SNP %in% snplist_0.01_0.001)
 Peptides_0.01_0.001 <- filter(Peptides,SNP %in% snplist_0.01_0.001)
-for (i in c("Protein_0.01","Protein_dr_0.01","Peptides_0.01",
-            "Protein_0.01_0.001","Protein_dr_0.01_0.001","Peptides_0.01_0.001",
-            "Protein","Protein_dr","Peptides"))
-{
-    sheetnames <- i
-    cat(sheetnames,"\n")
-    addWorksheet(wb, sheetnames, zoom=150)
-    writeData(wb, sheetnames, sheetnames, xy=c(1,1),
-                  headerStyle=createStyle(textDecoration="BOLD",
-                                          fontColour="#FFFFFF", fontSize=14, fontName="Arial Narrow", fgFill="#4F80BD"))
-    body <- get(i)
-    writeDataTable(wb, sheetnames, body, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
-    freezePane(wb, sheetnames, firstCol=TRUE, firstActiveRow=3)
-}
-bStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
-hStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
-saveWorkbook(wb, file=xlsx, overwrite=TRUE)
 caprion <- dplyr::mutate(Protein, ProteinSNP=paste0(Protein,"-",SNP),inv_chr_pos_a1_a2(SNP),pos=as.integer(pos)) %>%
            dplyr::rename(prot=Protein,rsid=SNP,uniprot=Gene)
 caprion_dr <- dplyr::mutate(Protein_dr, ProteinSNP=paste0(Protein,"-",SNP),inv_chr_pos_a1_a2(SNP),pos=as.integer(pos)) %>%
@@ -1071,9 +1039,42 @@ for(i in unique(pull(caprion,chr)))
         dplyr::select(chr,pos,uniprot,rsid,prot)
    dr <- dplyr::filter(caprion_dr,chr %in% i) %>%
          dplyr::select(chr,pos,uniprot,rsid,prot)
-   bfile <- file.path(INF,"INTERVAL","per_chr",paste0("chr",i))
+   bfile <- file.path(INF,"INTERVAL","per_chr",paste0("snpid",i))
    b[[i]] <- pQTLtools::novelty_check(k,dr,ldops=list(bfile,plink))
 }
+replication <- filter(bind_rows(b),r2>=0.8)
+hs <- createStyle(textDecoration="BOLD", fontColour="#FFFFFF", fontSize=12, fontName="Arial Narrow", fgFill="#4F80BD")
+xlsx <- "https://jhz22.user.srcf.net/Caprion/results.xlsx"
+xlsx <- file.path(analysis,"reports","results.xlsx")
+wb <- createWorkbook(xlsx)
+addWorksheet(wb,"Summary",zoom=150)
+writeData(wb,"Summary","Summary",xy=c(1,1),headerStyle=createStyle(textDecoration="BOLD",
+          fontColour="#FFFFFF", fontSize=14, fontName="Arial Narrow", fgFill="#4F80BD"))
+summary <- data.frame(Sheet=c("Protein_0.01","Protein_dr_0.01","Peptides_0.01",
+                              "Protein_0.01_0.001","Protein_dr_0.01_0.001","Peptides_0.01_0.001",
+                              "Protein","Protein_dr","Peptides"),
+                      Description=c("Unfiltered proteins, MAF>=0.01","DR-filtered proteins, MAF>=0.01","All peptides, MAF>=0.01",
+                                    "Unfiltered proteins, MAF in (0.01,0.001]","DR-filtered proteins, MAF (0.01,0.001]",
+                                    "All peptides, MAF in (0.01,0.001]",
+                                    "Unfiltered proteins","DR-filtered proteins","All peptides"))
+writeDataTable(wb, "Summary", summary, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
+for (i in c("Protein_0.01","Protein_dr_0.01","Peptides_0.01",
+            "Protein_0.01_0.001","Protein_dr_0.01_0.001","Peptides_0.01_0.001",
+            "Protein","Protein_dr","Peptides"))
+{
+    sheetnames <- i
+    cat(sheetnames,"\n")
+    addWorksheet(wb, sheetnames, zoom=150)
+    writeData(wb, sheetnames, sheetnames, xy=c(1,1),
+                  headerStyle=createStyle(textDecoration="BOLD",
+                                          fontColour="#FFFFFF", fontSize=14, fontName="Arial Narrow", fgFill="#4F80BD"))
+    body <- get(i)
+    writeDataTable(wb, sheetnames, body, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
+    freezePane(wb, sheetnames, firstCol=TRUE, firstActiveRow=3)
+}
+bStyle <- createStyle(fontColour = "#006100", bgFill = "#C6EFCE")
+hStyle <- createStyle(fontColour = "#9C0006", bgFill = "#FFC7CE")
+saveWorkbook(wb, file=xlsx, overwrite=TRUE)
 END
 }
 

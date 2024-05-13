@@ -949,27 +949,8 @@ function umich()
   '
 }
 
-# mean_by_genotype_gen_sample
-# mean_by_genotype_dosage
-# X: 127,156,325,471,567,691,748,792
-
-function per_chr()
+function per_chr_snpid()
 {
-# no-used and not merged
-seq 22 | \
-parallel -j10 -C' ' '
-plink \
-  --allow-no-sex \
-  --bgen ~/INF/INTERVAL/per_chr/interval.imputed.olink.chr_{}.bgen \
-  --make-bed \
-  --out ~/INF/INTERVAL/per_chr/chr{} \
-  --sample ~/INF/INTERVAL/per_chr/interval.imputed.olink.chr_{}.sample
-'
-cd ~/INF/INTERVAL/per_chr
-echo chr{1..22} | tr ' ' '\n' > bed.list
-plink --merge-list bed.list --make-bed --out INTERVAL
-
-# SNPid
 seq 22 | \
 parallel -j10 -C' ' '
 plink2 --bfile ~/INF/INTERVAL/per_chr/chr{} \
@@ -985,8 +966,6 @@ plink2 \
        --set-all-var-ids @:#_\$1_\$2 --new-id-max-allele-len 680 \
        --out ~/INF/INTERVAL/per_chr/snpidX
 }
-
-# srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i
 
 function tables()
 {
@@ -1121,3 +1100,6 @@ END
 # qqmanhattan/lz from 5_pgwas.sb
 # mean_by_genotype_gen_sample
 # mean_by_genotype_dosage
+# X: 127,156,325,471,567,691,748,792
+
+# srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i

@@ -931,6 +931,28 @@ function json()
   '
 }
 
+function mbp()
+{
+Rscript -e '
+mbp <- function(suffix="")
+{
+  require(dplyr)
+  rt <- "~/Caprion/analysis/work/"
+  b1 <- read.delim(paste0(rt,"caprion",suffix,"-1.pheno")) %>% mutate(batch="ZWK")
+  b2 <- read.delim(paste0(rt,"caprion",suffix,"-2.pheno")) %>% mutate(batch="ZYQ")
+  b3 <- read.delim(paste0(rt,"caprion",suffix,"-3.pheno")) %>% mutate(batch="UDP")
+  b <- bind_rows(b1,b2,b3)
+  png(paste0(rt,"caprion",suffix,".png"),height=8,width=20,units="in",res=300)
+  quantro::matboxplot(b[,-(1:2)],batch,cex.axis=0.6,notch=TRUE,ylab="Expression")
+  title("Box plots for phenotypes")
+  dev.off()
+}
+
+mbp()
+mbp(suffix="_dr")
+'
+}
+
 function umich()
 {
   curl https://portaldev.sph.umich.edu/api/v1/statistic/single/ > single.json

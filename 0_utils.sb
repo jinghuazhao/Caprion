@@ -936,18 +936,27 @@ function mbp()
 Rscript -e '
 mbp <- function(suffix="")
 {
-  require(dplyr)
   rt <- "~/Caprion/analysis/work/"
-  b1 <- read.delim(paste0(rt,"caprion",suffix,"-1.pheno")) %>% mutate(batch="ZWK")
-  b2 <- read.delim(paste0(rt,"caprion",suffix,"-2.pheno")) %>% mutate(batch="ZYQ")
-  b3 <- read.delim(paste0(rt,"caprion",suffix,"-3.pheno")) %>% mutate(batch="UDP")
-  b <- bind_rows(b1,b2,b3)
+  code <- c("ZWK","ZYQ","UDP")
+  b <- data.frame()
+  batch <- vector()
+  for(i in 1:3)
+  {
+    pheno <- read.delim(paste0(rt,"caprion",suffix,"-",i,".pheno"),check.names=FALSE) %>%
+             select(-FID) %>%
+             mutate(IID=paste0(code[i],IID)) %>%
+             column_to_rownames(var="IID")
+    b <- rbind(b,pheno)
+    batch <- c(batch,rep(i,nrow(pheno)))
+  }
   png(paste0(rt,"caprion",suffix,".png"),height=8,width=20,units="in",res=300)
-  quantro::matboxplot(b[,-(1:2)],batch,cex.axis=0.6,notch=TRUE,ylab="Expression")
-  title("Box plots for phenotypes")
+  quantro::matboxplot(t(b),batch,cex.axis=0.6,main="Box plots for phenotypes",
+                      notch=TRUE,pch=19,ylab="Expression")
   dev.off()
 }
 
+require(dplyr)
+require(tibble)
 mbp()
 mbp(suffix="_dr")
 '

@@ -119,6 +119,14 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     
     It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.
     
+    Preferably, the canonical procedure just described can be altered as follows,
+
+    ```bash
+    sed '1d' ${caprion}/work/caprion-1.pheno > ${caprion}/work/caprion-1.mpheno
+    sed '1d' ${caprion}/work/caprion-2.pheno > ${caprion}/work/caprion-2.mpheno
+    sed '1d' ${caprion}/work/caprion-3.pheno > ${caprion}/work/caprion-3.mpheno
+    ```
+
 [^metal]: incomplete gamma function
     
     The .info files for proteins BROX and CT027 could not be obtained from METAL 2020-05-05 with the following error message,

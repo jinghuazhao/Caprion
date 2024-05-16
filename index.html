@@ -267,7 +267,12 @@ sed -i '1d' ${caprion}/work/caprion-1.pheno
 sed -i '1d' ${caprion}/work/caprion-2.pheno
 sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
 <p>at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
-<p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.&#160;<a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+<p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.</p>
+<p>Preferably, the canonical procedure just described can be altered as follows,</p>
+<p><code>bash
+sed '1d' ${caprion}/work/caprion-1.pheno &gt; ${caprion}/work/caprion-1.mpheno
+sed '1d' ${caprion}/work/caprion-2.pheno &gt; ${caprion}/work/caprion-2.mpheno
+sed '1d' ${caprion}/work/caprion-3.pheno &gt; ${caprion}/work/caprion-3.mpheno</code>&#160;<a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 2 in the text">&#8617;</a></p>
 </li>
 <li id="fn:metal">
 <p>incomplete gamma function</p>

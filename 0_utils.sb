@@ -970,6 +970,8 @@ mbp()
 mbp(suffix="_dr")
 mbp(dir="output/")
 mbp(dir="output/",suffix="_dr")
+mbp(dir="scale/")
+mbp(dir="scale/",suffix="_dr")
 '
 }
 

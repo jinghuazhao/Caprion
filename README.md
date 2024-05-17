@@ -41,7 +41,7 @@ The results are ready to report.
 
 This can be finalised according to the Science paper.
 
-## 4. PCA and clustering
+## 4. PCA and clustering[^scale]
 
 The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.
 
@@ -81,7 +81,7 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
 ## 9. Lookup
 
-[^directory]: Directories
+[^directory]: **Directories**
     
     This is per Caprion project
     
@@ -103,7 +103,17 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
 
     To accommodate filteredd results, a suffix "" or "_dr" is applied when appropriate.
 
-[^pGWAS]: Protein GWAS
+[^scale]: **scale() operation**
+
+    A `scale()` version of transformation is conveniently done from a derieved program called `4.R` as follows,
+
+    ```bash
+     sed 's/output/scale/g' 4_pca_clustering.R | sed '/invnormal(r)/d' > 4.R
+    ```
+
+    only in need of suffix for unfiltered & DR-filtered files, respectively.
+
+[^pGWAS]: **Protein GWAS**
     
     GCTA/fastGWA employs MAF>=0.001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.
     
@@ -127,7 +137,7 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     sed '1d' ${caprion}/work/caprion-3.pheno > ${caprion}/work/caprion-3.mpheno
     ```
 
-[^metal]: incomplete gamma function
+[^metal]: **Incomplete gamma function**
     
     The .info files for proteins BROX and CT027 could not be obtained from METAL 2020-05-05 with the following error message,
     
@@ -139,7 +149,9 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository ([`https://github.com/statgen/METAL/issues/24`](https://github.com/statgen/METAL/issues/24)).
     This has enabled Forest plots for the associate pQTLs.
     
-[^HLA]: Whole cohort imputation is feasible with a HIBAG reference panel,
+[^HLA]: **HLA**
+
+     Whole cohort imputation is feasible with a HIBAG reference panel,
     
     | **Locus** | A    | B    | C    | DPB1 | DQA1 | DQB1 | DRB1 |
     | ----------- | ------ | ------ | ------ | ------ | ------ | ------ | ------ |

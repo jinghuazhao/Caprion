@@ -3,6 +3,7 @@
 .snakemake
 bgen/
 compare/
+eQTLCatalog/
 HLA/
 IMGT2Seq
 METAL/

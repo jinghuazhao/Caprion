@@ -20,7 +20,28 @@ cat <(cat ${analysis}/peptide/*/*cis.vs.trans | head -1) \
     > ${analysis}/reports/peptide.cis.vs.trans
 
 Rscript -e '
-  library(dplyr)
+  suppressMessages(library(dplyr))
+  suppressMessages(library(gap))
+  analysis <- getwd()
+  cis.vs.trans <- read.csv(file.path(analysis,"reports","peptide.cis.vs.trans"))
+  png(file.path(analysis,"reports",paste0("peptide",".pqtl2d.png")),width=12,height=10,unit="in",res=300)
+  r <- qtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
+                 gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
+                 TSS=TRUE,cis="cis",plot=TRUE,cex.labels=0.6,cex.points=0.6,
+                 xlab="pQTL position",ylab="Gene position")
+  dev.off()
+  r <- qtl2dplotly(cis.vs.trans,chrlen=gap::hg19,qtl.id="SNP",qtl.prefix="pQTL:",target.type="Protein",
+                   snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
+                   gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
+                   TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
+                   xlab="pQTL position",ylab="Gene position")
+  htmlwidgets::saveWidget(r,file=file.path(analysis,"reports",paste0("peptide",".pqtl2dplotly.html")))
+  r <- qtl3dplotly(cis.vs.trans,chrlen=gap::hg19,qtl.id="SNP",qtl.prefix="pQTL:",target.type="Protein",
+                   snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
+                   gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
+                   TSS=FALSE,cis="cis",cex.labels=0.6,cex.points=0.6,
+                   xlab="pQTL position",ylab="Gene position")
+  htmlwidgets::saveWidget(r,file=file.path(analysis,"reports",paste0("peptide",".pqtl3dplotly.html")))
   snplist_01 <- scan("~/Caprion/analysis/bgen/caprion-0.01.snplist",what="")
   cvt_01 <- read.csv("~/Caprion/analysis/reports/peptide.cis.vs.trans") %>%
             filter(SNP %in% snplist_01)

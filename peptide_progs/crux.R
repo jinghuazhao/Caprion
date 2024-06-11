@@ -84,7 +84,7 @@ if(n_decoys > 1)
 	for(decoy in 0:(n_decoys - 1))
 	{
   		system(paste("rm -f */dcy", decoy, ".tide-search.log.txt", sep = ""))
- 		 system(paste("rm -f */dcy", decoy, ".tide-search.params.txt", sep = ""))
+ 		system(paste("rm -f */dcy", decoy, ".tide-search.params.txt", sep = ""))
 	}
 }
 
@@ -172,10 +172,10 @@ if(!is_xcorr)
 {
     for(i in 1:length(dat_list))
     {
-		old_name = names(dat_list[[i]])
-		old_name[which(old_name == "exact.p.value")] = "xcorr.score"
-		dat_list[[i]] = setNames(dat_list[[i]], old_name)
-		dat_list[[i]]$xcorr.score = -1* dat_list[[i]]$xcorr.score
+	old_name = names(dat_list[[i]])
+	old_name[which(old_name == "exact.p.value")] = "xcorr.score"
+	dat_list[[i]] = setNames(dat_list[[i]], old_name)
+	dat_list[[i]]$xcorr.score = -1* dat_list[[i]]$xcorr.score
     }
 }
 
@@ -201,4 +201,3 @@ if(keep_psms == "F")
    system(paste("rm -r ", dataSet, ".pvalue", sep = ""))
    system(paste("rm -r ", dataSet, sep = ""))
 }
-

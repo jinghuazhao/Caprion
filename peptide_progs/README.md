@@ -28,7 +28,7 @@ The CSD3 icelake module `ceuadmin/R/4.4.0-icelake` now works as smoothly as `ceu
 
 ## Reference
 
-Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. Methods Mol Biol. 2023;2426:25-34. <doi: 10.1007/978-1-0716-1967-4_2>. PMID: 36308683.
+Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. Methods Mol Biol. 2023;2426:25-34. [doi: 10.1007/978-1-0716-1967-4_2](https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2). PMID: 36308683.
 
 ## Footnotes
 

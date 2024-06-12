@@ -11,6 +11,7 @@ The project directory above contains scripts at **peptide_progs/** and results r
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
 crux.R/crux.sh | R/multicomp+crux pipeline
+raw.R | handling of .raw files
 0_utils.sh | Code snippets
 1_pgwas.sh | Association analysis[^association] | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o

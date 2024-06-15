@@ -3,7 +3,7 @@
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
-export suffix=_dr
+export suffix=
 export signals=${analysis}/work/caprion${suffix}.signals
 
 module load ceuadmin/R

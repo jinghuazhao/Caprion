@@ -177,7 +177,7 @@ export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
 if [ "$(uname -n | sed 's/-[0-9]*$//')" == "login-q" ]; then
-   module load ceuadmin/R/4.3.3-icelake
+   module load ceuadmin/R/4.4.0-icelake
 else
    module load ceuadmin/R
 fi
@@ -185,6 +185,7 @@ fi
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
 grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
+grep PON3 | \
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

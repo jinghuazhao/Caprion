@@ -318,3 +318,43 @@ subset(ITIH2$mapping,Isotope.Group.ID==442581854)
 knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(ITIH2$mapping) <13492)[c(1,3,4,5,6)],row.names=FALSE)
 
 END
+
+R --no-save <<END
+setwd("~/Caprion/pilot")
+load("ZWK.rda")
+load("ZYQ.rda")
+load("UDP.rda")
+load("UHZ.rda")
+ZWK <- exprs(peptide_ZWK)
+ZYQ <- exprs(peptide_ZYQ)
+UDP <- exprs(peptide_UDP)
+UHZ <- exprs(peptide_UHZ)
+ZWK_442750362 <- ZWK[rownames(ZWK)==442750362,]
+ZYQ_442750362 <- ZYQ[rownames(ZYQ)==442750362,]
+UDP_442750362 <- UDP[rownames(UDP)==442750362,]
+UHZ_442750362 <- UHZ[rownames(UHZ)==442750362,]
+
+# UHZ is structural missing.
+
+for code in ZWK ZYQ UDP
+do
+   grep ${code} ${analysis}/work/caprion.pheno | \
+   cut -f1,2 --output-delimiter=' ' | \
+   grep -v NA > caprion-${code}.id
+done
+
+mv caprion-ZWK.id ${analysis}/output/caprion-1.id
+mv caprion-ZYQ.id ${analysis}/output/caprion-2.id
+mv caprion-UDP.id ${analysis}/output/caprion-3.id
+cp -p ${analysis}/output/caprion-1.id ${analysis}/output/caprion${suffix}-1.id
+cp -p ${analysis}/output/caprion-2.id ${analysis}/output/caprion${suffix}-2.id
+cp -p ${analysis}/output/caprion-3.id ${analysis}/output/caprion${suffix}-3.id
+
+cut -d' ' -f1 ${analysis}/output/caprion${suffix}-1.id | grep -f - ${analysis}/output/chrX.idlist \
+   > ${analysis}/output/chrX${suffix}-1.id
+cut -d' ' -f1 ${analysis}/output/caprion${suffix}-2.id | grep -f - ${analysis}/output/chrX.idlist \
+   > ${analysis}/output/chrX${suffix}-2.id
+cut -d' ' -f1 ${analysis}/output/caprion${suffix}-3.id | grep -f - ${analysis}/output/chrX.idlist \
+   > ${analysis}/output/chrX${suffix}-3.id
+
+END

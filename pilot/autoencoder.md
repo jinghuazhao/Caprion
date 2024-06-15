@@ -16,11 +16,15 @@ Additional work will be on variatinoal autoencoder (VAE) as indicated in the ref
 
 ## REFERENCES
 
+Bishop CM, Bishop H (2024), Deep learning: foundations and concepts, Springer International Publishing, [DOI: 10.1007/978-3-031-45468-4](https://link.springer.com/book/10.1007/978-3-031-45468-4).
+
 Bludau I, Frank M, Dörig C. et al. Systematic detection of functional proteoform groups from bottom-up proteomic datasets. Nat Commun 12, 3810 (2021). [https://doi.org/10.1038/s41467-021-24030-x](https://doi.org/10.1038/s41467-021-24030-x).
 
 Hofert M, Prasad A, Zhu M (2019). Quasi-Monte Carlo for multivariate distributions viagenerative neural networks. [https://arxiv.org/abs/1811.00683](https://arxiv.org/abs/1811.00683), [https://CRAN.R-project.org/package=gnn](https://CRAN.R-project.org/package=gnn).
 
 Kingma DP, Welling M (2014). Auto-Encoding Variational Bayes. [https://arxiv.org/abs/1312.6114](https://arxiv.org/abs/1312.6114), [https://keras.rstudio.com/articles/examples/variational_autoencoder.html](https://keras.rstudio.com/articles/examples/variational_autoencoder.html).
+
+Ng A. Sparse autoencoder, CS294A Lecture notes, <https://web.stanford.edu/class/archive/cs/cs294a/cs294a.1104/sparseAutoencoder.pdf>.
 
 Trivadis SK (2017). Variational autoencoders for anomaly detection. [https://rpubs.com/zkajdan/308801](https://rpubs.com/zkajdan/308801).
 

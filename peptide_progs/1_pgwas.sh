@@ -184,8 +184,7 @@ fi
 
 # all proteins:
 xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
-grep PON3 | \
+grep -n -f ${analysis}/peptide_progs/benchmark2.names -w ${varlist} | \
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

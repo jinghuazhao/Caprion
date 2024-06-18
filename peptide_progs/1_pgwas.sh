@@ -194,4 +194,3 @@ while IFS=":" read -r protein_index protein; do
     export N=$(awk "NR==1{print NF-2}" ${pheno})
 done < <(xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
          grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist})
-

@@ -1139,8 +1139,8 @@ END
 
 # fp_data
 # fp
-  HetISq
-# vep_annotate
+# HetISq
+  vep_annotate
 # qqmanhattan/lz from 5_pgwas.sb
 # mean_by_genotype_gen_sample
 # mean_by_genotype_dosage

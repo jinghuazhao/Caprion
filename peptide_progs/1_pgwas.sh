@@ -183,7 +183,6 @@ else
 fi
 
 # all proteins:
-set -x
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

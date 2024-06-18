@@ -119,8 +119,10 @@ normalise_lr <- function(d,batches)
   rownames(z) <- d[["IID"]]
   caprion_lr <- data.frame(d[c("FID","IID")],z)
   names(caprion_lr) <- gsub("^X([0-9])","\\1",names(caprion_lr))
-  write.table(d[c("FID","IID")],file=paste0("~/Caprion/analysis/output/caprion-",suffix,batches,".id"),col.names=FALSE,row.names=FALSE)
-  write.table(caprion_lr,file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
+  write.table(caprion_lr[c("FID","IID")],file=paste0("~/Caprion/analysis/output/caprion-",suffix,batches,".id"),
+              quote=FALSE,col.names=FALSE,row.names=FALSE)
+  write.table(caprion_lr,file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".pheno"),
+              quote=FALSE,row.names=FALSE,sep="\t")
 }
 
 normalise <- function(prot)
@@ -183,7 +185,8 @@ normalise <- function(prot)
     d <- filter(dat[many,],batch==batches)
     z <- d
     names(z) <- gsub("^X([0-9])","\\1",names(z))
-    write.table(z,file=paste0("~/Caprion/analysis/output/caprion-",batches,suffix,".tsv"),quote=FALSE,row.names=FALSE,sep="\t")
+    write.table(z,file=paste0("~/Caprion/analysis/output/caprion-",batches,suffix,".tsv"),
+                quote=FALSE,row.names=FALSE,sep="\t")
     normalise_lr(d,batches)
   }
   list(edata=t(combat_edata3),batch=batch)

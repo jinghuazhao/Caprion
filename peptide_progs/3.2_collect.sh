@@ -181,7 +181,6 @@ sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|" ${root}/${pro
 source 0_setup.sh
 
 # all proteins:
-set -x
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

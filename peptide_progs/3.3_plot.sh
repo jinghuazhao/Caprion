@@ -228,10 +228,10 @@ function mean_by_genotype()
     export batch=${batch}
     export out=${root}/means/${protein}-${batch}-${isotope}-${pqtl}
     if [ ! -f ${out}.dat ]; then
-       plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
-               --sample ${analysis}/work/chr${chr}.sample \
+       plink-2 --bgen ${analysis}/bgen/chr${chr}.bgen ref-unknown \
+               --sample ${analysis}/bgen/chr${chr}.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-               --keep ${pilot}/work/caprion-${batch}.id \
+               --keep ${analysis}/output/caprion-${batch}.id \
                --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \
                --recode oxford \
                --out ${out}
@@ -257,7 +257,8 @@ function mean_by_genotype()
                      Genotype=as.factor(case_when(g == genotypes[1] ~ paste0(A1,"/",A1),
                                                   g == genotypes[2] ~ paste0(A1,"/",A2),
                                                   g == genotypes[3] ~ paste0(A2,"/",A2),
-                                                  TRUE ~ "---")))
+                                                  TRUE ~ "---"))) %>%
+              filter(Genotype!="---")
        means <- group_by(dat,Genotype) %>%
                 summarise(N=n(),Mean=mean(Phenotype))
        invisible(list(dat=dat,means=means))
@@ -284,10 +285,10 @@ function mean_by_dosage()
     export batch=${batch}
     export out=${root}/means/${protein}-${batch}-${isotope}-${pqtl}
     if [ ! -f ${out}.raw ]; then
-       plink-2 --bgen ${pilot}/work/chr${chr}.bgen ref-unknown \
-               --sample ${analysis}/work/chr${chr}.sample \
+       plink-2 --bgen ${analysis}/bgen/chr${chr}.bgen ref-unknown \
+               --sample ${analysis}/bgen/chr${chr}.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
-               --keep ${pilot}/work/caprion-${batch}.id \
+               --keep ${analysis}/output/caprion-${batch}.id \
                --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \
                --recode A include-alt \
                --out ${out}
@@ -399,7 +400,7 @@ while IFS=":" read -r protein_index protein; do
     do
     (
       head -1 ${root}/${protein}.pheno
-      grep -f <(cut -d" " -f1 ${pilot}/work/caprion-${batch}.id) ${root}/${protein}.pheno
+      grep -f <(cut -d" " -f1 ${analysis}/output/caprion-${batch}.id) ${root}/${protein}.pheno
     ) > ${root}/work/${protein}-${batch}.pheno
     done
     step3_pqtl_summary

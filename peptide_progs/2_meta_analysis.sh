@@ -137,8 +137,7 @@ export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
-xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
+set -x
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein
@@ -150,4 +149,5 @@ while IFS=":" read -r protein_index protein; do
     METAL_list
     METAL_files
     METAL_analysis_sbatch
-done
+done < <(xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
+         grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist})

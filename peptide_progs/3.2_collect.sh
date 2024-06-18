@@ -181,8 +181,7 @@ sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|" ${root}/${pro
 source 0_setup.sh
 
 # all proteins:
-xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
+set -x
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein
@@ -195,4 +194,6 @@ while IFS=":" read -r protein_index protein; do
     step2_pqtl_collect
   # fplz should be here
     sbatch ${root}/${protein}-step2.sb
-done
+done < <(xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
+         grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist})
+

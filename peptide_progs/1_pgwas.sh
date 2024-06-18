@@ -183,8 +183,7 @@ else
 fi
 
 # all proteins:
-xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
+set -x
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein
@@ -193,4 +192,6 @@ while IFS=":" read -r protein_index protein; do
     sb ${protein_index}
     export pheno=${root}/${protein}.pheno
     export N=$(awk "NR==1{print NF-2}" ${pheno})
-done
+done < <(xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
+         grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist})
+

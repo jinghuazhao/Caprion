@@ -29,6 +29,8 @@ Earlier work was done in a named sequence.
 9_lookup.sh
 ```
 
+Some have or are able to generate a SLURM counterpart (.sb); `7_merge_X.sb` is obsolete since chromose X is handled together with autosomes.
+
 ## 1. Data handling and PCA projection
 
 The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected.

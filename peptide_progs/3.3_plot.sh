@@ -379,8 +379,7 @@ function fplz()
 source 0_setup.sh
 
 # all proteins:
-xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
-grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist} | \
+set -x
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein
@@ -407,4 +406,6 @@ while IFS=":" read -r protein_index protein; do
     sbatch ${root}/${protein}-step3.sb
   # pdfjam ${dir}/*_qqmanhattan.pdf --nup 1x1 --landscape --papersize '{7in,12in}' --outfile ${root}/qq+manhattan.pdf
   # qpdf --empty --pages $(ls ${dir}/*_qqmanhattan.pdf) -- ${root}/qq+manhattan.pdf
-done
+done < <(xargs -n 2 < ${analysis}/peptide_progs/benchmark2.names | \
+         grep -n -f ${analysis}/peptide_progs/benchmark2.names -v -w ${varlist})
+

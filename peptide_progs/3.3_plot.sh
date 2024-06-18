@@ -379,7 +379,6 @@ function fplz()
 source 0_setup.sh
 
 # all proteins:
-set -x
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

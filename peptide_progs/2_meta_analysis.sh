@@ -137,7 +137,6 @@ export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
 # all proteins:
-set -x
 while IFS=":" read -r protein_index protein; do
     export protein_index
     export protein

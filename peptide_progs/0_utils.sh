@@ -3,7 +3,7 @@
 export TMPDIR=${HPC_WORK}/work
 export pilot=~/Caprion/pilot
 export analysis=~/Caprion/analysis
-export suffix=
+export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
 
 module load ceuadmin/R
@@ -338,7 +338,7 @@ UHZ_442750362 <- UHZ[rownames(UHZ)==442750362,]
 
 for code in ZWK ZYQ UDP
 do
-   grep ${code} ${analysis}/work/caprion.pheno | \
+   grep ${code} ${analysis}/output/caprion.pheno | \
    cut -f1,2 --output-delimiter=' ' | \
    grep -v NA > caprion-${code}.id
 done

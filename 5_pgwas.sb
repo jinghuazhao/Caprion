@@ -106,7 +106,7 @@ function fastLR()
            --extract ${analysis}/bgen/caprion.snplist \
            --keep ${analysis}/output/caprion${suffix}-${batch}.id \
            --fastGWA-lr \
-           --pheno ${analysis}/output/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
+           --pheno ${analysis}/output/caprion${suffix}-${batch}.mpheno --mpheno ${phenocol} \
            --threads 10 \
            --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}
 
@@ -115,7 +115,7 @@ function fastLR()
            --extract ${analysis}/bgen/caprion.snplist \
            --keep ${analysis}/output/chrX${suffix}-${batch}.id \
            --fastGWA-lr --model-only \
-           --pheno ${analysis}/output/caprion${suffix}-${batch}.pheno --mpheno ${phenocol} \
+           --pheno ${analysis}/output/caprion${suffix}-${batch}.mpheno --mpheno ${phenocol} \
            --threads 10 \
            --out ${analysis}/pgwas${suffix}/caprion${suffix}-${batch}-${phenoname}
 

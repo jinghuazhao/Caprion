@@ -111,7 +111,7 @@ normalise_lr <- function(d,batches)
               function(col)
               {
                 if ((batches==2 & gsub("^X([0-9])","\\1",col) %in% ZYQ.na) |
-                    (batches==3 &  gsub("^X([0-9])","\\1",col) %in% UDP.na)) {
+                    (batches==3 & gsub("^X([0-9])","\\1",col) %in% UDP.na)) {
                   x <- NA
                 }
                 else {
@@ -127,6 +127,9 @@ normalise_lr <- function(d,batches)
   write.table(subset(caprion_lr[c("FID","IID")],!is.na(FID)),
               file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".id"),
               quote=FALSE,col.names=FALSE,row.names=FALSE)
+  write.table(subset(caprion_lr[c("FID","IID",proteins)],!is.na(FID)),
+              file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".mpheno"),
+              quote=FALSE,col.names=FALSE,row.names=FALSE,sep="\t")
   write.table(subset(caprion_lr[c("FID","IID",proteins)],!is.na(FID)),
               file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".pheno"),
               quote=FALSE,row.names=FALSE,sep="\t")
@@ -161,7 +164,7 @@ load("~/Caprion/pilot/es.rda")
 ZYQ.na <- c("BROX","CT027","GHRL","PSB6")
 UDP.na <- c("BROX","NCF2","SEM7A")
 
-suffix <- ""
+suffix <- "_dr"
 prot <- t(exprs(protein_all))
 colnames(prot) <- gsub("_HUMAN","",colnames(prot))
 if (suffix=="_dr")

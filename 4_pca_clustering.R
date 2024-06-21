@@ -102,93 +102,53 @@ quantro_sparsenetgls <- function(edata,batch,mod)
 
 normalise_lr <- function(d,batches)
 {
+  caprion_lr <- d
   covars <- c("sexPulse","agePulse",paste0("PC",1:20))
   proteins <- setdiff(names(d),c("FID","IID","batch",pcs,covars))
   if (batches!=1) covars <- c(covars,pcs)
   mod <- model.matrix(as.formula(paste0("~",paste(covars,collapse="+"))), data=d)
-  z <- sapply(names(d[proteins]),
-              function(col,verbose=FALSE)
+  z <- sapply(proteins,
+              function(col)
               {
-                if (verbose) cat(names(d[col]),col,"\n")
-                y <- invnormal(d[[col]])
-                l <- lm(y~mod[,-1])
-                r <- y-predict(l,na.action=na.pass)
-                invnormal(r)
+                if ((batches==2 & gsub("^X([0-9])","\\1",col) %in% ZYQ.na) |
+                    (batches==3 &  gsub("^X([0-9])","\\1",col) %in% UDP.na)) {
+                  x <- NA
+                }
+                else {
+                  y <- invnormal(d[[col]])
+                  l <- lm(y~mod[,-1])
+                  r <- y-predict(l,na.action=na.pass)
+                  x <- invnormal(r)
+                }
+                caprion_lr[col] <- x
+                x
               })
-  colnames(z) <- names(d[proteins])
-  rownames(z) <- d[["IID"]]
-  caprion_lr <- data.frame(d[c("FID","IID")],z)
-  names(caprion_lr) <- gsub("^X([0-9])","\\1",names(caprion_lr))
-  write.table(caprion_lr[c("FID","IID")],file=paste0("~/Caprion/analysis/output/caprion-",suffix,batches,".id"),
+  names(caprion_lr[proteins]) <- gsub("^X([0-9])","\\1",names(caprion_lr[proteins]))
+  write.table(subset(caprion_lr[c("FID","IID")],!is.na(FID)),
+              file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".id"),
               quote=FALSE,col.names=FALSE,row.names=FALSE)
-  write.table(caprion_lr,file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".pheno"),
+  write.table(subset(caprion_lr[c("FID","IID",proteins)],!is.na(FID)),
+              file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".pheno"),
               quote=FALSE,row.names=FALSE,sep="\t")
 }
 
-normalise <- function(prot)
+normalise <- function()
 {
-  ids <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
-  dates <- c("attendanceDate","monthPulse","yearPulse")
-  covars <- c("sexPulse","agePulse","ethnicPulse","processDate_bl","processTime_bl","classification")
-  data <- read.csv("~/Caprion/INTERVALdata_15SEP2021.csv")
-  eigenvec <- read.delim("~/Caprion/pilot/data/merged_imputation.eigenvec")
-  pilotsMap <- read.csv("~/Caprion/pilotsMap_15SEP2021.csv")
-  OmicsMap <- read.csv("~/Caprion/INTERVAL_OmicsMap_20210915.csv")
-  pca_km_mc <- pca_clustering(prot)
-  attach(pca_km_mc)
-  grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification)) %>%
-              left_join(data.frame(with(pca,x)[,1:3],caprion_id=rownames(with(pca,x)))) %>%
-              rename(ppc1=PC1,ppc2=PC2,ppc3=PC3)
-  detach(pca_km_mc)
-  id_date_covars <- merge(merge(data,merge(pilotsMap,OmicsMap,by="identifier",all=TRUE),by="identifier",all=TRUE),grouping,
-                          by="caprion_id")
-  pheno <- select(OmicsMap,identifier,Affymetrix_gwasQC_bl,caprion_id) %>%
-           merge(eigenvec,by.x="Affymetrix_gwasQC_bl",by.y="X.FID",all.x=TRUE) %>%
-           left_join(grouping) %>%
-           left_join(data) %>%
-           right_join(data.frame(prot,caprion_id=rownames(prot))) %>%
-           mutate(batch=match(substr(sampleNames(protein_all),1,3),c("ZWK","ZYQ","UDP")))
-  write.table(select(pheno,Affymetrix_gwasQC_bl),file=paste0("~/Caprion/analysis/output/caprion",suffix,".id"),
-              quote=FALSE,row.names=FALSE,col.names=FALSE)
-  caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,
-                          IID=Affymetrix_gwasQC_bl)[c("FID","IID",ids,"batch",dates,covars,pcs,PCS,xnames)]
-  names(caprion_pheno) <- gsub("^X([0-9])","\\1",names(caprion_pheno))
-  write.table(caprion_pheno,file=paste0("~/Caprion/analysis/output/caprion",suffix,".pheno"),quote=FALSE,row.names=FALSE,sep="\t")
-
   suppressMessages(library(sva))
-  mod <- model.matrix(as.formula(paste0(c("~sexPulse","agePulse",pcs,PCS),collapse="+")), data=pheno)
-  mcol <- apply(pheno[colnames(mod)[-1]],2,is.na)
-  many <- !apply(mcol,1,any)
-
   edata <- exprs(protein_all)
   rownames(edata) <- sub("_HUMAN","",rownames(edata))
   edata <- edata[!rownames(edata)%in%union(ZYQ.na,UDP.na),]
   batch <- pheno$batch
-
 # 1. parametric adjustment
   combat_edata1 <- ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE)
-
 # 2. non-parametric adjustment, mean-only version
   combat_edata2 = ComBat(dat=edata, batch=batch, mod=NULL, par.prior=FALSE, mean.only=TRUE)
-
   edata <- edata[,many]
   batch <- pheno$batch[many]
   quantro_sparsenetgls(edata,batch,mod)
 # 3. reference-batch version, with covariates
   combat_edata3 <- ComBat(dat=edata, batch=batch, mod=mod, par.prior=TRUE, ref.batch=3, prior.plots=TRUE)
 
-# invnormal transformation
-  allvars <- c("FID","IID","sexPulse","agePulse","batch",pcs,PCS,xnames)
-  dat <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl)[allvars]
-  for(batches in 1:3)
-  {
-    d <- filter(dat[many,],batch==batches)
-    z <- d
-    names(z) <- gsub("^X([0-9])","\\1",names(z))
-    write.table(z,file=paste0("~/Caprion/analysis/output/caprion-",batches,suffix,".tsv"),
-                quote=FALSE,row.names=FALSE,sep="\t")
-    normalise_lr(d,batches)
-  }
   list(edata=t(combat_edata3),batch=batch)
 }
 
@@ -201,15 +161,15 @@ load("~/Caprion/pilot/es.rda")
 ZYQ.na <- c("BROX","CT027","GHRL","PSB6")
 UDP.na <- c("BROX","NCF2","SEM7A")
 
-suffix <- "_dr"
+suffix <- ""
 prot <- t(exprs(protein_all))
 colnames(prot) <- gsub("_HUMAN","",colnames(prot))
 if (suffix=="_dr")
 {
   prot <- t(exprs(protein_dr_all))
   colnames(prot) <- gsub("_HUMAN","",colnames(prot))
-  ZYQ.na <- c(ZYQ.na,"A1AG2","CAH13","COF1","CZIB","GBRL2","GLTD2","HPSE","ITA6","K2C5",
-                     "MK14","NDKA","NOMO1","NQO2","PTPRM","RGMA","SE6L2","SHLB1","SYYC","TMED8","VATG1","VAV")
+  ZYQ.na <- c(ZYQ.na,"A1AG2","CAH13","COF1","CZIB","GBRL2","GLTD2","HPSE","ITA6","K2C5","MK14","NCF2",
+                     "NDKA","NOMO1","NQO2","PTPRM","RGMA","SE6L2","SHLB1","SYYC","TMED8","VATG1","VAV")
   UDP.na <- c(UDP.na,"1433S", "AT1B1", "HPSE", "MYLK", "NENF", "NOMO1", "NQO2", "VATG1", "VAV")
 # r <- apply(all[grepl("UDP",rownames(all)),],2,sum); r[is.na(r)]
 }
@@ -221,20 +181,69 @@ cat("digital names:",dnames,"\n")
 pcs <- paste0("ppc",1:3)
 PCS <- paste0("PC",1:20)
 
-edata_batch <- normalise(prot)
-png(paste0("~/Caprion/analysis/output/combat-matboxplot",suffix,".png"),width=12,height=10,unit="in",res=300)
-with(edata_batch,matboxplot(t(edata),groupFactor=batch, ylab="Protein measurement"))
-dev.off()
-png(paste0("~/Caprion/analysis/output/combat-matdensity",suffix,".png"),width=12,height=10,unit="in",res=300)
-with(edata_batch,matdensity(t(edata),groupFactor=batch,xlab = " ", ylab = "density", ylim=c(0,3),
-           main = "Protein measurement", brewer.n = 8, brewer.name = "Dark2"))
-dev.off()
-attach(edata_batch)
-combat_quantro <- quantro(t(edata),batch,B=10000)
-quantroPlot(combat_quantro)
-pca_km_mc <- pca_clustering(edata)
-detach(edata_batch)
+ids <- c("identifier","Affymetrix_gwasQC_bl","caprion_id")
+dates <- c("attendanceDate","monthPulse","yearPulse")
+covars <- c("sexPulse","agePulse","ethnicPulse","processDate_bl","processTime_bl","classification")
+data <- read.csv("~/Caprion/INTERVALdata_15SEP2021.csv")
+eigenvec <- read.delim("~/Caprion/pilot/data/merged_imputation.eigenvec")
+pilotsMap <- read.csv("~/Caprion/pilotsMap_15SEP2021.csv")
+OmicsMap <- read.csv("~/Caprion/INTERVAL_OmicsMap_20210915.csv")
+pca_km_mc <- pca_clustering(prot)
 attach(pca_km_mc)
-if (interactive()) rgl::plot3d(with(pca,x[,c(2,1,3)]),col=mc$classification)
-pca_clustering_plot(pca,mc,paste0("~/Caprion/analysis/output/pca_clustering_combat",suffix,".html"))
+grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification)) %>%
+            left_join(data.frame(with(pca,x)[,1:3],caprion_id=rownames(with(pca,x)))) %>%
+            rename(ppc1=PC1,ppc2=PC2,ppc3=PC3)
 detach(pca_km_mc)
+id_data_covars <- merge(pilotsMap,OmicsMap,by="identifier",all=TRUE) %>%
+                  merge(data,by="identifier",all=TRUE) %>%
+                  left_join(grouping,by="caprion_id")
+pheno <- select(OmicsMap,identifier,Affymetrix_gwasQC_bl,caprion_id) %>%
+         merge(eigenvec,by.x="Affymetrix_gwasQC_bl",by.y="X.FID",all.x=TRUE) %>%
+         left_join(grouping) %>%
+         left_join(data) %>%
+         right_join(data.frame(prot,caprion_id=rownames(prot))) %>%
+         mutate(batch=match(substr(caprion_id,1,3),c("ZWK","ZYQ","UDP")))
+write.table(select(pheno,Affymetrix_gwasQC_bl),file=paste0("~/Caprion/analysis/output/caprion",suffix,".id"),
+            quote=FALSE,row.names=FALSE,col.names=FALSE)
+caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,
+                        IID=Affymetrix_gwasQC_bl)[c("FID","IID",ids,"batch",dates,covars,pcs,PCS,xnames)]
+names(caprion_pheno) <- gsub("^X([0-9])","\\1",names(caprion_pheno))
+write.table(caprion_pheno,file=paste0("~/Caprion/analysis/output/caprion",suffix,".pheno"),
+            quote=FALSE,row.names=FALSE,sep="\t")
+allvars <- c("FID","IID","sexPulse","agePulse","batch",pcs,PCS,xnames)
+dat <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl)[allvars]
+mod <- model.matrix(as.formula(paste0(c("~sexPulse","agePulse",pcs,PCS),collapse="+")), data=pheno)
+mcol <- apply(pheno[colnames(mod)[-1]],2,is.na)
+many <- !apply(mcol,1,any)
+for(batches in 1:3)
+{
+  d <- filter(dat[many,],batch==batches)
+  z <- d
+  names(z) <- gsub("^X([0-9])","\\1",names(z))
+  write.table(z,file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".tsv"),
+              quote=FALSE,row.names=FALSE,sep="\t")
+  normalise_lr(d,batches)
+}
+
+run_normalise <- function()
+{
+  edata_batch <- normalise()
+  png(paste0("~/Caprion/analysis/output/combat-matboxplot",suffix,".png"),width=12,height=10,unit="in",res=300)
+  with(edata_batch,matboxplot(t(edata),groupFactor=batch, ylab="Protein measurement"))
+  dev.off()
+  png(paste0("~/Caprion/analysis/output/combat-matdensity",suffix,".png"),width=12,height=10,unit="in",res=300)
+  with(edata_batch,matdensity(t(edata),groupFactor=batch,xlab = " ", ylab = "density", ylim=c(0,3),
+             main = "Protein measurement", brewer.n = 8, brewer.name = "Dark2"))
+  dev.off()
+  attach(edata_batch)
+  combat_quantro <- quantro(t(edata),batch,B=10000)
+  quantroPlot(combat_quantro)
+  pca_km_mc <- pca_clustering(edata)
+  detach(edata_batch)
+  attach(pca_km_mc)
+  if (interactive()) rgl::plot3d(with(pca,x[,c(2,1,3)]),col=mc$classification)
+  pca_clustering_plot(pca,mc,paste0("~/Caprion/analysis/output/pca_clustering_combat",suffix,".html"))
+  detach(pca_km_mc)
+}
+
+run_normalise()

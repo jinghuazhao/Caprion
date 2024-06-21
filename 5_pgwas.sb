@@ -478,9 +478,9 @@ function miamiplot2()
 #bgen
 #freq
 #freq.01
-#fastLR 1
-#fastLR 2
-#fastLR 3
+fastLR 1
+fastLR 2
+fastLR 3
 #qqmanhattan
 #lz
 #pairs_p

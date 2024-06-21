@@ -31,21 +31,20 @@ function sb()
                      left_join(data.frame(id=colnames(peptide_exprs),t(peptide_exprs))) %>%
                      filter(!is.na(FID) & grepl(code,id)) %>%
                      select(-id)
+      peptide_lr <- peptide_dat
       peptides <- setdiff(names(peptide_dat),c("FID","IID","batch",ccovars))
       mod <- model.matrix(as.formula(paste0("~",paste(covars,collapse="+"))), data=peptide_dat)
       z <- sapply(names(peptide_dat[peptides]),
-                  function(col,verbose=FALSE)
+                  function(col)
                   {
-                    if (verbose) cat(names(peptide_dat[col]),col,"\n")
                     y <- gap::invnormal(peptide_dat[[col]])
                     l <- lm(y~mod[,-1])
                     r <- y-predict(l,na.action=na.pass)
-                    gap::invnormal(r)
+                    x <- gap::invnormal(r)
+                    peptide_lr[col] <- x
+                    x
                   })
-      colnames(z) <- names(peptide_dat[peptides])
-      rownames(z) <- peptide_dat[["IID"]]
-      peptide_lr <- data.frame(peptide_dat[c("FID","IID")],z)
-      names(peptide_lr) <- gsub("^X([0-9])","\\1",names(peptide_lr))
+      names(peptide_lr[peptides]) <- gsub("^X([0-9])","\\1",names(peptide_lr[peptides]))
       na_dat <- apply(peptide_dat[peptides],1,sum,na.rm=TRUE)
       peptide_table <- group_by(get(paste("mapping",code,sep="_")),Protein) %>%
                        summarise(N=n()) %>%
@@ -57,7 +56,7 @@ function sb()
       if (verbose) write.table(filter(peptide_lr,na_dat!=0),
                                file=paste0(analysis,"/peptide/",protein,"/",code,".pheno"),
                                row.names=FALSE,quote=FALSE)
-      peptide_lr
+      peptide_lr[c("FID","IID",peptides)]
     }
     ZWK <- tryCatch(
       {

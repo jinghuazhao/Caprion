@@ -47,9 +47,11 @@ This can be finalised according to the Science paper.
 
 The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.
 
-The PLINK2 has been consistent in the pilot studies, so `scale()` operaions can be used in the inverse normal transformations.
+The PLINK2 has been consistent in the pilot studies, including now deprecated `scale()` operaions used in the inverse normal transformations.
 
-The phenotypic data is generated in accordance with the double transformations as in SCALLOP-Seq analysis.
+The phenotypic data is now generated in accordance with the double transformations as in SCALLOP-Seq analysis.
+
+The file also includes experiments on normalisation.
 
 ## 5. pGWAS[^pGWAS]
 

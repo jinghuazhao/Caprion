@@ -49,7 +49,7 @@ The groupings based on unfiltered and DR-filtered proteins can be made on three 
 
 The PLINK2 has been consistent in the pilot studies, including now deprecated `scale()` operaions used in the inverse normal transformations.
 
-The phenotypic data is now generated in accordance with the double transformations as in SCALLOP-Seq analysis.
+The double transformations of the phenotypic data is similar to SCALLOP-Seq analysis. Amazingly, assignment of the original value proves critcal for contrast with the raw data.
 
 The file also includes experiments on normalisation.
 

@@ -29,7 +29,7 @@ Earlier work was done in a named sequence.
 9_lookup.sh
 ```
 
-Some have or are able to generate a SLURM counterpart (.sb); `7_merge_X.sb` is obsolete since chromose X is handled together with autosomes.
+Some have or are able to generate a SLURM counterpart (.sb); chromose X is handled together with autosomes.
 
 ## 1. Data handling and PCA projection
 
@@ -47,9 +47,7 @@ This can be finalised according to the Science paper.
 
 The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.
 
-The PLINK2 has been consistent in the pilot studies, including now deprecated `scale()` operaions used in the inverse normal transformations.
-
-The double transformations of the phenotypic data is similar to SCALLOP-Seq analysis. Amazingly, assignment of the original value proves critcal for contrast with the raw data.
+The PLINK2 has been used in the pilot studies, but now fastGWA using double transformations of the phenotypic data similar to SCALLOP-Seq analysis. Amazingly, assignment of the original value proves critcal for contrast with the raw data.
 
 The file also includes experiments on normalisation.
 

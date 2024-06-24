@@ -189,7 +189,7 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 8_hla.sh
 9_lookup.sh
 </code></pre>
-<p>Some have or are able to generate a SLURM counterpart (.sb); <code>7_merge_X.sb</code> is obsolete since chromose X is handled together with autosomes.</p>
+<p>Some have or are able to generate a SLURM counterpart (.sb); chromose X is handled together with autosomes.</p>
 <h2 id="1-data-handling-and-pca-projection">1. Data handling and PCA projection</h2>
 <p>The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected.</p>
 <h2 id="2-ggm">2. GGM</h2>
@@ -198,8 +198,7 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 <p>This can be finalised according to the Science paper.</p>
 <h2 id="4-pca-and-clustering2">4. PCA and clustering<sup id="fnref:scale"><a class="footnote-ref" href="#fn:scale">2</a></sup></h2>
 <p>The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.</p>
-<p>The PLINK2 has been consistent in the pilot studies, including now deprecated <code>scale()</code> operaions used in the inverse normal transformations.</p>
-<p>The double transformations of the phenotypic data is similar to SCALLOP-Seq analysis. Amazingly, assignment of the original value proves critcal for contrast with the raw data.</p>
+<p>The PLINK2 has been used in the pilot studies, but now fastGWA using double transformations of the phenotypic data similar to SCALLOP-Seq analysis. Amazingly, assignment of the original value proves critcal for contrast with the raw data.</p>
 <p>The file also includes experiments on normalisation.</p>
 <h2 id="5-pgwas3">5. pGWAS<sup id="fnref:pGWAS"><a class="footnote-ref" href="#fn:pGWAS">3</a></sup></h2>
 <p>The bgen files were extracted from a list of all samples, the variant IDs of which were for all RSids to allow for multiallelic loci.</p>

@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=_merge
 #SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=icelake
+#SBATCH --partition=icelake-himem
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 

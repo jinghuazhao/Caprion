@@ -8,6 +8,8 @@
 
 The project directory above contains scripts at **peptide_progs/** and results results at **peptide/**, respectively.
 
+These are also a set of scripts called from `bash` which invokes SLURM jobs.
+
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
 crux.R/crux.sh | R/multicomp+crux pipeline

@@ -41,7 +41,7 @@ function sb()
                     l <- lm(y~mod[,-1])
                     r <- y-predict(l,na.action=na.pass)
                     x <- gap::invnormal(r)
-                    peptide_lr[col] <- x
+                    peptide_lr[col] <<- x
                     x
                   })
       names(peptide_lr[peptides]) <- gsub("^X([0-9])","\\1",names(peptide_lr[peptides]))
@@ -175,11 +175,7 @@ export suffix=_dr
 export signals=${analysis}/work/caprion${suffix}.signals
 export varlist=${analysis}/output/caprion${suffix}.varlist
 
-if [ "$(uname -n | sed 's/-[0-9]*$//')" == "login-q" ]; then
-   module load ceuadmin/R/4.4.1-icelake
-else
-   module load ceuadmin/R
-fi
+module load ceuadmin/R
 
 # all proteins:
 while IFS=":" read -r protein_index protein; do

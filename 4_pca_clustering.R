@@ -95,7 +95,7 @@ normalise_lr <- function(d,batches)
                   r <- y-predict(l,na.action=na.pass)
                   x <- invnormal(r)
                 }
-                caprion_lr[col] <- x
+                caprion_lr[col] <<- x
                 x
               })
   names(caprion_lr[proteins]) <- gsub("^X([0-9])","\\1",names(caprion_lr[proteins]))

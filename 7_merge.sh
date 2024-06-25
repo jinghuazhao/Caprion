@@ -113,4 +113,4 @@ function cistrans()
   '
 }
 
-for cmd in signals merge cistrans; do $cmd; done
+for cmd in merge cistrans; do $cmd; done

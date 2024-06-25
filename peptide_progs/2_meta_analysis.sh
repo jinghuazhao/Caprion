@@ -91,7 +91,7 @@ export PERL5LIB=
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
-module load ceuadmin/R/4.3.3-icelake
+module load ceuadmin/R
 module load samtools/1.13/gcc/zwxn7ug3
 module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
 

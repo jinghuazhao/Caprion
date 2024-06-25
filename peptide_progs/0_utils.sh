@@ -319,36 +319,12 @@ knitr::kable(subset(ITIH2$mapping, rownames(ITIH2$mapping) >=13480 & rownames(IT
 
 END
 
-R --no-save <<END
-setwd("~/Caprion/pilot")
-load("ZWK.rda")
-load("ZYQ.rda")
-load("UDP.rda")
-load("UHZ.rda")
-ZWK <- exprs(peptide_ZWK)
-ZYQ <- exprs(peptide_ZYQ)
-UDP <- exprs(peptide_UDP)
-UHZ <- exprs(peptide_UHZ)
-
-for code in ZWK ZYQ UDP
-do
-   grep ${code} ${analysis}/output/caprion.pheno | \
-   cut -f1,2 --output-delimiter=' ' | \
-   grep -v NA > caprion-${code}.id
-done
-END
-
-# these are now unnecessary
-mv caprion-ZWK.id ${analysis}/output/caprion-1.id
-mv caprion-ZYQ.id ${analysis}/output/caprion-2.id
-mv caprion-UDP.id ${analysis}/output/caprion-3.id
-cp -p ${analysis}/output/caprion-1.id ${analysis}/output/caprion${suffix}-1.id
-cp -p ${analysis}/output/caprion-2.id ${analysis}/output/caprion${suffix}-2.id
-cp -p ${analysis}/output/caprion-3.id ${analysis}/output/caprion${suffix}-3.id
-# still useful
+function chrX()
+{
 cut -d' ' -f1 ${analysis}/output/caprion${suffix}-1.id | grep -f - ${analysis}/output/chrX.idlist \
    > ${analysis}/output/chrX${suffix}-1.id
 cut -d' ' -f1 ${analysis}/output/caprion${suffix}-2.id | grep -f - ${analysis}/output/chrX.idlist \
    > ${analysis}/output/chrX${suffix}-2.id
 cut -d' ' -f1 ${analysis}/output/caprion${suffix}-3.id | grep -f - ${analysis}/output/chrX.idlist \
    > ${analysis}/output/chrX${suffix}-3.id
+}

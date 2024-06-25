@@ -136,11 +136,11 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#4-pca-and-clustering2" class="nav-link">4. PCA and clustering2</a>
+            <li class="nav-item" data-level="2"><a href="#4-pca-and-clustering" class="nav-link">4. PCA and clustering</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#5-pgwas3" class="nav-link">5. pGWAS3</a>
+            <li class="nav-item" data-level="2"><a href="#5-pgwas2" class="nav-link">5. pGWAS2</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -152,7 +152,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#8-hla-imputation5" class="nav-link">8. HLA imputation5</a>
+            <li class="nav-item" data-level="2"><a href="#8-hla-imputation4" class="nav-link">8. HLA imputation4</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -196,11 +196,11 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 <p>The results are ready to report.</p>
 <h2 id="3-wgcna">3. WGCNA</h2>
 <p>This can be finalised according to the Science paper.</p>
-<h2 id="4-pca-and-clustering2">4. PCA and clustering<sup id="fnref:scale"><a class="footnote-ref" href="#fn:scale">2</a></sup></h2>
+<h2 id="4-pca-and-clustering">4. PCA and clustering</h2>
 <p>The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.</p>
 <p>The PLINK2 has been used in the pilot studies, but now fastGWA using double transformations of the phenotypic data similar to SCALLOP-Seq analysis. Amazingly, a standard assignment statement inside <code>sapply()</code> would produce <code>.pheno</code>/<code>.mpheno</code> containing the raw data.</p>
 <p>The file also includes experiments on normalisation.</p>
-<h2 id="5-pgwas3">5. pGWAS<sup id="fnref:pGWAS"><a class="footnote-ref" href="#fn:pGWAS">3</a></sup></h2>
+<h2 id="5-pgwas2">5. pGWAS<sup id="fnref:pGWAS"><a class="footnote-ref" href="#fn:pGWAS">2</a></sup></h2>
 <p>The <code>bgen</code> files were extracted from a list of all samples, the variant IDs of which were for all RSids to allow for multiallelic loci.</p>
 <p>The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots. Note that LocusZoom 1.4 does not contain 1000Genomes build 37 genotypes for chromosome X and therefore they are supplemented with local files in the required format, namely, <code>locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX.[bed, bim, fan]</code>. Now that for the Manhattan plot call for VEP is necessary from <code>0_utils.sb</code>, which also produces mean by genotype/dosage plots.</p>
 <h2 id="6-meta-analysis">6. Meta-analysis</h2>
@@ -210,8 +210,8 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 <p>where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.</p>
 <p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p>
 <h2 id="7-variant-identification">7. Variant identification</h2>
-<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here<sup id="fnref:metal"><a class="footnote-ref" href="#fn:metal">4</a></sup>.</p>
-<h2 id="8-hla-imputation5">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">5</a></sup></h2>
+<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here<sup id="fnref:metal"><a class="footnote-ref" href="#fn:metal">3</a></sup>.</p>
+<h2 id="8-hla-imputation4">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">4</a></sup></h2>
 <p>This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed <a href="https://cambridge-ceu.github.io/csd3/applications/CookHLA.html">here</a>. The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.</p>
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
 <h2 id="9-lookup">9. Lookup</h2>
@@ -258,28 +258,10 @@ source ${csd3path}/bin/activate</code></p>
 <p>Note that <code>docs.sh</code> copies <code>pilot/utils</code> directory of the pilot studies, so coding under that directory is preferable to avoid overwrite.</p>
 <p>To accommodate filteredd results, a suffix "" or "_dr" is applied when appropriate.&#160;<a class="footnote-backref" href="#fnref:directory" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
-<li id="fn:scale">
-<p><strong>scale() operation</strong></p>
-<p>A <code>scale()</code> version of transformation is conveniently done from a derieved program called <code>4.R</code> as follows,</p>
-<p><code>bash
- sed 's/output/scale/g' 4_pca_clustering.R | sed '/invnormal(r)/d' &gt; 4.R</code></p>
-<p>only in need of suffix for unfiltered &amp; DR-filtered files, respectively.&#160;<a class="footnote-backref" href="#fnref:scale" title="Jump back to footnote 2 in the text">&#8617;</a></p>
-</li>
 <li id="fn:pGWAS">
 <p><strong>Protein GWAS</strong></p>
 <p>GCTA/fastGWA employs MAF&gt;=0.001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
-<p>GCTA uses headerless phenotype files, so <strong>the following section from <code>5_pgwas.sh</code> is run</strong> in preparation.</p>
-<p><code>bash
-sed -i '1d' ${caprion}/work/caprion-1.pheno
-sed -i '1d' ${caprion}/work/caprion-2.pheno
-sed -i '1d' ${caprion}/work/caprion-3.pheno</code></p>
-<p>at <code>pilot/work</code> while the original version is saved at <code>analysis/work/</code>.</p>
-<p>It looked to take 3.5 days on Cardio without unfiltered genotypes but ~12 hours on cclake, and once these are taken care of the analysis can be propagated.</p>
-<p>Preferably, the canonical procedure just described can be altered as follows,</p>
-<p><code>bash
-sed '1d' ${caprion}/work/caprion-1.pheno &gt; ${caprion}/work/caprion-1.mpheno
-sed '1d' ${caprion}/work/caprion-2.pheno &gt; ${caprion}/work/caprion-2.mpheno
-sed '1d' ${caprion}/work/caprion-3.pheno &gt; ${caprion}/work/caprion-3.mpheno</code>&#160;<a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+<p>GCTA uses headerless phenotype files, generated by <code>5_pgwas.sh</code> which is now unnecessary.&#160;<a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 2 in the text">&#8617;</a></p>
 </li>
 <li id="fn:metal">
 <p><strong>Incomplete gamma function</strong></p>
@@ -287,7 +269,7 @@ sed '1d' ${caprion}/work/caprion-3.pheno &gt; ${caprion}/work/caprion-3.mpheno</
 <p><code>FATAL ERROR -
 a too large, ITMAX too small in gamma countinued fraction (gcf)</code></p>
 <p>An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository (<a href="https://github.com/statgen/METAL/issues/24"><code>https://github.com/statgen/METAL/issues/24</code></a>).
-This has enabled Forest plots for the associate pQTLs.&#160;<a class="footnote-backref" href="#fnref:metal" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+This has enabled Forest plots for the associate pQTLs.&#160;<a class="footnote-backref" href="#fnref:metal" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 <li id="fn:HLA">
 <p><strong>HLA</strong></p>
@@ -356,7 +338,7 @@ This has enabled Forest plots for the associate pQTLs.&#160;<a class="footnote-b
 </tr>
 </tbody>
 </table>
-<p>A recent update: PGG.HLA, <a href="https://pog.fudan.edu.cn/pggmhc/">https://pog.fudan.edu.cn/pggmhc/</a>, requires data submission.&#160;<a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+<p>A recent update: PGG.HLA, <a href="https://pog.fudan.edu.cn/pggmhc/">https://pog.fudan.edu.cn/pggmhc/</a>, requires data submission.&#160;<a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 4 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div></div>

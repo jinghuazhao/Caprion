@@ -28,4 +28,5 @@ config/
 data/
 results/
 scale/
+tests/
 ToDo.md

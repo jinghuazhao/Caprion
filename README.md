@@ -55,7 +55,7 @@ The file also includes experiments on normalisation.
 
 The `bgen` files were extracted from a list of all samples, the variant IDs of which were for all RSids to allow for multiallelic loci.
 
-The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots. Note that LocusZoom 1.4 does not contain 1000Genomes build 37 genotypes for chromosome X and therefore they are supplemented with local files in the required format, namely, `locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX.[bed, bim, fan]`. Now that for the Manhattan plot call for VEP (in `0_utils.sb`) is necessary.
+The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots. Note that LocusZoom 1.4 does not contain 1000Genomes build 37 genotypes for chromosome X and therefore they are supplemented with local files in the required format, namely, `locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX.[bed, bim, fan]`. Now that for the Manhattan plot call for VEP is necessary from `0_utils.sb`, which also produces mean by genotype/dosage plots.
 
 ## 6. Meta-analysis
 

@@ -1,0 +1,7 @@
+/var/spool/slurm/slurmd/job54633383/slurm_script: line 181: module: command not found
+735 PON3
+xargs: echo: terminated by signal 13
+/usr/local/Cluster-Apps/ceuadmin/R/4.4.1-icelake/bin/exec/R: error while loading shared libraries: libreadline.so.7: cannot open shared object file: No such file or directory
+awk: fatal: cannot open file `/home/jhz22/Caprion/analysis/peptide/PON3/PON3.pheno' for reading (No such file or directory)
+sbatch: /lib64/libc.so.6: version `GLIBC_2.27' not found (required by /usr/local/software/slurm/slurm-23.02.7-rhel8/lib/slurm/libslurmfull.so)
+awk: fatal: cannot open file `/home/jhz22/Caprion/analysis/peptide/PON3/PON3.pheno' for reading (No such file or directory)

@@ -198,7 +198,7 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 <p>This can be finalised according to the Science paper.</p>
 <h2 id="4-pca-and-clustering2">4. PCA and clustering<sup id="fnref:scale"><a class="footnote-ref" href="#fn:scale">2</a></sup></h2>
 <p>The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.</p>
-<p>The PLINK2 has been used in the pilot studies, but now fastGWA using double transformations of the phenotypic data similar to SCALLOP-Seq analysis. Amazingly, assignment of the original value proves critcal for contrast with the raw data.</p>
+<p>The PLINK2 has been used in the pilot studies, but now fastGWA using double transformations of the phenotypic data similar to SCALLOP-Seq analysis. Amazingly, a standard assignment statement inside <code>sapply()</code> would produce <code>.pheno</code>/<code>.mpheno</code> containing the raw data.</p>
 <p>The file also includes experiments on normalisation.</p>
 <h2 id="5-pgwas3">5. pGWAS<sup id="fnref:pGWAS"><a class="footnote-ref" href="#fn:pGWAS">3</a></sup></h2>
 <p>The <code>bgen</code> files were extracted from a list of all samples, the variant IDs of which were for all RSids to allow for multiallelic loci.</p>

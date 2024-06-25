@@ -29,9 +29,6 @@ function fastGWAsetup()
   cut -f1-38 --complement ${analysis}/output/caprion${suffix}.pheno | \
   head -1 | \
   tr '\t' '\n' > ${analysis}/output/caprion${suffix}.varlist
-  sed -i '1d' ${analysis}/output/caprion${suffix}-1.pheno
-  sed -i '1d' ${analysis}/output/caprion${suffix}-2.pheno
-  sed -i '1d' ${analysis}/output/caprion${suffix}-3.pheno
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/qqmanhattanlz/slurm ]; then mkdir ~/Caprion/analysis/METAL${suffix}/qqmanhattanlz/slurm; fi
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/pairs/slurm ]; then mkdir -p ~/Caprion/analysis/METAL${suffix}/pairs/slurm; fi
   if [ ! -d ~/Caprion/analysis/METAL${suffix}/miamiplot/slurm ]; then mkdir -p ~/Caprion/analysis/METAL${suffix}/miamiplot/slurm; fi

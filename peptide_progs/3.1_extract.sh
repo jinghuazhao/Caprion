@@ -28,7 +28,7 @@ cat <<'EOL'> ${root}/${protein}-step1.sb
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
-module load ceuadmin/R/4.4.1-icelake
+module load ceuadmin/R
 module load samtools/1.13/gcc/zwxn7ug3
 module load libiconv/1.16/intel/64iicvbf
 

@@ -59,19 +59,21 @@ The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extre
 
 ## 6. Meta-analysis
 
-This follows from the SCALLOP/INF implementation, as designed analogous to a Makefile, i.e.,
+Internally, this follows from the SCALLOP/INF implementation, as designed analogous to a Makefile, i.e.,
 
 ```bash
 6_meta_analysis <task>
 ```
 
-where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence.
+where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence. However, due to time limit on HPC, a call to `.sb` is made for meta-analysis.
 
 To extract significant variants one may resort to `awk 'NR==1||$12<log(1e-6)/log(10)' 1433B-1.tbl`, say.
 
 ## 7. Variant identification
 
 An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here[^metal].
+
+A SLURM job is executed, to be followed by collection of results.
 
 ## 8. HLA imputation[^HLA]
 

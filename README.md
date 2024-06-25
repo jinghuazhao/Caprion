@@ -53,11 +53,9 @@ The file also includes experiments on normalisation.
 
 ## 5. pGWAS[^pGWAS]
 
-The bgen files were extracted from a list of all samples, the variant IDs of which were for all RSids to allow for multiallelic loci.
+The `bgen` files were extracted from a list of all samples, the variant IDs of which were for all RSids to allow for multiallelic loci.
 
-The bgen generation is moved into .sb based on cclake but can be switched back to cardio by uncommenting the ##SBATCH lines.
-
-The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots. Note that LocusZoom 1.4 does not contain 1000Genomes build 37 genotypes for chromosome X and therefore they are supplemented with local files in the required format, namely, `locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX.[bed, bim, fan]`.
+The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots. Note that LocusZoom 1.4 does not contain 1000Genomes build 37 genotypes for chromosome X and therefore they are supplemented with local files in the required format, namely, `locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX.[bed, bim, fan]`. Now that for the Manhattan plot call for VEP (in `0_utils.sb`) is necessary.
 
 ## 6. Meta-analysis
 

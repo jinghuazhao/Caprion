@@ -47,7 +47,7 @@ This can be finalised according to the Science paper.
 
 The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.
 
-The PLINK2 has been used in the pilot studies, but now fastGWA using double transformations of the phenotypic data similar to SCALLOP-Seq analysis. Amazingly, assignment of the original value proves critcal for contrast with the raw data.
+The PLINK2 has been used in the pilot studies, but now fastGWA using double transformations of the phenotypic data similar to SCALLOP-Seq analysis. Amazingly, a standard assignment statement inside `sapply()` would produce `.pheno`/`.mpheno` containing the raw data.
 
 The file also includes experiments on normalisation.
 

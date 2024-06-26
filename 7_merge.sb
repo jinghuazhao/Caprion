@@ -14,7 +14,7 @@
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
-module load R/4.4.1-icelake
+module load ceuadmin/R
 
 export TMPDIR=${HPC_WORK}/work
 export analysis=~/Caprion/analysis

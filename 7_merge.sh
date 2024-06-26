@@ -5,7 +5,7 @@ export suffix=_dr
 export TMPDIR=${HPC_WORK}/work
 export PERL5LIB=
 
-module load ceuadmin/R/4.4.1-icelake
+module load ceuadmin/R
 module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
 
 function signals()

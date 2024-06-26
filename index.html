@@ -242,12 +242,11 @@ source ${csd3path}/bin/activate</code></p>
 </li>
 <li id="fn:workflow">
 <p><strong>workflow</strong> (experimental)</p>
-<p>```bash
-module add ceuadmin/snakemake</p>
-<p>snakemake -s workflow/rules/cojo.smk -j1
+<p><code>bash
+module add ceuadmin/snakemake
+snakemake -s workflow/rules/cojo.smk -j1
 snakemake -s workflow/rules/report.smk -j1
-snakemake -s workflow/rules/cojo.smk -c --profile workflow
-```</p>
+snakemake -s workflow/rules/cojo.smk -c --profile workflow</code></p>
 <p>and use <code>--unlock</code> when necessary. <a class="footnote-backref" href="#fnref:workflow" title="Jump back to footnote 2 in the text">↩</a></p>
 </li>
 <li id="fn:pGWAS">

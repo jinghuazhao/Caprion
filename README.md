@@ -1,20 +1,8 @@
 # Protein analysis
 <a href="https://jinghuazhao.github.io/Caprion/"><img src="pilot/qrcode.png" height=200 width=200 align="right"></img></a>
-## workflow (experimental)
-
-```bash
-module add ceuadmin/snakemake
-
-snakemake -s workflow/rules/cojo.smk -j1
-snakemake -s workflow/rules/report.smk -j1
-snakemake -s workflow/rules/cojo.smk -c --profile workflow
-```
-
-and use `--unlock` when necessary.
-
 ## Programs[^directory]
 
-Work was done in a named sequence.
+Work was done in a named sequence[^workflow].
 
 ```
 1_pca_projection.sh
@@ -113,6 +101,18 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     Note that `docs.sh` copies `pilot/utils` directory of the pilot studies, so coding under that directory is preferable to avoid overwrite.
 
     To accommodate filteredd results, a suffix "" or "_dr" is applied when appropriate.
+
+[^workflow]: **workflow** (experimental)
+
+    ```bash
+    module add ceuadmin/snakemake
+
+    snakemake -s workflow/rules/cojo.smk -j1
+    snakemake -s workflow/rules/report.smk -j1
+    snakemake -s workflow/rules/cojo.smk -c --profile workflow
+    ```
+
+    and use `--unlock` when necessary.
 
 [^pGWAS]: **Protein GWAS**
     

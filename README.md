@@ -21,12 +21,12 @@ graph TB
 1_pca_projection.sh
 2_ggm.R
 3_wgcna.R
-4_pca_clustering.R --> 5_pgwas.sb --> 6_meta_analysis.sh --> 6_meta_analysis.sb --> 0_utils.sb --> 7_merge.sb --> 7_merge.sh
+4_pca_clustering.R --> 5_pgwas.sb --> 6_meta_analysis.sh --> 6_meta_analysis.sb --> 7_merge.sb --> 7_merge.sh --> 0_utils.sb --> 5_pgwas.sb
 8_hla.sh
 9_lookup.sh
 ```
 
-Some have or are able to generate a SLURM counterpart (.sb); chromose X is handled together with autosomes.
+Chromose X is handled together with autosomes, and the loop from `0_utils.sb` to `5_pgwas.sb` is to produce QQ/Manhattan/LocusZoom plots.
 
 ## 1. Data handling and PCA projection
 

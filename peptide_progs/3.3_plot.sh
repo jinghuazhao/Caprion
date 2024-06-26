@@ -186,7 +186,7 @@ function lz_autosomes()
     locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
               --delim tab title="{4}-{5}" \
               --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
-              --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --svg --refsnp {5}
+              --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --refsnp {5}
     rm ${root}/work/{4}-{5}.lz
   '
   module unload python/2.7
@@ -215,7 +215,7 @@ function lz_X()
               --delim tab title="{4}-{5}" \
               --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
               --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz \
-              --svg --refsnp {5}
+              --refsnp {5}
     rm ${root}/work/{4}-{5}.lz
   '
   module unload python/2.7

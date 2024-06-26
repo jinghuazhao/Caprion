@@ -166,11 +166,11 @@
 1_pca_projection.sh
 2_ggm.R
 3_wgcna.R
-4_pca_clustering.R --&gt; 5_pgwas.sb --&gt; 6_meta_analysis.sh --&gt; 6_meta_analysis.sb --&gt; 0_utils.sb --&gt; 7_merge.sb --&gt; 7_merge.sh
+4_pca_clustering.R --&gt; 5_pgwas.sb --&gt; 6_meta_analysis.sh --&gt; 6_meta_analysis.sb --&gt; 7_merge.sb --&gt; 7_merge.sh --&gt; 0_utils.sb --&gt; 5_pgwas.sb
 8_hla.sh
 9_lookup.sh
 </div>
-<p>Some have or are able to generate a SLURM counterpart (.sb); chromose X is handled together with autosomes.</p>
+<p>Chromose X is handled together with autosomes, and the loop from <code>0_utils.sb</code> to <code>5_pgwas.sb</code> is to produce QQ/Manhattan/LocusZoom plots.</p>
 <h2 id="1-data-handling-and-pca-projection">1. Data handling and PCA projection</h2>
 <p>The pipeline follows HGI contributions nevertheless only serves for reassurance since the study samples were carefully selected.</p>
 <h2 id="2-ggm">2. GGM</h2>

@@ -103,10 +103,9 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     To accommodate filteredd results, a suffix "" or "_dr" is applied when appropriate.
 
 [^workflow]: **workflow** (experimental)
-
+    
     ```bash
     module add ceuadmin/snakemake
-
     snakemake -s workflow/rules/cojo.smk -j1
     snakemake -s workflow/rules/report.smk -j1
     snakemake -s workflow/rules/cojo.smk -c --profile workflow

@@ -102,10 +102,6 @@
 <ul class="nav flex-column">
 <li class="nav-item" data-level="1"><a class="nav-link" href="#protein-analysis">Protein analysis</a>
 <ul class="nav flex-column">
-<li class="nav-item" data-level="2"><a class="nav-link" href="#workflow-experimental">workflow (experimental)</a>
-<ul class="nav flex-column">
-</ul>
-</li>
 <li class="nav-item" data-level="2"><a class="nav-link" href="#programs1">Programs1</a>
 <ul class="nav flex-column">
 </ul>
@@ -126,7 +122,7 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#5-pgwas2">5. pGWAS2</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#5-pgwas3">5. pGWAS3</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -138,7 +134,7 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#8-hla-imputation4">8. HLA imputation4</a>
+<li class="nav-item" data-level="2"><a class="nav-link" href="#8-hla-imputation5">8. HLA imputation5</a>
 <ul class="nav flex-column">
 </ul>
 </li>
@@ -154,16 +150,8 @@
 <div class="col-md-9" role="main">
 <h1 id="protein-analysis">Protein analysis</h1>
 <p><a href="https://jinghuazhao.github.io/Caprion/"><img align="right" height="200" src="pilot/qrcode.png" width="200"/></a></p>
-<h2 id="workflow-experimental">workflow (experimental)</h2>
-<pre><code class="language-bash">module add ceuadmin/snakemake
-
-snakemake -s workflow/rules/cojo.smk -j1
-snakemake -s workflow/rules/report.smk -j1
-snakemake -s workflow/rules/cojo.smk -c --profile workflow
-</code></pre>
-<p>and use <code>--unlock</code> when necessary.</p>
 <h2 id="programs1">Programs<sup id="fnref:directory"><a class="footnote-ref" href="#fn:directory">1</a></sup></h2>
-<p>Work was done in a named sequence.</p>
+<p>Work was done in a named sequence<sup id="fnref:workflow"><a class="footnote-ref" href="#fn:workflow">2</a></sup>.</p>
 <pre><code>1_pca_projection.sh
 2_ggm.R
 3_wgcna.R
@@ -193,7 +181,7 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 <p>The groupings based on unfiltered and DR-filtered proteins can be made on three phases altogether and instead of a classification indicator the first three PCs are used.</p>
 <p>The PLINK2 has been used in the pilot studies, but now fastGWA using double transformations of the phenotypic data similar to SCALLOP-Seq analysis. Amazingly, a standard assignment statement inside <code>sapply()</code> would produce <code>.pheno</code>/<code>.mpheno</code> containing the raw data.</p>
 <p>The file also includes experiments on normalisation.</p>
-<h2 id="5-pgwas2">5. pGWAS<sup id="fnref:pGWAS"><a class="footnote-ref" href="#fn:pGWAS">2</a></sup></h2>
+<h2 id="5-pgwas3">5. pGWAS<sup id="fnref:pGWAS"><a class="footnote-ref" href="#fn:pGWAS">3</a></sup></h2>
 <p>The <code>bgen</code> files were extracted from a list of all samples, the variant IDs of which were for all RSids to allow for multiallelic loci.</p>
 <p>The (sb)atch file is extended to produce Q-Q/Manhattan/LocusZoom plots and extreme p values are possible for all plots. Note that LocusZoom 1.4 does not contain 1000Genomes build 37 genotypes for chromosome X and therefore they are supplemented with local files in the required format, namely, <code>locuszoom_1.4/data/1000G/genotypes/2014-10-14/EUR/chrX.[bed, bim, fan]</code>. Now that for the Manhattan plot call for VEP is necessary from <code>0_utils.sb</code>, which also produces mean by genotype/dosage plots.</p>
 <h2 id="6-meta-analysis">6. Meta-analysis</h2>
@@ -203,9 +191,9 @@ snakemake -s workflow/rules/cojo.smk -c --profile workflow
 <p>where task = METAL_list, METAL_files, METAL_analysis, respectively in sequence. However, due to time limit on HPC, a call to <code>.sb</code> is made for meta-analysis.</p>
 <p>To extract significant variants one may resort to <code>awk 'NR==1||$12&lt;log(1e-6)/log(10)' 1433B-1.tbl</code>, say.</p>
 <h2 id="7-variant-identification">7. Variant identification</h2>
-<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here<sup id="fnref:metal"><a class="footnote-ref" href="#fn:metal">3</a></sup>.</p>
+<p>An iterative merging scheme is employed; the HLA region is simplified but will be specifically handled. Somewhat paradoxically, forest plots are also obtained here<sup id="fnref:metal"><a class="footnote-ref" href="#fn:metal">4</a></sup>.</p>
 <p>A SLURM job is executed, to be followed by collection of results.</p>
-<h2 id="8-hla-imputation4">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">4</a></sup></h2>
+<h2 id="8-hla-imputation5">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">5</a></sup></h2>
 <p>This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed <a href="https://cambridge-ceu.github.io/csd3/applications/CookHLA.html">here</a>. The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.</p>
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
 <h2 id="9-lookup">9. Lookup</h2>
@@ -252,10 +240,20 @@ source ${csd3path}/bin/activate</code></p>
 <p>Note that <code>docs.sh</code> copies <code>pilot/utils</code> directory of the pilot studies, so coding under that directory is preferable to avoid overwrite.</p>
 <p>To accommodate filteredd results, a suffix "" or "_dr" is applied when appropriate. <a class="footnote-backref" href="#fnref:directory" title="Jump back to footnote 1 in the text">↩</a></p>
 </li>
+<li id="fn:workflow">
+<p><strong>workflow</strong> (experimental)</p>
+<p>```bash
+module add ceuadmin/snakemake</p>
+<p>snakemake -s workflow/rules/cojo.smk -j1
+snakemake -s workflow/rules/report.smk -j1
+snakemake -s workflow/rules/cojo.smk -c --profile workflow
+```</p>
+<p>and use <code>--unlock</code> when necessary. <a class="footnote-backref" href="#fnref:workflow" title="Jump back to footnote 2 in the text">↩</a></p>
+</li>
 <li id="fn:pGWAS">
 <p><strong>Protein GWAS</strong></p>
 <p>GCTA/fastGWA employs MAF&gt;=0.001 (~56%) and geno=0.1 so potentially we can have .bgen files as such to speed up.</p>
-<p>GCTA uses headerless phenotype files, generated by <code>5_pgwas.sh</code> which is now unnecessary. <a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 2 in the text">↩</a></p>
+<p>GCTA uses headerless phenotype files, generated by <code>5_pgwas.sh</code> which is now unnecessary. <a class="footnote-backref" href="#fnref:pGWAS" title="Jump back to footnote 3 in the text">↩</a></p>
 </li>
 <li id="fn:metal">
 <p><strong>Incomplete gamma function</strong></p>
@@ -263,7 +261,7 @@ source ${csd3path}/bin/activate</code></p>
 <p><code>FATAL ERROR -
 a too large, ITMAX too small in gamma countinued fraction (gcf)</code></p>
 <p>An attempt was made to fix this and reported as a fixable issue to METAL GitHub respository (<a href="https://github.com/statgen/METAL/issues/24"><code>https://github.com/statgen/METAL/issues/24</code></a>).
-This has enabled Forest plots for the associate pQTLs. <a class="footnote-backref" href="#fnref:metal" title="Jump back to footnote 3 in the text">↩</a></p>
+This has enabled Forest plots for the associate pQTLs. <a class="footnote-backref" href="#fnref:metal" title="Jump back to footnote 4 in the text">↩</a></p>
 </li>
 <li id="fn:HLA">
 <p><strong>HLA</strong></p>
@@ -332,7 +330,7 @@ This has enabled Forest plots for the associate pQTLs. <a class="footnote-backr
 </tr>
 </tbody>
 </table>
-<p>A recent update: PGG.HLA, <a href="https://pog.fudan.edu.cn/pggmhc/">https://pog.fudan.edu.cn/pggmhc/</a>, requires data submission. <a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 4 in the text">↩</a></p>
+<p>A recent update: PGG.HLA, <a href="https://pog.fudan.edu.cn/pggmhc/">https://pog.fudan.edu.cn/pggmhc/</a>, requires data submission. <a class="footnote-backref" href="#fnref:HLA" title="Jump back to footnote 5 in the text">↩</a></p>
 </li>
 </ol>
 </div></div>

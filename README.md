@@ -1,6 +1,5 @@
 # Protein analysis
 <a href="https://jinghuazhao.github.io/Caprion/"><img src="pilot/qrcode.png" height=200 width=200 align="right"></img></a>
-
 ## workflow (experimental)
 
 ```bash
@@ -15,7 +14,7 @@ and use `--unlock` when necessary.
 
 ## Programs[^directory]
 
-Earlier work was done in a named sequence.
+Work was done in a named sequence.
 
 ```
 1_pca_projection.sh
@@ -25,6 +24,16 @@ Earlier work was done in a named sequence.
 5_pgwas.sh
 6_meta_analysis.sh
 7_merge.sh
+8_hla.sh
+9_lookup.sh
+```
+
+```mermaid
+graph TB
+1_pca_projection.sh
+2_ggm.R
+3_wgcna.R
+4_pca_clustering.R --> 5_pgwas.sb --> 6_meta_analysis.sh --> 6_meta_analysis.sb --> 0_utils.sb --> 7_merge.sb --> 7_merge.sh
 8_hla.sh
 9_lookup.sh
 ```

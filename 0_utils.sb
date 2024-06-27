@@ -950,9 +950,13 @@ mbp <- function(dir="work/",suffix="")
     b <- rbind(b,pheno)
     batch <- c(batch,rep(i,nrow(pheno)))
   }
-  png(paste0(rt,dir,"caprion",suffix,".png"),height=8,width=20,units="in",res=300)
+  png(paste0(rt,dir,"caprion",suffix,"-matboxplot.png"),height=8,width=20,units="in",res=300)
   quantro::matboxplot(t(b),batch,cex.axis=0.6,main="Box plots for phenotypes",
                       notch=TRUE,pch=19,ylab="Expression")
+  dev.off()
+  png(paste0(rt,dir,"caprion",suffix,"-matdensity.png"),height=8,width=20,units="in",res=300)
+  quantro::matdensity(t(b),batch,cex.axis=0.6,main="Density plots for phenotypes",
+                      pch=19,ylab="Expression")
   dev.off()
 }
 

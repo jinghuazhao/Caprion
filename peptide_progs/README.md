@@ -27,7 +27,7 @@ Prerequistes for a Manhattan/peptide association plot are
 - a call to `gz()` (in `0_utils.sh` for protein) for a compressed DR-filtered data.
 - ensembl-vep (step 3.2 above)[^vep], for which `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is called.
 
-The CSD3 icelake module `ceuadmin/R/4.4.1-icelake` now works as smoothly.
+The CSD3 icelake module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake` (CentOS 7).
 
 ## Reference
 

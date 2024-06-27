@@ -130,9 +130,8 @@ function fp_data()
 }
 
 function fp()
-# --array=1
 {
-  if [ ! -d ${analysis}/METAL${suffix}/fp ]; then mkdir -o mkdir -p ${analysis}/METAL${suffix}/fp; fi
+  if [ ! -d ${analysis}/METAL${suffix}/fp ]; then mkdir -p ${analysis}/METAL${suffix}/fp; fi
   Rscript -e '
     require(gap)
     require(dplyr)
@@ -160,7 +159,7 @@ function fp()
            arrange(study) %>%
            select(-batch_prot_chr)
     rsid <- read.table(file.path(analysis,"work",paste0("rsid",suffix,".tsv")),col.names=c("MarkerName","rsid"))
-    pdf(file.path(analysis,"work",paste0("fp",suffix,".pdf")),width=8,height=5)
+    pdf(file.path(analysis,paste0("METAL",suffix),"fp",paste0("fp",suffix,".pdf")),width=8,height=5)
     METAL_forestplot(tbl,all,rsid,flag="Type",package="metafor",method="FE",cex=1.2,cex.axis=1.2,cex.lab=1.2,xlab="Effect")
     dev.off()
   '
@@ -203,8 +202,9 @@ function HetISq()
     Het <- filter(tbl,HetISq>=75) %>%
            select(prot,SNP,Direction,HetISq,index) %>%
            left_join(select(b,prot,SNP,P.ZWK,P.ZYQ,P.UDP,BETA.ZWK,BETA.ZYQ,BETA.UDP))
-    write.csv(Het,file=file.path(analysis,"work", paste0("HetISq75",suffix,".csv")),row.names=FALSE,quote=FALSE)
-    write(Het[['index']],file=file.path(analysis, "work", paste0("HetISq75",suffix,".index")),sep=",",ncolumns=nrow(Het))
+    write.csv(Het,file=file.path(analysis,paste0("METAL",suffix), "fp", paste0("HetISq75",suffix,".csv")),row.names=FALSE,quote=FALSE)
+    write(Het[['index']],file=file.path(analysis, paste0("METAL",suffix),"fp", paste0("HetISq75",suffix,".index")),
+          sep=",",ncolumns=nrow(Het))
   '
 }
 

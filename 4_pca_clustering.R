@@ -169,11 +169,10 @@ eigenvec <- read.delim("~/Caprion/pilot/data/merged_imputation.eigenvec")
 pilotsMap <- read.csv("~/Caprion/pilotsMap_15SEP2021.csv")
 OmicsMap <- read.csv("~/Caprion/INTERVAL_OmicsMap_20210915.csv")
 pca_km_mc <- pca_clustering(prot)
-attach(pca_km_mc)
-grouping <- data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification)) %>%
-            left_join(data.frame(with(pca,x)[,1:3],caprion_id=rownames(with(pca,x)))) %>%
-            rename(ppc1=PC1,ppc2=PC2,ppc3=PC3)
-detach(pca_km_mc)
+grouping <- with(pca_km_mc, data.frame(caprion_id=names(with(mc,classification)),classification=with(mc,classification)) %>%
+                 left_join(data.frame(with(pca,x)[,1:3],caprion_id=rownames(with(pca,x)))) %>%
+                 rename(ppc1=PC1,ppc2=PC2,ppc3=PC3)
+            )
 id_data_covars <- merge(pilotsMap,OmicsMap,by="identifier",all=TRUE) %>%
                   merge(data,by="identifier",all=TRUE) %>%
                   left_join(grouping,by="caprion_id")
@@ -183,23 +182,34 @@ pheno <- select(OmicsMap,identifier,Affymetrix_gwasQC_bl,caprion_id) %>%
          left_join(data) %>%
          right_join(data.frame(prot,caprion_id=rownames(prot))) %>%
          mutate(batch=match(substr(caprion_id,1,3),c("ZWK","ZYQ","UDP")))
-write.table(select(pheno,Affymetrix_gwasQC_bl),file=paste0("~/Caprion/analysis/output/caprion",suffix,".id"),
-            quote=FALSE,row.names=FALSE,col.names=FALSE)
 caprion_pheno <- mutate(pheno,FID=Affymetrix_gwasQC_bl,
                         IID=Affymetrix_gwasQC_bl)[c("FID","IID",ids,"batch",dates,covars,pcs,PCS,xnames)] %>%
                  arrange(batch,FID,IID)
 names(caprion_pheno) <- gsub("^X([0-9])","\\1",names(caprion_pheno))
+write.table(select(pheno,Affymetrix_gwasQC_bl),file=paste0("~/Caprion/analysis/output/caprion",suffix,".id"),
+            quote=FALSE,row.names=FALSE,col.names=FALSE)
 write.table(caprion_pheno,file=paste0("~/Caprion/analysis/output/caprion",suffix,".pheno"),
             quote=FALSE,row.names=FALSE,sep="\t")
 allvars <- c("FID","IID","sexPulse","agePulse","batch",pcs,PCS,xnames)
+if (FALSE) {
+  pheno_order <- arrange(pheno, batch,caprion_id)
+  dat <-  pheno_order %>%
+          mutate(FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl) %>%
+          select(all_of(allvars))
+  mod <- model.matrix(as.formula(paste0(c("~sexPulse","agePulse",pcs,PCS),collapse="+")),
+                     filter(pheno_order,!is.na(Affymetrix_gwasQC_bl)))
+  mcol <- apply(pheno_order[colnames(mod)[-1]],2,is.na)
+  mrow <- with(pheno_order,!is.na(Affymetrix_gwasQC_bl))
+  table(pheno_order[mrow,"batch"])
+}
 dat <- mutate(pheno,FID=Affymetrix_gwasQC_bl,IID=Affymetrix_gwasQC_bl)[allvars]
 mod <- model.matrix(as.formula(paste0(c("~sexPulse","agePulse",pcs,PCS),collapse="+")),
                     filter(pheno,!is.na(Affymetrix_gwasQC_bl)))
 mcol <- apply(pheno[colnames(mod)[-1]],2,is.na)
-many <- !apply(mcol,1,any)
+obs <- !apply(mcol,1,any)
 for(batches in 1:3)
 {
-  d <- filter(dat[many,],batch==batches)
+  d <- filter(dat[obs,],batch==batches)
   z <- d
   names(z) <- gsub("^X([0-9])","\\1",names(z))
   write.table(z,file=paste0("~/Caprion/analysis/output/caprion",suffix,"-",batches,".tsv"),
@@ -211,17 +221,20 @@ suppressMessages(library(sva))
 edata <- protein_all
 rownames(edata) <- sub("_HUMAN","",rownames(edata))
 edata <- edata[!rownames(edata)%in%union(ZYQ.na,UDP.na),]
-batch <- as.factor(match(substr(rownames(Biobase::pData(edata)),1,3),c("ZWK","ZYQ","UDP")))
+edata_exprs <- t(exprs(edata))
+id <- rownames(edata_exprs)
+batch <- match(substr(id,1,3),c("ZWK","ZYQ","UDP"))
+edata_new <- data.frame(id,batch,edata_exprs) %>%
+             arrange(batch,id)
 table(batch)
 # 1. parametric adjustment
-combat_edata1 <- ComBat(dat=edata, batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE)
+combat_edata1 <- ComBat(dat=t(edata_new[-c(1,2)]), batch=batch, mod=NULL, par.prior=TRUE, prior.plots=TRUE)
 # 2. non-parametric adjustment, mean-only version
-combat_edata2 = ComBat(dat=edata, batch=batch, mod=NULL, par.prior=FALSE, mean.only=TRUE)
-edata <- edata[,many]
-batch <- pheno$batch[many]
-quantro_sparsenetgls(edata,batch,mod)
+combat_edata2 = ComBat(dat=t(edata_new[-c(1,2)]), batch=batch, mod=NULL, par.prior=FALSE, mean.only=TRUE)
+batch <- edata_new[obs,][["batch"]]
+quantro_sparsenetgls(t(edata_new[obs,-c(1,2)]),batch,mod[obs,])
 # 3. reference-batch version, with covariates
-combat_edata3 <- ComBat(dat=edata, batch=batch, mod=mod, par.prior=TRUE, ref.batch=3, prior.plots=TRUE)
+combat_edata3 <- ComBat(dat=t(edata_new[obs,-c(1,2)]), batch=batch, mod=mod, par.prior=TRUE, ref.batch=3, prior.plots=TRUE)
 if (FALSE)
 {
   pca_km_mc <- pca_clustering(combat_edata3)

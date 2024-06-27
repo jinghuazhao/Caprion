@@ -6,12 +6,12 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --array=1
-#SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_fp_%A_%a.o
-#SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_fp_%A_%a.e
+#SBATCH --array=1-987
+##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_fp_%A_%a.o
+##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_fp_%A_%a.e
 
-##SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
-##SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
+#SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
 
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.o
 ##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.e
@@ -371,7 +371,8 @@ function mean_by_genotype_gen_sample()
                      Genotype=as.factor(case_when(g == genotypes[1] ~ paste0(A1,"/",A1),
                                                   g == genotypes[2] ~ paste0(A1,"/",A2),
                                                   g == genotypes[3] ~ paste0(A2,"/",A2),
-                                                  TRUE ~ "---")))
+                                                  TRUE ~ "---"))) %>%
+              filter(Genotype!="---")
        means <- group_by(dat,Genotype) %>%
                 summarise(N=sum(!is.na(Phenotype)),Mean=signif(mean(Phenotype,na.rm=TRUE),digits))
        invisible(list(dat=dat,means=means))
@@ -1128,13 +1129,13 @@ saveWorkbook(wb, file=xlsx, overwrite=TRUE)
 END
 }
 
-fp_data
+# fp_data
 # fp
 # HetISq
 # vep_annotate
 # qqmanhattan/lz from 5_pgwas.sb
-# mean_by_genotype_gen_sample
-# mean_by_genotype_dosage
+  mean_by_genotype_gen_sample
+  mean_by_genotype_dosage
 # X: 127,156,325,471,567,691,748,792
 
 # srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i

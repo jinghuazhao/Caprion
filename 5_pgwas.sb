@@ -11,22 +11,22 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_freq-0.01_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_freq-0.01_%A_%a.e
 
-#SBATCH --job-name=_fastGWA
-#SBATCH --array=1-987
-#SBATCH --mem=28800
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/pgwas_dr/slurm/_pgwas_fastLR_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/pgwas_dr/slurm/_pgwas_fastLR_%A_%a.e
+##SBATCH --job-name=_fastGWA
+##SBATCH --array=1-987
+##SBATCH --mem=28800
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/pgwas_dr/slurm/_pgwas_fastLR_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/pgwas_dr/slurm/_pgwas_fastLR_%A_%a.e
 
 ##SBATCH --job-name=_qqmanhattan
 ##SBATCH --array=1-987
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.e
 
-##SBATCH --job-name=_lz
-##SBATCH --array=1-987
-##SBATCH --mem 6800
-##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
-##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
+#SBATCH --job-name=_lz
+#SBATCH --array=1-987
+#SBATCH --mem 6800
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
 
 ##SBATCH --job-name=pairs
 ##SBATCH --array=1-987
@@ -480,11 +480,11 @@ function miamiplot2()
 #bgen
 #freq
 #freq.01
-fastLR 1
-fastLR 2
-fastLR 3
+#fastLR 1
+#fastLR 2
+#fastLR 3
 #qqmanhattan
-#lz
+lz
 #pairs_p
 #miamiplot
 #miamiplot2

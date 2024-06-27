@@ -6,21 +6,21 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --array=1-987
-##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_fp_%A_%a.o
-##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_fp_%A_%a.e
+#SBATCH --array=1
+#SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_fp_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/ukb_ppp/slurm/_fp_%A_%a.e
 
 ##SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
 ##SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
 
-#SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.o
-#SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.e
+##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.o
+##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.e
 
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
 export PERL5LIB=
-module load ceuadmin/R/4.4.1-icelake
+module load ceuadmin/R
 module load samtools/1.13/gcc/zwxn7ug3
 module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
 module load libiconv/1.16/intel/64iicvbf
@@ -942,19 +942,10 @@ mbp <- function(dir="work/",suffix="")
   batch <- vector()
   for(i in 1:3)
   {
-    if (dir=="output/" & suffix=="_dr")
-    {
-    pheno <- read.table(paste0(rt,dir,"caprion",suffix,"-",i,".pheno")) %>%
-             select(-V1) %>%
-             mutate(V2=paste0(code[i],V2)) %>%
-             column_to_rownames(var="V2")
-    } else
-    {
     pheno <- read.delim(paste0(rt,dir,"caprion",suffix,"-",i,".pheno"),check.names=FALSE) %>%
              select(-FID) %>%
              mutate(IID=paste0(code[i],IID)) %>%
              column_to_rownames(var="IID")
-    }
     b <- rbind(b,pheno)
     batch <- c(batch,rep(i,nrow(pheno)))
   }
@@ -1137,10 +1128,10 @@ saveWorkbook(wb, file=xlsx, overwrite=TRUE)
 END
 }
 
-# fp_data
+fp_data
 # fp
 # HetISq
-  vep_annotate
+# vep_annotate
 # qqmanhattan/lz from 5_pgwas.sb
 # mean_by_genotype_gen_sample
 # mean_by_genotype_dosage

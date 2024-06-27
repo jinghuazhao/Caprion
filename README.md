@@ -26,7 +26,7 @@ graph TB
 9_lookup.sh
 ```
 
-Chromose X is handled together with autosomes, and the loop from `0_utils.sb` to `5_pgwas.sb` is to produce mean-by-genotype/QQ/Manhattan/LocusZoom plots -- the former also implements vep_annotate(), fp_data(), fp() which only requires `--array=1`.
+Chromose X is handled together with autosomes, and the loop from `0_utils.sb` to `5_pgwas.sb` is to produce mean-by-genotype/QQ/Manhattan/LocusZoom plots -- the former also implements vep_annotate(), fp_data(), fp() which only requires `--array=1`. Note also that HetISq() only works inside an interactive R session.
 
 ## 1. Data handling and PCA projection
 

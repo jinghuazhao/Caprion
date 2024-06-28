@@ -112,7 +112,7 @@ function cistrans()
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)
     write.csv(cis.vs.trans,file=file.path(root,paste0(protein,".cis.vs.trans")),row.names=FALSE,quote=FALSE)
-    png(file.path(root,"pqtl2d.png"),width=12,height=10,unit="in",res=300)
+    png(file.path(root,paste0(protein,"-peptides.png")),width=12,height=10,unit="in",res=300)
     r <- qtl2dplot(cis.vs.trans,chrlen=gap::hg19,snp_name="SNP",snp_chr="SNPChrom",snp_pos="SNPPos",
                    gene_chr="geneChrom",gene_start="geneStart",gene_end="geneEnd",trait="prot",gene="Gene",
                    TSS=TRUE,cis="cis",plot=TRUE,cex.labels=0.6,cex.points=0.6,

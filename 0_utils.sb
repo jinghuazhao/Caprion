@@ -1135,6 +1135,12 @@ saveWorkbook(wb, file=xlsx, overwrite=TRUE)
 END
 }
 
+function left()
+# No. of pending array jobs
+{
+  expr $(echo $(squeue -u jhz22|grep PD|awk '{gsub("[0-9]*_||\\[||\\]", ""); print $1}'|cut -d- -f2|tr '\n' '+'|sed 's/+/ + /g') 0)
+}
+
 # fp_data
 # fp
 # HetISq

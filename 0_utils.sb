@@ -415,7 +415,7 @@ function mean_by_genotype_dosage()
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${analysis}/work/caprion${suffix}-${batch}.id \
                --pheno ${analysis}/work/caprion${suffix}-${batch}.pheno --pheno-name ${prot} \
-               --recode A include-alt \
+               --recode A include-alt --missing-catname NA \
                --out ${out}
        rm ${out}.log
        mv ${out}.raw ${out}.dosage
@@ -435,7 +435,8 @@ function mean_by_genotype_dosage()
                          colClasses=c("character","character","character","character","integer","numeric","numeric"))
        n7 <- names(dat)[7]
        names(dat)[6:7] <- c("Phenotype","Genotype")
-       dat <- mutate(dat,Genotype=as.character(round(Genotype)))
+       dat <- mutate(dat,Genotype=as.character(round(Genotype))) %>%
+              filter(!is.na(Genotype))
        means <- group_by(dat,Genotype) %>%
                 summarise(sum(!is.na(Phenotype)),Mean=signif(mean(Phenotype,na.rm=TRUE),digits))
        invisible(list(dat=dat,means=means,id=n7))
@@ -452,7 +453,8 @@ function mean_by_genotype_dosage()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
      p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(analysis,paste0("pgwas",suffix),"means",paste0(prot,"-",pqtl,"-dosage.png")),device="png",width=16, height=10, units="in")
+     ggsave(file.path(analysis,paste0("pgwas",suffix),"means",paste0(prot,suffix,"-",pqtl,"-dosage.png")),
+            device="png",width=16, height=10, units="in")
   '
 }
 

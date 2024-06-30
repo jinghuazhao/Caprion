@@ -290,7 +290,7 @@ function mean_by_dosage()
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${analysis}/output/caprion-${batch}.id \
                --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \
-               --recode A include-alt \
+               --recode A include-alt --missing-catname NA \
                --out ${out}
        rm ${out}.log
     fi
@@ -309,7 +309,8 @@ function mean_by_dosage()
                          colClasses=c("character","character","character","character","integer","numeric","numeric"))
        n7 <- names(dat)[7]
        names(dat)[6:7] <- c("Phenotype","Genotype")
-       dat <- mutate(dat,Genotype=as.character(round(Genotype)))
+       dat <- mutate(dat,Genotype=as.character(round(Genotype))) %>%
+              filter(!is.na(Genotype))
        means <- group_by(dat,Genotype) %>%
                 summarise(N=n(),Mean=signif(mean(Phenotype),digits))
        invisible(list(dat=dat,means=means,id=n7))

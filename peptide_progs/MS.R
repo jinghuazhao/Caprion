@@ -6,9 +6,12 @@ spectra_ZWK <- "~/Caprion/pre_qc_data/spectral_library_ZWK"
 raw_files <- list.files(spectra_ZWK, pattern = "\\.raw$", full.names = TRUE)
 ## collectively
 suppressMessages(library(MsBackendRawFileReader))
-ZWKw <- Spectra::backendInitialize(MsBackendRawFileReader::MsBackendRawFileReader(),
-        files = raw_files)
+ZWK <- Spectra::backendInitialize(MsBackendRawFileReader::MsBackendRawFileReader(),
+       files = raw_files)
 class(ZWK)
+methods(class=class(ZWK))
+Spectra(ZWK)
+spectraData(ZWK)
 ZWK
 ZWK |> Spectra::spectraVariables()
 save(ZWK,file="~/Caprion/analysis/work/ZWK.rda")
@@ -25,6 +28,15 @@ class(ZYQ_UDP)
 ZYQ_UDP
 ZYQ_UDP |> Spectra::spectraVariables()
 save(ZYQ_UDP,file="~/Caprion/analysis/work/ZYQ_UDP.rda")
+
+# mzML
+d <- "/rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectra"
+mz <-  openMSfile(file.path(d,"budp082710c21101xms1.mzML"))
+methods(class="mzRpwiz")
+spec <- spectra(mz)
+class(spec)
+length(spec)
+lapply(spec,head,3)
 
 legacy <- function()
 {

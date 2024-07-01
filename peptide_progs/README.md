@@ -12,8 +12,8 @@ These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
+MS.R | handling of .raw/.mzML files
 crux.R/crux.sh | R/multicomp+crux pipeline
-raw.R | handling of .raw files
 0_utils.sh | Code snippets
 1_pgwas.sh | Association analysis[^association] | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o

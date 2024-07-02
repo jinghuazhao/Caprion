@@ -30,6 +30,7 @@ ZYQ_UDP |> Spectra::spectraVariables()
 save(ZYQ_UDP,file="~/Caprion/analysis/work/ZYQ_UDP.rda")
 
 # mzML
+library(mzR)
 d <- "/rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectra"
 mz <-  openMSfile(file.path(d,"budp082710c21101xms1.mzML"))
 methods(class="mzRpwiz")
@@ -52,7 +53,6 @@ legacy <- function()
   }
   plot(raw_spectrum[[1]], centroid=FALSE)
 # a single mzML file
-  library(mzR)
   mzML_file <- list.files(spectra, pattern="mzML",full.names=TRUE, recursive = TRUE)
   dirname(mzML_file)
   mz <- openMSfile(mzML_file)

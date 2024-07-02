@@ -14,10 +14,13 @@ export raw=szwk901104i19901xms1.raw
 {
   export ZWK=~/Caprion/pre_qc_data/spectral_library_ZWK
   export mgf=$(echo ${raw} | sed 's/raw/mgf/')
-  export out=$(echo ${raw} | sed 's/raw/txt/')
-  echo ${mgf}
+  export mzML=$(echo ${raw} | sed 's/raw/mzML/')
   if [ ! -f ${mgf} ]; then
+     echo ${mgf}
      wine64 $(which msconvert.exe) --mgf ${ZWK}/${raw}
+  elif [ ! -f ${mzML} ]; then
+     echo ${mzML}
+     wine64 $(which msconvert.exe) --mzML ${ZWK}/${raw}
   fi
 }
 

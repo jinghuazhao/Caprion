@@ -1138,6 +1138,7 @@ END
 function left()
 # No. of pending array jobs
 {
+  squeue -u jhz22|grep PD|wc -l
   expr $(echo $(squeue -u jhz22|grep PD|awk '{gsub("[0-9]*_||\\[||\\]", ""); print $1}'|cut -d- -f2|tr '\n' '+'|sed 's/+/ + /g') 0)
 }
 

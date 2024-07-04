@@ -1,3 +1,5 @@
+#!/usr/local/Cluster-Apps/ceuadmin/R/4.4.1-icelake/bin/Rscript
+
 options(width=200)
 
 # ZWK .raw data

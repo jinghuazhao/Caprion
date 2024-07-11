@@ -303,7 +303,7 @@ PROC <- peptideMapping("PROC",mm=0)
 
 # rs1367117 (chr2:21263900)
 mspav <- "TSQC"
-match_position <- regexpr(mspav, APOB$sequence)
+match_position <- regexpr(mspav, APOB[["sequence"]])
 match_position
 
 peptideAssociationPlot("A1BG")

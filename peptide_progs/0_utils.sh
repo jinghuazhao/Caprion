@@ -328,3 +328,35 @@ cut -d' ' -f1 ${analysis}/output/caprion${suffix}-2.id | grep -f - ${analysis}/o
 cut -d' ' -f1 ${analysis}/output/caprion${suffix}-3.id | grep -f - ${analysis}/output/chrX.idlist \
    > ${analysis}/output/chrX${suffix}-3.id
 }
+
+
+function pav()
+{
+  for protein in A1BG APOB EPCR ERAP2 PROC PON3
+  do
+  export protein=${protein}
+  export root=${analysis}/peptide/${protein}
+  cd ${root}/METAL/vep
+  (
+    grep -v '##' *.tab | head -1
+    grep -v '#' *.tab
+  ) > ${root}/vep.txt
+  cd - > /dev/null
+  Rscript -e '
+   analysis <- Sys.getenv("analysis")
+   root <- Sys.getenv("root")
+   protein <- Sys.getenv("protein")
+   vep <- read.delim(file.path(root,"vep.txt"),check.names=FALSE)
+   knitr::kable(with(vep,table(Consequence)),caption=paste(protein,"annotation"))
+  '
+  done
+  (
+    head -1 ${analysis}/peptide/*/vep.txt | awk "/Consequence/" | head -1
+    grep -v '#' ${analysis}/peptide/*/vep.txt | sed "s|${analysis}/peptide/||;s|vep.txt:||;s|.tab:|,|"
+  ) > ${analysis}/work/peptide_vep.txt
+  Rscript -e '
+   analysis <- Sys.getenv("analysis")
+   vep <- read.delim(file.path(analysis,"work","peptide_vep.txt"),check.names=FALSE)
+   knitr::kable(with(vep,table(Consequence)),caption="Peptide annotation based on six proteins")
+  '
+}

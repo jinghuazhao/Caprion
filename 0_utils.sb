@@ -1143,6 +1143,22 @@ function left()
   expr $(echo $(squeue -u jhz22|grep PD|awk '{gsub("[0-9]*_||\\[||\\]", ""); print $1}'|cut -d- -f2|tr '\n' '+'|sed 's/+/ + /g') 0)
 }
 
+function pav()
+{
+  cd ${analysis}/METAL${suffix}/vep
+  (
+    grep -v '##' *.tab | head -1
+    grep -v '#' *.tab
+  ) > ${analysis}/work/vep${suffix}.txt
+  cd - > /dev/null
+  Rscript -e '
+   analysis <- Sys.getenv("analysis")
+   suffix <- Sys.getenv("suffix")
+   vep <- read.delim(file.path(analysis,"work",paste0("vep",suffix,".txt")),check.names=FALSE)
+   knitr::kable(with(vep,table(Consequence)),caption=paste(ifelse(suffix=="","Unfiltered","DR-filtered"), "annotation"))
+  '
+}
+
 # fp_data
 # fp
 # HetISq

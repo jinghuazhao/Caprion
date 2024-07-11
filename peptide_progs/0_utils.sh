@@ -298,12 +298,19 @@ A1BG <- peptideMapping("A1BG",mm=0)
 APOB <- peptideMapping("APOB",mm=0)
 EPCR <- peptideMapping("EPCR",mm=0)
 ERAP2 <- peptideMapping("ERAP2",mm=0)
+PON3 <- peptideMapping("PON3",mm=0)
 PROC <- peptideMapping("PROC",mm=0)
+
+# rs1367117 (chr2:21263900)
+mspav <- "TSQC"
+match_position <- regexpr(mspav, APOB$sequence)
+match_position
 
 peptideAssociationPlot("A1BG")
 peptideAssociationPlot("APOB")
 peptideAssociationPlot("EPCR")
 peptideAssociationPlot("ERAP2")
+peptideAssociationPlot("PON3")
 peptideAssociationPlot("PROC")
 
 ITIH2 <- peptideMapping("ITIH2",mm=0)

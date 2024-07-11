@@ -1075,12 +1075,13 @@ caprion <- dplyr::mutate(Protein, ProteinSNP=paste0(Protein,"-",SNP),inv_chr_pos
 caprion_dr <- dplyr::mutate(Protein_dr, ProteinSNP=paste0(Protein,"-",SNP),inv_chr_pos_a1_a2(SNP),pos=as.integer(pos)) %>%
               dplyr::rename(prot=Protein,rsid=SNP,uniprot=Gene)
 same <- intersect(caprion[["ProteinSNP"]],caprion_dr[["ProteinSNP"]])
-cor(filter(caprion,ProteinSNP %in% same)["Effect"],
-    filter(caprion_dr,ProteinSNP %in% same)["Effect"])
-png(file.path(analysis,"work","caprion_caprion_dr.png"),height=8,width=8,units="in",res=300)
+cat("Total # of chromosome X signals =",length(same[grepl("X:",same)]),"\n")
+r <- cor(filter(caprion,ProteinSNP %in% same)["Effect"],
+         filter(caprion_dr,ProteinSNP %in% same)["Effect"])
+png(file.path(analysis,"work","un_dr_overlap.png"),height=8,width=8,units="in",res=300)
 plot(filter(caprion,ProteinSNP %in% same)[["Effect"]],
      filter(caprion_dr,ProteinSNP %in% same)[["Effect"]],pch=19,
-     main="Effect size comparison (N. pQTLs=559, r=0.999)",xlab="Beta",ylab="Beta_dr")
+     main=paste0("Effect size comparison (N. pQTLs=",length(same),",r=",trunc(r,5),")"),xlab="Beta",ylab="Beta_dr")
 dev.off()
 INF <- "/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/INF"
 plink <- "/rds/user/jhz22/hpc-work/bin/plink"

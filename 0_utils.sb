@@ -1159,6 +1159,96 @@ function pav()
   '
 }
 
+function glmnet_test()
+{
+  Rscript -e '
+    library(glmnet)
+  # glmnet
+    data(QuickStartExample)
+    x <- QuickStartExample$x
+    y <- QuickStartExample$y
+    fit <- glmnet(x, y)
+    plot(fit,label=TRUE)
+    print(fit)
+    coef(fit, s = 0.1)
+  # cv.glmnet
+    set.seed(29)
+    nx <- matrix(rnorm(5 * 20), 5, 20)
+    predict(fit, newx = nx, s = c(0.1, 0.05))
+    cvfit <- cv.glmnet(x, y)
+    plot(cvfit)
+    cvfit$lambda.min
+    coef(cvfit, s = "lambda.min")
+    predict(cvfit, newx = x[1:5,], s = "lambda.min")
+  # weights
+    wts <-  c(rep(1,50), rep(2,50))
+    fit <- glmnet(x, y, alpha = 0.2, weights = wts, nlambda = 20)
+    print(fit)
+    fit <- glmnet(x, y)
+    coef.apprx <- coef(fit, s = 0.5, exact = FALSE)
+    coef.exact <- coef(fit, s = 0.5, exact = TRUE, x=x, y=y)
+    cbind2(coef.exact[which(coef.exact != 0)],
+           coef.apprx[which(coef.apprx != 0)])
+    predict(fit, newx = x[1:5,], type = "response", s = 0.05)
+    plot(fit, xvar = "lambda", label = TRUE)
+    plot(fit, xvar = "dev", label = TRUE)
+    cvfit <- cv.glmnet(x, y, type.measure = "mse", nfolds = 20)
+    print(cvfit)
+    structure(c(2.44, 0.08, 2.518, 0, 0), class = "proc_time", .Names = c("user.self",
+    "sys.self", "elapsed", "user.child", "sys.child"))
+    structure(c(0.508999999999999, 0.057, 1.56699999999999, 1.941,
+    0.1), class = "proc_time", .Names = c("user.self", "sys.self",
+    "elapsed", "user.child", "sys.child"))
+    cvfit$lambda.min
+    predict(cvfit, newx = x[1:5,], s = "lambda.min")
+    coef(cvfit, s = "lambda.min")
+    foldid <- sample(1:10, size = length(y), replace = TRUE)
+    cv1  <- cv.glmnet(x, y, foldid = foldid, alpha = 1)
+    cv.5 <- cv.glmnet(x, y, foldid = foldid, alpha = 0.5)
+    cv0  <- cv.glmnet(x, y, foldid = foldid, alpha = 0)
+    par(mfrow = c(2,2))
+    plot(cv1); plot(cv.5); plot(cv0)
+    plot(log(cv1$lambda)   , cv1$cvm , pch = 19, col = "red",
+         xlab = "log(Lambda)", ylab = cv1$name)
+    points(log(cv.5$lambda), cv.5$cvm, pch = 19, col = "grey")
+    points(log(cv0$lambda) , cv0$cvm , pch = 19, col = "blue")
+    legend("topleft", legend = c("alpha= 1", "alpha= .5", "alpha 0"),
+           pch = 19, col = c("red","grey","blue"))
+    tfit <- glmnet(x, y, lower.limits = -0.7, upper.limits = 0.5)
+    plot(tfit)
+    p.fac <- rep(1, 20)
+    p.fac[c(1, 3, 5)] <- 0
+    pfit <- glmnet(x, y, penalty.factor = p.fac)
+    plot(pfit, label = TRUE)
+  # parallel
+    library(doMC)
+    registerDoMC(cores = 2)
+    X <- matrix(rnorm(1e4 * 200), 1e4, 200)
+    Y <- rnorm(1e4)
+    system.time(cv.glmnet(X, Y))
+    system.time(cv.glmnet(X, Y, parallel = TRUE))
+  '
+  Rsciprt -e '
+    library(Biobase)
+    load("~/Caprion/pilot/ZWK.rda")
+    protein_APOB <- exprs(dr_ZWK)[rownames(exprs(dr_ZWK))=="APOB_HUMAN",]
+    isotope_APOB <- mapping_ZWK[mapping_ZWK$Protein == "APOB_HUMAN", "Isotope.Group.ID"]
+    peptide_APOB <- exprs(peptide_ZWK) |> subset(rownames(exprs(peptide_ZWK)) %in% isotope_APOB)
+    peptide_APOB <- t(peptide_APOB)
+    colnames(peptide_APOB) <- paste0("X",colnames(peptide_APOB))
+    library(glmnet)
+    fit <- glmnet(peptide_APOB,protein_APOB)
+    coef(fit, s = 0.1)
+    beta <- coef(fit, s = 0.1)
+    selected <- (beta[,1]>1e-5)[-1]
+    non_na_beta <- beta[selected,]
+    selected_groups <- rownames(beta)[selected]
+    cat("Peptides contributed to protein:\n",selected_groups,"\n")
+    signals <- read.csv("~/Caprion/analysis/peptide/APOB/APOB.cis.vs.trans",header=TRUE)
+    selected_signals <- subset(signals,isotope%in%selected_groups)
+  '
+}
+
 # fp_data
 # fp
 # HetISq

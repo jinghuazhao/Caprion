@@ -1229,23 +1229,51 @@ function glmnet_test()
     system.time(cv.glmnet(X, Y, parallel = TRUE))
   '
   Rsciprt -e '
+    options(width=200)
     library(Biobase)
-    load("~/Caprion/pilot/ZWK.rda")
-    protein_APOB <- exprs(dr_ZWK)[rownames(exprs(dr_ZWK))=="APOB_HUMAN",]
-    isotope_APOB <- mapping_ZWK[mapping_ZWK$Protein == "APOB_HUMAN", "Isotope.Group.ID"]
-    peptide_APOB <- exprs(peptide_ZWK) |> subset(rownames(exprs(peptide_ZWK)) %in% isotope_APOB)
-    peptide_APOB <- t(peptide_APOB)
-    colnames(peptide_APOB) <- paste0("X",colnames(peptide_APOB))
     library(glmnet)
-    fit <- glmnet(peptide_APOB,protein_APOB)
-    coef(fit, s = 0.1)
-    beta <- coef(fit, s = 0.1)
-    selected <- (beta[,1]>1e-5)[-1]
-    non_na_beta <- beta[selected,]
-    selected_groups <- rownames(beta)[selected]
-    cat("Peptides contributed to protein:\n",selected_groups,"\n")
-    signals <- read.csv("~/Caprion/analysis/peptide/APOB/APOB.cis.vs.trans",header=TRUE)
-    selected_signals <- subset(signals,isotope%in%selected_groups)
+    library(dplyr)
+    library(tidyr)
+    load("~/Caprion/pilot/ZWK.rda")
+    per_prot <- function(p)
+    {
+      enet <- function(type)
+      {
+        prot <- get(type)
+        fit <- glmnet(peptide,prot)
+        coef(fit, s = 0.1)
+        beta <- coef(fit, s = 0.1)
+        selected <- (beta[,1]>1e-5)[-1]
+        non_na_beta <- beta[selected,]
+        selected_groups <- gsub("^X", "",rownames(beta)[selected])
+        if (length(selected_groups)>0)
+        {
+           cat("\nPeptides contributed to",p,type,"\n",selected_groups)
+           selected_signals <- subset(signals,isotope%in%selected_groups)
+           print(knitr::kable(selected_signals))
+        }
+      }
+      uniprot <- paste0(p,"_HUMAN")
+      protein <- exprs(dr_ZWK)[rownames(exprs(protein_ZWK))==uniprot,]
+      dr <- exprs(dr_ZWK)[rownames(exprs(dr_ZWK))==uniprot,]
+      isotope <- mapping_ZWK[mapping_ZWK$Protein == uniprot, "Isotope.Group.ID"]
+      peptide <- exprs(peptide_ZWK) |> subset(rownames(exprs(peptide_ZWK)) %in% isotope)
+      peptide <- t(peptide)
+      colnames(peptide) <- paste0("X",colnames(peptide))
+      vep <- read.delim(paste0("~/Caprion/analysis/peptide/",p,"/","vep.txt")) %>%
+             setNames(c("isotope_SNP", names(.)[-1])) %>%
+             extract(col = 1, into = c("isotope", "SNP"), regex = "^([0-9]+).tab:(.*)$") %>%
+             mutate(isotope=as.numeric(isotope)) %>%
+             select(isotope,SNP,Feature,Feature_type,Consequence,Codons,IMPACT,DISTANCE,SYMBOL,NEAREST)
+      signals <- read.csv(paste0("~/Caprion/analysis/peptide/",p,"/",p,".cis.vs.trans"),header=TRUE) %>%
+                 select(-geneStart,-geneEnd,-SNPChrom,-SNPPos) %>%
+                 left_join(vep)
+      enet("protein")
+      enet("dr")
+    }
+    sink("~/Caprion/analysis/work/benchmark.md")
+    for (p in c("A1BG","APOB","EPCR","ERAP2","PON3","PROC")) per_prot(p)
+    sink()
   '
 }
 

@@ -1298,3 +1298,96 @@ function vignette()
     system.time(cv.glmnet(X, Y, parallel = TRUE))
   '
 }
+
+function PROC()
+{
+# 1. Pull the meta-analysis results for all 20 peptides for the lead chr2 SNP and lead chr20 SNP (it seems to the same lead SNP across all peptides) – this will help us see if the results are truly null for the 8 peptides not currently marked as ‘good’
+  # the lead chr2 and chr20 signals
+  # 20 peptides
+  export PERL5LIB=
+  (
+    gunzip -c ${analysis}/peptide/PROC/METAL/*-1.tbl.gz | head -1
+    parallel zgrep -w {2} ${analysis}/peptide/PROC/METAL/{1}-1.tbl.gz ::: \
+    $(cut -f1 ${analysis}/peptide/PROC/PROC.signals | sed '1d' | sort -u) ::: \
+    $(awk '/PROC/{print $NF}' ${analysis}/work/caprion.signals) \
+  ) > ${analysis}/work/PROC.signals
+# 2. Create the correlation heatmap between all these peptides (I would hypothesise that the correlation is better between the ‘good’ peptides than with the others)
+  Rscript -e '
+     # Set environment and paths
+     options(width = 200)
+     analysis <- Sys.getenv("analysis")
+     pilot <- gsub("analysis", "pilot", analysis)
+
+     suppressMessages(library(Biobase))
+     suppressMessages(library(dplyr))
+     # Read and process isotope data
+     isotope <- read.table(file.path(analysis, "peptide", "PROC", "PROC.signals"), header = TRUE) %>%
+                pull(isotope) %>%
+                unique()
+
+     # Load dataset
+     load(file.path(pilot, "es.rda"))
+
+     # Subset data based on isotopes
+     PROC_peptides <- peptide_all[rownames(peptide_all) %in% isotope]
+
+     # Calculate correlation matrices
+     r_all <- cor(t(exprs(PROC_peptides)))
+     r_ZWK <- cor(t(exprs(PROC_peptides[, grepl("ZWK", sampleNames(PROC_peptides))])))
+     r_ZYQ <- cor(t(exprs(PROC_peptides[, grepl("ZYQ", sampleNames(PROC_peptides))])))
+     r_UDP <- cor(t(exprs(PROC_peptides[, grepl("UDP", sampleNames(PROC_peptides))])))
+
+     # Generate heatmaps using pheatmap
+     pdf(file.path(analysis,"work","PROC-heatmap.pdf"))
+     pheatmap(r_all, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+              color = colorRampPalette(c("blue", "white", "red"))(100),
+              main = "Correlation Matrix - All Samples", border_color = NA)
+
+     pheatmap(r_ZWK, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+              color = colorRampPalette(c("blue", "white", "red"))(100),
+              main = "Correlation Matrix - ZWK Samples", border_color = NA)
+
+     pheatmap(r_ZYQ, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+              color = colorRampPalette(c("blue", "white", "red"))(100),
+              main = "Correlation Matrix - ZYQ Samples", border_color = NA)
+
+     pheatmap(r_UDP, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+              color = colorRampPalette(c("blue", "white", "red"))(100),
+              main = "Correlation Matrix - UDP Samples", border_color = NA)
+
+     # R base heatmaps
+     heatmap(r_all, main = "Correlation Matrix - All Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_ZWK, main = "Correlation Matrix - ZWK Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_ZYQ, main = "Correlation Matrix - ZYQ Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_UDP, main = "Correlation Matrix - UDP Samples", Colv = NA, Rowv = NA, scale = "none")
+     pdf()
+
+# 3. Plot the distribution of the raw intensities of each peptide by batch, and the normalised intensities of each peptide by batch
+     load(file.path(pilot,"caprion.rda"))
+     raw_ZWK <- filter(rawIGs,Isotope.Group.ID%in%isotope)
+     load(file.path(pilot,"ZYQ_R.rda"))
+     raw_ZYQ <- filter(ZYQ_R,Isotope.Group.ID%in%isotope)
+     load(file.path(pilot,"UDP_R.rda"))
+     raw_UDP <- filter(UDP_R,Isotope.Group.ID%in%isotope)
+     raw_UDP <- select(raw_UDP,Isotope.Group.ID,names(raw_UDP)[grep("UDP",names(raw_UDP))])
+
+     raw2data <- function(code)
+     {
+       raw <- get(paste0("raw_",code))
+       t_names <- names(raw)
+       t_data <- raw[c("Isotope.Group.ID", t_names[grep(code,t_names)])]
+       t_new <- t(t_data[-1])
+       colnames(t_new) <- t_data[[1]]
+       rownames(t_new) <- t_names[grep("UDP", t_names)]
+       invisible(t_new)
+     }
+     # all selected with rawIGs,ZYQ_R,UDP_R
+     ZWK_raw <- raw2data("ZWK")
+     ZYQ_raw <- raw2data("ZYQ")
+     UDP_raw <- raw2data("UDP")
+# 4. Quantify for each peptide how many participants in each batch have 0 values and how many have values below the detection rate threshold (I think this was 50,000?) – this might help us see if the potentially poorly measured peptides have more missingness
+# 5. Work out where on the protein each peptide matches to - this might hopefully help with the 2 curious peptides that only have a trans signal
+# 6. See which peptides are/aren’t being used in the protein_dr quantification based on the DR threshold filter
+# 7. See from your elastic net work which peptides seem to be contributing to the protein quantification. We can then think about how to restrict the protein quantification to only the ‘good’ peptides, which should improve signal strength.
+  '
+}

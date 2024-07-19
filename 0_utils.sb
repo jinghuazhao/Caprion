@@ -28,6 +28,7 @@ module load ceuadmin/ensembl-vep/111-icelake
 
 export TMPDIR=${HPC_WORK}/work
 export analysis=~/Caprion/analysis
+export pre_qc_data=/rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics
 export suffix=_dr
 
 function duplicates()
@@ -1315,11 +1316,13 @@ function PROC()
   Rscript -e '
      # Set environment and paths
      options(width = 200)
+     pre_qc_data <- Sys.getenv("pre_qc_data")
      analysis <- Sys.getenv("analysis")
      pilot <- gsub("analysis", "pilot", analysis)
 
      suppressMessages(library(Biobase))
      suppressMessages(library(dplyr))
+     suppressMessages(library(pheatmap))
      # Read and process isotope data
      isotope <- read.table(file.path(analysis, "peptide", "PROC", "PROC.signals"), header = TRUE) %>%
                 pull(isotope) %>%
@@ -1363,14 +1366,19 @@ function PROC()
      pdf()
 
 # 3. Plot the distribution of the raw intensities of each peptide by batch, and the normalised intensities of each peptide by batch
-     load(file.path(pilot,"caprion.rda"))
-     raw_ZWK <- filter(rawIGs,Isotope.Group.ID%in%isotope)
-     load(file.path(pilot,"ZYQ_R.rda"))
-     raw_ZYQ <- filter(ZYQ_R,Isotope.Group.ID%in%isotope)
-     load(file.path(pilot,"UDP_R.rda"))
-     raw_UDP <- filter(UDP_R,Isotope.Group.ID%in%isotope)
-     raw_UDP <- select(raw_UDP,Isotope.Group.ID,names(raw_UDP)[grep("UDP",names(raw_UDP))])
+     require(openxlsx)
+     ZWK_path <- file.path(pre_qc_data,"pilot","ZWK_EDR_20191002.xlsx")
+     raw_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Raw IGs",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
+     neq_ZWL <- openxlsx::read.xlsx(ZWK_path, sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
 
+     ZYQ_path <- file.path(pre_qc_data,"batch2","CAM1184-ZYQ")
+     raw_ZYQ <- read.delim(file.path(ZYQ_path,"ZYQ_Comp_Neq1_Norm_Int_20200812.csv"))
+     neq_ZYQ <- read.delim(file.path(ZYQ_path,"ZYQ_R4_Comp_Neq1_Raw_Int_Updated_20200615.txt"))
+
+     UDP_path <- file.path(pre_qc_data,"batch3","CAM1184-UDP")
+     raw_UDP <- read.delim(file.path(UDP_path,"UDP_R3_Comp_Neq1_Raw_Int_Clean_20210412.txt"))
+     neq_UDP <- openxlsx::read.xlsx(file.path(UDP_path,"UDP_EDR_20210423.xlsx"),
+                                    sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=1)
      raw2data <- function(code)
      {
        raw <- get(paste0("raw_",code))
@@ -1385,6 +1393,19 @@ function PROC()
      ZWK_raw <- raw2data("ZWK")
      ZYQ_raw <- raw2data("ZYQ")
      UDP_raw <- raw2data("UDP")
+
+     legacy <- function()
+     {
+       load(file.path(pilot,"caprion.rda"))
+       raw_ZWK <- filter(rawIGs,Isotope.Group.ID%in%isotope)
+       load(file.path(pilot,"ZYQ_R.rda"))
+       raw_ZYQ <- filter(ZYQ_R,Isotope.Group.ID%in%isotope)
+       load(file.path(pilot,"UDP_R.rda"))
+       raw_UDP <- filter(UDP_R,Isotope.Group.ID%in%isotope)
+       raw_UDP <- select(raw_UDP,Isotope.Group.ID,names(raw_UDP)[grep("UDP",names(raw_UDP))]) %>%
+                  filter(!duplicated(Isotope.Group.ID))
+     }
+
 # 4. Quantify for each peptide how many participants in each batch have 0 values and how many have values below the detection rate threshold (I think this was 50,000?) – this might help us see if the potentially poorly measured peptides have more missingness
 # 5. Work out where on the protein each peptide matches to - this might hopefully help with the 2 curious peptides that only have a trans signal
 # 6. See which peptides are/aren’t being used in the protein_dr quantification based on the DR threshold filter

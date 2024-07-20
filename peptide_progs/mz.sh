@@ -11,10 +11,13 @@ export SIF=pwiz-skyline-i-agree-to-the-vendor-licenses_latest.sif
 if [ ! -f "${f}" ] && [ -x "${f}" ]; then
    singularity pull --name ${SIF} docker://chambm/pwiz-skyline-i-agree-to-the-vendor-licenses
 fi
+for format in --mzML --mzXML --mz5 --mzMLb --mgf --text --ms1 --cms1 --ms2 --cms2
+do
 singularity exec --env WINEDEBUG=-all \
                   -B /rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectral_library_ZWK/:/data \
                       ${SIF} \
-                      wine msconvert /data/${raw} --filter "peakPicking true 1-"
+                      wine msconvert ${format} /data/${raw}
+done
 
 module load ceuadmin/crux/4.1
 export sprot=~/rds/public_databases/UniProt/uniprot_sprot.fasta.gz

@@ -1334,22 +1334,30 @@ function PROC()
      isotope <- read.table(file.path(analysis, "peptide", "PROC", "PROC.signals"), header = TRUE) %>%
                 pull(isotope) %>%
                 unique()
-
-     # Load dataset
      load(file.path(pilot, "es.rda"))
-
-     # Subset data based on isotopes
      PROC_peptides <- peptide_all[rownames(peptide_all) %in% isotope]
+     cor_na <- function(d)
+     # Calculate correlation matrices excluding cols/rows all NAs
+     {
+        r <- cor(d)
+        diag(r) <- NA
+        na_rows <- apply(r,1,function(x) all(is.na(x)))
+        na_cols <- apply(r,2,function(x) all(is.na(x)))
+        diag(r) <- 1
+        r[!na_rows,!na_cols]
+     }
+     r_all <- cor_na(t(exprs(PROC_peptides)))
+     r_ZWK <- cor_na(t(exprs(PROC_peptides[, grepl("ZWK", sampleNames(PROC_peptides))])))
+     r_ZYQ <- cor_na(t(exprs(PROC_peptides[, grepl("ZYQ", sampleNames(PROC_peptides))])))
+     r_UDP <- cor_na(t(exprs(PROC_peptides[, grepl("UDP", sampleNames(PROC_peptides))])))
 
-     # Calculate correlation matrices
-     r_all <- cor(t(exprs(PROC_peptides)))
-     r_ZWK <- cor(t(exprs(PROC_peptides[, grepl("ZWK", sampleNames(PROC_peptides))])))
-     r_ZYQ <- cor(t(exprs(PROC_peptides[, grepl("ZYQ", sampleNames(PROC_peptides))])))
-     r_UDP <- cor(t(exprs(PROC_peptides[, grepl("UDP", sampleNames(PROC_peptides))])))
-
-     # Generate heatmaps using pheatmap
      pdf(file.path(analysis,"work","PROC-heatmap.pdf"))
-     pheatmap(r_all, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+     heatmap(r_all, main = "Correlation Matrix - All Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_ZWK, main = "Correlation Matrix - ZWK Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_ZYQ, main = "Correlation Matrix - ZYQ Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_UDP, main = "Correlation Matrix - UDP Samples", Colv = NA, Rowv = NA, scale = "none")
+     pheatmap(r_all[complete.cases(r_all),complete.cases(t(r_all)),drop=FALSE],
+              display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
               color = colorRampPalette(c("blue", "white", "red"))(100),
               main = "Correlation Matrix - All Samples", border_color = NA)
 
@@ -1364,12 +1372,6 @@ function PROC()
      pheatmap(r_UDP, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
               color = colorRampPalette(c("blue", "white", "red"))(100),
               main = "Correlation Matrix - UDP Samples", border_color = NA)
-
-     # R base heatmaps
-     heatmap(r_all, main = "Correlation Matrix - All Samples", Colv = NA, Rowv = NA, scale = "none")
-     heatmap(r_ZWK, main = "Correlation Matrix - ZWK Samples", Colv = NA, Rowv = NA, scale = "none")
-     heatmap(r_ZYQ, main = "Correlation Matrix - ZYQ Samples", Colv = NA, Rowv = NA, scale = "none")
-     heatmap(r_UDP, main = "Correlation Matrix - UDP Samples", Colv = NA, Rowv = NA, scale = "none")
      pdf()
 
 # 3. Plot the distribution of the raw intensities of each peptide by batch, and the normalised intensities of each peptide by batch

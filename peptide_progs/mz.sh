@@ -4,7 +4,7 @@
 module load ceuadmin/wine/8.21
 module load ceuadmin/pwiz/3_0_24163_9bfa69a-wine
 export ZWK=~/Caprion/pre_qc_data/spectral_library_ZWK
-export raw=szwk901104i19801xms1.raw
+export raw=szwk901104i19801xms1
 
 singularity --version
 export SIF=pwiz-skyline-i-agree-to-the-vendor-licenses_latest.sif
@@ -16,13 +16,14 @@ do
 singularity exec --env WINEDEBUG=-all \
                   -B /rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectral_library_ZWK/:/data \
                       ${SIF} \
-                      wine msconvert ${format} /data/${raw}
+                      wine msconvert ${format} /data/${raw}.raw
 done
 
 module load ceuadmin/crux/4.1
 export sprot=~/rds/public_databases/UniProt/uniprot_sprot.fasta.gz
 export sprot=uniprot_sprot.fasta
 export uniref100=~/rds/public_databases/UniProt/uniref100.fasta.gz
+export mgf=${raw}.mgf
 R --no-save < crux.R
 
 function legacy()

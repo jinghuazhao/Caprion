@@ -1220,11 +1220,16 @@ function glmnet()
       enet("protein")
       enet("dr")
     }
-    pdf("~/Caprion/analysis/work/enet.pdf")
+    pdf("~/Caprion/analysis/work/enet.pdf",height10,width=12)
     sink("~/Caprion/analysis/work/enet.md")
     for (p in c("A1BG","APOB","EPCR","ERAP2","PON3","PROC")) per_prot(p)
     sink()
-    pdf()
+    dev.off()
+    pdf("~/Caprion/analysis/work/PROC_enet.pdf",height=10,width=12)
+    sink("~/Caprion/analysis/work/PROC_enet.md")
+    per_prot("PROC")
+    sink()
+    dev.off()
   '
 }
 
@@ -1460,9 +1465,39 @@ function PROC()
      # save(list=ls(),file=file.path(analysis,"work","PROC.rda"))
      # load(file.path(analysis,"work","PROC.rda"))
 # 4. Quantify for each peptide how many participants in each batch have 0 values and how many have values below the detection rate threshold (I think this was 50,000?) – this might help us see if the potentially poorly measured peptides have more missingness
+     cat("Number of samples with zero values:\n")
+     for (src in c("ZWK_raw","ZYQ_raw","UDP_raw"))
+     {
+       cat(src,"\n")
+       print(apply(apply(get(src),2,'==',0),2,sum))
+     }
+     cat("Number of samples below 50,000:\n")
+     for (src in c("ZWK_raw","ZYQ_raw","UDP_raw"))
+     {
+       cat(src,"\n")
+       print(apply(apply(get(src),2,'<=',50000),2,sum))
+     }
 # 5. Work out where on the protein each peptide matches to - this might hopefully help with the 2 curious peptides that only have a trans signal
+     suppressMessages(library(Biostrings))
+     fasta_file_path <- 'https://rest.uniprot.org/uniprotkb/P04070.fasta'
+     fasta_sequences <- Biostrings::readAAStringSet(fasta_file_path, format = "fasta")
+     AA_sequence <- fasta_sequences[[1]]
+     cat("Sequence:", toString(AA_sequence), "\n")
+     load (file.path(pilot,"ZWK.rda"))
+     PROC_mapping <- subset(mapping_ZWK,Protein=="PROC_HUMAN" & Isotope.Group.ID%in%isotope)
+     knitr::kable(PROC_mapping,caption="PROC sequence information")
+     knitr::kable(t(mp),caption="PROC sequence positions")
+     mp <- sapply(setdiff(PROC_mapping[["Modified.Peptide.Sequence"]],"-"),
+           function(x) {
+             y <- gsub("\\[\\d+\\.\\d+\\]", "X", x);
+             mp <- matchPattern(y,AA_sequence)
+             as.data.frame(mp)
+           })
+     # load(file.path(analysis,"work","PROC_peptides.rda"))
 # 6. See which peptides are/aren’t being used in the protein_dr quantification based on the DR threshold filter
+     # see 4. above
 # 7. See from your elastic net work which peptides seem to be contributing to the protein quantification. We can then think about how to restrict the protein quantification to only the ‘good’ peptides, which should improve signal strength.
+     # see glmnet()
      legacy <- function()
      {
        load(file.path(pilot,"caprion.rda"))

@@ -1142,12 +1142,15 @@ function left()
 {
   squeue -u jhz22 | grep PD | wc -l
   squeue -u jhz22 | awk '/PD/{
-    gsub("[0-9]*_[[]|[]]", "")
-    split($1, a, "-")
-    if (length(a) == 1)
-      total += a[1]
-    else
-      total += a[2] - a[1] + 1
+    if (!/[[]/ && $NF==8) total+=1
+    else {
+     gsub("[0-9]*_[[]|[]]", "")
+     split($1, a, "-")
+     if (length(a) == 1)
+       total += a[1]
+     else
+       total += a[2] - a[1] + 1
+    }
    } END {print total}'
 }
 
@@ -1327,10 +1330,10 @@ function PROC()
      analysis <- Sys.getenv("analysis")
      pilot <- gsub("analysis", "pilot", analysis)
 
+     # Read and process isotope data
      suppressMessages(library(Biobase))
      suppressMessages(library(dplyr))
      suppressMessages(library(pheatmap))
-     # Read and process isotope data
      isotope <- read.table(file.path(analysis, "peptide", "PROC", "PROC.signals"), header = TRUE) %>%
                 pull(isotope) %>%
                 unique()
@@ -1346,16 +1349,19 @@ function PROC()
         diag(r) <- 1
         r[!na_rows,!na_cols]
      }
-     r_all <- cor_na(t(exprs(PROC_peptides)))
-     r_ZWK <- cor_na(t(exprs(PROC_peptides[, grepl("ZWK", sampleNames(PROC_peptides))])))
-     r_ZYQ <- cor_na(t(exprs(PROC_peptides[, grepl("ZYQ", sampleNames(PROC_peptides))])))
-     r_UDP <- cor_na(t(exprs(PROC_peptides[, grepl("UDP", sampleNames(PROC_peptides))])))
-
-     pdf(file.path(analysis,"work","PROC-heatmap.pdf"))
+     pdf(file.path(analysis,"work","PROC-heatmap.pdf"),height=10,width=12)
+     r_all <- cor(t(exprs(PROC_peptides)))
+     r_ZWK <- cor(t(exprs(PROC_peptides[, grepl("ZWK", sampleNames(PROC_peptides))])))
+     r_ZYQ <- cor(t(exprs(PROC_peptides[, grepl("ZYQ", sampleNames(PROC_peptides))])))
+     r_UDP <- cor(t(exprs(PROC_peptides[, grepl("UDP", sampleNames(PROC_peptides))])))
      heatmap(r_all, main = "Correlation Matrix - All Samples", Colv = NA, Rowv = NA, scale = "none")
      heatmap(r_ZWK, main = "Correlation Matrix - ZWK Samples", Colv = NA, Rowv = NA, scale = "none")
      heatmap(r_ZYQ, main = "Correlation Matrix - ZYQ Samples", Colv = NA, Rowv = NA, scale = "none")
      heatmap(r_UDP, main = "Correlation Matrix - UDP Samples", Colv = NA, Rowv = NA, scale = "none")
+     r_all <- cor_na(t(exprs(PROC_peptides)))
+     r_ZWK <- cor_na(t(exprs(PROC_peptides[, grepl("ZWK", sampleNames(PROC_peptides))])))
+     r_ZYQ <- cor_na(t(exprs(PROC_peptides[, grepl("ZYQ", sampleNames(PROC_peptides))])))
+     r_UDP <- cor_na(t(exprs(PROC_peptides[, grepl("UDP", sampleNames(PROC_peptides))])))
      pheatmap(r_all[complete.cases(r_all),complete.cases(t(r_all)),drop=FALSE],
               display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
               color = colorRampPalette(c("blue", "white", "red"))(100),
@@ -1372,7 +1378,7 @@ function PROC()
      pheatmap(r_UDP, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
               color = colorRampPalette(c("blue", "white", "red"))(100),
               main = "Correlation Matrix - UDP Samples", border_color = NA)
-     pdf()
+     dev.off()
 
 # 3. Plot the distribution of the raw intensities of each peptide by batch, and the normalised intensities of each peptide by batch
      require(openxlsx)
@@ -1384,7 +1390,7 @@ function PROC()
      {
        n <- read.delim(f,nrows=1) %>% length
        h <- scan(f,sep="\t",what="",n=n)
-       h <- gsub(".*\\[(UDP\\d+|XCC\\w+|ZWK\\w+).*\\].*", "\\1",h)
+       h <- gsub(".*\\[(UDP\\d+|XCC\\w+|ZWK\\w+|ZYQ\\w+).*\\].*", "\\1",h)
        read.table(f,col.names=h,sep="\t",skip=1)
      }
      ZYQ_path <- file.path(pre_qc_data,"batch2","CAM1184-ZYQ")
@@ -1397,9 +1403,9 @@ function PROC()
      raw_ZYQ3 <- raw_process(f3)
      raw_ZYQ4 <- raw_process(f4)
      raw_ZYQ <- raw_ZYQ1[names(raw_ZYQ1)[grep("UDP|Isotope.Group.ID", names(raw_ZYQ1))]] %>%
-                left_join(raw_ZYQ2[names(raw_ZYQ2)[grep("UDP|Isotope.Group.ID", names(raw_ZYQ2))]]) %>%
-                left_join(raw_ZYQ3[names(raw_ZYQ3)[grep("UDP|Isotope.Group.ID", names(raw_ZYQ3))]]) %>%
-                left_join(raw_ZYQ4[names(raw_ZYQ4)[grep("UDP|Isotope.Group.ID", names(raw_ZYQ4))]])
+                left_join(raw_ZYQ2[names(raw_ZYQ2)[grep("ZYQ|Isotope.Group.ID", names(raw_ZYQ2))]]) %>%
+                left_join(raw_ZYQ3[names(raw_ZYQ3)[grep("ZYQ|Isotope.Group.ID", names(raw_ZYQ3))]]) %>%
+                left_join(raw_ZYQ4[names(raw_ZYQ4)[grep("ZYQ|Isotope.Group.ID", names(raw_ZYQ4))]])
      neq_ZYQ <- read.csv(file.path(ZYQ_path,"ZYQ_Comp_Neq1_Norm_Int_20200812.csv"))
 
      UDP_path <- file.path(pre_qc_data,"batch3","CAM1184-UDP")
@@ -1412,15 +1418,17 @@ function PROC()
      raw_UDP <- raw_UDP1[names(raw_UDP1)[grep("UDP|Isotope.Group.ID", names(raw_UDP1))]] %>%
                 left_join(raw_UDP2[names(raw_UDP2)[grep("UDP|Isotope.Group.ID", names(raw_UDP2))]]) %>%
                 left_join(raw_UDP3[names(raw_UDP3)[grep("UDP|Isotope.Group.ID", names(raw_UDP3))]])
-
      neq_UDP <- openxlsx::read.xlsx(file.path(UDP_path,"UDP_EDR_20210423.xlsx"),
                                     sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=1)
      IGs2data <- function(src_code)
      {
+       require(dplyr)
        IGs <- get(src_code) %>%
               filter(Isotope.Group.ID%in%isotope)
+       code <- unlist(strsplit(src_code,"_"))[2]
        t_names <- names(IGs)
-       t_data <- IGs[c("Isotope.Group.ID", t_names[grep(code,t_names)])]
+       t_data <- IGs[t_names[grep(paste0("Isotope.Group.ID", "|", code),t_names)]]
+       t_data[t_data=="-"] <- NA
        t_new <- t(t_data[-1])
        colnames(t_new) <- t_data[[1]]
        rownames(t_new) <- t_names[grep(code, t_names)]
@@ -1428,8 +1436,33 @@ function PROC()
      }
      ZWK_raw <- IGs2data("raw_ZWK");ZWK_neq <- IGs2data("neq_ZWK")
      ZYQ_raw <- IGs2data("raw_ZYQ");ZYQ_neq <- IGs2data("neq_ZYQ");
-     UDP_raw <- IGs2data("raw_UDP");UDP_neq <- IGs2data("neq_UDP")
+     UDP_raw <- IGs2data("raw_UDP");UDP_neq <- IGs2data("neq_UDP");
+     UDP_neq <- matrix(as.numeric(sapply(UDP_neq, as.character)),
+                       nrow = nrow(UDP_neq), ncol = ncol(UDP_neq), dimnames=list(rownames(UDP_neq),colnames(UDP_neq)))
 
+     hist_mat <- function(src)
+     {
+       require(ggplot2)
+       require(reshape2)
+       mat <- get(src)
+       df_long <- melt(mat)
+       p <- ggplot(df_long, aes(x = value)) +
+            geom_histogram() +
+            facet_wrap(~ Var2, scales = "free") +
+            labs(title = paste("Histograms of",src,"Columns"))
+       print(p)
+     }
+
+     pdf(file.path(analysis,"work","PROC-hist.pdf"),height=10,width=12)
+     for (src in c("ZWK_raw","ZWK_neq","ZYQ_raw","ZYQ_neq","UDP_raw","UDP_neq")) hist_mat(src)
+     dev.off()
+
+     # save(list=ls(),file=file.path(analysis,"work","PROC.rda"))
+     # load(file.path(analysis,"work","PROC.rda"))
+# 4. Quantify for each peptide how many participants in each batch have 0 values and how many have values below the detection rate threshold (I think this was 50,000?) – this might help us see if the potentially poorly measured peptides have more missingness
+# 5. Work out where on the protein each peptide matches to - this might hopefully help with the 2 curious peptides that only have a trans signal
+# 6. See which peptides are/aren’t being used in the protein_dr quantification based on the DR threshold filter
+# 7. See from your elastic net work which peptides seem to be contributing to the protein quantification. We can then think about how to restrict the protein quantification to only the ‘good’ peptides, which should improve signal strength.
      legacy <- function()
      {
        load(file.path(pilot,"caprion.rda"))
@@ -1442,9 +1475,5 @@ function PROC()
                   filter(!duplicated(Isotope.Group.ID))
      }
 
-# 4. Quantify for each peptide how many participants in each batch have 0 values and how many have values below the detection rate threshold (I think this was 50,000?) – this might help us see if the potentially poorly measured peptides have more missingness
-# 5. Work out where on the protein each peptide matches to - this might hopefully help with the 2 curious peptides that only have a trans signal
-# 6. See which peptides are/aren’t being used in the protein_dr quantification based on the DR threshold filter
-# 7. See from your elastic net work which peptides seem to be contributing to the protein quantification. We can then think about how to restrict the protein quantification to only the ‘good’ peptides, which should improve signal strength.
   '
 }

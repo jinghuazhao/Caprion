@@ -1178,8 +1178,8 @@ function glmnet()
     suppressMessages(library(glmnet))
     suppressMessages(library(dplyr))
     suppressMessages(library(tidyr))
-    load("~/Caprion/pilot/ZWK.rda")
-    per_prot <- function(p)
+    load("~/Caprion/pilot/ZYQ.rda")
+    per_prot <- function(p, with.isotope=TRUE)
     {
       enet <- function(type)
       {
@@ -1203,10 +1203,10 @@ function glmnet()
         }
       }
       uniprot <- paste0(p,"_HUMAN")
-      protein <- exprs(dr_ZWK)[rownames(exprs(protein_ZWK))==uniprot,]
-      dr <- exprs(dr_ZWK)[rownames(exprs(dr_ZWK))==uniprot,]
-      isotope <- mapping_ZWK[mapping_ZWK$Protein == uniprot, "Isotope.Group.ID"]
-      peptide <- exprs(peptide_ZWK) |> subset(rownames(exprs(peptide_ZWK)) %in% isotope)
+      protein <- exprs(protein_ZYQ)[rownames(exprs(protein_ZYQ))==uniprot,]
+      dr <- exprs(dr_ZYQ)[rownames(exprs(dr_ZYQ))==uniprot,]
+      if (!with.isotope) isotope <- mapping_ZYQ[mapping_ZYQ$Protein == uniprot, "Isotope.Group.ID"]
+      peptide <- exprs(peptide_ZYQ) |> subset(rownames(exprs(peptide_ZYQ)) %in% isotope)
       peptide <- t(peptide)
       colnames(peptide) <- paste0("X",colnames(peptide))
       vep <- read.delim(paste0("~/Caprion/analysis/peptide/",p,"/","vep.txt")) %>%

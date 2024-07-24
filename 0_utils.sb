@@ -1342,6 +1342,7 @@ function PROC()
      isotope <- read.table(file.path(analysis, "peptide", "PROC", "PROC.signals"), header = TRUE) %>%
                 pull(isotope) %>%
                 unique()
+   # isotope <- setdiff(isotope,c("442611348", "442686905"))
      load(file.path(pilot, "es.rda"))
      PROC_peptides <- peptide_all[rownames(peptide_all) %in% isotope]
      cor_na <- function(d)
@@ -1462,8 +1463,8 @@ function PROC()
      for (src in c("ZWK_raw","ZWK_neq","ZYQ_raw","ZYQ_neq","UDP_raw","UDP_neq")) hist_mat(src)
      dev.off()
 
-     # save(list=ls(),file=file.path(analysis,"work","PROC.rda"))
-     # load(file.path(analysis,"work","PROC.rda"))
+   # save(list=ls(),file=file.path(analysis,"work","PROC.rda"))
+   # load(file.path(analysis,"work","PROC.rda"))
 # 4. Quantify for each peptide how many participants in each batch have 0 values and how many have values below the detection rate threshold (I think this was 50,000?) – this might help us see if the potentially poorly measured peptides have more missingness
      cat("Number of samples with zero values:\n")
      for (src in c("ZWK_raw","ZYQ_raw","UDP_raw"))

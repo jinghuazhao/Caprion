@@ -1087,14 +1087,14 @@ dev.off()
 INF <- "/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/INF"
 plink <- "/rds/user/jhz22/hpc-work/bin/plink"
 b <- list()
-for(i in unique(pull(caprion,chr)))
+for(i in unique(pull(caprion,chr))))
 {
    k <- dplyr::filter(caprion,chr %in% i) %>%
         dplyr::select(chr,pos,uniprot,rsid,prot)
    dr <- dplyr::filter(caprion_dr,chr %in% i) %>%
          dplyr::select(chr,pos,uniprot,rsid,prot)
    bfile <- file.path(INF,"INTERVAL","per_chr",paste0("snpid",i))
-   b[[i]] <- pQTLtools::novelty_check(k,dr,ldops=list(bfile,plink))
+   b[[i]] <- pQTLtools::novelty_check(k,dr,ldops=list(bfile=bfile,plink=plink))
 }
 b[["23"]] <- mutate(b[["X"]],known.seqnames="23",query.seqnames="23")
 replication <- dplyr::filter(bind_rows(b[-which(names(b)=="X")]),r2>=0.8) %>%

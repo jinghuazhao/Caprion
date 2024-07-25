@@ -12,7 +12,7 @@ These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
-mz.R/mz.sh | handling of .raw/.mgf/.mzML/mzXML files
+mz.R/mz.sh | handling of files in .raw and other formats
 crux.R/crux.sh | R/multicomp+crux pipeline
 0_utils.sh | Code snippets
 1_pgwas.sh | Association analysis[^association] | {protein}.e / {protein}.o

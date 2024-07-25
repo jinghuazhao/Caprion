@@ -7,6 +7,7 @@
 ## Scripts and results
 
 ```mermaid
+graph TD;
 mz.R/mz.sh
 0_utils.sh
 1_pgwas.sh

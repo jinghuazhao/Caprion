@@ -1173,19 +1173,15 @@ function pav()
 function glmnet()
 {
   Rscript -e '
-    options(width=200)
-    suppressMessages(library(Biobase))
-    suppressMessages(library(glmnet))
-    suppressMessages(library(dplyr))
-    suppressMessages(library(tidyr))
-    load("~/Caprion/pilot/ZYQ.rda")
-    per_prot <- function(p, with.isotope=TRUE)
+    per_prot <- function(p,batch="ZWK",with.isotope=TRUE)
     {
+      load(paste0("~/Caprion/pilot/",batch,".rda"))
       enet <- function(type)
       {
         prot <- get(type)
         fit <- glmnet(peptide,prot)
-        plot(fit,label=TRUE,main=paste(p,type))
+        plot(fit,label=TRUE)
+        title(paste(paste0(p,type),batch,"elastic net"))
         coef(fit, s = 0.1)
         beta <- coef(fit, s = 0.1)
         selected <- (beta[,1]>1e-5)[-1]
@@ -1193,20 +1189,25 @@ function glmnet()
         selected_groups <- gsub("^X", "",rownames(beta)[selected])
         cvfit <- cv.glmnet(peptide, prot)
         plot(cvfit)
+        title(paste(batch,"elastic net"))
         coef(cvfit, s = "lambda.min")
         if (length(selected_groups)>0)
         {
            cat("\n",p,type,"Peptide contributions:",selected_groups,"\n")
            selected_signals <- subset(signals,isotope%in%selected_groups)
-           print(knitr::kable(selected_signals))
+           print(knitr::kable(selected_signals,caption=paste(p,batch)))
            cat("\nCV min(lamda) =",cvfit$lambda.min,"\n")
         }
       }
       uniprot <- paste0(p,"_HUMAN")
-      protein <- exprs(protein_ZYQ)[rownames(exprs(protein_ZYQ))==uniprot,]
-      dr <- exprs(dr_ZYQ)[rownames(exprs(dr_ZYQ))==uniprot,]
-      if (!with.isotope) isotope <- mapping_ZYQ[mapping_ZYQ$Protein == uniprot, "Isotope.Group.ID"]
-      peptide <- exprs(peptide_ZYQ) |> subset(rownames(exprs(peptide_ZYQ)) %in% isotope)
+      protein_batch <- get(paste0("protein","_",batch))
+      peptide_batch <- get(paste0("peptide","_",batch))
+      dr_batch <- get(paste0("dr","_",batch))
+      mapping_batch <- get(paste0("mapping","_",batch))
+      protein <- exprs(protein_batch)[rownames(exprs(protein_batch))==uniprot,]
+      dr <- exprs(dr_batch)[rownames(exprs(dr_batch))==uniprot,]
+      if (!with.isotope) isotope <- mapping_batch[mapping_batch$Protein == uniprot, "Isotope.Group.ID"]
+      peptide <- exprs(peptide_batch) |> subset(rownames(exprs(peptide_batch)) %in% isotope)
       peptide <- t(peptide)
       colnames(peptide) <- paste0("X",colnames(peptide))
       vep <- read.delim(paste0("~/Caprion/analysis/peptide/",p,"/","vep.txt")) %>%
@@ -1220,14 +1221,22 @@ function glmnet()
       enet("protein")
       enet("dr")
     }
+    options(width=200)
+    suppressMessages(library(Biobase))
+    suppressMessages(library(glmnet))
+    suppressMessages(library(dplyr))
+    suppressMessages(library(tidyr))
+    pdf("~/Caprion/analysis/work/PROC_enet.pdf",height=10,width=12)
+    opar <- par()
+    par(mfrow=c(1,2))
+    sink("~/Caprion/analysis/work/PROC_enet.md")
+    for(code in c("ZWK","ZYQ","UDP")) per_prot("PROC",code)
+    sink()
+    par(opar)
+    dev.off()
     pdf("~/Caprion/analysis/work/enet.pdf",height10,width=12)
     sink("~/Caprion/analysis/work/enet.md")
     for (p in c("A1BG","APOB","EPCR","ERAP2","PON3","PROC")) per_prot(p)
-    sink()
-    dev.off()
-    pdf("~/Caprion/analysis/work/PROC_enet.pdf",height=10,width=12)
-    sink("~/Caprion/analysis/work/PROC_enet.md")
-    per_prot("PROC")
     sink()
     dev.off()
   '

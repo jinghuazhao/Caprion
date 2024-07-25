@@ -55,3 +55,47 @@ function yeast_files()
   wget ftp://ftp.pride.ebi.ac.uk/pride/data/archive/2016/04/PXD002726/KFSwYeastCrTry_150506.fasta
   wget ftp://ftp.pride.ebi.ac.uk/pride/data/archive/2016/04/PXD002726/Yeast_In-gel_digest_2.mgf
 }
+
+
+function openms()
+{
+# A Workflow for Peptide Identification
+
+##   Preprocessing Raw Data:
+##       Convert raw MS data to an appropriate format using FileConverter.
+##       Perform peak picking and feature detection using FeatureFinderCentroided.
+
+##   Peptide Identification:
+##      Run peptide identification using search engines like Comet, XTandem, or MSGFPlus.
+##      Convert the identification results to OpenMS format using IDFileConverter.
+
+##   Mapping and Annotation:
+##      Map the identified peptides to detected features using IDMapper.
+##      Annotate peptide sequences with protein information using PeptideIndexer.
+
+##  Quantification and Analysis:
+##      Quantify peptides and proteins using ProteinQuantifier or other relevant tools.
+##      Perform further statistical analysis and visualization using additional OpenMS tools or external software.
+
+module load ceuadmin/icu/50.2 ceuadmin/OpenMS/3.0.0-pre-develop-2022-09-28
+export spectra=szwk901104i19801xms1
+ln -sf /rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectral_library_ZWK/${spectra}.raw rawdata.raw
+
+# Convert raw data to mzML format using ThermoRawFileParser.exe
+FileConverter -in rawdata.raw -out rawdata.mzML
+
+# Perform peak picking
+PeakPickerHiRes -in rawdata.mzML -out picked.mzML
+
+# Run peptide identification using Comet
+CometAdapter -in picked.mzML -out comet.idXML -database uniprot_sprot.fasta
+
+# Convert identification results to OpenMS format using comet.exe
+IDFileConverter -in comet.idXML -out comet.idXML
+
+# Map peptide identifications to features
+IDMapper -in picked.mzML -id comet.idXML -out mapped.mzML
+
+# Annotate peptides with protein information
+PeptideIndexer -in comet.idXML -fasta uniprot.fasta -out indexed.idXML
+}

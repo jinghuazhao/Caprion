@@ -1173,7 +1173,7 @@ function pav()
 function glmnet()
 {
   Rscript -e '
-    per_prot <- function(p,batch="ZWK",with.isotope=TRUE)
+    per_prot <- function(p,batch)
     {
       load(paste0("~/Caprion/pilot/",batch,".rda"))
       enet <- function(type)
@@ -1206,7 +1206,8 @@ function glmnet()
       mapping_batch <- get(paste0("mapping","_",batch))
       protein <- exprs(protein_batch)[rownames(exprs(protein_batch))==uniprot,]
       dr <- exprs(dr_batch)[rownames(exprs(dr_batch))==uniprot,]
-      if (!with.isotope) isotope <- mapping_batch[mapping_batch$Protein == uniprot, "Isotope.Group.ID"]
+      # isotope <- mapping_batch[mapping_batch$Protein == uniprot, "Isotope.Group.ID"]
+      isotope <- get(paste0("isotope","_",batch))
       peptide <- exprs(peptide_batch) |> subset(rownames(exprs(peptide_batch)) %in% isotope)
       peptide <- t(peptide)
       colnames(peptide) <- paste0("X",colnames(peptide))
@@ -1226,6 +1227,9 @@ function glmnet()
     suppressMessages(library(glmnet))
     suppressMessages(library(dplyr))
     suppressMessages(library(tidyr))
+    isotope_ZWK <- isotope
+    isotope_ZYQ <- setdiff(isotope,c("442611348", "442686905"))
+    isotope_UDP <- setdiff(isotope,c("442611348", "442686905", "442590967"))
     pdf("~/Caprion/analysis/work/PROC_enet.pdf",height=10,width=12)
     opar <- par()
     par(mfrow=c(1,2))
@@ -1351,7 +1355,6 @@ function PROC()
      isotope <- read.table(file.path(analysis, "peptide", "PROC", "PROC.signals"), header = TRUE) %>%
                 pull(isotope) %>%
                 unique()
-   # isotope <- setdiff(isotope,c("442611348", "442686905"))
      load(file.path(pilot, "es.rda"))
      PROC_peptides <- peptide_all[rownames(peptide_all) %in% isotope]
      cor_na <- function(d)

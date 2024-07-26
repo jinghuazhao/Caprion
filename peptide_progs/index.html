@@ -133,15 +133,10 @@ mz.R/mz.sh
 0_utils.sh
 1_pgwas.sh
 2_meta_analysis.sh
-3
 3.1_extract.sh
 3.2_collect.sh
 3.3_plot.sh
-1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3
-3 --&gt; 3.1_extract.sh
-3 --&gt; 3.2_collect.sh
-3 --&gt; 3.3_plot.sh
-3.1_extract.s --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
+1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3.1_extract.s --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
 </div>
 <p>The project directory above contains scripts at <strong>peptide_progs/</strong> and results results at <strong>peptide/</strong>, respectively.</p>
 <p>These are also a set of scripts called from <code>bash</code> which invokes SLURM jobs.</p>

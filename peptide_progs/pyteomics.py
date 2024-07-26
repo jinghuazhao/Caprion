@@ -74,24 +74,23 @@ def ms_boxcar(mzml_file, charge_states, mass_tolerance, num_peaks=3, min_intensi
                     )
                 except (KeyError, IndexError) as e:
                     print(f"Error processing spectrum {spec['id']}: {e}")
-                    continue  # Skip to the next spectrum
+                    continue
 
 def _compute_boxcar_scores(mz, intensities, charge, mass_tolerance, num_peaks):
     """Internal function for computing BoxCar scores."""
     print(f"Intensities: {intensities}")
     print(f"Intensities Length: {len(intensities)}")
 
-    if intensities.size > 0 and not np.all(np.isnan(intensities)):  # Check for empty or all NaN array
-        # Calculate mass differences only if mz has more than one element
+    if intensities.size > 0 and not np.all(np.isnan(intensities)):
+        # Calculate mass differences if mz has more than one element
         if len(mz) > 1:
             mass_diff = np.diff(mz)
         else:
-            mass_diff = np.array([1.0])  # Set a default value if mz has only one element
+            mass_diff = np.array([1.0])
 
         # Create a boxcar filter with an upper limit on width
         boxcar_width = int(mass_tolerance / np.median(mass_diff))
-        boxcar_width = min(boxcar_width, len(intensities) - 1)  # Limit boxcar width
-
+        boxcar_width = min(boxcar_width, len(intensities) - 1)
         boxcar_filter = np.ones(boxcar_width)
 
         # Convolve with intensities
@@ -106,19 +105,14 @@ def _compute_boxcar_scores(mz, intensities, charge, mass_tolerance, num_peaks):
     else:
         print(f"Warning: Empty or all NaN intensities array for spectrum.")  # Handle empty or all NaN array
 
-# Example usage
-mzml_file = 'szwk901104i19801xms1.mzML'  # Your mzML file
-charge_states = [2, 3]  # Adjust if necessary
-mass_tolerance = 0.5  # Adjust if necessary
+mzml_file = 'szwk901104i19801xms1.mzML'
+charge_states = [2, 3]
+mass_tolerance = 0.5
 
 with open("ms_boxcar_results.csv", "w", newline="") as csvfile:
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(["Spectrum ID", "Retention Time", "Scores", "Peak Indices", "Precursor m/z", "Precursor Charge"])
-
     for result in ms_boxcar(mzml_file, charge_states, mass_tolerance, num_peaks=2, min_intensity=0.2):
         spectrum_id, retention_time, scores, peak_indices, precursor_mz, precursor_charge = result
-
-        # Convert peak_indices to a string representation (now works correctly)
         peak_indices_str = np.array2string(peak_indices, separator=',')
-
         csv_writer.writerow([spectrum_id, retention_time, scores, peak_indices_str, precursor_mz, precursor_charge])

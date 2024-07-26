@@ -12,15 +12,10 @@ mz.R/mz.sh
 0_utils.sh
 1_pgwas.sh
 2_meta_analysis.sh
-3
 3.1_extract.sh
 3.2_collect.sh
 3.3_plot.sh
-1_pgwas.sh --> 2_meta_analysis.sh --> 3
-3 --> 3.1_extract.sh
-3 --> 3.2_collect.sh
-3 --> 3.3_plot.sh
-3.1_extract.s --> 3.2_collect.sh --> 3.3_plot.sh
+1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.s --> 3.2_collect.sh --> 3.3_plot.sh
 ```
 
 The project directory above contains scripts at **peptide_progs/** and results results at **peptide/**, respectively.

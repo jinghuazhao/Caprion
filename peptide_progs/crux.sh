@@ -32,3 +32,8 @@ crux q-ranker --output-dir qranker-output percolator-output/percolator.target.ps
 
 crux version
 crux get-ms2-spectrum ${spectra}.ms2
+
+# BoxCar integration
+
+crux tide-index --output-dir crux_index --fasta uniprot_sprot.fasta
+crux tide-search --output-dir crux_search --search-file spectrum_*.mgf --database-dir crux_index

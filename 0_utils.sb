@@ -1484,6 +1484,12 @@ function PROC()
        cat(src,"\n")
        print(apply(apply(get(src),2,'==',0),2,sum))
      }
+     cat("Number of samples with zero values:\n")
+     for (src in c("ZWK_neq","ZYQ_neq","UDP_neq"))
+     {
+       cat(src,"\n")
+       print(apply(apply(get(src),2,'==',0),2,sum))
+     }
      cat("Number of samples below 50,000:\n")
      for (src in c("ZWK_raw","ZYQ_raw","UDP_raw"))
      {

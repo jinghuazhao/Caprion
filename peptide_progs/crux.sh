@@ -12,7 +12,7 @@ gunzip uniprot_sprot.fasta.gz
 
 # 2: Data
 
-# raw data --> mzML
+# raw data --> mzML, done elsewhere
 msconvert ${spectra}.raw --mzML
 
 # 3: Perform Peptide Identification
@@ -27,3 +27,8 @@ crux tide-search --output-dir tide-output ${spectra}.mzML tide-index
 crux percolator --output-dir percolator-output tide-output/tide-search.target.txt
 # Generate a report
 crux q-ranker --output-dir qranker-output percolator-output/percolator.target.psms.txt
+
+# utilities
+
+crux version
+crux get-ms2-spectrum ${spectra}.ms2

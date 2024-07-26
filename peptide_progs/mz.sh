@@ -56,6 +56,13 @@ function yeast_files()
   wget ftp://ftp.pride.ebi.ac.uk/pride/data/archive/2016/04/PXD002726/Yeast_In-gel_digest_2.mgf
 }
 
+function boxcar()
+{
+  module load ceuadmin/Anaconda3/2023.09-0
+  pip install pyteomics
+  python BoxCar.py
+  python pyteomics.py
+}
 
 function openms()
 {

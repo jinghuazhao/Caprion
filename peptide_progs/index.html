@@ -206,14 +206,17 @@ pyteomics.py
 </tbody>
 </table>
 <details>
+
 Prerequistes for a Manhattan/peptide association plot are
 
 - a call to `gz()` (in `0_utils.sh` for protein) for a compressed DR-filtered data.
 - ensembl-vep (step 3.2 above)[^vep], for which `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is called.
 
-**ensembl-vep** is ready to use since plugin `Set::IntervalTree` has been made available. For cclake, one uses `ceuadmin/ensembl-vep/104`.
+**ensembl-vep** is ready to use since plugin `Set::IntervalTree` has been made available.
+
+The CSD3 icelake module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
+
 </details>
-<p>The CSD3 icelake module <code>ceuadmin/R/4.4.1-icelake</code> now works as smoothly as the old <code>ceuadmin/R</code> at <code>cclake</code> (CentOS 7).</p>
 <h2 id="reference">Reference</h2>
 <p>Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. <em>J Proteome Res</em> 22:625–631 (2023) doi:10.1021/acs.jproteome.2c00632, <a href="https://spectrum-utils.readthedocs.io/en/latest/">https://spectrum-utils.readthedocs.io/en/latest/</a>.</p>
 <p>Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. <em>Methods Mol Biol</em> 2426:25-34 (2023). <a href="https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2">doi: 10.1007/978-1-0716-1967-4_2</a>. PMID: 36308683.</p>

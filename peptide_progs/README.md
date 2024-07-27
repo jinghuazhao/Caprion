@@ -41,14 +41,11 @@ utils.sh | Various utitlties
 
 Prerequistes for a Manhattan/peptide association plot are
 
-- a call to `gz()` (in `0_utils.sh` for protein) for a compressed DR-filtered data.
-- ensembl-vep (step 3.2 above)[^vep], for which `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is called.
+- a call to `gz()` (in `utils.sh` for protein) for a compressed DR-filtered data.
+- for step 3.2, `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is used instead of `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
+- module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake`
 
-**ensembl-vep** is ready to use since plugin `Set::IntervalTree` has been made available.
-
-The CSD3 icelake module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
-
-## Reference
+## References
 
 Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. *J Proteome Res* 22:625–631 (2023) doi:10.1021/acs.jproteome.2c00632, <https://spectrum-utils.readthedocs.io/en/latest/>.
 

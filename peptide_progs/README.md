@@ -6,21 +6,6 @@
 
 ## Scripts and results
 
-```mermaid
-graph TD;
-1_pgwas.sh
-2_meta_analysis.sh
-3.1_extract.sh
-3.2_collect.sh
-3.3_plot.sh
-1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
-crux.R/crux.sh
-mz.R/mz.sh
-BoxCar.py
-pyteomics.py
-utils.sh
-```
-
 The project directory above contains scripts at **peptide_progs/** and results results at **peptide/**, respectively.
 
 These are also a set of scripts called from `bash` which invokes SLURM jobs.
@@ -38,6 +23,21 @@ mz.R/mz.sh | handling of files in .raw and other formats
 crux.R/crux.sh | R/multicomp+crux pipeline
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
 utils.sh | Various utitlties
+
+```mermaid
+graph TD;
+1_pgwas.sh
+2_meta_analysis.sh
+3.1_extract.sh
+3.2_collect.sh
+3.3_plot.sh
+1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
+crux.R/crux.sh
+mz.R/mz.sh
+BoxCar.py
+pyteomics.py
+utils.sh
+```
 
 Prerequistes for a Manhattan/peptide association plot are
 

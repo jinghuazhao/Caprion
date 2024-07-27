@@ -14,11 +14,11 @@ graph TD;
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
-utils.sh
 crux.R/crux.sh
 mz.R/mz.sh
 BoxCar.py
 pyteomics.py
+utils.sh
 ```
 
 The project directory above contains scripts at **peptide_progs/** and results results at **peptide/**, respectively.
@@ -34,12 +34,10 @@ Signal identification | see **{protein}/sentinels/slurm**
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
 Experimental codes |
-utils.sh | Various utitlties
 mz.R/mz.sh | handling of files in .raw and other formats
 crux.R/crux.sh | R/multicomp+crux pipeline
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
-
-<details>
+utils.sh | Various utitlties
 
 Prerequistes for a Manhattan/peptide association plot are
 
@@ -49,8 +47,6 @@ Prerequistes for a Manhattan/peptide association plot are
 **ensembl-vep** is ready to use since plugin `Set::IntervalTree` has been made available.
 
 The CSD3 icelake module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
-
-</details>
 
 ## Reference
 

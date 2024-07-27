@@ -124,19 +124,6 @@
 <h2 id="csd3-directory">CSD3 directory</h2>
 <p><strong>/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/</strong></p>
 <h2 id="scripts-and-results">Scripts and results</h2>
-<div class="mermaid">graph TD;
-1_pgwas.sh
-2_meta_analysis.sh
-3.1_extract.sh
-3.2_collect.sh
-3.3_plot.sh
-1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3.1_extract.sh --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
-crux.R/crux.sh
-mz.R/mz.sh
-BoxCar.py
-pyteomics.py
-utils.sh
-</div>
 <p>The project directory above contains scripts at <strong>peptide_progs/</strong> and results results at <strong>peptide/</strong>, respectively.</p>
 <p>These are also a set of scripts called from <code>bash</code> which invokes SLURM jobs.</p>
 <table>
@@ -205,6 +192,19 @@ utils.sh
 </tr>
 </tbody>
 </table>
+<div class="mermaid">graph TD;
+1_pgwas.sh
+2_meta_analysis.sh
+3.1_extract.sh
+3.2_collect.sh
+3.3_plot.sh
+1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3.1_extract.sh --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
+crux.R/crux.sh
+mz.R/mz.sh
+BoxCar.py
+pyteomics.py
+utils.sh
+</div>
 <p>Prerequistes for a Manhattan/peptide association plot are</p>
 <ul>
 <li>a call to <code>gz()</code> (in <code>utils.sh</code> for protein) for a compressed DR-filtered data.</li>

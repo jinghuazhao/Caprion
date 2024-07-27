@@ -8,13 +8,13 @@
 
 ```mermaid
 graph TD;
-0_utils.sh
 1_pgwas.sh
 2_meta_analysis.sh
 3.1_extract.sh
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
+utils.sh
 crux.R/crux.sh
 mz.R/mz.sh
 BoxCar.py
@@ -27,22 +27,26 @@ These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
-0_utils.sh | Code snippets
-1_pgwas.sh | Association analysis[^association] | {protein}.e / {protein}.o
+1_pgwas.sh | Association analysis | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
-Signal identification[^location]
+Signal identification | see **{protein}/sentinels/slurm**
 3.1_extract.sh | Signal extraction | \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.o
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
 Experimental codes |
+utils.sh | Various utitlties
 mz.R/mz.sh | handling of files in .raw and other formats
 crux.R/crux.sh | R/multicomp+crux pipeline
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
 
+<details>
 Prerequistes for a Manhattan/peptide association plot are
 
 - a call to `gz()` (in `0_utils.sh` for protein) for a compressed DR-filtered data.
 - ensembl-vep (step 3.2 above)[^vep], for which `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is called.
+
+**ensembl-vep** is ready to use since plugin `Set::IntervalTree` has been made available. For cclake, one uses `ceuadmin/ensembl-vep/104`.
+</details>
 
 The CSD3 icelake module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake` (CentOS 7).
 
@@ -53,17 +57,3 @@ Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC
 Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. *Methods Mol Biol* 2426:25-34 (2023). [doi: 10.1007/978-1-0716-1967-4_2](https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2). PMID: 36308683.
 
 Levitsky LI, Klein J, Ivanov, MV, Gorshkov MV. “Pyteomics 4.0: five years of development of a Python proteomics framework”, *J Proteome Res* 2018, DOI: 10.1021/acs.jproteome.8b00717, <https://pyteomics.readthedocs.io/en/latest/>
-
-## Footnotes
-
-[^association]: **Association**
-
-    Accidentally, they were removed for the benchmarks: A1BG, APOB EPCR, ERAP2, PROC.
-
-[^location]: **Location**
-
-    **{protein}/sentinels/slurm**
-
-[^vep]: **ensembl-vep**
-
-    This is possible since plugin `Set::IntervalTree` has been made available. For cclake, one uses `ceuadmin/ensembl-vep/104`.

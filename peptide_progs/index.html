@@ -131,11 +131,11 @@
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3.1_extract.sh --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
-utils.sh
 crux.R/crux.sh
 mz.R/mz.sh
 BoxCar.py
 pyteomics.py
+utils.sh
 </div>
 <p>The project directory above contains scripts at <strong>peptide_progs/</strong> and results results at <strong>peptide/</strong>, respectively.</p>
 <p>These are also a set of scripts called from <code>bash</code> which invokes SLURM jobs.</p>
@@ -184,11 +184,6 @@ pyteomics.py
 <td></td>
 </tr>
 <tr>
-<td>utils.sh</td>
-<td>Various utitlties</td>
-<td></td>
-</tr>
-<tr>
 <td>mz.R/mz.sh</td>
 <td>handling of files in .raw and other formats</td>
 <td></td>
@@ -203,20 +198,20 @@ pyteomics.py
 <td>BoxCar algorighm and its use</td>
 <td></td>
 </tr>
+<tr>
+<td>utils.sh</td>
+<td>Various utitlties</td>
+<td></td>
+</tr>
 </tbody>
 </table>
-<details>
-
-Prerequistes for a Manhattan/peptide association plot are
-
-- a call to `gz()` (in `0_utils.sh` for protein) for a compressed DR-filtered data.
-- ensembl-vep (step 3.2 above)[^vep], for which `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is called.
-
-**ensembl-vep** is ready to use since plugin `Set::IntervalTree` has been made available.
-
-The CSD3 icelake module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
-
-</details>
+<p>Prerequistes for a Manhattan/peptide association plot are</p>
+<ul>
+<li>a call to <code>gz()</code> (in <code>0_utils.sh</code> for protein) for a compressed DR-filtered data.</li>
+<li>ensembl-vep (step 3.2 above)[^vep], for which <code>ceuadmin/ensembl-vep/111-icelake</code> now is the default since partition <code>icelake-himem</code> is called.</li>
+</ul>
+<p><strong>ensembl-vep</strong> is ready to use since plugin <code>Set::IntervalTree</code> has been made available.</p>
+<p>The CSD3 icelake module <code>ceuadmin/R/4.4.1-icelake</code> now works as smoothly as the old <code>ceuadmin/R</code> at <code>cclake</code> (CentOS 7) which has <code>ceuadmin/ensembl-vep/104</code>.</p>
 <h2 id="reference">Reference</h2>
 <p>Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. <em>J Proteome Res</em> 22:625–631 (2023) doi:10.1021/acs.jproteome.2c00632, <a href="https://spectrum-utils.readthedocs.io/en/latest/">https://spectrum-utils.readthedocs.io/en/latest/</a>.</p>
 <p>Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. <em>Methods Mol Biol</em> 2426:25-34 (2023). <a href="https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2">doi: 10.1007/978-1-0716-1967-4_2</a>. PMID: 36308683.</p>

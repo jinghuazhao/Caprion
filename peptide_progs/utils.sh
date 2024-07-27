@@ -182,6 +182,7 @@ END
 
 function bgz()
 {
+  module load samtools/1.13/gcc/zwxn7ug3
   if [ ! -d ${analysis}/METAL${suffix}/gz ]; then mkdir ${analysis}/METAL${suffix}/gz; fi
   ls ${analysis}/METAL${suffix}/*-1.tbl.gz | \
   xargs -l basename -s -1.tbl.gz | \

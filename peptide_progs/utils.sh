@@ -180,7 +180,7 @@ END
 #' Note protein name could be with/without _HUMAN suffix & readDNAStringSet
 #' It remains to implement a sequence plot with signals
 
-function gz()
+function bgz()
 {
   if [ ! -d ${analysis}/METAL${suffix}/gz ]; then mkdir ${analysis}/METAL${suffix}/gz; fi
   ls ${analysis}/METAL${suffix}/*-1.tbl.gz | \

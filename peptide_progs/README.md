@@ -51,4 +51,6 @@ Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC
 
 Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. *Methods Mol Biol* 2426:25-34 (2023). [doi: 10.1007/978-1-0716-1967-4_2](https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2). PMID: 36308683.
 
-Levitsky LI, Klein J, Ivanov, MV, Gorshkov MV. “Pyteomics 4.0: five years of development of a Python proteomics framework”, *J Proteome Res* 2018, DOI: 10.1021/acs.jproteome.8b00717, <https://pyteomics.readthedocs.io/en/latest/>
+Levitsky LI, Klein J, Ivanov, MV, Gorshkov MV. Pyteomics 4.0: five years of development of a Python proteomics framework, *J Proteome Res* 2018, DOI: 10.1021/acs.jproteome.8b00717, <https://pyteomics.readthedocs.io/en/latest/>
+
+Rehfeldt TG, Gabriels R, Bouwmeester R, Gessulat S, Neely BA, Palmblad M, Perez-Riverol Y, Schmidt T, Vizcaíno JA, Deutsch EW. ProteomicsML: An Online Platform for Community-Curated Data sets and Tutorials for Machine Learning in Proteomics. *J Proteome Res*, 22(2):632-636 (2023). <https://doi.org/10.1021/acs.jproteome.2c00629>.

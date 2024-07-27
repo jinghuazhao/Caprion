@@ -30,13 +30,14 @@ Script name| Description          | Protein-specific error/output
 0_utils.sh | Code snippets
 1_pgwas.sh | Association analysis[^association] | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
-3 | Signal identification[^location]
+Signal identification[^location]
 3.1_extract.sh | Signal extraction | \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.o
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
+Experimental codes |
 mz.R/mz.sh | handling of files in .raw and other formats
 crux.R/crux.sh | R/multicomp+crux pipeline
-BoxCar.py/pyteomics.py | Experimental codes
+BoxCar.py/pyteomics.py | BoxCar algorighm and its use
 
 Prerequistes for a Manhattan/peptide association plot are
 

@@ -1,0 +1,71 @@
+#!/bin/bash
+
+#SBATCH --job-name=_alz
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=icelake-himem
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=4  # Use 4 cores per task
+
+#SBATCH --output=/home/jhz22/alz.o
+#SBATCH --error=/home/jhz22/alz.e
+
+. /etc/profile.d/modules.sh
+module purge
+module load rhel8/default-icl
+module load ceuadmin/crux/4.1
+export PERL5LIB=
+
+# database search with Tide:
+
+## creating a peptide index file from human proteins (uniprot-proteome_UP000005640+reviewed_yes.fasta),
+crux tide-index \
+     --overwrite T \
+     --max-mods 3 \
+     --mods-spec 2M+15.9949,2STY+79.966331 \
+     --missed-cleavages 3 \
+     uniprot-proteome_UP000005640+reviewed_yes.fasta human-idx
+
+## searching a spectrum dataset (UPS1.mzML.gz) with tide-search, large RAM required
+crux tide-search \
+     --overwrite T \
+     --concat T \
+     --top-match 1 \
+     --num-threads 4 \
+     --precursor-window 100 \
+     --mz-bin-width 1.0005079 \
+     --precursor-window-type ppm \
+     --use-tailor-calibration T \
+     --output-dir results UPS1.mzML.gz human-idx
+
+## running Percolator:
+crux percolator \
+     --overwrite T \
+     --output-dir results \
+     results/tide-search.txt
+
+## Build index of tryptic peptides
+crux tide-index \
+     --overwite T \
+     --digestion full-digest uniprot-proteome_UP000005640+reviewed_yes.fasta full-tryptic-idx
+
+## Build index of non-tryptic peptides
+crux tide-index \
+     --overwrite T \
+     --digestion non-specific-digest uniprot-proteome_UP000005640+reviewed_yes.fasta non-tryptic-idx
+
+## remove full tryptic peptides from semi-tryptic index
+crux subtract-index --overwrite T semi-tryptic-idx full-tryptic-idx only-semi-tryptic
+
+## remove semi tryptic peptides from non-tryptic index
+crux subtract-index --overwrite T non-tryptic-idx semi-tryptic-idx only-non-tryptic
+
+## Run cascade search
+crux cascade-search --overwrite T --precursor-window 100 --mz-bin-width 1.0005079 --precursor-window-type ppm \
+                    UPS1.mzML.gz full-tryptic-idx,only-semi-tryptic,only-non-tryptic
+
+## Evaluate results
+crux assign-confidence --overwrite T crux-output/tide-search.txt
+
+## Run percolator
+crux percolator --overwrite T crux-output/tide-search.txt

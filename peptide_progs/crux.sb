@@ -16,7 +16,13 @@ module load rhel8/default-icl
 module load ceuadmin/crux/4.1
 export PERL5LIB=
 
-# database search with Tide:
+# A. Kojak on a cross-linked sample in mzML format using a given fasta file (Cas9_plus10.fasta):
+crux kojak --overwrite T --fragment_bin_offset 0.0 --fragment_bin_size 0.01 --decoy_filter DECOY 1 \
+           --max_miscleavages 2 --min_spectrum_peaks 25 --spectrum_processing true --top_count 5 \
+           --min_peptide_score 0.25 *.mzML Cas9_plus10.fasta
+crux percolator --overwrite T --only-psms T --tdc T *.pin
+
+# B. database search with Tide:
 #1. creating a peptide index file from human proteins (uniprot-proteome_UP000005640+reviewed_yes.fasta),
 crux tide-index \
      --overwrite T --max-mods 3 --mods-spec 2M+15.9949,2STY+79.966331 --missed-cleavages 3 \
@@ -31,9 +37,15 @@ crux tide-search \
 #3. running Percolator:
 crux percolator --overwrite T --output-dir results results/tide-search.txt
 
+# C. human proteins search using DIAmeter
 # https://panoramaweb.org/Panorama%20Public/2021/project-begin.view
+# https://panoramaweb.org/Panorama%20Public/2021/MacCoss%20-%20AD%20Isomer%20Paper/project-begin.view?pageId=Raw%20Data
+HZR03=12March2019-Lumos-DIA-HuAD-Hipp-B1-ind-8mz-ovlp-400to1000-HZR03.mzML
 
-# CASCADE search:
+crux tide-index --overwrite T uniprot-proteome_UP000005640+reviewed_yes.fasta human-idx
+crux diameter --overwrite T --diameter-instrument orbitrap $HZR03 human-idx
+
+# D. CASCADE search:
 # 1. Build index of tryptic peptides
 crux tide-index --overwrite T --digestion full-digest uniprot-proteome_UP000005640+reviewed_yes.fasta full-tryptic-idx
 # 2. Build index of semi-tryptic peptides
@@ -51,3 +63,12 @@ crux cascade-search --precursor-window 100 --mz-bin-width 1.0005079 \
 crux assign-confidence --overwite T crux-output/tide-search.txt
 # 8. Run percolator
 crux percolator --overwite T crux-output/tide-search.txt
+
+# D. Param-Medic
+crux param-medic --overwrite T UPS1.mzML.gz
+# E. average target-decoy competition (aTDC):
+crux tide-index --overwrite T --num-decoys-per-target 5 --allow-dups T \
+                --decoy-format shuffle uniprot-proteome_UP000005640+reviewed_yes.fasta human-idx
+crux tide-search --overwrite T --concat F --top-match 1  --num-threads 4 --precursor-window 100 \
+                 --mz-bin-width 1.0005079 --precursor-window-type ppm --use-tailor-calibration T \
+                 UPS1.mzML.gz human-idx crux assign-confidence --score "tailor score" crux-output/tide-search.target.

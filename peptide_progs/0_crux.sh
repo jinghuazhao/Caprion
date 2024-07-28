@@ -30,8 +30,7 @@ function crux_search()
 {
 #1. creating a peptide index file from human proteins (uniprot-proteome_UP000005640+reviewed_yes.fasta),
   crux tide-index \
-       --overwrite T --max-mods 3 --mods-spec 2M+15.9949,2STY+79.966331 --missed-cleavages 3 \
-       uniprot-proteome_UP000005640+reviewed_yes.fasta human-idx
+       --overwrite T --max-mods 3 --mods-spec 2M+15.9949,2STY+79.966331 --missed-cleavages 3 FASTA human-idx
 
 #2. searching a spectrum dataset (UPS1.mzML.gz) with tide-search, large RAM required
   crux tide-search \
@@ -46,11 +45,13 @@ function crux_search()
 cd ${analysis}/crux
 crux_search
 EOL
-sed -i "s|ANALYSIS|${analysis}|;s|RAW|${raw}|" ${sbatch}
+sed -i "s|ANALYSIS|${analysis}|;s|FASTA|${fasta}|;s|RAW|${raw}|" ${sbatch}
 sbatch ${sbatch}
 }
 
 export analysis=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 export raw=szwk901104i19801xms1
 export sbatch=${analysis}/crux/${raw}.sb
+export fasta=uniprot-proteome_UP000005640+reviewed_yes.fasta
+export fasta=uniprot_sprot.fasta
 sb

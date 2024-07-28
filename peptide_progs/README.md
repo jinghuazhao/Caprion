@@ -19,8 +19,8 @@ Signal identification | see **{protein}/sentinels/slurm**
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
 Experimental codes |
-mz.R/mz.sh | handling of files in .raw and other formats
-crux.R/crux.sh | R/multicomp+crux pipeline
+mz.* | handling of files in .raw and other formats
+crux.* | R/multicomp+crux pipeline
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
 utils.sh | Various utitlties
 
@@ -32,8 +32,8 @@ graph TD;
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
-crux.R/crux.sh
-mz.R/mz.sh
+crux.*
+mz.*
 BoxCar.py
 pyteomics.py
 utils.sh

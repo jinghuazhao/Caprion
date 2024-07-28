@@ -1,6 +1,0 @@
-INFO: CPU: cpu-q-370
-INFO: Crux version: 4.1-e4b2f4d-2021-10-13
-INFO: Sun Jul 28 10:12:23 BST 2024
-COMMAND LINE: crux tide-search --overwrite T --concat T --top-match 1 --num-threads 4 --precursor-window 100 --mz-bin-width 1.0005079 --precursor-window-type ppm --use-tailor-calibration T --output-dir results UPS1.mzML.gz human-idx
-INFO: Beginning tide-search.
-FATAL: 'human-idx' does not exist

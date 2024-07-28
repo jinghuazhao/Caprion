@@ -45,9 +45,9 @@ cd ${analysis}/crux
 crux_search
 EOL
 
-export RAW=szwk901104i19801xms1
+export raw=szwk901104i19801xms1
 export analysis=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 export sbatch=${analysis}/crux/${RAW}.sbatch
-sed -i "s/ANALYSIS/${analysis};s/RAW/${RAW}/" ${sbatch}
+sed -i "s/ANALYSIS/${analysis};s/RAW/${raw}/" ${sbatch}
 
 sbatch ${sbatch}

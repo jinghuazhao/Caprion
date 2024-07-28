@@ -1,7 +1,0 @@
-INFO: CPU: cpu-q-370
-INFO: Crux version: 4.1-e4b2f4d-2021-10-13
-INFO: Sun Jul 28 10:12:23 BST 2024
-COMMAND LINE: crux tide-index --overwrite T --digestion full-digest uniprot-proteome_UP000005640+reviewed_yes.fasta full-tryptic-idx
-INFO: Beginning tide-index.
-INFO: Running tide-index...
-FATAL: Fasta file uniprot-proteome_UP000005640+reviewed_yes.fasta does not exist

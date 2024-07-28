@@ -5,7 +5,7 @@ function sb()
 cat << 'EOL' > ${sbatch}
 #!/bin/bash
 
-#SBATCH --job-name=_ZWK
+#SBATCH --job-name=_crux-search
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --mem=28800
@@ -25,6 +25,7 @@ export analysis=ANALYSIS
 export PERL5LIB=
 export raw=RAW
 
+function crux_search()
 # database search with Tide:
 {
 #1. creating a peptide index file from human proteins (uniprot-proteome_UP000005640+reviewed_yes.fasta),
@@ -40,15 +41,16 @@ export raw=RAW
 
 #3. running Percolator:
   crux percolator --overwrite T --output-dir results results/tide-search.txt
+}
 
 cd ${analysis}/crux
+crux_search
 EOL
 sed -i "s|ANALYSIS|${analysis}|;s|RAW|${raw}|" ${sbatch}
+sbatch ${sbatch}
 }
 
 export analysis=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 export raw=szwk901104i19801xms1
 export sbatch=${analysis}/crux/${raw}.sb
 sb
-
-sbatch ${sbatch}

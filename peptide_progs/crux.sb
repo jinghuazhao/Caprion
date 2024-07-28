@@ -31,6 +31,8 @@ crux tide-search \
 #3. running Percolator:
 crux percolator --overwrite T --output-dir results results/tide-search.txt
 
+# https://panoramaweb.org/Panorama%20Public/2021/project-begin.view
+
 # CASCADE search:
 # 1. Build index of tryptic peptides
 crux tide-index --overwrite T --digestion full-digest uniprot-proteome_UP000005640+reviewed_yes.fasta full-tryptic-idx

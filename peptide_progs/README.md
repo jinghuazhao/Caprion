@@ -12,6 +12,7 @@ These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
+0_crux.sh | crux search | crux/*.e/.o
 1_pgwas.sh | Association analysis | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
 Signal identification | see **{protein}/sentinels/slurm**
@@ -20,7 +21,7 @@ Signal identification | see **{protein}/sentinels/slurm**
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
 Experimental codes |
 mz.* | handling of files in .raw and other formats
-crux.* | R/multicomp+crux pipeline
+crux.* | R/multicomp+crux benchmarks
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
 utils.sh | Various utitlties
 
@@ -39,7 +40,7 @@ pyteomics.py
 utils.sh
 ```
 
-Prerequistes for a Manhattan/peptide association plot are
+The crux search is experimental and along with ongoing effort on visualization. Specfically, prerequistes for a Manhattan/peptide association plot are
 
 - a call to `bgz()` (in `utils.sh` for protein) for a indexed and compressed DR-filtered data.
 - for step 3.2, `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is used instead of `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.

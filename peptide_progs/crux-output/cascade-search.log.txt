@@ -1,0 +1,10 @@
+INFO: CPU: cpu-q-370
+INFO: Crux version: 4.1-e4b2f4d-2021-10-13
+INFO: Sun Jul 28 10:12:23 BST 2024
+COMMAND LINE: crux cascade-search --precursor-window 100 --mz-bin-width 1.0005079 --precursor-window-type ppm UPS1.mzML.gz full-tryptic-idx,only-semi-tryptic,only-non-tryptic
+INFO: Beginning cascade-search.
+INFO: Running cascade-search...
+INFO: Running tide-search...
+INFO: Number of Threads: 1
+INFO: Reading index full-tryptic-idx
+FATAL: Error reading index (full-tryptic-idx/protix)

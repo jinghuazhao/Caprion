@@ -136,6 +136,11 @@
 </thead>
 <tbody>
 <tr>
+<td>0_crux.sh</td>
+<td>crux search</td>
+<td>crux/*.e/.o</td>
+</tr>
+<tr>
 <td>1_pgwas.sh</td>
 <td>Association analysis</td>
 <td>{protein}.e / {protein}.o</td>
@@ -177,7 +182,7 @@
 </tr>
 <tr>
 <td>crux.*</td>
-<td>R/multicomp+crux pipeline</td>
+<td>R/multicomp+crux benchmarks</td>
 <td></td>
 </tr>
 <tr>
@@ -205,7 +210,7 @@ BoxCar.py
 pyteomics.py
 utils.sh
 </div>
-<p>Prerequistes for a Manhattan/peptide association plot are</p>
+<p>The crux search is experimental and along with ongoing effort on visualization. Specfically, prerequistes for a Manhattan/peptide association plot are</p>
 <ul>
 <li>a call to <code>bgz()</code> (in <code>utils.sh</code> for protein) for a indexed and compressed DR-filtered data.</li>
 <li>for step 3.2, <code>ceuadmin/ensembl-vep/111-icelake</code> now is the default since partition <code>icelake-himem</code> is used instead of <code>cclake</code> (CentOS 7) which has <code>ceuadmin/ensembl-vep/104</code>.</li>

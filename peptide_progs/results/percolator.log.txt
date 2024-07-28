@@ -1,0 +1,6 @@
+INFO: CPU: cpu-q-370
+INFO: Crux version: 4.1-e4b2f4d-2021-10-13
+INFO: Sun Jul 28 10:12:23 BST 2024
+COMMAND LINE: crux percolator --overwrite T --output-dir results results/tide-search.txt
+INFO: Beginning percolator.
+ERROR: Search file 'results/tide-search.txt' doesn't exist

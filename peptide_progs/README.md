@@ -27,6 +27,7 @@ utils.sh | Various utitlties
 
 ```mermaid
 graph TD;
+0_crus.sh
 1_pgwas.sh
 2_meta_analysis.sh
 3.1_extract.sh

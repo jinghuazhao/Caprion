@@ -5,8 +5,6 @@ export spectra=szwk901104i19801xms1
 
 # 1: A Protein Database
 
-Download a FASTA file of a protein database, for example, from UniProt.
-
 wget https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
 gunzip uniprot_sprot.fasta.gz
 

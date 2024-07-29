@@ -30,7 +30,7 @@ function crux_search()
 {
 #1. creating a peptide index file from human proteins (uniprot-proteome_UP000005640+reviewed_yes.fasta),
   crux tide-index \
-       --overwrite T --max-mods 3 --mods-spec 2M+15.9949,2STY+79.966331 --missed-cleavages 3 FASTA human-idx
+       --overwrite T --max-mods 3 --missed-cleavages 3 FASTA human-idx
 
 #2. searching a spectrum dataset (UPS1.mzML.gz) with tide-search, large RAM required
   crux tide-search \

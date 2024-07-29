@@ -16,22 +16,24 @@ msconvert ${spectra}.raw --mzML
 # 3: Perform Peptide Identification
 
 # Run Crux with a chosen search engine Tide:
-crux tide-index uniprot_sprot.fasta tide-index
-crux tide-search --output-dir tide-output ${spectra}.mzML tide-index
+crux tide-index --overwrite T uniprot_sprot.fasta tide-index
+crux tide-search --overwrite T --output-dir tide-output ${spectra}.mzML tide-index
 
 # 4: Results
 
 # Percolator validation
-crux percolator --output-dir percolator-output tide-output/tide-search.target.txt
-# Generate a report
-crux q-ranker --output-dir qranker-output percolator-output/percolator.target.psms.txt
+crux percolator --overwrite T --output-dir percolator-output tide-output/tide-search.target.txt
+
+Rscript -e '
+  to <- read.delim("tide-output/tide-search.target.txt")
+  subset(to,grepl("PROC_HUMAN",protein.id))
+  tp <- read.delim("percolator-output/percolator.target.peptides.txt")
+  subset(tp,grepl("PROC_HUMAN",protein.id))
+  psms <- read.delim("percolator-output/percolator.target.psms.txt")
+  subset(psms,grepl("PROC_HUMAN",protein.id))
+'
 
 # utilities
 
 crux version
 crux get-ms2-spectrum ${spectra}.ms2
-
-# BoxCar integration
-
-crux tide-index --output-dir crux_index --fasta uniprot_sprot.fasta
-crux tide-search --output-dir crux_search --search-file spectrum_*.mgf --database-dir crux_index

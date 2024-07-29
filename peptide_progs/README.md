@@ -43,6 +43,7 @@ utils.sh
 
 The crux search is experimental and along with ongoing effort on visualization. Specfically, prerequistes for a Manhattan/peptide association plot are
 
+- a call to vep_annotate functino in `0_utils.sh` for proteins.
 - a call to `bgz()` (in `utils.sh` for protein) for a indexed and compressed DR-filtered data.
 - for step 3.2, `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is used instead of `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
 - module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake`

@@ -1505,13 +1505,15 @@ function PROC()
      load (file.path(pilot,"ZWK.rda"))
      PROC_mapping <- subset(mapping_ZWK,Protein=="PROC_HUMAN" & Isotope.Group.ID%in%isotope)
      knitr::kable(PROC_mapping,caption="PROC sequence information")
-     knitr::kable(t(mp),caption="PROC sequence positions")
      mp <- sapply(setdiff(PROC_mapping[["Modified.Peptide.Sequence"]],"-"),
            function(x) {
              y <- gsub("\\[\\d+\\.\\d+\\]", "X", x);
              mp <- matchPattern(y,AA_sequence)
              as.data.frame(mp)
            })
+     knitr::kable(t(mp),caption="PROC sequence positions")
+     # protein level aggregated at each sample according to IG>=50,000
+     # DR aggregated according to 10%
      # load(file.path(analysis,"work","PROC_peptides.rda"))
 # 6. See which peptides are/aren’t being used in the protein_dr quantification based on the DR threshold filter
      # see 4. above

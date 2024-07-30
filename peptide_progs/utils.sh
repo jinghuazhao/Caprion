@@ -232,7 +232,7 @@ peptideMapping <- function(protein,batch="ZWK",mm=5)
 peptideAssociationPlot <- function(protein,suffix="_dr")
 {
   f <- file.path(analysis,"peptide",protein)
-  png(paste0(f,"/",protein,"-peptides.png"),width=10,height=12,res=300,unit="in")
+  png(paste0(f,"/",protein,"-association.png"),width=10,height=12,res=300,unit="in")
   par(mfrow=c(2,1))
   input <- paste0("~/Caprion/analysis/METAL",suffix,"/gz/",protein,suffix,".txt.gz")
   annotation <- paste0("~/Caprion/analysis/METAL",suffix,"/vep/",protein,".txt")

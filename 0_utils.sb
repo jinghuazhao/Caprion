@@ -10,8 +10,8 @@
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/fp/slurm/_fp_%A_%a.o
 ##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/fp/slurm/_fp_%A_%a.e
 
-#SBATCH --output=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.o
-#SBATCH --error=/home/jhz22/Caprion/analysis/pgwas_dr/means/slurm/_means_%A_%a.e
+#SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/means/slurm/_means_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/means/slurm/_means_%A_%a.e
 
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.o
 ##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.e
@@ -364,7 +364,7 @@ function mean_by_genotype_gen_sample()
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
      process_batch <- function(batch,digits=3, genotypes=c("100","010","001"))
      {
-       datfile <- file.path(analysis,paste0("pgwas",suffix),"means",paste(paste0("caprion",suffix),batch,prot,pqtl,sep="-"))
+       datfile <- file.path(analysis,paste0("METAL",suffix),"means",paste(paste0("caprion",suffix),batch,prot,pqtl,sep="-"))
        dat <- read.table(paste0(datfile,".dat"),
                          colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
                          col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
@@ -431,7 +431,7 @@ function mean_by_genotype_dosage()
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
      process_batch <- function(batch,digits=3)
      {
-       datfile <- file.path(analysis,paste0("pgwas",suffix),"means",paste(paste0("caprion",suffix),batch,prot,pqtl,sep="-"))
+       datfile <- file.path(analysis,paste0("METAL",suffix),"means",paste(paste0("caprion",suffix),batch,prot,pqtl,sep="-"))
        dat <- read.delim(paste0(datfile,".dosage"),check.names=FALSE,
                          colClasses=c("character","character","character","character","integer","numeric","numeric"))
        n7 <- names(dat)[7]

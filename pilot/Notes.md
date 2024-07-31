@@ -1,24 +1,15 @@
 # Notes
 
-## m/z (ChatGPT)
+## Meta-data (Claude)
 
-In the context of mass spectrometry, the term "charge" refers to the electrical charge of an ion. Mass spectrometry is a technique used to analyze the mass-to-charge ratio (m/z) of ions. Monoisotopic m/z refers to the mass-to-charge ratio of the monoisotopic peak, which is the peak corresponding to the ion containing the most abundant isotope of each element.
+1. **Isotope.Group.ID** is a unique identifier for a group of isotopes that belong to the same peptide or molecule. In mass spectrometry, isotopes are atoms of the same element that have the same number of protons but differ in the number of neutrons. This ID helps to group together isotopes that arise from the same peptide, allowing for easier identification and analysis.
+2. **Protein** contains the name or identifier of the protein that the peptide (or molecule) is derived from. This information is typically obtained by searching the MS data against a protein database.
+3. **Modified.Peptide.Sequence** is the amino acid sequence of the peptide, including any post-translational modifications (PTMs) that have been identified. PTMs are chemical modifications that occur after protein synthesis, such as phosphorylation, ubiquitination, or methylation. The sequence is usually represented in a standard format, such as using lowercase letters for modified residues.
+4. **Monoisotopic.m/z** is the monoisotopic mass-to-charge ratio (m/z) of the peptide or molecule. The monoisotopic mass is the mass of the most abundant isotope of each element in the molecule, which is typically the lightest isotope (e.g., 12C, 1H, 14N, 16O, etc.). This value is used as a reference point for identifying the peptide or molecule.
+5. **Max.Isotope.Time.Centroid** is the time centroid (or apex) of the most intense isotope in the isotope group. In liquid chromatography-mass spectrometry (LC-MS), peptides are separated based on their retention time (the time it takes for the peptide to elute from the column). The time centroid is the time point at which the peptide signal is most intense, which can be used to quantify the peptide abundance.
+6. **Charge** is the charge state of the peptide or molecule. In mass spectrometry, peptides can be ionized to different charge states (e.g., +1, +2, +3, etc.), which affects their mass-to-charge ratio (m/z). The charge state is an important parameter for identifying peptides and molecules.
 
-The Max Isotope Time Centroid is the time at which the intensity-weighted average of the isotope distribution reaches its maximum value. This parameter is important for accurately determining the mass and charge state of an ion.
-
-The charge of an ion is a crucial piece of information in mass spectrometry. It is used in the calculation of the mass-to-charge ratio (m/z) of an ion, which is a key parameter in identifying and characterizing molecules. The m/z value is used to determine the mass of an ion, and the charge is needed to convert the raw mass spectrometry data (measured in daltons) into the mass-to-charge ratio.
-
-The formula for calculating m/z is:
-
-$$
-m/z=\frac{\mbox{Mass of the ion}}{\mbox{Charge of the ion​}}
-$$
-
-The charge of an ion is essential for interpreting mass spectrometry data, particularly in determining the mass-to-charge ratio (m/z) of ions, which is fundamental for identifying and characterizing molecules in a sample.
-
-When the charge is 0 for monoisotopic m/z, it implies a neutral species, and the mass spectrometry analysis might be focusing on the measurement of neutral molecules or particles.
-
-In proteomics, researchers often analyze proteins and peptides in their neutral forms. Techniques like matrix-assisted laser desorption/ionization (MALDI) are commonly used for the analysis of intact proteins in their neutral state
+These columns provide valuable information for analyzing and interpreting MS data, including peptide identification, quantification, and characterization of post-translational modifications.
 
 ## Peptide and Protein ID using OpenMS tools
 

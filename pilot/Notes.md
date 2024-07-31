@@ -9,7 +9,7 @@
 5. **Max.Isotope.Time.Centroid** is the time centroid (or apex) of the most intense isotope in the isotope group. In liquid chromatography-mass spectrometry (LC-MS), peptides are separated based on their retention time (the time it takes for the peptide to elute from the column). The time centroid is the time point at which the peptide signal is most intense, which can be used to quantify the peptide abundance.
 6. **Charge** is the charge state of the peptide or molecule. In mass spectrometry, peptides can be ionized to different charge states (e.g., +1, +2, +3, etc.), which affects their mass-to-charge ratio (m/z). The charge state is an important parameter for identifying peptides and molecules.
 
-These columns provide valuable information for analyzing and interpreting MS data, including peptide identification, quantification, and characterization of post-translational modifications.
+They are invaluable for analyzing and interpreting MS data, including peptide identification, quantification, and characterization of post-translational modifications.
 
 ## Peptide and Protein ID using OpenMS tools
 

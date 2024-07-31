@@ -85,14 +85,18 @@ function openms()
 ##      Perform further statistical analysis and visualization using additional OpenMS tools or external software.
 
 module load ceuadmin/icu/50.2 ceuadmin/OpenMS/3.0.0-pre-develop-2022-09-28
+module load ceuadmin/tandem/2017.2.1.4
 export spectra=szwk901104i19801xms1
 ln -sf /rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectral_library_ZWK/${spectra}.raw rawdata.raw
 
 # Convert raw data to mzML format using ThermoRawFileParser.exe
 FileConverter -in rawdata.raw -out rawdata.mzML
 
+# peptide identification
+XTandemAdapter -in ${spectra}.mzML -database uniprot_sprot.fasta -xtandem_executable $(which tandem.exe)
+
 # Perform peak picking
-PeakPickerHiRes -in rawdata.mzML -out picked.mzML
+PeakPickerHiRes -in ${spectra}.mzML -out picked.mzML
 
 # Run peptide identification using Comet
 CometAdapter -in picked.mzML -out comet.idXML -database uniprot_sprot.fasta

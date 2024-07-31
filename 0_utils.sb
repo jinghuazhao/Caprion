@@ -1328,77 +1328,14 @@ function vignette()
   '
 }
 
-function PROC()
+function eSet()
 {
-# 1. Pull the meta-analysis results for all 20 peptides for the lead chr2 SNP and lead chr20 SNP (it seems to the same lead SNP across all peptides) – this will help us see if the results are truly null for the 8 peptides not currently marked as ‘good’
-  # the lead chr2 and chr20 signals
-  # 20 peptides
-  export PERL5LIB=
-  (
-    gunzip -c ${analysis}/peptide/PROC/METAL/*-1.tbl.gz | head -1
-    parallel zgrep -w {2} ${analysis}/peptide/PROC/METAL/{1}-1.tbl.gz ::: \
-    $(cut -f1 ${analysis}/peptide/PROC/PROC.signals | sed '1d' | sort -u) ::: \
-    $(awk '/PROC/{print $NF}' ${analysis}/work/caprion.signals) \
-  ) > ${analysis}/work/PROC.signals
-# 2. Create the correlation heatmap between all these peptides (I would hypothesise that the correlation is better between the ‘good’ peptides than with the others)
   Rscript -e '
-     # Set environment and paths
      options(width = 200)
      pre_qc_data <- Sys.getenv("pre_qc_data")
      analysis <- Sys.getenv("analysis")
      pilot <- gsub("analysis", "pilot", analysis)
 
-     # Read and process isotope data
-     suppressMessages(library(Biobase))
-     suppressMessages(library(dplyr))
-     suppressMessages(library(pheatmap))
-     isotope <- read.table(file.path(analysis, "peptide", "PROC", "PROC.signals"), header = TRUE) %>%
-                pull(isotope) %>%
-                unique()
-     load(file.path(pilot, "es.rda"))
-     PROC_peptides <- peptide_all[rownames(peptide_all) %in% isotope]
-     cor_na <- function(d)
-     # Calculate correlation matrices excluding cols/rows all NAs
-     {
-        r <- cor(d)
-        diag(r) <- NA
-        na_rows <- apply(r,1,function(x) all(is.na(x)))
-        na_cols <- apply(r,2,function(x) all(is.na(x)))
-        diag(r) <- 1
-        r[!na_rows,!na_cols]
-     }
-     pdf(file.path(analysis,"work","PROC-heatmap.pdf"),height=10,width=12)
-     r_all <- cor(t(exprs(PROC_peptides)))
-     r_ZWK <- cor(t(exprs(PROC_peptides[, grepl("ZWK", sampleNames(PROC_peptides))])))
-     r_ZYQ <- cor(t(exprs(PROC_peptides[, grepl("ZYQ", sampleNames(PROC_peptides))])))
-     r_UDP <- cor(t(exprs(PROC_peptides[, grepl("UDP", sampleNames(PROC_peptides))])))
-     heatmap(r_all, main = "Correlation Matrix - All Samples", Colv = NA, Rowv = NA, scale = "none")
-     heatmap(r_ZWK, main = "Correlation Matrix - ZWK Samples", Colv = NA, Rowv = NA, scale = "none")
-     heatmap(r_ZYQ, main = "Correlation Matrix - ZYQ Samples", Colv = NA, Rowv = NA, scale = "none")
-     heatmap(r_UDP, main = "Correlation Matrix - UDP Samples", Colv = NA, Rowv = NA, scale = "none")
-     r_all <- cor_na(t(exprs(PROC_peptides)))
-     r_ZWK <- cor_na(t(exprs(PROC_peptides[, grepl("ZWK", sampleNames(PROC_peptides))])))
-     r_ZYQ <- cor_na(t(exprs(PROC_peptides[, grepl("ZYQ", sampleNames(PROC_peptides))])))
-     r_UDP <- cor_na(t(exprs(PROC_peptides[, grepl("UDP", sampleNames(PROC_peptides))])))
-     pheatmap(r_all[complete.cases(r_all),complete.cases(t(r_all)),drop=FALSE],
-              display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
-              color = colorRampPalette(c("blue", "white", "red"))(100),
-              main = "Correlation Matrix - All Samples", border_color = NA)
-
-     pheatmap(r_ZWK, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
-              color = colorRampPalette(c("blue", "white", "red"))(100),
-              main = "Correlation Matrix - ZWK Samples", border_color = NA)
-
-     pheatmap(r_ZYQ, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
-              color = colorRampPalette(c("blue", "white", "red"))(100),
-              main = "Correlation Matrix - ZYQ Samples", border_color = NA)
-
-     pheatmap(r_UDP, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
-              color = colorRampPalette(c("blue", "white", "red"))(100),
-              main = "Correlation Matrix - UDP Samples", border_color = NA)
-     dev.off()
-
-# 3. Plot the distribution of the raw intensities of each peptide by batch, and the normalised intensities of each peptide by batch
      require(openxlsx)
      ZWK_path <- file.path(pre_qc_data,"pilot","ZWK_EDR_20191002.xlsx")
      raw_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Raw IGs",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
@@ -1438,6 +1375,83 @@ function PROC()
                 left_join(raw_UDP3[names(raw_UDP3)[grep("UDP|Isotope.Group.ID", names(raw_UDP3))]])
      neq_UDP <- openxlsx::read.xlsx(file.path(UDP_path,"UDP_EDR_20210423.xlsx"),
                                     sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=1)
+   save(list=ls(),file=file.path(analysis,"work","eSet.rda"))
+  '
+}
+
+function benchmark()
+{
+# 1. Pull the meta-analysis results for all 20 peptides for the lead chr2 SNP and lead chr20 SNP (it seems to the same lead SNP across all peptides) – this will help us see if the results are truly null for the 8 peptides not currently marked as ‘good’
+  # the lead chr2 and chr20 signals
+  # 20 peptides
+  export protein=${1}
+  export PERL5LIB=
+  (
+    gunzip -c ${analysis}/peptide/${protein}/METAL/*-1.tbl.gz | head -1
+    parallel zgrep -w {2} ${analysis}/peptide/${protein}/METAL/{1}-1.tbl.gz ::: \
+    $(cut -f1 ${analysis}/peptide/${protein}/${protein}.signals | sed '1d' | sort -u) ::: \
+    $(grep -v ${protein} ${analysis}/work/caprion.signals | awk '{print $NF}') \
+  ) > ${analysis}/work/${protein}.signals
+# 2. Create the correlation heatmap between all these peptides (I would hypothesise that the correlation is better between the ‘good’ peptides than with the others)
+  Rscript -e '
+     # Set environment and paths
+     options(width = 200)
+     pre_qc_data <- Sys.getenv("pre_qc_data")
+     analysis <- Sys.getenv("analysis")
+     pilot <- gsub("analysis", "pilot", analysis)
+     protein <- Sys.getenv("protein")
+
+     load(file.path(analysis,"work","PROC.rda"))
+     # Read and process isotope data
+     suppressMessages(library(Biobase))
+     suppressMessages(library(dplyr))
+     suppressMessages(library(pheatmap))
+     isotope <- read.table(file.path(analysis, "peptide", protein, paste0(protein,".signals")), header = TRUE) %>%
+                pull(isotope) %>%
+                unique()
+     load(file.path(pilot, "es.rda"))
+     benchmark_peptides <- peptide_all[rownames(peptide_all) %in% isotope]
+     cor_na <- function(d)
+     # Calculate correlation matrices excluding cols/rows all NAs
+     {
+        r <- cor(d)
+        diag(r) <- NA
+        na_rows <- apply(r,1,function(x) all(is.na(x)))
+        na_cols <- apply(r,2,function(x) all(is.na(x)))
+        diag(r) <- 1
+        r[!na_rows,!na_cols]
+     }
+     pdf(file.path(analysis,"work",paste0(protein,"-heatmap.pdf)"),height=10,width=12)
+     r_all <- cor(t(exprs(benchmark_peptides)))
+     r_ZWK <- cor(t(exprs(benchmark_peptides[, grepl("ZWK", sampleNames(benchmark_peptides))])))
+     r_ZYQ <- cor(t(exprs(benchmark_peptides[, grepl("ZYQ", sampleNames(benchmark_peptides))])))
+     r_UDP <- cor(t(exprs(benchmark_peptides[, grepl("UDP", sampleNames(benchmark_peptides))])))
+     heatmap(r_all, main = "Correlation Matrix - All Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_ZWK, main = "Correlation Matrix - ZWK Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_ZYQ, main = "Correlation Matrix - ZYQ Samples", Colv = NA, Rowv = NA, scale = "none")
+     heatmap(r_UDP, main = "Correlation Matrix - UDP Samples", Colv = NA, Rowv = NA, scale = "none")
+     r_all <- cor_na(t(exprs(benchmark_peptides)))
+     r_ZWK <- cor_na(t(exprs(benchmark_peptides[, grepl("ZWK", sampleNames(benchmark_peptides))])))
+     r_ZYQ <- cor_na(t(exprs(benchmark_peptides[, grepl("ZYQ", sampleNames(benchmark_peptides))])))
+     r_UDP <- cor_na(t(exprs(benchmark_peptides[, grepl("UDP", sampleNames(benchmark_peptides))])))
+     pheatmap(r_all[complete.cases(r_all),complete.cases(t(r_all)),drop=FALSE],
+              display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+              color = colorRampPalette(c("blue", "white", "red"))(100),
+              main = "Correlation Matrix - All Samples", border_color = NA)
+
+     pheatmap(r_ZWK, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+              color = colorRampPalette(c("blue", "white", "red"))(100),
+              main = "Correlation Matrix - ZWK Samples", border_color = NA)
+
+     pheatmap(r_ZYQ, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+              color = colorRampPalette(c("blue", "white", "red"))(100),
+              main = "Correlation Matrix - ZYQ Samples", border_color = NA)
+
+     pheatmap(r_UDP, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
+              color = colorRampPalette(c("blue", "white", "red"))(100),
+              main = "Correlation Matrix - UDP Samples", border_color = NA)
+     dev.off()
+# 3. Plot the distribution of the raw intensities of each peptide by batch, and the normalised intensities of each peptide by batch
      IGs2data <- function(src_code)
      {
        require(dplyr)
@@ -1470,13 +1484,10 @@ function PROC()
             labs(title = paste("Histograms of",src,"Columns"))
        print(p)
      }
-
      pdf(file.path(analysis,"work","PROC-hist.pdf"),height=10,width=12)
      for (src in c("ZWK_raw","ZWK_neq","ZYQ_raw","ZYQ_neq","UDP_raw","UDP_neq")) hist_mat(src)
      dev.off()
 
-   # save(list=ls(),file=file.path(analysis,"work","PROC.rda"))
-   # load(file.path(analysis,"work","PROC.rda"))
 # 4. Quantify for each peptide how many participants in each batch have 0 values and how many have values below the detection rate threshold (I think this was 50,000?) – this might help us see if the potentially poorly measured peptides have more missingness
      cat("Number of samples with zero values:\n")
      for (src in c("ZWK_raw","ZYQ_raw","UDP_raw"))
@@ -1530,6 +1541,5 @@ function PROC()
        raw_UDP <- select(raw_UDP,Isotope.Group.ID,names(raw_UDP)[grep("UDP",names(raw_UDP))]) %>%
                   filter(!duplicated(Isotope.Group.ID))
      }
-
   '
 }

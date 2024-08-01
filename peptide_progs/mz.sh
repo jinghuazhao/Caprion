@@ -10,6 +10,9 @@ singularity --version
 export SIF=pwiz-skyline-i-agree-to-the-vendor-licenses_latest.sif
 if [ ! -f "${f}" ] && [ -x "${f}" ]; then
    singularity pull --name ${SIF} docker://chambm/pwiz-skyline-i-agree-to-the-vendor-licenses
+ # http://localhost:8080, Admin, password
+   ln -sf /rds/project/rds-4o5vpvAowP0/software/.apptainer/ ${HOME}/.apptainer
+   singularity pull --dir galaxy docker://quay.io/galaxy/introduction-training
 fi
 for format in --mzML --mzXML --mz5 --mzMLb --mgf --text --ms1 --cms1 --ms2 --cms2
 do

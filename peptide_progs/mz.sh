@@ -12,7 +12,7 @@ if [ ! -f "${f}" ] && [ -x "${f}" ]; then
    singularity pull --name ${SIF} docker://chambm/pwiz-skyline-i-agree-to-the-vendor-licenses
  # http://localhost:8080, Admin, password
    ln -sf /rds/project/rds-4o5vpvAowP0/software/.apptainer/ ${HOME}/.apptainer
-   singularity pull --dir galaxy docker://quay.io/galaxy/introduction-training
+   singularity pull docker://quay.io/galaxy/introduction-training
 fi
 for format in --mzML --mzXML --mz5 --mzMLb --mgf --text --ms1 --cms1 --ms2 --cms2
 do
@@ -95,8 +95,16 @@ ln -sf /rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectral_library
 # Convert raw data to mzML format using ThermoRawFileParser.exe
 FileConverter -in rawdata.raw -out rawdata.mzML
 
-# peptide identification
+# decoy database
+DecoyDatabase -in uniprot_sprot.fasta -out decoy_uniprot_sprot.fasta
+
+# peptide identification & more showcase of singularity
 XTandemAdapter -in ${spectra}.mzML -database uniprot_sprot.fasta -xtandem_executable $(which tandem.exe)
+singularity exec -B /usr/local/Cluster-Apps/ceuadmin/OpenMS/3.0.0-pre-develop-2022-09-28/bin/:/openms \
+                 -B /usr/local/Cluster-Apps/ceuadmin/tandem/2017.2.1.4/:/bin \
+                 -B /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/OpenMS/tutorials:/data \
+            introduction-training_latest.sif /openms/XTandemAdapter \
+                -in /data/qExactive01819_profile.mzml -database /data/'Human_database_including_decoys_(cRAP_added).fasta'
 
 # Perform peak picking
 PeakPickerHiRes -in ${spectra}.mzML -out picked.mzML

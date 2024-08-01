@@ -13,9 +13,15 @@ They are invaluable for analyzing and interpreting MS data, including peptide id
 
 ## Peptide and Protein ID using OpenMS tools
 
-Web: <https://usegalaxy.org/>
+Web: <https://usegalaxy.org/> (https://training.galaxyproject.org/training-material/)
 
-<https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html#peptide-identification>
+```bash
+docker run -p 8080:80 quay.io/galaxy/introduction-training
+```
+
+Visit <http://localhost:8080>. Login as **admin** with password **password** to access.
+
+See <https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html>
 
 ## PoGo
 

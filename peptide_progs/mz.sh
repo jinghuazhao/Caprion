@@ -48,6 +48,7 @@ function docker()
 {
   docker run -it --rm -e WINEDEBUG=-all -v ${ZWK}:/data chambm/pwiz-skyline-i-agree-to-the-vendor-licenses \
          wine msconvert /data/szwk901104i19801xms1.raw --filter "peakPicking true 1-"
+  docker run -p 8080:80 quay.io/galaxy/introduction-training
   module load ceuadmin/docker/24.0.5
 }
 

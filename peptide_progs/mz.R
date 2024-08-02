@@ -41,6 +41,65 @@ class(spec)
 length(spec)
 lapply(spec,head,3)
 
+# MSnbase
+library(MSnbase)
+mzXML <- readMSData("szwk901104i19801xms1.mzXML")
+extractSpectraData(mzXML)
+hasSpectra("szwk901104i19801xms1.mzML,gz")
+hasChromatograms("szwk901104i19801xms1.mzML,gz")
+plot2d(mzXML,z="peaks.count")
+plotDensity(mzXML,z="precursor.mz")
+
+mgf <- readMgfData("szwk901104i19801xms1.mgf")
+extractSpectraData(mgf)
+methods(class="MSpectra")
+mz(mgf)
+intensity(mgf)
+rtime(mgf)
+precursorMz(mgf)
+precursorCharge(mgf)
+precScanNum(mgf)
+precursorIntensity(mgf)
+acquisitionNum(mgf)
+scanIndex(mgf)
+peaksCount(mgf)
+msLevel(mgf)
+tic(mgf)
+ionCount(mgf)
+collisionEnergy(mgf)
+fromFile(mgf)
+polarity(mgf)
+smoothed(mgf)
+centroided(mgf)
+isCentroided(mgf)
+writeMgfData(mgf, con = "spectra.mgf", COM = NULL, TITLE = NULL)
+removePeaks(mgf, t, msLevel., ...)
+filterMsLevel(mgf, msLevel=2)
+as.ExpressionSet(mgf)
+
+# This turned to be really slow!
+sp_list <- lapply(seq_along(mgf), function(i) {
+  intensity_i <- intensity(mgf)[[i]]
+  mz_i <- mz(mgf)[[i]]
+  centroided_i <- centroided(mgf)[[i]]
+  return(new("Spectrum1", intensity = intensity_i, mz = mz_i, centroided = centroided_i))
+})
+sp1 <- do.call(rbind, sp_list)
+# only the first one is more manageable
+sp1 <- new("Spectrum1",intensity=intensity(mgf)[[1]],mz=mz(mgf)[[1]],centroided=centroided(mgf)[[1]])
+sp2 <- pickPeaks(sp1)
+intensity(sp2)
+plot(mz(sp1),intensity(sp1),type="h")
+## Without m/z refinement
+points(mz(sp2), intensity(sp2), col = "darkgrey")
+## Using k = 1, closest signals
+sp3 <- pickPeaks(sp1, refineMz = "kNeighbors", k = 1)
+points(mz(sp3), intensity(sp3), col = "green", type = "h")
+## Using descendPeak requiring at least 50% or the centroid's intensity
+sp4 <- pickPeaks(sp1, refineMz = "descendPeak", signalPercentage = 50)
+points(mz(sp4), intensity(sp4), col = "red", type = "h")
+
+
 legacy <- function()
 {
 # individually

@@ -44,13 +44,15 @@ lapply(spec,head,3)
 # MSnbase
 library(MSnbase)
 mzXML <- readMSData("szwk901104i19801xms1.mzXML")
+mgf <- readMgfData("szwk901104i19801xms1.mgf")
+save(mzXML,mgf,file="szwk901104i19801xms1.rda")
+
 extractSpectraData(mzXML)
 hasSpectra("szwk901104i19801xms1.mzML,gz")
 hasChromatograms("szwk901104i19801xms1.mzML,gz")
 plot2d(mzXML,z="peaks.count")
 plotDensity(mzXML,z="precursor.mz")
 
-mgf <- readMgfData("szwk901104i19801xms1.mgf")
 extractSpectraData(mgf)
 methods(class="MSpectra")
 mz(mgf)
@@ -99,6 +101,34 @@ points(mz(sp3), intensity(sp3), col = "green", type = "h")
 sp4 <- pickPeaks(sp1, refineMz = "descendPeak", signalPercentage = 50)
 points(mz(sp4), intensity(sp4), col = "red", type = "h")
 
+# CAMERA
+library(CAMERA)
+xs   <- xcmsSet(c("szwk901104i19801xms1.mzML"), method="centWave", ppm=30, peakwidth=c(5,10))
+an   <- xsAnnotate(xs)
+an   <- groupFWHM(an)
+#For one group
+peaklist <- getpspectra(an, 1)
+#For two groups
+peaklist <- getpspectra(an, c(1,2))
+
+# Spectra
+suppressMessages(library(Spectra))
+f <- "szwk901104i19801xms1.mzML,gz"
+sp <- Spectra(f)
+head(sp)
+table(sp$msLevel)
+d <- computeMzDeltas(sp[1:1000])
+plotMzDelta(d)
+
+# protViz
+library(protViz)
+esd <- extractSpectraData(mgf)
+op <- par(mfrow=c(2,1))
+ms <- function(i) with(esd[i,],list(title=TITLE,rtinseconds=RTINSECONDS,pepmass=PEPMASS,charge=CHARGE,
+                                    mZ=mz(mgf[[i]]),intensity=intensity(mgf[[i]])))
+peakplot("TAFDEAIAELDTLNEESYK", ms(1))
+peakplot("TAFDEAIAELDTLSEESYK", ms(2))
+par(op)
 
 legacy <- function()
 {

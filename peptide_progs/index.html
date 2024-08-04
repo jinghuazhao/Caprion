@@ -203,8 +203,10 @@
 </tbody>
 </table>
 <div class="mermaid">graph TD;
-crux.*
 mz.*
+crux.*
+BoxCar.py
+pyteomics.py
 0_crux.sh
 1_pgwas.sh
 2_meta_analysis.sh
@@ -212,8 +214,6 @@ mz.*
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3.1_extract.sh --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
-BoxCar.py
-pyteomics.py
 utils.sh
 </div>
 <p>The crux search is experimental and along with ongoing effort on visualization. Specfically, prerequistes for a Manhattan/peptide association plot are</p>

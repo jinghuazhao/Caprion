@@ -217,7 +217,7 @@ utils.sh
 <li>a call to <code>bgz()</code> (in <code>utils.sh</code> for protein) for a indexed and compressed DR-filtered data.</li>
 <li>for step 3.2, <code>ceuadmin/ensembl-vep/111-icelake</code> now is the default since partition <code>icelake-himem</code> is used instead of <code>cclake</code> (CentOS 7) which has <code>ceuadmin/ensembl-vep/104</code>.</li>
 <li>module <code>ceuadmin/R/4.4.1-icelake</code> now works as smoothly as the old <code>ceuadmin/R</code> at <code>cclake</code></li>
-<li>module <code>mono-5.10.0.78-gcc-5.4.0-c6cq4hh</code> is required for <code>rawrr</code>, to <code>${HOME}/.cache/R/rawrr/rawrrassembly</code></li>
+<li>module <code>mono-5.10.0.78-gcc-5.4.0-c6cq4hh</code> is required for <code>rawrr</code>, to <code>${HOME}/.cache/R/rawrr/rawrrassembly</code> (4/8/2024)</li>
 </ul>
 <table>
 <thead>
@@ -253,18 +253,6 @@ utils.sh
 </tr>
 </tbody>
 </table>
-<details>
-
-   ```r
-    if (isFALSE(rawrr::.checkDllInMonoPath())){
-      rawrr::installRawFileReaderDLLs()
-    }
-    if (isFALSE(file.exists(rawrr:::.rawrrAssembly()))){
-      rawrr::installRawrrExe()
-    }
-    ```
-
-</details>
 <h2 id="references">References</h2>
 <p>Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. <em>J Proteome Res</em> 22:625–631 (2023), <a href="https://doi.org/10.1021/acs.jproteome.2c00632">https://doi.org/10.1021/acs.jproteome.2c00632</a>, <a href="https://spectrum-utils.readthedocs.io/en/latest/">https://spectrum-utils.readthedocs.io/en/latest/</a>.</p>
 <p>Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. <em>Methods Mol Biol</em> 2426:25-34 (2023), <a href="https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2">doi: 10.1007/978-1-0716-1967-4_2</a>.</p>

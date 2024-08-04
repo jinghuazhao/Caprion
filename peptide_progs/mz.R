@@ -3,6 +3,12 @@
 options(width=200)
 # ZWK .raw data
 library(rawrr)
+if (isFALSE(rawrr::.checkDllInMonoPath())){
+   rawrr::installRawFileReaderDLLs()
+}
+if (isFALSE(file.exists(rawrr:::.rawrrAssembly()))){
+   rawrr::installRawrrExe()
+}
 spectra_ZWK <- "~/Caprion/pre_qc_data/spectral_library_ZWK"
 raw_files <- list.files(spectra_ZWK, pattern = "\\.raw$", full.names = TRUE)
 ## collectively

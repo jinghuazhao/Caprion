@@ -28,8 +28,10 @@ Signal identification | see **{protein}/sentinels/slurm**
 
 ```mermaid
 graph TD;
-crux.*
 mz.*
+crux.*
+BoxCar.py
+pyteomics.py
 0_crux.sh
 1_pgwas.sh
 2_meta_analysis.sh
@@ -37,8 +39,6 @@ mz.*
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
-BoxCar.py
-pyteomics.py
 utils.sh
 ```
 

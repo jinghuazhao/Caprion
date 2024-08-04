@@ -1,20 +1,5 @@
 #!/usr/local/Cluster-Apps/ceuadmin/R/4.4.1-icelake/bin/Rscript
 
-# module load mono-5.10.0.78-gcc-5.4.0-c6cq4hh
-if (isFALSE(rawrr::.checkDllInMonoPath())){
-  rawrr::installRawFileReaderDLLs()
-}
-if (isFALSE(file.exists(rawrr:::.rawrrAssembly()))){
- rawrr::installRawrrExe()
-}
-# ${HOME}/.cache/R/rawrr/rawrrassembly
-# 163     eula.txt
-# 28672   rawrr.exe
-# 44544   ThermoFisher.CommonCore.BackgroundSubtraction.dll
-# 406016  ThermoFisher.CommonCore.Data.dll
-# 11264   ThermoFisher.CommonCore.MassPrecisionEstimator.dll
-# 654336  ThermoFisher.CommonCore.RawFileReader.dll
-
 options(width=200)
 # ZWK .raw data
 library(rawrr)
@@ -179,6 +164,7 @@ par(op)
 dev.off()
 
 # MSstats
+library(MSstats)
 f <- "szwk901104i19801xms1.mzML,gz"
 x <- mzR::openMSfile(f, backend = "pwiz")
 x
@@ -188,3 +174,15 @@ head(chromatogram(x, 1L)) ## same as tic(x)
 str(chromatogram(x))
 p <- mzR::peaks(x)
 head(peaks(x, scan=4))
+
+head(SRMRawData)
+QuantData <- dataProcess(SRMRawData, use_log_file = FALSE)
+head(QuantData$FeatureLevelData)
+
+quant <- dataProcess(SRMRawData,
+                      normalization = "equalizeMedians",
+                      summaryMethod = "TMP",
+                      censoredInt = "NA",
+                      MBimpute = TRUE,
+                      maxQuantileforCensored = 0.999)
+head(quant)

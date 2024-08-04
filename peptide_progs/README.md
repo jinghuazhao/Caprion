@@ -12,13 +12,13 @@ These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
-Experimental codes |
+**Experimental codes** |
 mz.* | handling of files in .raw and other formats
 crux.* | R/multicomp+crux benchmarks
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
 utils.sh | Various utitlties
 0_crux.sh | crux search | crux/*.e/.o
-Association analysis |
+**Association analysis** |
 1_pgwas.sh | Association analysis | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
 Signal identification | see **{protein}/sentinels/slurm**
@@ -30,8 +30,7 @@ Signal identification | see **{protein}/sentinels/slurm**
 graph TD;
 mz.*
 crux.*
-BoxCar.py
-pyteomics.py
+BoxCar.py/pyteomics.py
 0_crux.sh
 1_pgwas.sh
 2_meta_analysis.sh

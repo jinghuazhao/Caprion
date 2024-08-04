@@ -20,8 +20,12 @@ methods(class=class(ZWK))
 Spectra(ZWK)
 spectraData(ZWK)
 ZWK
-ZWK |> Spectra::spectraVariables()
-ZWK |> Spectra::spectraData() |> dim()
+ZWKvars <- ZWK |> Spectra::spectraVariables()
+ZWKdata <- ZWK |> Spectra::spectraData()
+dim(ZWKdata)
+# rows with >=1 non-NA value in the columns with prefix "precursor"
+precursor <- apply(ZWKdata[grep("precursor",ZWKvars)], 1, function(x) any(!is.na(x)))
+ZWKdata_filtered <- ZWKdata[precursor, ]
 save(ZWK,file="~/Caprion/analysis/work/ZWK.rda")
 
 # ZYQ/UDP

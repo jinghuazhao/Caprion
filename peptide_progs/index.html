@@ -217,29 +217,52 @@ utils.sh
 <li>a call to <code>bgz()</code> (in <code>utils.sh</code> for protein) for a indexed and compressed DR-filtered data.</li>
 <li>for step 3.2, <code>ceuadmin/ensembl-vep/111-icelake</code> now is the default since partition <code>icelake-himem</code> is used instead of <code>cclake</code> (CentOS 7) which has <code>ceuadmin/ensembl-vep/104</code>.</li>
 <li>module <code>ceuadmin/R/4.4.1-icelake</code> now works as smoothly as the old <code>ceuadmin/R</code> at <code>cclake</code></li>
-<li>
-<p>module <code>mono-5.10.0.78-gcc-5.4.0-c6cq4hh</code> is required for <code>rawrr</code>,</p>
-<p><code>r
-if (isFALSE(rawrr::.checkDllInMonoPath())){
-  rawrr::installRawFileReaderDLLs()
-}
-if (isFALSE(file.exists(rawrr:::.rawrrAssembly()))){
-  rawrr::installRawrrExe()
-}</code></p>
-</li>
+<li>module <code>mono-5.10.0.78-gcc-5.4.0-c6cq4hh</code> is required for <code>rawrr</code>, to <code>${HOME}/.cache/R/rawrr/rawrrassembly</code></li>
 </ul>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>163</td>
+<td>eula.txt</td>
+</tr>
+<tr>
+<td>28672</td>
+<td>rawrr.exe</td>
+</tr>
+<tr>
+<td>44544</td>
+<td>ThermoFisher.CommonCore.BackgroundSubtraction.dll</td>
+</tr>
+<tr>
+<td>406016</td>
+<td>ThermoFisher.CommonCore.Data.dll</td>
+</tr>
+<tr>
+<td>11264</td>
+<td>ThermoFisher.CommonCore.MassPrecisionEstimator.dll</td>
+</tr>
+<tr>
+<td>654336</td>
+<td>ThermoFisher.CommonCore.RawFileReader.dll</td>
+</tr>
+</tbody>
+</table>
 <details>
 
-# ${HOME}/.cache/R/rawrr/rawrrassembly
-
-Size    | File
---------|---------------------------------------------------
-163     | eula.txt
-28672   | rawrr.exe
-44544   | ThermoFisher.CommonCore.BackgroundSubtraction.dll
-406016  | ThermoFisher.CommonCore.Data.dll
-11264   | ThermoFisher.CommonCore.MassPrecisionEstimator.dll
-654336  | ThermoFisher.CommonCore.RawFileReader.dll
+   ```r
+    if (isFALSE(rawrr::.checkDllInMonoPath())){
+      rawrr::installRawFileReaderDLLs()
+    }
+    if (isFALSE(file.exists(rawrr:::.rawrrAssembly()))){
+      rawrr::installRawrrExe()
+    }
+    ```
 
 </details>
 <h2 id="references">References</h2>

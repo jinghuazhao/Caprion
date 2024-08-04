@@ -1,7 +1,21 @@
 #!/usr/local/Cluster-Apps/ceuadmin/R/4.4.1-icelake/bin/Rscript
 
-options(width=200)
+# module load mono-5.10.0.78-gcc-5.4.0-c6cq4hh
+if (isFALSE(rawrr::.checkDllInMonoPath())){
+  rawrr::installRawFileReaderDLLs()
+}
+if (isFALSE(file.exists(rawrr:::.rawrrAssembly()))){
+ rawrr::installRawrrExe()
+}
+# ${HOME}/.cache/R/rawrr/rawrrassembly
+# 163     eula.txt
+# 28672   rawrr.exe
+# 44544   ThermoFisher.CommonCore.BackgroundSubtraction.dll
+# 406016  ThermoFisher.CommonCore.Data.dll
+# 11264   ThermoFisher.CommonCore.MassPrecisionEstimator.dll
+# 654336  ThermoFisher.CommonCore.RawFileReader.dll
 
+options(width=200)
 # ZWK .raw data
 library(rawrr)
 spectra_ZWK <- "~/Caprion/pre_qc_data/spectral_library_ZWK"
@@ -16,6 +30,7 @@ Spectra(ZWK)
 spectraData(ZWK)
 ZWK
 ZWK |> Spectra::spectraVariables()
+ZWK |> Spectra::spectraData() |> dim()
 save(ZWK,file="~/Caprion/analysis/work/ZWK.rda")
 
 # ZYQ/UDP
@@ -122,6 +137,7 @@ plotMzDelta(d)
 
 # protViz
 library(protViz)
+protViz::fragmentIon("TFVLNFIK")
 esd <- extractSpectraData(mgf)
 op <- par(mfrow=c(2,1))
 ms <- function(i) with(esd[i,],list(title=TITLE,rtinseconds=RTINSECONDS,pepmass=PEPMASS,charge=CHARGE,
@@ -129,26 +145,46 @@ ms <- function(i) with(esd[i,],list(title=TITLE,rtinseconds=RTINSECONDS,pepmass=
 peakplot("TAFDEAIAELDTLNEESYK", ms(1))
 peakplot("TAFDEAIAELDTLSEESYK", ms(2))
 par(op)
+load("~/Caprion/pilot/ZWK.rda")
+peptides <- subset(mapping_ZWK,Protein=="PROC_HUMAN")[["Modified.Peptide.Sequence"]] |> unique()
+pim <- parentIonMass(peptides)
+fi <- fragmentIon(peptides)
+df <- as.data.frame(fi)
+pdf("~/Caprion/analysis/peptide/PROC/PROC-fragmention.pdf",width=10,height=12)
+op <- par(mfrow=c(3,1))
+for (i in 1:length(peptides)){
+    plot(0, 0,
+    xlab='m/Z',
+    ylab='',
+    xlim=range(c(fi[[i]]$b,fi[[i]]$y)),
+    ylim=c(0,1),
+    type='n',
+    axes=FALSE,
+    sub=paste(peptides[i], "/", pim[i], "Da"));
+    box()
+    axis(1, fi[[i]]$b, round(fi[[i]]$b,1), las=2)
+    axis(1, fi[[i]]$y, round(fi[[i]]$y,1), las=2)
 
-legacy <- function()
-{
-# individually
-  for (raw_file in raw_files) {
-      cat("Processing:", raw_file, "\n")
-      raw_index <- rawrr::readIndex(raw_file)
-      for (scan in raw_index$scan) {
-          cat("Scan Number:", scan, "\n")
-          raw_spectrum <- rawrr::readSpectrum(raw_file, scan = scan)
-          print(raw_spectrum)
-      }
-  }
-  plot(raw_spectrum[[1]], centroid=FALSE)
-# a single mzML file
-  mzML_file <- list.files(spectra, pattern="mzML",full.names=TRUE, recursive = TRUE)
-  dirname(mzML_file)
-  mz <- openMSfile(mzML_file)
-  fileName(mz)
-  runInfo(mz)
-  close(mz)
-# netCDF, mzXML or mzML
+    pepSeq<-strsplit(peptides[i], "")
+    axis(3,fi[[i]]$b, paste("b", row.names(fi[[i]]),sep=''),las=2)
+    axis(3,fi[[i]]$y, paste("y", row.names(fi[[i]]),sep=''),las=2)
+
+    text(fi[[i]]$b, rep(0.3, nchar(peptides[i])),
+    pepSeq[[1]],pos=3,cex=4, lwd=4, col="#aaaaaaaa")
+
+    abline(v=fi[[i]]$b, col='red')
+    abline(v=fi[[i]]$y, col='blue',lwd=2)
 }
+par(op)
+dev.off()
+
+# MSstats
+f <- "szwk901104i19801xms1.mzML,gz"
+x <- mzR::openMSfile(f, backend = "pwiz")
+x
+nChrom(x)
+head(tic(x))
+head(chromatogram(x, 1L)) ## same as tic(x)
+str(chromatogram(x))
+p <- mzR::peaks(x)
+head(peaks(x, scan=4))

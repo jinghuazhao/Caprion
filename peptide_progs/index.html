@@ -136,9 +136,39 @@
 </thead>
 <tbody>
 <tr>
+<td>Experimental codes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>mz.*</td>
+<td>handling of files in .raw and other formats</td>
+<td></td>
+</tr>
+<tr>
+<td>crux.*</td>
+<td>R/multicomp+crux benchmarks</td>
+<td></td>
+</tr>
+<tr>
+<td>BoxCar.py/pyteomics.py</td>
+<td>BoxCar algorighm and its use</td>
+<td></td>
+</tr>
+<tr>
+<td>utils.sh</td>
+<td>Various utitlties</td>
+<td></td>
+</tr>
+<tr>
 <td>0_crux.sh</td>
 <td>crux search</td>
 <td>crux/*.e/.o</td>
+</tr>
+<tr>
+<td>Association analysis</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
 <td>1_pgwas.sh</td>
@@ -170,43 +200,18 @@
 <td>Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots</td>
 <td>_step3_{SLURM_job_id}_{phenotype_number}.e / _step3_{SLURM_job_id}_{phenotype_number}.o</td>
 </tr>
-<tr>
-<td>Experimental codes</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>mz.*</td>
-<td>handling of files in .raw and other formats</td>
-<td></td>
-</tr>
-<tr>
-<td>crux.*</td>
-<td>R/multicomp+crux benchmarks</td>
-<td></td>
-</tr>
-<tr>
-<td>BoxCar.py/pyteomics.py</td>
-<td>BoxCar algorighm and its use</td>
-<td></td>
-</tr>
-<tr>
-<td>utils.sh</td>
-<td>Various utitlties</td>
-<td></td>
-</tr>
 </tbody>
 </table>
 <div class="mermaid">graph TD;
-0_crus.sh
+crux.*
+mz.*
+0_crux.sh
 1_pgwas.sh
 2_meta_analysis.sh
 3.1_extract.sh
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3.1_extract.sh --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
-crux.*
-mz.*
 BoxCar.py
 pyteomics.py
 utils.sh
@@ -217,42 +222,44 @@ utils.sh
 <li>a call to <code>bgz()</code> (in <code>utils.sh</code> for protein) for a indexed and compressed DR-filtered data.</li>
 <li>for step 3.2, <code>ceuadmin/ensembl-vep/111-icelake</code> now is the default since partition <code>icelake-himem</code> is used instead of <code>cclake</code> (CentOS 7) which has <code>ceuadmin/ensembl-vep/104</code>.</li>
 <li>module <code>ceuadmin/R/4.4.1-icelake</code> now works as smoothly as the old <code>ceuadmin/R</code> at <code>cclake</code></li>
-<li>module <code>mono-5.10.0.78-gcc-5.4.0-c6cq4hh</code> is required for <code>rawrr</code>, to <code>${HOME}/.cache/R/rawrr/rawrrassembly</code> (4/8/2024)</li>
-</ul>
+<li>
+<p>module <code>mono-5.10.0.78-gcc-5.4.0-c6cq4hh</code> is required for <code>rawrr</code>, to <code>${HOME}/.cache/R/rawrr/rawrrassembly</code> (4/8/2024)</p>
 <table>
 <thead>
 <tr>
-<th>Size</th>
 <th>File</th>
+<th>Size</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>163</td>
 <td>eula.txt</td>
+<td>163</td>
 </tr>
 <tr>
-<td>28672</td>
 <td>rawrr.exe</td>
+<td>28672</td>
 </tr>
 <tr>
-<td>44544</td>
 <td>ThermoFisher.CommonCore.BackgroundSubtraction.dll</td>
+<td>44544</td>
 </tr>
 <tr>
-<td>406016</td>
 <td>ThermoFisher.CommonCore.Data.dll</td>
+<td>406016</td>
 </tr>
 <tr>
-<td>11264</td>
 <td>ThermoFisher.CommonCore.MassPrecisionEstimator.dll</td>
+<td>11264</td>
 </tr>
 <tr>
-<td>654336</td>
 <td>ThermoFisher.CommonCore.RawFileReader.dll</td>
+<td>654336</td>
 </tr>
 </tbody>
 </table>
+</li>
+</ul>
 <h2 id="references">References</h2>
 <p>Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. <em>J Proteome Res</em> 22:625–631 (2023), <a href="https://doi.org/10.1021/acs.jproteome.2c00632">https://doi.org/10.1021/acs.jproteome.2c00632</a>, <a href="https://spectrum-utils.readthedocs.io/en/latest/">https://spectrum-utils.readthedocs.io/en/latest/</a>.</p>
 <p>Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. <em>Methods Mol Biol</em> 2426:25-34 (2023), <a href="https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2">doi: 10.1007/978-1-0716-1967-4_2</a>.</p>

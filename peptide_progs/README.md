@@ -12,30 +12,31 @@ These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
+Experimental codes |
+mz.* | handling of files in .raw and other formats
+crux.* | R/multicomp+crux benchmarks
+BoxCar.py/pyteomics.py | BoxCar algorighm and its use
+utils.sh | Various utitlties
 0_crux.sh | crux search | crux/*.e/.o
+Association analysis |
 1_pgwas.sh | Association analysis | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
 Signal identification | see **{protein}/sentinels/slurm**
 3.1_extract.sh | Signal extraction | \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.o
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
-Experimental codes |
-mz.* | handling of files in .raw and other formats
-crux.* | R/multicomp+crux benchmarks
-BoxCar.py/pyteomics.py | BoxCar algorighm and its use
-utils.sh | Various utitlties
 
 ```mermaid
 graph TD;
-0_crus.sh
+crux.*
+mz.*
+0_crux.sh
 1_pgwas.sh
 2_meta_analysis.sh
 3.1_extract.sh
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
-crux.*
-mz.*
 BoxCar.py
 pyteomics.py
 utils.sh
@@ -49,14 +50,14 @@ The crux search is experimental and along with ongoing effort on visualization. 
 - module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake`
 - module `mono-5.10.0.78-gcc-5.4.0-c6cq4hh` is required for `rawrr`, to `${HOME}/.cache/R/rawrr/rawrrassembly` (4/8/2024)
 
-  Size    | File
-  --------|---------------------------------------------------
-  163     | eula.txt
-  28672   | rawrr.exe
-  44544   | ThermoFisher.CommonCore.BackgroundSubtraction.dll
-  406016  | ThermoFisher.CommonCore.Data.dll
-  11264   | ThermoFisher.CommonCore.MassPrecisionEstimator.dll
-  654336  | ThermoFisher.CommonCore.RawFileReader.dll
+    File   | Size
+    --------|---------------------------------------------------
+    eula.txt | 163
+    rawrr.exe | 28672
+    ThermoFisher.CommonCore.BackgroundSubtraction.dll | 44544
+    ThermoFisher.CommonCore.Data.dll | 406016
+    ThermoFisher.CommonCore.MassPrecisionEstimator.dll | 11264
+    ThermoFisher.CommonCore.RawFileReader.dll | 654336
 
 ## References
 

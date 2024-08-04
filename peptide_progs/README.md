@@ -47,9 +47,20 @@ The crux search is experimental and along with ongoing effort on visualization. 
 - a call to `bgz()` (in `utils.sh` for protein) for a indexed and compressed DR-filtered data.
 - for step 3.2, `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is used instead of `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
 - module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake`
-- module `mono-5.10.0.78-gcc-5.4.0-c6cq4hh` is required for `rawrr`,
+- module `mono-5.10.0.78-gcc-5.4.0-c6cq4hh` is required for `rawrr`, to `${HOME}/.cache/R/rawrr/rawrrassembly`
 
-    ```r
+  Size    | File
+  --------|---------------------------------------------------
+  163     | eula.txt
+  28672   | rawrr.exe
+  44544   | ThermoFisher.CommonCore.BackgroundSubtraction.dll
+  406016  | ThermoFisher.CommonCore.Data.dll
+  11264   | ThermoFisher.CommonCore.MassPrecisionEstimator.dll
+  654336  | ThermoFisher.CommonCore.RawFileReader.dll
+
+<details>
+
+   ```r
     if (isFALSE(rawrr::.checkDllInMonoPath())){
       rawrr::installRawFileReaderDLLs()
     }
@@ -57,18 +68,6 @@ The crux search is experimental and along with ongoing effort on visualization. 
       rawrr::installRawrrExe()
     }
     ```
-<details>
-
-# ${HOME}/.cache/R/rawrr/rawrrassembly
-
-Size    | File
---------|---------------------------------------------------
-163     | eula.txt
-28672   | rawrr.exe
-44544   | ThermoFisher.CommonCore.BackgroundSubtraction.dll
-406016  | ThermoFisher.CommonCore.Data.dll
-11264   | ThermoFisher.CommonCore.MassPrecisionEstimator.dll
-654336  | ThermoFisher.CommonCore.RawFileReader.dll
 
 </details>
 

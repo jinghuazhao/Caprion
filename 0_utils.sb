@@ -6,12 +6,15 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --array=1-987
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/eSet.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/eSet.o
+
+##SBATCH --array=1-987
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/fp/slurm/_fp_%A_%a.o
 ##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/fp/slurm/_fp_%A_%a.e
 
-#SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/means/slurm/_means_%A_%a.o
-#SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/means/slurm/_means_%A_%a.e
+##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/means/slurm/_means_%A_%a.o
+##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/means/slurm/_means_%A_%a.e
 
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.o
 ##SBATCH --error=/home/jhz22/Caprion/analysis/METAL_dr/vep/slurm/_vep_%A_%a.e
@@ -1251,7 +1254,7 @@ function glmnet()
 # HetISq
 # vep_annotate
 # qqmanhattan/lz from 5_pgwas.sb
-mean_by_genotype_gen_sample
+# mean_by_genotype_gen_sample
 # mean_by_genotype_dosage
 # X: 127,156,325,471,567,691,748,792
 
@@ -1336,11 +1339,6 @@ function eSet()
      analysis <- Sys.getenv("analysis")
      pilot <- gsub("analysis", "pilot", analysis)
 
-     require(openxlsx)
-     ZWK_path <- file.path(pre_qc_data,"pilot","ZWK_EDR_20191002.xlsx")
-     raw_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Raw IGs",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
-     neq_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
-
      raw_process <- function(f)
      {
        n <- read.delim(f,nrows=1) %>% length
@@ -1348,6 +1346,11 @@ function eSet()
        h <- gsub(".*\\[(UDP\\d+|XCC\\w+|ZWK\\w+|ZYQ\\w+).*\\].*", "\\1",h)
        read.table(f,col.names=h,sep="\t",skip=1)
      }
+     require(openxlsx)
+     ZWK_path <- file.path(pre_qc_data,"pilot","ZWK_EDR_20191002.xlsx")
+     raw_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Raw IGs",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
+     neq_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
+
      ZYQ_path <- file.path(pre_qc_data,"batch2","CAM1184-ZYQ")
      f1 <- file.path(ZYQ_path,"ZYQ_R1_Comp_Neq1_Raw_Int_Updated_20200505.txt")
      f2 <- file.path(ZYQ_path,"ZYQ_R3_Comp_Neq1_Raw_Int_Updated_20200608.txt")
@@ -1401,16 +1404,21 @@ function benchmark()
      pilot <- gsub("analysis", "pilot", analysis)
      protein <- Sys.getenv("protein")
 
-     load(file.path(analysis,"work","PROC.rda"))
-     # Read and process isotope data
-     suppressMessages(library(Biobase))
      suppressMessages(library(dplyr))
-     suppressMessages(library(pheatmap))
+     # Only signals
      isotope <- read.table(file.path(analysis, "peptide", protein, paste0(protein,".signals")), header = TRUE) %>%
                 pull(isotope) %>%
                 unique()
+     # All peptides
+     isotope <- read.table(file.path(analysis,"peptide",protein,paste0(protein,".pheno")),check.names=FALSE,header=TRUE, nrows=1) %>%
+                select(-FID,-IID) %>%
+                names()
      load(file.path(pilot, "es.rda"))
      benchmark_peptides <- peptide_all[rownames(peptide_all) %in% isotope]
+     load(file.path(analysis,"work","PROC.rda"))
+     # Read and process isotope data
+     suppressMessages(library(Biobase))
+     suppressMessages(library(pheatmap))
      cor_na <- function(d)
      # Calculate correlation matrices excluding cols/rows all NAs
      {
@@ -1543,3 +1551,5 @@ function benchmark()
      }
   '
 }
+
+eSet

@@ -88,16 +88,20 @@ function openms()
 ##      Quantify peptides and proteins using ProteinQuantifier or other relevant tools.
 ##      Perform further statistical analysis and visualization using additional OpenMS tools or external software.
 
+# paket add Mono.Unix --version 7.1.0-final.1.21458.1
+module load mono/5.0.1.1
+module load ceuadmin/dotnet/6.0.423
 module load ceuadmin/icu/50.2 ceuadmin/OpenMS/3.0.0-pre-develop-2022-09-28
 module load ceuadmin/tandem/2017.2.1.4
-export spectra=szwk901104i19801xms1
-ln -sf /rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectral_library_ZWK/${spectra}.raw rawdata.raw
-
-# Convert raw data to mzML format using ThermoRawFileParser.exe
-FileConverter -in rawdata.raw -out rawdata.mzML
 
 # decoy database
 DecoyDatabase -in uniprot_sprot.fasta -out decoy_uniprot_sprot.fasta
+
+# Convert raw data to mzML format using ThermoRawFileParser.exe
+# msconvert qExactive01819.raw qExactive01819.mzML
+export spectra=szwk901104i19801xms1
+ln -sf /rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectral_library_ZWK/${spectra}.raw rawdata.raw
+FileConverter -in rawdata.raw -out rawdata.mzML
 
 # peptide identification & more showcase of singularity
 XTandemAdapter -in ${spectra}.mzML -database uniprot_sprot.fasta -xtandem_executable $(which tandem.exe)

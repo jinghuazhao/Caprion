@@ -1385,14 +1385,16 @@ function eSet()
 
 function benchmark()
 {
-  export protein=${1}
-  Rscript -e '
-     options(width = 200)
-     suppressMessages(library(dplyr))
-     protein <- Sys.getenv("protein")
-     analysis <- Sys.getenv("analysis")
-     load(file.path(analysis,"work","eSet.rda"))
-     require(openxlsx)
+Rscript -e '
+  options(width = 200)
+  suppressMessages(library(dplyr))
+  analysis <- Sys.getenv("analysis")
+  require(openxlsx)
+  load(file.path(analysis,"work","eSet.rda"))
+  for (protein in c("A1BG","APOB","EPCR","ERAP2","PROC"))
+  {
+     cat("Protein:",protein,"\n")
+     sink(file.path(analysis,"work",paste0(protein,".log")))
 # 1. Pull the meta-analysis results for all 20 peptides for the lead chr2 SNP and lead chr20 SNP (it seems to the same lead SNP across all peptides) – this will help us see if the results are truly null for the 8 peptides not currently marked as ‘good’
   # the lead chr2 and chr20 signals
   # 20 peptides, cis/trans
@@ -1517,14 +1519,14 @@ function benchmark()
      cat("Sequence:", toString(AA_sequence), "\n")
      load (file.path(pilot,"ZWK.rda"))
      benchmark_mapping <- subset(mapping_ZWK,Protein==paste0(protein,"_HUMAN") & Isotope.Group.ID%in%isotope)
-     knitr::kable(benchmark_mapping,caption=paste(protein,"sequence information"))
+     print(knitr::kable(benchmark_mapping,caption=paste(protein,"sequence information")))
      mp <- sapply(setdiff(benchmark_mapping[["Modified.Peptide.Sequence"]],"-"),
            function(x) {
              y <- gsub("\\[\\d+\\.\\d+\\]", "X", x);
              mp <- matchPattern(y,AA_sequence)
              as.data.frame(mp)
            })
-     knitr::kable(t(mp),caption=paste(protein,"sequence positions"))
+     print(knitr::kable(t(mp),caption=paste(protein,"sequence positions")))
      # protein level aggregated at each sample according to IG>=50,000
      # DR aggregated according to 10%
 # 6. See which peptides are/aren’t being used in the protein_dr quantification based on the DR threshold filter
@@ -1536,12 +1538,10 @@ function benchmark()
    # Comparing the protein and protein_dr GWAS results to the literature
    # Comparing the peptide results to the results for the corresponding protein/protein_dr
    # Working out which peptides contributed to the protein and protein_dr quantification for all proteins
-  '
+     sink()
+  }
+'
 }
 
 # eSet
-benchmark A1BG
-benchmark APOB
-benchmark EPCR
-benchmark ERAP2
-benchmark PROC
+benchmark

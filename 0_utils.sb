@@ -6,8 +6,8 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/eSet.e
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/eSet.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/benchmark.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/benchmark.o
 
 ##SBATCH --array=1-987
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/fp/slurm/_fp_%A_%a.o
@@ -1532,16 +1532,16 @@ function benchmark()
 # 7. See from your elastic net work which peptides seem to be contributing to the protein quantification. We can then think about how to restrict the protein quantification to only the ‘good’ peptides, which should improve signal strength.
      # see glmnet()
 # X. Extending the PROC peptide investigation to all PROC peptides (not just those with signals)
-#    Extending the PROC peptide investigation to the other few proteins we have been using for testing/benchmarking
-#    Comparing the protein and protein_dr GWAS results to the literature
-#    Comparing the peptide results to the results for the corresponding protein/protein_dr
-#    Working out which peptides contributed to the protein and protein_dr quantification for all proteins
+   # Extending the PROC peptide investigation to the other few proteins we have been using for testing/benchmarking
+   # Comparing the protein and protein_dr GWAS results to the literature
+   # Comparing the peptide results to the results for the corresponding protein/protein_dr
+   # Working out which peptides contributed to the protein and protein_dr quantification for all proteins
   '
 }
 
 # eSet
-benchmark APOB
 benchmark A1BG
+benchmark APOB
 benchmark EPCR
 benchmark ERAP2
 benchmark PROC

@@ -1347,6 +1347,7 @@ function eSet()
        read.table(f,col.names=h,sep="\t",skip=1)
      }
      require(openxlsx)
+     suppressMessages(library(dplyr))
      ZWK_path <- file.path(pre_qc_data,"pilot","ZWK_EDR_20191002.xlsx")
      raw_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Raw IGs",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
      neq_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
@@ -1378,44 +1379,40 @@ function eSet()
                 left_join(raw_UDP3[names(raw_UDP3)[grep("UDP|Isotope.Group.ID", names(raw_UDP3))]])
      neq_UDP <- openxlsx::read.xlsx(file.path(UDP_path,"UDP_EDR_20210423.xlsx"),
                                     sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=1)
-   save(list=ls(),file=file.path(analysis,"work","eSet.rda"))
+     save(list=ls(),file=file.path(analysis,"work","eSet.rda"))
   '
 }
 
 function benchmark()
 {
+  export protein=${1}
+  Rscript -e '
+     options(width = 200)
+     suppressMessages(library(dplyr))
+     protein <- Sys.getenv("protein")
+     analysis <- Sys.getenv("analysis")
+     load(file.path(analysis,"work","eSet.rda"))
+     require(openxlsx)
 # 1. Pull the meta-analysis results for all 20 peptides for the lead chr2 SNP and lead chr20 SNP (it seems to the same lead SNP across all peptides) – this will help us see if the results are truly null for the 8 peptides not currently marked as ‘good’
   # the lead chr2 and chr20 signals
-  # 20 peptides
-  export protein=${1}
-  export PERL5LIB=
-  (
-    gunzip -c ${analysis}/peptide/${protein}/METAL/*-1.tbl.gz | head -1
-    parallel zgrep -w {2} ${analysis}/peptide/${protein}/METAL/{1}-1.tbl.gz ::: \
-    $(cut -f1 ${analysis}/peptide/${protein}/${protein}.signals | sed '1d' | sort -u) ::: \
-    $(grep -v ${protein} ${analysis}/work/caprion.signals | awk '{print $NF}') \
-  ) > ${analysis}/work/${protein}.signals
-# 2. Create the correlation heatmap between all these peptides (I would hypothesise that the correlation is better between the ‘good’ peptides than with the others)
-  Rscript -e '
-     # Set environment and paths
-     options(width = 200)
-     pre_qc_data <- Sys.getenv("pre_qc_data")
-     analysis <- Sys.getenv("analysis")
-     pilot <- gsub("analysis", "pilot", analysis)
-     protein <- Sys.getenv("protein")
+  # 20 peptides, cis/trans
+     signals <- read.csv(file.path(analysis, "peptide", protein, paste0(protein,".cis.vs.trans")), header = TRUE) %>%
+                arrange(isotope, SNP) %>%
+                group_by(isotope) %>%
+                summarise(signals = paste0(SNP, " (",Type,")", collapse = "; "))
 
-     suppressMessages(library(dplyr))
-     # Only signals
-     isotope <- read.table(file.path(analysis, "peptide", protein, paste0(protein,".signals")), header = TRUE) %>%
-                pull(isotope) %>%
-                unique()
+     if (protein=="PROC") signals <- openxlsx::read.xlsx("http://jhz22.user.srcf.net/Caprion/peptides/PROC/proc_peptides_all_30.xlsx",
+                                                        sheet=1,colNames=TRUE, skipEmptyRows=TRUE, startRow=1) %>%
+                                    dplyr::left_join(select(signals,isotope,signals),by=c('Peptide'='isotope'))
+     write.table(signals,file=file.path(analysis,"work",paste0(protein,".signals")),sep="\t",quote=FALSE,row.names=FALSE)
+# 2. Create the correlation heatmap between all these peptides (I would hypothesise that the correlation is better between the ‘good’ peptides than with the others)
+     # Set environment and paths
      # All peptides
      isotope <- read.table(file.path(analysis,"peptide",protein,paste0(protein,".pheno")),check.names=FALSE,header=TRUE, nrows=1) %>%
                 select(-FID,-IID) %>%
                 names()
      load(file.path(pilot, "es.rda"))
      benchmark_peptides <- peptide_all[rownames(peptide_all) %in% isotope]
-     load(file.path(analysis,"work","PROC.rda"))
      # Read and process isotope data
      suppressMessages(library(Biobase))
      suppressMessages(library(pheatmap))
@@ -1429,7 +1426,7 @@ function benchmark()
         diag(r) <- 1
         r[!na_rows,!na_cols]
      }
-     pdf(file.path(analysis,"work",paste0(protein,"-heatmap.pdf)"),height=10,width=12)
+     pdf(file.path(analysis,"work",paste0(protein,"-heatmap.pdf")),height=10,width=12)
      r_all <- cor(t(exprs(benchmark_peptides)))
      r_ZWK <- cor(t(exprs(benchmark_peptides[, grepl("ZWK", sampleNames(benchmark_peptides))])))
      r_ZYQ <- cor(t(exprs(benchmark_peptides[, grepl("ZYQ", sampleNames(benchmark_peptides))])))
@@ -1446,15 +1443,12 @@ function benchmark()
               display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
               color = colorRampPalette(c("blue", "white", "red"))(100),
               main = "Correlation Matrix - All Samples", border_color = NA)
-
      pheatmap(r_ZWK, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
               color = colorRampPalette(c("blue", "white", "red"))(100),
               main = "Correlation Matrix - ZWK Samples", border_color = NA)
-
      pheatmap(r_ZYQ, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
               color = colorRampPalette(c("blue", "white", "red"))(100),
               main = "Correlation Matrix - ZYQ Samples", border_color = NA)
-
      pheatmap(r_UDP, display_numbers = FALSE, cluster_rows = TRUE, cluster_cols = TRUE,
               color = colorRampPalette(c("blue", "white", "red"))(100),
               main = "Correlation Matrix - UDP Samples", border_color = NA)
@@ -1479,7 +1473,6 @@ function benchmark()
      UDP_raw <- IGs2data("raw_UDP");UDP_neq <- IGs2data("neq_UDP");
      UDP_neq <- matrix(as.numeric(sapply(UDP_neq, as.character)),
                        nrow = nrow(UDP_neq), ncol = ncol(UDP_neq), dimnames=list(rownames(UDP_neq),colnames(UDP_neq)))
-
      hist_mat <- function(src)
      {
        require(ggplot2)
@@ -1492,7 +1485,7 @@ function benchmark()
             labs(title = paste("Histograms of",src,"Columns"))
        print(p)
      }
-     pdf(file.path(analysis,"work","PROC-hist.pdf"),height=10,width=12)
+     pdf(file.path(analysis,"work",paste0(protein,"-hist.pdf")),height=10,width=12)
      for (src in c("ZWK_raw","ZWK_neq","ZYQ_raw","ZYQ_neq","UDP_raw","UDP_neq")) hist_mat(src)
      dev.off()
 
@@ -1517,39 +1510,38 @@ function benchmark()
      }
 # 5. Work out where on the protein each peptide matches to - this might hopefully help with the 2 curious peptides that only have a trans signal
      suppressMessages(library(Biostrings))
-     fasta_file_path <- 'https://rest.uniprot.org/uniprotkb/P04070.fasta'
+     accession <- subset(pQTLdata::caprion,grepl(protein,Protein))[["Accession"]]
+     fasta_file_path <- paste0("https://rest.uniprot.org/uniprotkb/",accession,".fasta")
      fasta_sequences <- Biostrings::readAAStringSet(fasta_file_path, format = "fasta")
      AA_sequence <- fasta_sequences[[1]]
      cat("Sequence:", toString(AA_sequence), "\n")
      load (file.path(pilot,"ZWK.rda"))
-     PROC_mapping <- subset(mapping_ZWK,Protein=="PROC_HUMAN" & Isotope.Group.ID%in%isotope)
-     knitr::kable(PROC_mapping,caption="PROC sequence information")
-     mp <- sapply(setdiff(PROC_mapping[["Modified.Peptide.Sequence"]],"-"),
+     benchmark_mapping <- subset(mapping_ZWK,Protein==paste0(protein,"_HUMAN") & Isotope.Group.ID%in%isotope)
+     knitr::kable(benchmark_mapping,caption=paste(protein,"sequence information"))
+     mp <- sapply(setdiff(benchmark_mapping[["Modified.Peptide.Sequence"]],"-"),
            function(x) {
              y <- gsub("\\[\\d+\\.\\d+\\]", "X", x);
              mp <- matchPattern(y,AA_sequence)
              as.data.frame(mp)
            })
-     knitr::kable(t(mp),caption="PROC sequence positions")
+     knitr::kable(t(mp),caption=paste(protein,"sequence positions"))
      # protein level aggregated at each sample according to IG>=50,000
      # DR aggregated according to 10%
-     # load(file.path(analysis,"work","PROC_peptides.rda"))
 # 6. See which peptides are/aren’t being used in the protein_dr quantification based on the DR threshold filter
      # see 4. above
 # 7. See from your elastic net work which peptides seem to be contributing to the protein quantification. We can then think about how to restrict the protein quantification to only the ‘good’ peptides, which should improve signal strength.
      # see glmnet()
-     legacy <- function()
-     {
-       load(file.path(pilot,"caprion.rda"))
-       raw_ZWK <- filter(rawIGs,Isotope.Group.ID%in%isotope)
-       load(file.path(pilot,"ZYQ_R.rda"))
-       raw_ZYQ <- filter(ZYQ_R,Isotope.Group.ID%in%isotope)
-       load(file.path(pilot,"UDP_R.rda"))
-       raw_UDP <- filter(UDP_R,Isotope.Group.ID%in%isotope)
-       raw_UDP <- select(raw_UDP,Isotope.Group.ID,names(raw_UDP)[grep("UDP",names(raw_UDP))]) %>%
-                  filter(!duplicated(Isotope.Group.ID))
-     }
+# X. Extending the PROC peptide investigation to all PROC peptides (not just those with signals)
+#    Extending the PROC peptide investigation to the other few proteins we have been using for testing/benchmarking
+#    Comparing the protein and protein_dr GWAS results to the literature
+#    Comparing the peptide results to the results for the corresponding protein/protein_dr
+#    Working out which peptides contributed to the protein and protein_dr quantification for all proteins
   '
 }
 
-eSet
+# eSet
+benchmark APOB
+benchmark A1BG
+benchmark EPCR
+benchmark ERAP2
+benchmark PROC

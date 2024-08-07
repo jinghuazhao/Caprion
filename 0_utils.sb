@@ -1403,7 +1403,7 @@ function benchmark()
 
      if (protein=="PROC") signals <- openxlsx::read.xlsx("http://jhz22.user.srcf.net/Caprion/peptides/PROC/proc_peptides_all_30.xlsx",
                                                         sheet=1,colNames=TRUE, skipEmptyRows=TRUE, startRow=1) %>%
-                                    dplyr::left_join(select(signals,isotope,signals),by=c('Peptide'='isotope'))
+                                    dplyr::left_join(select(signals,isotope,signals),by=c("Peptide"="isotope"))
      write.table(signals,file=file.path(analysis,"work",paste0(protein,".signals")),sep="\t",quote=FALSE,row.names=FALSE)
 # 2. Create the correlation heatmap between all these peptides (I would hypothesise that the correlation is better between the ‘good’ peptides than with the others)
      # Set environment and paths
@@ -1494,19 +1494,19 @@ function benchmark()
      for (src in c("ZWK_raw","ZYQ_raw","UDP_raw"))
      {
        cat(src,"\n")
-       print(apply(apply(get(src),2,'==',0),2,sum))
+       print(apply(apply(get(src),2,"==",0),2,sum))
      }
      cat("Number of samples with zero values:\n")
      for (src in c("ZWK_neq","ZYQ_neq","UDP_neq"))
      {
        cat(src,"\n")
-       print(apply(apply(get(src),2,'==',0),2,sum))
+       print(apply(apply(get(src),2,"==",0),2,sum))
      }
      cat("Number of samples below 50,000:\n")
      for (src in c("ZWK_raw","ZYQ_raw","UDP_raw"))
      {
        cat(src,"\n")
-       print(apply(apply(get(src),2,'<=',50000),2,sum))
+       print(apply(apply(get(src),2,"<=",50000),2,sum))
      }
 # 5. Work out where on the protein each peptide matches to - this might hopefully help with the 2 curious peptides that only have a trans signal
      suppressMessages(library(Biostrings))

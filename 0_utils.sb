@@ -1176,89 +1176,87 @@ function pav()
 function glmnet()
 {
   Rscript -e '
-    per_prot <- function(p,batch)
-    {
-      load(paste0("~/Caprion/pilot/",batch,".rda"))
-      enet <- function(type)
-      {
-        prot <- get(type)
-        fit <- glmnet(peptide,prot)
-        plot(fit,label=TRUE)
-        title(paste(paste0(p,"_",type),batch,"elastic net"),line=2.5)
-        coef(fit, s = 0.1)
-        beta <- coef(fit, s = 0.1)
-        selected <- (beta[,1]>1e-5)[-1]
-        non_na_beta <- beta[selected,]
-        selected_groups <- gsub("^X", "",rownames(beta)[selected])
-        cvfit <- cv.glmnet(peptide, prot)
-        plot(cvfit)
-        title(paste(paste0(p,"_",type),batch,"CV elastic net"),line=2.5)
-        coef(cvfit, s = "lambda.min")
-        if (length(selected_groups)>0)
-        {
-           cat("\n",p,type,"Peptide contributions:",selected_groups,"\n")
-           selected_signals <- subset(signals,isotope%in%selected_groups)
-           print(knitr::kable(selected_signals,caption=paste(p,batch)))
-           cat("\nCV min(lamda) =",cvfit$lambda.min,"\n")
-        }
-      }
-      uniprot <- paste0(p,"_HUMAN")
-      protein_batch <- get(paste0("protein","_",batch))
-      peptide_batch <- get(paste0("peptide","_",batch))
-      dr_batch <- get(paste0("dr","_",batch))
-      mapping_batch <- get(paste0("mapping","_",batch))
-      protein <- exprs(protein_batch)[rownames(exprs(protein_batch))==uniprot,]
-      dr <- exprs(dr_batch)[rownames(exprs(dr_batch))==uniprot,]
-      # isotope <- mapping_batch[mapping_batch$Protein == uniprot, "Isotope.Group.ID"]
-      isotope <- get(paste0("isotope","_",batch))
-      peptide <- exprs(peptide_batch) |> subset(rownames(exprs(peptide_batch)) %in% isotope)
-      peptide <- t(peptide)
-      colnames(peptide) <- paste0("X",colnames(peptide))
-      vep <- read.delim(paste0("~/Caprion/analysis/peptide/",p,"/","vep.txt")) %>%
-             setNames(c("isotope_SNP", names(.)[-1])) %>%
-             extract(col = 1, into = c("isotope", "SNP"), regex = "^([0-9]+).tab:(.*)$") %>%
-             mutate(isotope=as.numeric(isotope)) %>%
-             select(isotope,SNP,Feature,Feature_type,Consequence,Codons,IMPACT,DISTANCE,SYMBOL,NEAREST)
-      signals <- read.csv(paste0("~/Caprion/analysis/peptide/",p,"/",p,".cis.vs.trans"),header=TRUE) %>%
-                 select(-geneStart,-geneEnd,-SNPChrom,-SNPPos) %>%
-                 left_join(vep)
-      enet("protein")
-      enet("dr")
-    }
     options(width=200)
     suppressMessages(library(Biobase))
     suppressMessages(library(glmnet))
     suppressMessages(library(dplyr))
     suppressMessages(library(tidyr))
-    isotope_ZWK <- isotope
-    isotope_ZYQ <- setdiff(isotope,c("442611348", "442686905"))
-    isotope_UDP <- setdiff(isotope,c("442611348", "442686905", "442590967"))
-    pdf("~/Caprion/analysis/work/PROC_enet.pdf",height=10,width=12)
-    opar <- par()
-    par(mfrow=c(2,1))
-    sink("~/Caprion/analysis/work/PROC_enet.md")
-    for(code in c("ZWK","ZYQ","UDP")) per_prot("PROC",code)
-    sink()
-    par(opar)
-    dev.off()
-    pdf("~/Caprion/analysis/work/enet.pdf",height10,width=12)
-    sink("~/Caprion/analysis/work/enet.md")
-    for (p in c("A1BG","APOB","EPCR","ERAP2","PON3","PROC")) per_prot(p)
-    sink()
-    dev.off()
+    analysis <- "~/Caprion/analysis"
+    for (p in c("A1BG","APOB","EPCR","ERAP2","PROC"))
+    {
+       isotope <- read.table(file.path(analysis,"peptide",p,paste0(p,".pheno")),
+                             check.names=FALSE,header=TRUE, nrows=1) %>%
+                  select(-FID,-IID) %>%
+                  names()
+       isotope_ZWK <- isotope_ZYQ <- isotope_UDP <- isotope
+       if (p=="PROC")
+       {
+         isotope_ZYQ <- setdiff(isotope,c("442611348", "442686905"))
+         isotope_UDP <- setdiff(isotope,c("442611348", "442686905", "442590967"))
+       }
+       batches <- c("ZWK","ZYQ","UDP")
+       for (batch in batches) {
+          tryCatch({
+            print(batch)
+            pdf(file.path(analysis,"work",paste0(p,"-",batch,"-enet.pdf")),height=10,width=12)
+            opar <- par()
+            par(mfrow=c(2,1))
+            sink(file.path(analysis,"work",paste0(p,"-",batch,"-enet.md")))
+            load(paste0("~/Caprion/pilot/",batch,".rda"))
+            uniprot <- paste0(p,"_HUMAN")
+            protein_batch <- get(paste0("protein","_",batch))
+            peptide_batch <- get(paste0("peptide","_",batch))
+            dr_batch <- get(paste0("dr","_",batch))
+            mapping_batch <- get(paste0("mapping","_",batch))
+            protein <- exprs(protein_batch)[rownames(exprs(protein_batch))==uniprot,]
+            dr <- exprs(dr_batch)[rownames(exprs(dr_batch))==uniprot,]
+            # isotope <- mapping_batch[mapping_batch$Protein == uniprot, "Isotope.Group.ID"]
+            isotope <- get(paste0("isotope","_",batch))
+            peptide <- exprs(peptide_batch) |> subset(rownames(exprs(peptide_batch)) %in% isotope)
+            peptide <- t(peptide)
+            colnames(peptide) <- paste0("X",colnames(peptide))
+            vep <- read.delim(paste0("~/Caprion/analysis/peptide/",p,"/","vep.txt")) %>%
+                   setNames(c("isotope_SNP", names(.)[-1])) %>%
+                   extract(col = 1, into = c("isotope", "SNP"), regex = "^([0-9]+).tab:(.*)$") %>%
+                   mutate(isotope=as.numeric(isotope)) %>%
+                   select(isotope,SNP,Feature,Feature_type,Consequence,Codons,IMPACT,DISTANCE,SYMBOL,NEAREST)
+            signals <- read.csv(paste0("~/Caprion/analysis/peptide/",p,"/",p,".cis.vs.trans"),header=TRUE) %>%
+                       select(-geneStart,-geneEnd,-SNPChrom,-SNPPos) %>%
+                       left_join(vep)
+            for (type in c("protein","dr"))
+            {
+               prot <- get(type)
+               peptide_x <- makeX(data.frame(peptide),missing="mean")
+               fit <- glmnet(peptide_x,prot)
+               plot(fit,label=TRUE)
+               title(paste(paste0(p,"_",type),batch,"elastic net"),line=2.5)
+               coef(fit, s = 0.1)
+               beta <- coef(fit, s = 0.1)
+               selected <- (beta[,1]>1e-5)[-1]
+               non_na_beta <- beta[selected,]
+               selected_groups <- gsub("^X", "",rownames(beta)[selected])
+               cvfit <- cv.glmnet(peptide_x, prot)
+               plot(cvfit)
+               title(paste(paste0(p,"_",type),batch,"CV elastic net"),line=2.5)
+               coef(cvfit, s = "lambda.min")
+               if (length(selected_groups)>0)
+               {
+                  cat("\n",p,type,"Peptide contributions:",selected_groups,"\n")
+                  selected_signals <- subset(signals,isotope%in%selected_groups)
+                  print(knitr::kable(selected_signals,caption=paste(p,batch)))
+                  cat("\nCV min(lamda) =",cvfit$lambda.min,"\n")
+               }
+            }
+          }, error = function(e) {
+            print(paste("Error at index", batch, ":", e$message))
+          })
+          sink()
+          dev.off()
+          par(opar)
+       }
+    }
   '
 }
-
-# fp_data
-# fp
-# HetISq
-# vep_annotate
-# qqmanhattan/lz from 5_pgwas.sb
-# mean_by_genotype_gen_sample
-# mean_by_genotype_dosage
-# X: 127,156,325,471,567,691,748,792
-
-# srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i
 
 function vignette()
 {
@@ -1543,5 +1541,15 @@ Rscript -e '
 '
 }
 
+# fp_data
+# fp
+# HetISq
+# vep_annotate
+# qqmanhattan/lz from 5_pgwas.sb
+# mean_by_genotype_gen_sample
+# mean_by_genotype_dosage
 # eSet
-benchmark
+# benchmark
+# X: 127,156,325,471,567,691,748,792
+
+# srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i

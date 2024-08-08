@@ -1188,20 +1188,14 @@ function glmnet()
                              check.names=FALSE,header=TRUE, nrows=1) %>%
                   select(-FID,-IID) %>%
                   names()
+       pdf(file.path(analysis,"work",paste0(p,"-enet.pdf")),height=10,width=12)
+       opar <- par()
+       par(mfrow=c(2,1))
        isotope_ZWK <- isotope_ZYQ <- isotope_UDP <- isotope
-       if (p=="PROC")
-       {
-         isotope_ZYQ <- setdiff(isotope,c("442611348", "442686905"))
-         isotope_UDP <- setdiff(isotope,c("442611348", "442686905", "442590967"))
-       }
        batches <- c("ZWK","ZYQ","UDP")
+       sink(file.path(analysis,"work",paste0(p,"-enet.md")))
        for (batch in batches) {
           tryCatch({
-            print(batch)
-            pdf(file.path(analysis,"work",paste0(p,"-",batch,"-enet.pdf")),height=10,width=12)
-            opar <- par()
-            par(mfrow=c(2,1))
-            sink(file.path(analysis,"work",paste0(p,"-",batch,"-enet.md")))
             load(paste0("~/Caprion/pilot/",batch,".rda"))
             uniprot <- paste0(p,"_HUMAN")
             protein_batch <- get(paste0("protein","_",batch))
@@ -1226,7 +1220,8 @@ function glmnet()
             for (type in c("protein","dr"))
             {
                prot <- get(type)
-               peptide_x <- makeX(data.frame(peptide),missing="mean")
+               col_sel <- !is.na(apply(peptide,2,sum))
+               peptide_x <- peptide[,col_sel]
                fit <- glmnet(peptide_x,prot)
                plot(fit,label=TRUE)
                title(paste(paste0(p,"_",type),batch,"elastic net"),line=2.5)
@@ -1250,10 +1245,10 @@ function glmnet()
           }, error = function(e) {
             print(paste("Error at index", batch, ":", e$message))
           })
-          sink()
-          dev.off()
-          par(opar)
        }
+       sink()
+       par(opar)
+       dev.off()
     }
   '
 }

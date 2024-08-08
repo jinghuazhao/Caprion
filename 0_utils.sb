@@ -1227,9 +1227,8 @@ function glmnet()
                title(paste(paste0(p,"_",type),batch,"elastic net"),line=2.5)
                coef(fit, s = 0.1)
                beta <- coef(fit, s = 0.1)
-               selected <- (beta[,1]>1e-5)[-1]
-               non_na_beta <- beta[selected,]
-               selected_groups <- gsub("^X", "",rownames(beta)[selected])
+               selected <- (beta!=0)
+               selected_groups <- gsub("^X", "",rownames(beta)[selected][-1])
                cvfit <- cv.glmnet(peptide_x, prot)
                plot(cvfit)
                title(paste(paste0(p,"_",type),batch,"CV elastic net"),line=2.5)

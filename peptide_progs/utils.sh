@@ -368,3 +368,61 @@ function pav()
    knitr::kable(with(vep,table(Consequence)),caption="Peptide annotation based on six proteins")
   '
 }
+
+function meta()
+{
+  Rscript -e '
+     options(width=200)
+     suppressMessages(library(Biobase))
+     suppressMessages(library(dplyr))
+     suppressMessages(library(tidyr))
+     suppressMessages(library(stringr))
+     suppressMessages(library(Biostrings))
+     analysis <- "~/Caprion/analysis"
+     load("~/Caprion/pilot/ZYQ.rda")
+     isotopes <- vector()
+   # for (p in c("A1BG","APOB","EPCR","ERAP2","PROC"))
+     p <- "PROC"
+     protein_names <- paste0(p,"_HUMAN")
+     benchmarks <- grep(paste(protein_names,collapse="|"),names(uniprot_db))
+     {
+        isotope <- read.table(file.path(analysis,"peptide",p,paste0(p,".pheno")),
+                              check.names=FALSE,header=TRUE, nrows=1) %>%
+                   dplyr::select(-FID,-IID) %>%
+                   names()
+        isotopes <- c(isotopes,isotope)
+     }
+     peptide_data <- mapping_ZYQ %>%
+                     dplyr::filter(Isotope.Group.ID %in% isotopes) %>%
+                     dplyr::select(Isotope.Group.ID,Modified.Peptide.Sequence,Monoisotopic.m.z,Max.Isotope.Time.Centroid,Charge)
+     fasta_file <- file.path(analysis,"crux","uniprot_sprot.fasta")
+     uniprot_db <- readAAStringSet(fasta_file)
+     unique_peptides <- peptide_data %>%
+       group_by(Isotope.Group.ID) %>%
+       summarise(
+         Modified.Peptide.Sequence = dplyr::first(Modified.Peptide.Sequence),
+         Monoisotopic.m.z = mean(Monoisotopic.m.z),
+         Charge = dplyr::first(Charge),
+         Max.Isotope.Time.Centroid = mean(Max.Isotope.Time.Centroid)
+       ) %>%
+       ungroup() %>%
+       distinct(Modified.Peptide.Sequence, .keep_all = TRUE)
+     identify_peptide <- function(peptide, uniprot_db, protein_names) {
+       # Remove modifications for exact matching
+       peptide_clean <- gsub("\\[.*?\\]", "", peptide)
+       hits <- vmatchPattern(peptide_clean, uniprot_db)
+       if (length(hits) > 0) {
+         matching_proteins <- names(hits)
+         matching_protein_names <- protein_names[matching_proteins]
+         return(paste(matching_protein_names, collapse = "; "))
+       } else {
+         return(NA)
+       }
+     }
+     match_peptides <- unique_peptides
+     match_peptides$Matched_Proteins <- sapply(unique_peptides$Modified.Peptide.Sequence, function(peptide) {
+       identify_peptide(peptide, uniprot_db, protein_names)
+     })
+     print(match_peptides)
+  '
+}

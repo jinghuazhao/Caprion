@@ -25,32 +25,10 @@ done
 module load ceuadmin/crux/4.1
 export sprot=~/rds/public_databases/UniProt/uniprot_sprot.fasta.gz
 export sprot=uniprot_sprot.fasta
+export uniprot=uniprot
 export uniref100=~/rds/public_databases/UniProt/uniref100.fasta.gz
 export mgf=${raw}.mgf
 R --no-save < crux.R
-
-function legacy()
-{
-  export mgf=$(echo ${raw} | sed 's/raw/mgf/')
-  export mzML=$(echo ${raw} | sed 's/raw/mzML/')
-  if [ ! -f ${mgf} ]; then
-     echo ${mgf}
-     wine64 $(which msconvert.exe) --mgf ${ZWK}/${raw}
-  fi
-  if [ ! -f ${mzML} ]; then
-     echo ${mzML}
-     wine64 $(which msconvert.exe) --mzML ${ZWK}/${raw}
-  fi
-}
-
-function docker()
-# under Ubuntu 22.04 LTS /home/$USER/D/Downloads:/data
-{
-  docker run -it --rm -e WINEDEBUG=-all -v ${ZWK}:/data chambm/pwiz-skyline-i-agree-to-the-vendor-licenses \
-         wine msconvert /data/szwk901104i19801xms1.raw --filter "peakPicking true 1-"
-  docker run -p 8080:80 quay.io/galaxy/introduction-training
-  module load ceuadmin/docker/24.0.5
-}
 
 function yeast_files()
 # Rscript multidecoy_peptides.R yeast_parameters.txt
@@ -95,7 +73,7 @@ module load ceuadmin/icu/50.2 ceuadmin/OpenMS/3.0.0-pre-develop-2022-09-28
 module load ceuadmin/tandem/2017.2.1.4
 
 # decoy database
-DecoyDatabase -in uniprot_sprot.fasta -out decoy_uniprot_sprot.fasta
+DecoyDatabase -in ${uniprot} -out decoy_${uniprot}.fasta
 
 # Convert raw data to mzML format using ThermoRawFileParser.exe
 # msconvert qExactive01819.raw qExactive01819.mzML
@@ -103,19 +81,15 @@ export spectra=szwk901104i19801xms1
 ln -sf /rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics/spectral_library_ZWK/${spectra}.raw rawdata.raw
 FileConverter -in rawdata.raw -out rawdata.mzML
 
+## 1.
 # peptide identification & more showcase of singularity
-XTandemAdapter -in ${spectra}.mzML -database uniprot_sprot.fasta -xtandem_executable $(which tandem.exe)
-singularity exec -B /usr/local/Cluster-Apps/ceuadmin/OpenMS/3.0.0-pre-develop-2022-09-28/bin/:/openms \
-                 -B /usr/local/Cluster-Apps/ceuadmin/tandem/2017.2.1.4/:/bin \
-                 -B /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/OpenMS/tutorials:/data \
-            introduction-training_latest.sif /openms/XTandemAdapter \
-                -in /data/qExactive01819_profile.mzml -database /data/'Human_database_including_decoys_(cRAP_added).fasta'
+XTandemAdapter -in ${spectra}.mzML -database ${unprot}.fasta -xtandem_executable $(which tandem.exe)
 
 # Perform peak picking
 PeakPickerHiRes -in ${spectra}.mzML -out picked.mzML
 
 # Run peptide identification using Comet
-CometAdapter -in picked.mzML -out comet.idXML -database uniprot_sprot.fasta
+CometAdapter -in picked.mzML -out comet.idXML -database ${uniprot}.fasta
 
 # Convert identification results to OpenMS format using comet.exe
 IDFileConverter -in comet.idXML -out comet.idXML
@@ -124,5 +98,52 @@ IDFileConverter -in comet.idXML -out comet.idXML
 IDMapper -in picked.mzML -id comet.idXML -out mapped.mzML
 
 # Annotate peptides with protein information
-PeptideIndexer -in comet.idXML -fasta uniprot.fasta -out indexed.idXML
+PeptideIndexer -in comet.idXML -fasta ${uniprot}.fasta -out indexed.idXML
+
+singularity exec -B /usr/local/Cluster-Apps/ceuadmin/OpenMS/3.0.0-pre-develop-2022-09-28/bin/:/openms \
+                 -B /usr/local/Cluster-Apps/ceuadmin/tandem/2017.2.1.4/:/bin \
+                 -B /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/OpenMS/tutorials:/data \
+            introduction-training_latest.sif /openms/XTandemAdapter \
+                -in /data/qExactive01819_profile.mzml -database /data/'Human_database_including_decoys_(cRAP_added).fasta'
+## 2.
+
+export db=Human_database_including_decoys_(cRAP_added).fasta
+
+# Feature detection: 16193 features found for szwk021704i19101xms1.mzML.
+FeatureFinderCentroided -in szwk021704i19101xms1.mzML -out features.featureXML
+
+# Peptide Identification
+XTandemAdapter -in szwk021704i19101xms1.mzML -out identifications.idXML -database ${db}
+
+# Validation and Filtering
+IDFilter -in identifications.idXML -out filtered_identifications.idXML -score:pep 0.01
+
+# Peptide Indexing
+PeptideIndexer -in filtered_identifications.idXML -out indexed_identifications.idXML -fasta ${db}
+
+# Protein Inference
+ProteinQuantifier -in indexed_identifications.idXML -out protein_quant.csv -consensus:protein_level
+}
+
+function docker()
+# under Ubuntu 22.04 LTS /home/$USER/D/Downloads:/data
+{
+  docker run -it --rm -e WINEDEBUG=-all -v ${ZWK}:/data chambm/pwiz-skyline-i-agree-to-the-vendor-licenses \
+         wine msconvert /data/szwk901104i19801xms1.raw --filter "peakPicking true 1-"
+  docker run -p 8080:80 quay.io/galaxy/introduction-training
+  module load ceuadmin/docker/24.0.5
+}
+
+function legacy()
+{
+  export mgf=$(echo ${raw} | sed 's/raw/mgf/')
+  export mzML=$(echo ${raw} | sed 's/raw/mzML/')
+  if [ ! -f ${mgf} ]; then
+     echo ${mgf}
+     wine64 $(which msconvert.exe) --mgf ${ZWK}/${raw}
+  fi
+  if [ ! -f ${mzML} ]; then
+     echo ${mzML}
+     wine64 $(which msconvert.exe) --mzML ${ZWK}/${raw}
+  fi
 }

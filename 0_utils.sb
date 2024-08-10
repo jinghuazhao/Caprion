@@ -1535,6 +1535,32 @@ Rscript -e '
 '
 }
 
+function lookup()
+{
+  Rscript -e '
+    options(width=200)
+    library(pQTLdata)
+    suppressMessages(library(dplyr))
+    benchmarks <- subset(caprion[1:3],grepl("A1BG|APOB|EPCR|ERAP2|PROC",Gene))
+    uniprot <- benchmarks[["Accession"]]
+    genes <- benchmarks[["Gene"]]
+    filter(Olink_Explore_3072,UniProt.ID %in% uniprot|Gene.name %in% genes)
+    filter(SomaScanV4.1,UniProt.ID%in%uniprot|GeneID %in% genes)
+  '
+  export UKB_PPP=~/rds/results/public/proteomics/UKB-PPP/sun23/European
+# A1BG, APOB, EPCR(PROCR), PROC
+# A1BG_P04217_OID30771_v1_Inflammation_II.bgz
+# APOB_P04114_OID30673_v1_Inflammation_II.bgz
+# PROCR_Q9UNN8_OID30149_v1_Cardiometabolic_II.bgz
+# PROC_P04070_OID20402_v1_Cardiometabolic.bgz
+  export deCODE=~/rds/results/public/proteomics/deCODE
+# 16561_9_A1BG_Alpha_1B_glycoprotein.txt.gz
+# 2797_56_APOB_Apo_B.txt.gz
+# 8960_3_ERAP2_LRAP.txt.gz
+# 2961_1_PROC_Protein_C.txt.gz
+# 3758_68_PROC_Activated_Protein_C.txt.gz
+}
+
 # fp_data
 # fp
 # HetISq

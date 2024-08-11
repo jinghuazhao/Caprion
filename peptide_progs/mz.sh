@@ -22,13 +22,10 @@ singularity exec --env WINEDEBUG=-all \
                       wine msconvert ${format} /data/${raw}.raw
 done
 
-module load ceuadmin/crux/4.1
 export sprot=~/rds/public_databases/UniProt/uniprot_sprot.fasta.gz
 export sprot=uniprot_sprot.fasta
-export uniprot=uniprot
 export uniref100=~/rds/public_databases/UniProt/uniref100.fasta.gz
-export mgf=${raw}.mgf
-R --no-save < crux.R
+export uniprot=uniprot
 
 function yeast_files()
 # Rscript multidecoy_peptides.R yeast_parameters.txt
@@ -73,7 +70,7 @@ module load ceuadmin/icu/50.2 ceuadmin/OpenMS/3.0.0-pre-develop-2022-09-28
 module load ceuadmin/tandem/2017.2.1.4
 
 # decoy database
-DecoyDatabase -in ${uniprot} -out decoy_${uniprot}.fasta
+DecoyDatabase -in ${uniprot}.fasta -out decoy_${uniprot}.fasta
 
 # Convert raw data to mzML format using ThermoRawFileParser.exe
 # msconvert qExactive01819.raw qExactive01819.mzML

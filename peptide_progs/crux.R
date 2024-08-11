@@ -4,7 +4,7 @@
 
 library(multicomp)
 
-fasta_fi1e=Sys.getenv("sprot")
+fasta_fi1e=Sys.getenv("uniprot")
 spectra_file=Sys.getenv("mgf")
 scoring="xcorr"
 n_decoys=5
@@ -15,8 +15,8 @@ name="ZWK"
 extra_crux="--precursor-window 10 --precursor-window-type ppm --mz-bin-width 0.02 --pm-min-peak-pairs 100 --pm-charges 2"
 seed=123
 
-fasta = fasta_fi1e
-ms2 = spectra_file
+fasta = paste0(fasta_fi1e,".fasta")
+ms2 = paste0(spectra_file,".mgf")
 
 CRUX=Sys.which("crux")
 val = 0

@@ -95,9 +95,12 @@ function test()
     knitr::kable(subset(psms,grepl("PROC_HUMAN",protein.id)),caption="percolator.target.psms")
     sink()
   '
+  crux assign-confidence --overwrite T --estimation-method tdc --output-dir assign-confidence \
+                         --decoy-prefix decoy_ percolator-output/percolator.target.psms.txt
 # utilities
 
   crux version
+  crux generate-peptides --enzyme trypsin --missed-cleavages 2 --decoy-format peptide-reverse uniprot.fasta
   crux get-ms2-spectrum ${spectra}.ms2
 
   export uniprot=uniprot

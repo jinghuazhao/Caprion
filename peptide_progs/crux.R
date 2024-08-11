@@ -65,7 +65,6 @@ for(decoy in 0:(n_decoys - 1))
         # system(paste(CRUX, " extract-rows --comparison eq --column-type int \`echo ", tideResults, " | sed \'s/target/decoy/\'\` \"xcorr rank\" 1 > decoy.tmp", sep = ""))
           system(paste(CRUX, " assign-confidence --estimation-method ", method, " --output-dir ", root, " --fileroot ", method, ".dcy", decoy, " target.tmp", sep = ""))
         # system("rm target.tmp decoy.tmp")
-          
         }
       }
     }

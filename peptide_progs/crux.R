@@ -16,7 +16,7 @@ extra_crux="--precursor-window 10 --precursor-window-type ppm --mz-bin-width 0.0
 seed=123
 
 fasta = paste0(fasta_fi1e,".fasta")
-ms2 = paste0(spectra_file,".mgf")
+ms2 = paste0(spectra_file,".mzML")
 
 CRUX=Sys.which("crux")
 val = 0
@@ -60,10 +60,11 @@ for(decoy in 0:(n_decoys - 1))
         confidenceResults = paste(root, "/", method, ".dcy", decoy, ".assign-confidence.target.txt", sep = "")
         if(!file.exists(confidenceResults))
         {
-          system(paste(CRUX, " extract-rows --comparison eq --column-type int ", tideResults, " \"xcorr rank\" 1 > target.tmp", sep = ""))
-          system(paste(CRUX, " extract-rows --comparison eq --column-type int \`echo ", tideResults, " | sed \'s/target/decoy/\'\` \"xcorr rank\" 1 > decoy.tmp", sep = ""))
+        # extract-rows has been removed from 4.0
+        # system(paste(CRUX, " extract-rows --comparison eq --column-type int ", tideResults, " \"xcorr rank\" 1 > target.tmp", sep = ""))
+        # system(paste(CRUX, " extract-rows --comparison eq --column-type int \`echo ", tideResults, " | sed \'s/target/decoy/\'\` \"xcorr rank\" 1 > decoy.tmp", sep = ""))
           system(paste(CRUX, " assign-confidence --estimation-method ", method, " --output-dir ", root, " --fileroot ", method, ".dcy", decoy, " target.tmp", sep = ""))
-          system("rm target.tmp decoy.tmp")
+        # system("rm target.tmp decoy.tmp")
           
         }
       }

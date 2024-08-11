@@ -1173,7 +1173,7 @@ function pav()
   '
 }
 
-function glmnet_pense(pense=TRUE)
+function glmnet_pense()
 {
   Rscript -e '
     options(width=200)
@@ -1243,8 +1243,9 @@ function glmnet_pense(pense=TRUE)
                   print(knitr::kable(selected_signals,caption=paste(p,batch)))
                   cat("\nCV min(lamda) =",cvfit$lambda.min,"\n")
                }
-               if (pense)
+               if (TRUE)
                {
+                 par(mfrow=c(3,2))
                  set.seed(12345)
                  fit <- adapense_cv(peptide,prot,alpha=0.75,cv_k=5,cv_repl=50,cl=cluster)
                  plot(fit)

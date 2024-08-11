@@ -14,7 +14,7 @@ Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
 **Experimental codes** |
 mz.* | handling of files in .raw and other formats
-crux.* | R/multicomp+crux benchmarks
+crux.R | R/multicomp+crux benchmark
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
 utils.sh | Various utitlties
 0_crux.sh | crux search | crux/*.e/.o

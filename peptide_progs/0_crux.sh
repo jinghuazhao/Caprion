@@ -28,7 +28,7 @@ export raw=RAW
 function crux_search()
 # database search with Tide:
 {
-#1. creating a peptide index file from human proteins (uniprot-proteome_UP000005640+reviewed_yes.fasta),
+#1. creating a peptide index file from human proteins
   crux tide-index \
        --overwrite T --max-mods 3 --missed-cleavages 3 FASTA human-idx
 
@@ -51,7 +51,57 @@ sbatch ${sbatch}
 
 export analysis=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 export raw=szwk901104i19801xms1
-export sbatch=${analysis}/crux/${raw}.sb
+export raw=12March2019-Lumos-DIA-HuAD-Hipp-B1-ind-8mz-ovlp-400to1000-HZR03
 export fasta=uniprot-proteome_UP000005640+reviewed_yes.fasta
-export fasta=uniprot_sprot.fasta
+export fasta=uniprot.fasta
+export sbatch=${analysis}/crux/commands/${raw}.sb
 sb
+
+function test()
+{
+  #!/usr/bin/bash
+
+  module load ceuadmin/crux/4.1
+  export spectra=szwk021704i19101xms1
+
+# 1: A Protein Database
+
+# wget https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
+# gunzip uniprot_sprot.fasta.gz
+
+# 2: Data
+
+# raw data --> mzML, done elsewhere
+# msconvert ${spectra}.raw --mzML
+
+# 3: Perform Peptide Identification
+
+# Run Crux with a chosen search engine Tide:
+  crux tide-index --overwrite T uniprot.fasta tide-index
+  crux tide-search --overwrite T --output-dir tide-output ${spectra}.mzML tide-index
+
+# 4: Results
+
+# Percolator validation
+  crux percolator --overwrite T --output-dir percolator-output tide-output/tide-search.target.txt
+
+  Rscript -e '
+    to <- read.delim("tide-output/tide-search.target.txt")
+    tp <- read.delim("percolator-output/percolator.target.peptides.txt")
+    psms <- read.delim("percolator-output/percolator.target.psms.txt")
+    sink("PROC-crux.md")
+    knitr::kable(subset(to,grepl("PROC_HUMAN",protein.id)),caption="tide-search.target")
+    knitr::kable(subset(tp,grepl("PROC_HUMAN",protein.id)),caption="percolator.target.peptides")
+    knitr::kable(subset(psms,grepl("PROC_HUMAN",protein.id)),caption="percolator.target.psms")
+    sink()
+  '
+# utilities
+
+  crux version
+  crux get-ms2-spectrum ${spectra}.ms2
+
+  export uniprot=uniprot
+  export mgf=${raw}
+  module load ceuadmin/crux/4.1
+  R --no-save < crux.R
+}

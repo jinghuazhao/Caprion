@@ -6,8 +6,8 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/benchmark.e
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/benchmark.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/glmnet_pense.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/glmnet_pense.o
 
 ##SBATCH --array=1-987
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/fp/slurm/_fp_%A_%a.o
@@ -1173,14 +1173,17 @@ function pav()
   '
 }
 
-function glmnet()
+function glmnet_pense(pense=TRUE)
 {
   Rscript -e '
     options(width=200)
     suppressMessages(library(Biobase))
     suppressMessages(library(glmnet))
+    suppressMessages(library(pense))
     suppressMessages(library(dplyr))
     suppressMessages(library(tidyr))
+    suppressMessages(library(parallel))
+    cluster <- makeCluster(5)
     analysis <- "~/Caprion/analysis"
     for (p in c("A1BG","APOB","EPCR","ERAP2","PROC"))
     {
@@ -1239,6 +1242,22 @@ function glmnet()
                   selected_signals <- subset(signals,isotope%in%selected_groups)
                   print(knitr::kable(selected_signals,caption=paste(p,batch)))
                   cat("\nCV min(lamda) =",cvfit$lambda.min,"\n")
+               }
+               if (pense)
+               {
+                 set.seed(12345)
+                 fit <- adapense_cv(peptide,prot,alpha=0.75,cv_k=5,cv_repl=50,cl=cluster)
+                 plot(fit)
+                 summary(fit,lambda="se")
+                 set.seed(12345)
+                 fit_075_1 <- adapense_cv(peptide,prot,alpha=0.75,exponent=1,cv_k=5,cv_repl=50,cl=cluster)
+                 set.seed(12345)
+                 fit_100_1 <- adapense_cv(peptide,prot,alpha=1.00,exponent=1,cv_k=5,cv_repl=50,cl=cluster)
+                 set.seed(12345)
+                 fit_075_1 <- adapense_cv(peptide,prot,alpha=0.75,exponent=2,cv_k=5,cv_repl=50,cl=cluster)
+                 set.seed(12345)
+                 fit_100_2 <- adapense_cv(peptide,prot,alpha=1.00,exponent=2,cv_k=5,cv_repl=50,cl=cluster)
+                 prediction_performance(fit_075_1,fit_100_1,fit_075_2,fit_100_2,lambda="min")
                }
             }
           }, error = function(e) {
@@ -1568,6 +1587,7 @@ function lookup()
 # qqmanhattan/lz from 5_pgwas.sb
 # mean_by_genotype_gen_sample
 # mean_by_genotype_dosage
+glmnet_pense
 # eSet
 # benchmark
 # X: 127,156,325,471,567,691,748,792

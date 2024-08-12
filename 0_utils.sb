@@ -1620,7 +1620,8 @@ function lookup()
   Rscript -e '
      f <- read.delim("stdin")
      print(knitr::kable(f,caption="UKB-PPP Olink replication"))
-  ' > ~/Caprion/analysis/work/lookup_olink.md
+  ' | \
+  pandoc - ~/Caprion/analysis/work/lookup_olink.html
 
   (
     export deCODE=~/rds/results/public/proteomics/deCODE
@@ -1636,7 +1637,8 @@ function lookup()
   Rscript -e '
      f <- read.delim("stdin")
      print(knitr::kable(f,caption="deCODE Somescan replication"))
-  ' > ~/Caprion/analysis/work/lookup_somascan.md
+  ' | \
+  pandoc - ~/Caprion/analysis/work/lookup_somascan.html
 }
 
 # fp_data

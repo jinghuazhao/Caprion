@@ -1619,7 +1619,7 @@ function lookup()
       }' | \
   Rscript -e '
      f <- read.delim("stdin")
-     print(knitr::knit(f,caption="UKB-PPP replication"))
+     print(knitr::kable(f,caption="UKB-PPP replication"))
   ' > ~/Caprion/analysis/work/lookup_olink.md
 
   (
@@ -1635,7 +1635,7 @@ function lookup()
       }' | \
   Rscript -e '
      f <- read.delim("stdin")
-     print(knitr::knit(f,caption="UKB-PPP replication"))
+     print(knitr::kable(f,caption="UKB-PPP replication"))
   ' > ~/Caprion/analysis/work/lookup_somascan.md
 }
 

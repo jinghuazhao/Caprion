@@ -281,7 +281,7 @@ function qq_manhattan_subs()
    else
     cat <(echo chromsome position log_pvalue beta se) \
         <(gunzip -c ${f} | \
-          awk ' NR>1 {gsub(/chr/,"",$1);print $1, $2, $9, $7, $10}') | \
+          awk ' NR>1 {gsub(/chr/,"",$1);gsub(/X/,23,$1);print $1, $2, $9, $7, $10}') | \
     gzip -f > ${gz}
     Rscript -e '
       suppressMessages(library(dplyr))

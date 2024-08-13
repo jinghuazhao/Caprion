@@ -10,14 +10,14 @@
 #SBATCH --output=/home/jhz22/Caprion/analysis/compare/slurm/_comp_%A_%a.o
 #SBATCH --error=/home/jhz22/Caprion/analysis/compare/slurm/_comp_%A_%a.e
 
-export TMPDIR=${HPC_WORK}/work
-export analysis=~/Caprion/analysis
-export suffix=_dr
-
 . /etc/profile.d/modules.sh
 module purge
 module load rhel7/default-ccl
 module load ceuadmin/readline/8.0
+
+export TMPDIR=${HPC_WORK}/work
+export analysis=~/Caprion/analysis
+export suffix=_dr
 
 export deCODE=~/rds/results/public/proteomics/deCODE
 export UKB_PPP=~/rds/results/public/proteomics/UKB-PPP/sun23/European
@@ -282,6 +282,12 @@ function qq_manhattan_subs()
     cat <(echo chromsome position log_pvalue beta se) \
         <(gunzip -c ${f} | \
           awk ' NR>1 {gsub(/chr/,"",$1);gsub(/X/,23,$1);print $1, $2, $9, $7, $10}' | \
+          Rscript -e '
+            suppressMessages(library(dplyr))
+            f <- read.table("stdin",col.names=c("chr","pos","log10p","beta","se")) %>%
+                 mutate(log10p=-log10p(beta/se))
+            write.table(f,col.names=FALSE,row.names=FALSE,quota=FALSE)
+          ' | \
           sort -k1,1n -k2,2n ) | \
     gzip -f > ${gz}
     Rscript -e '

@@ -285,8 +285,8 @@ function qq_manhattan_subs()
           Rscript -e '
             suppressMessages(library(dplyr))
             f <- read.table("stdin",col.names=c("chr","pos","log10p","beta","se")) %>%
-                 mutate(log10p=-log10p(beta/se))
-            write.table(f,col.names=FALSE,row.names=FALSE,quota=FALSE)
+                 mutate(log10p=-gap::log10p(beta/se))
+            write.table(f,col.names=FALSE,row.names=FALSE,quote=FALSE)
           ' | \
           sort -k1,1n -k2,2n ) | \
     gzip -f > ${gz}

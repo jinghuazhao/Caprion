@@ -19,6 +19,9 @@ module purge
 module load rhel7/default-ccl
 module load ceuadmin/readline/8.0
 
+export deCODE=~/rds/results/public/proteomics/deCODE
+export UKB_PPP=~/rds/results/public/proteomics/UKB-PPP/sun23/European
+
 function idx()
 #idx METAL3 _3
 {
@@ -160,6 +163,167 @@ function signal_grouping()
   z <- filter(protein_peptide,!Gene%in%c(x,y))
   filter(peptide,!Gene%in%c(x,y)) %>% nrow
   '
+}
+
+
+function lookup_r()
+{
+  Rscript -e '
+    options(width=200)
+    library(pQTLdata)
+    suppressMessages(library(dplyr))
+    benchmarks <- subset(caprion[1:3],grepl("A1BG|APOB|EPCR|ERAP2|PROC",Gene))
+    uniprot <- benchmarks[["Accession"]]
+    genes <- benchmarks[["Gene"]]
+    filter(Olink_Explore_3072,UniProt.ID %in% uniprot|Gene.name %in% genes)
+    filter(SomaScanV4.1,UniProt.ID%in%uniprot|GeneID %in% genes)
+  '
+}
+
+function lookup_bash()
+{
+  export prot=${1}
+  export f=${2}
+  Rscript -e '
+    suppressMessages(library(rtracklayer))
+    suppressMessages(library(dplyr))
+    protein <- Sys.getenv("prot")
+    cvt <- "~/Caprion/analysis/work/caprion_dr.cis.vs.trans"
+    f <- filter(read.csv(cvt),prot==protein) %>%
+         mutate(seqname=paste0("chr",SNPChrom),start=as.integer(SNPPos),end=SNPPos) %>%
+         arrange(SNPChrom,SNPPos)
+    gr <- with(f,GenomicRanges::GRanges(seqnames=seqname,IRanges::IRanges(start,end,names=SNP))) %>%
+          unique()
+    hpc_work <- Sys.getenv("HPC_WORK")
+    path <- file.path(hpc_work, "bin", "hg19ToHg38.over.chain")
+    ch <- import.chain(path)
+    seqlevelsStyle(gr) <- "UCSC"
+    gr38 <- liftOver(gr,ch)
+    dat <- select(f,SNP,prot,Gene,Type,SNPChrom,SNPPos) %>%
+           left_join(data.frame(gr38),by=c("SNP"="group_name")) %>%
+           mutate(seqnames=gsub("chr","",seqnames)) %>%
+           select(prot,Gene,Type,SNP,SNPChrom,SNPPos,seqnames,start)
+    write.table(dat,quote=FALSE,col.names=FALSE,row.names=FALSE)
+  ' | \
+  parallel -C' ' '
+    gunzip -c ${f} | \
+    awk -vOFS="\t" "NR==1||/{5}:{6}/||/{7}:{8}/{print \"{1}\",\"{2}\",\"{3}\",\$0}"
+  '
+}
+
+function lookup()
+# A1BG, APOB, EPCR(PROCR), PROC
+{
+  (
+    export UKB_PPP=~/rds/results/public/proteomics/UKB-PPP/sun23/European
+    lookup_bash A1BG ${UKB_PPP}/A1BG_P04217_OID30771_v1_Inflammation_II.bgz
+    lookup_bash APOB ${UKB_PPP}/APOB_P04114_OID30673_v1_Inflammation_II.bgz
+    lookup_bash EPCR ${UKB_PPP}/PROCR_Q9UNN8_OID30149_v1_Cardiometabolic_II.bgz
+    lookup_bash PROC ${UKB_PPP}/PROC_P04070_OID20402_v1_Cardiometabolic.bgz
+  ) | awk -vOFS="\t" '{
+      if (NR==1) {$1="Protein";$2="Gene";$3="Type";print}
+      if (NR>1 && !/ALLELE/) print
+      }' | \
+  Rscript -e '
+     f <- read.delim("stdin")
+     write.table(f,file="~/Caprion/analysis/work/lookup_olink.tsv",row.names=FALSE,quote=FALSE,sep="\t")
+     print(knitr::kable(f,caption="UKB-PPP Olink replication"))
+  ' | \
+  pandoc - -o ~/Caprion/analysis/work/lookup_olink.html
+
+  (
+    lookup_bash A1BG ${deCODE}/16561_9_A1BG_Alpha_1B_glycoprotein.txt.gz
+    lookup_bash APOB ${deCODE}/2797_56_APOB_Apo_B.txt.gz
+    lookup_bash ERAP2 ${deCODE}/8960_3_ERAP2_LRAP.txt.gz
+    lookup_bash PROC ${deCODE}/2961_1_PROC_Protein_C.txt.gz
+    lookup_bash PROC ${deCODE}/3758_68_PROC_Activated_Protein_C.txt.gz
+  ) | awk -vOFS="\t" '{
+      if (NR==1) {$1="Protein";$2="Gene";$3="Type";print}
+      if (NR>1 && !/Chrom/) print
+      }' | \
+  Rscript -e '
+     f <- read.delim("stdin")
+     write.table(f,file="~/Caprion/analysis/work/lookup_somascan.tsv",row.names=FALSE,quote=FALSE,sep="\t")
+     print(knitr::kable(f,caption="deCODE Somescan replication"))
+  ' | \
+  pandoc - -o ~/Caprion/analysis/work/lookup_somascan.html
+}
+
+function qq_manhattan_subs()
+{
+  export prot=${1}
+  export f=${2}
+  if [[ "${f}" == *"UKB-PPP"* ]]; then
+     export src=olink
+  else
+     export src=somascan
+  fi
+  export rt=~/Caprion/analysis/work
+  export gz=${rt}/${prot}_${src}.gz
+  export an=${rt}/${prot}_${src}.annotate
+  if [ ${src} == "olink" ]; then
+  # chromsome position log_pvalue beta se
+    cat <(echo chromsome position log_pvalue beta se) \
+        <(gunzip -c ${f} | \
+          awk ' NR>1 {print $1, $2, $13, $10, $11}') | \
+    gzip -f > ${gz}
+    Rscript -e '
+      suppressMessages(library(dplyr))
+      an <- Sys.getenv("an")
+      prot <- Sys.getenv("prot")
+      rt <- Sys.getenv("rt")
+      annotate <- read.delim(file.path(rt,paste0("lookup_olink.tsv"))) %>%
+                  filter(Protein==prot) %>%
+                  select(CHROM,GENPOS,Gene,Type) %>%
+                  setNames(c("chromosome", "position", "nearest_gene_name", "cistrans"))
+      write.table(annotate,file=an,row.names=FALSE,quote=FALSE)
+    '
+   else
+    cat <(echo chromsome position log_pvalue beta se) \
+        <(gunzip -c ${f} | \
+          awk ' NR>1 {gsub(/chr/"",$1);print $1, $2, $9, $7, $10}') | \
+    gzip -f > ${gz}
+    Rscript -e '
+      suppressMessages(library(dplyr))
+      an <- Sys.getenv("an")
+      prot <- Sys.getenv("prot")
+      rt <- Sys.getenv("rt")
+      annotate <- read.delim(file.path(rt,paste0("lookup_somascan.tsv"))) %>%
+                  mutate(chr=gsub("chr","",Chrom)) %>%
+                  filter(Protein==prot) %>%
+                  select(chr,Pos,Gene,Type) %>%
+                  setNames(c("chromosome", "position", "nearest_gene_name", "cistrans"))
+      write.table(annotate,file=an,row.names=FALSE,quote=FALSE)
+    '
+  fi
+  Rscript -e '
+     analysis <- Sys.getenv("analysis")
+     protein <- Sys.getenv("prot")
+     src <- Sys.getenv("src")
+     png(file.path(analysis,"work",paste0(protein,"_",src,".png")),width=3600, height=3600, pointsize=12, res=450)
+     input_data_path <- Sys.getenv("gz")
+     custom_peak_annotation_file_path <- Sys.getenv("an")
+     reference_file_path <- file.path(find.package("pQTLtools"),"turboman","turboman_hg38_reference_data.rda")
+     pvalue_sign <- 5e-8
+     plot_title <- protein
+     library(pQTLtools)
+     turboman(input_data_path, custom_peak_annotation_file_path,
+              reference_file_path, pvalue_sign, plot_title)
+     dev.off()
+'
+}
+
+function qq_manhattan()
+{
+    qq_manhattan_subs A1BG ${UKB_PPP}/A1BG_P04217_OID30771_v1_Inflammation_II.bgz
+    qq_manhattan_subs APOB ${UKB_PPP}/APOB_P04114_OID30673_v1_Inflammation_II.bgz
+    qq_manhattan_subs EPCR ${UKB_PPP}/PROCR_Q9UNN8_OID30149_v1_Cardiometabolic_II.bgz
+    qq_manhattan_subs PROC ${UKB_PPP}/PROC_P04070_OID20402_v1_Cardiometabolic.bgz
+    qq_manhattan_subs A1BG ${deCODE}/16561_9_A1BG_Alpha_1B_glycoprotein.txt.gz
+    qq_manhattan_subs APOB ${deCODE}/2797_56_APOB_Apo_B.txt.gz
+    qq_manhattan_subs ERAP2 ${deCODE}/8960_3_ERAP2_LRAP.txt.gz
+    qq_manhattan_subs PROC ${deCODE}/2961_1_PROC_Protein_C.txt.gz
+    qq_manhattan_subs PROC ${deCODE}/3758_68_PROC_Activated_Protein_C.txt.gz
 }
 
 #assoc _dr

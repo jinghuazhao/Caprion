@@ -6,6 +6,7 @@ module load ceuadmin/pwiz/3_0_24163_9bfa69a-wine
 export ZWK=~/Caprion/pre_qc_data/spectral_library_ZWK
 export raw=szwk901104i19801xms1
 
+# option 1
 singularity --version
 export SIF=pwiz-skyline-i-agree-to-the-vendor-licenses_latest.sif
 if [ ! -f "${f}" ] && [ -x "${f}" ]; then
@@ -21,6 +22,23 @@ singularity exec --env WINEDEBUG=-all \
                       ${SIF} \
                       wine msconvert ${format} /data/${raw}.raw
 done
+
+# option 2
+## CLI
+module load ceuadmin/ThermoRawFileParser
+cd $ThermoRawFileParser_HOME;
+ThermoRawFileParser.exe -i $ZWK/$raw
+cd -
+
+## GUI
+module load ceuadmin/ThermoRawFileParserGUI
+cd $ThermoRawFileParser_HOME/resources/ThermoRawFileParser
+java -jar $ThermoRawFileParser_HOME/ThermoRawFileParser-1.7.4.jar
+cd -
+
+# option 3 (legacy)
+wine64 $(which msconvert.exe) --mgf ${ZWK}/${raw}
+wine64 $(which msconvert.exe) --mzML ${ZWK}/${raw}
 
 export sprot=~/rds/public_databases/UniProt/uniprot_sprot.fasta.gz
 export sprot=uniprot_sprot.fasta
@@ -129,18 +147,4 @@ function docker()
          wine msconvert /data/szwk901104i19801xms1.raw --filter "peakPicking true 1-"
   docker run -p 8080:80 quay.io/galaxy/introduction-training
   module load ceuadmin/docker/24.0.5
-}
-
-function legacy()
-{
-  export mgf=$(echo ${raw} | sed 's/raw/mgf/')
-  export mzML=$(echo ${raw} | sed 's/raw/mzML/')
-  if [ ! -f ${mgf} ]; then
-     echo ${mgf}
-     wine64 $(which msconvert.exe) --mgf ${ZWK}/${raw}
-  fi
-  if [ ! -f ${mzML} ]; then
-     echo ${mzML}
-     wine64 $(which msconvert.exe) --mzML ${ZWK}/${raw}
-  fi
 }

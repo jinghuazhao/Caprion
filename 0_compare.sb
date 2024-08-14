@@ -330,7 +330,8 @@ function qq_manhattan()
     qq_manhattan_subs APOB ${deCODE}/2797_56_APOB_Apo_B.txt.gz
     qq_manhattan_subs ERAP2 ${deCODE}/8960_3_ERAP2_LRAP.txt.gz
     qq_manhattan_subs PROC ${deCODE}/2961_1_PROC_Protein_C.txt.gz
-    qq_manhattan_subs PROC ${deCODE}/3758_68_PROC_Activated_Protein_C.txt.gz
+  # qq_manhattan_subs PROC ${deCODE}/3758_68_PROC_Activated_Protein_C.txt.gz
+  # to avoid overwrite, remove its annotation at lookup_somascan.tsv
 }
 
 #assoc _dr

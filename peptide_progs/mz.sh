@@ -6,7 +6,7 @@ module load ceuadmin/pwiz/3_0_24163_9bfa69a-wine
 export ZWK=~/Caprion/pre_qc_data/spectral_library_ZWK
 export raw=szwk901104i19801xms1
 
-# option 1
+# option 1. singularity
 singularity --version
 export SIF=pwiz-skyline-i-agree-to-the-vendor-licenses_latest.sif
 if [ ! -f "${f}" ] && [ -x "${f}" ]; then
@@ -23,7 +23,7 @@ singularity exec --env WINEDEBUG=-all \
                       wine msconvert ${format} /data/${raw}.raw
 done
 
-# option 2
+# option 2. ThermoRawFileParser (ThermoFileReader)
 ## CLI
 module load ceuadmin/ThermoRawFileParser
 cd $ThermoRawFileParser_HOME;

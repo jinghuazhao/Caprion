@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#SBATCH --job-name=_ThermoRawFileParser
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=icelake-himem
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=4
+
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/mz.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/mz.e
+
+. /etc/profile.d/modules.sh
+module purge
+module load rhel8/default-icl
+module load ceuadmin/ThermoRawFileParser/1.4.4
+export TMPDIR=${HPC_WORK}/work
+
+# ZWK
+{
+  cd /usr/local/Cluster-Apps/ceuadmin/ThermoRawFileParser/1.4.4
+  mono ThermoRawFileParser.exe -d ~/Caprion/pre_qc_data/spectral_library_ZWK -o ~/Caprion/analysis/ZWK
+  cd -
+}

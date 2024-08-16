@@ -42,4 +42,14 @@ function run_metamorpheus()
   cd -
 }
 
+function run_msamanda()
+}
+  export src=~/Caprion/analysis/ZWK
+  export amamnda=/usr/local/Cluster-Apps/ceuadmin/msamanda/3.0.21.532
+  export fragpipe=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
+  cd ${amanda}
+  MSAmanda -s ${src}  -f 2 -e ${amanda}/settings.xml  -o ${src}/msamonda -d ${fragpipe}/databases/UP000005640.fasta
+  cd -
+}
+
 run_metamorpheus

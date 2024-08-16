@@ -107,6 +107,8 @@ Choosing the Right Tool:
 
 Remember to consider your specific research goals, data type, and bioinformatics expertise when choosing the best tool for your needs. You might even explore combining different tools to leverage their unique strengths for different aspects of your analysis.
 
+**Notes on crux/FragPipe on CSD3***. `crux/4.1` is functional (along with `comet/2024.01.1` & `kojak/2.0.0a22`) on CSD3 but `crux/4.2` is not. `FragPipe/22.0` does offer a comprehensive GUI. Moreover, `MetaMorpheus/1.0.5` and `FlashLFQ/1.2.6` are also available from CSD3.
+
 ## IV. Galaxy tutorials
 
 Web: <https://usegalaxy.org/> (https://training.galaxyproject.org/training-material/)

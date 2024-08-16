@@ -21,7 +21,7 @@ However, it is possible to infer peptides and proteins using only MS1 data throu
 
 1. **Label-based quantification**: Techniques like SILAC (Stable Isotope Labeling by Amino acids in Cell culture) or chemical labeling (e.g., TMT, iTRAQ) rely on MS1 data for quantification. The mass shift introduced by labels allows for the direct comparison of peptide abundances based on their MS1 ion intensities.
 
-2  **Label-free quantification**: Proteins can be quantified by comparing the intensities of their corresponding peptide ions in MS1 across different samples. This requires accurate mass and retention time alignment and often uses algorithms to detect and quantify features (peptide ions) consistently across multiple runs.
+2. **Label-free quantification**: Proteins can be quantified by comparing the intensities of their corresponding peptide ions in MS1 across different samples. This requires accurate mass and retention time alignment and often uses algorithms to detect and quantify features (peptide ions) consistently across multiple runs.
 
 3. **Accurate Mass and Time tags (AMT)**: This approach relies on a previously established library of peptide identifications, where each peptide is characterized by its accurate mass and normalized retention time. In subsequent analyses, peptides can be inferred by matching the observed accurate mass and retention time to the library without the need for MS2 fragmentation.
 

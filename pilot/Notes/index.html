@@ -132,6 +132,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#ms1ms2-claude" class="nav-link">MS1/MS2 (Claude)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#proteoform-analysis" class="nav-link">Proteoform Analysis</a>
               <ul class="nav flex-column">
               </ul>
@@ -380,6 +384,22 @@ mvn install
 <li>FragPipe: Ideal for researchers seeking a highly flexible and customizable platform for various workflows, including DIA analysis, and who are comfortable with command-line operations.</li>
 </ul>
 <p>Remember to consider your specific research goals, data type, and bioinformatics expertise when choosing the best tool for your needs. You might even explore combining different tools to leverage their unique strengths for different aspects of your analysis.</p>
+<h2 id="ms1ms2-claude">MS1/MS2 (Claude)</h2>
+<p>In mass spectrometry-based proteomics, the typical workflow for identifying peptides and proteins involves using tandem mass spectrometry (MS/MS or MS2). In this process, precursor ions (peptides) are selected in the first stage of mass spectrometry (MS1) and then fragmented to produce a series of smaller ions in the second stage (MS2). The resulting fragment ions (product ions) are analyzed to infer the sequence of the peptide and, by extension, identify the proteins from which they were derived.</p>
+<p>However, it is possible to infer peptides and proteins using only MS1 data through a process known as "MS1-only" or "untargeted" analysis. This approach can be particularly useful in the following scenarios:</p>
+<ol>
+<li><strong>Label-based quantification</strong>: Techniques like SILAC (Stable Isotope Labeling by Amino acids in Cell culture) or chemical labeling (e.g., TMT, iTRAQ) rely on MS1 data for quantification. The mass shift introduced by labels allows for the direct comparison of peptide abundances based on their MS1 ion intensities.</li>
+</ol>
+<p>2  <strong>Label-free quantification</strong>: Proteins can be quantified by comparing the intensities of their corresponding peptide ions in MS1 across different samples. This requires accurate mass and retention time alignment and often uses algorithms to detect and quantify features (peptide ions) consistently across multiple runs.</p>
+<ol>
+<li>
+<p><strong>Accurate Mass and Time tags (AMT)</strong>: This approach relies on a previously established library of peptide identifications, where each peptide is characterized by its accurate mass and normalized retention time. In subsequent analyses, peptides can be inferred by matching the observed accurate mass and retention time to the library without the need for MS2 fragmentation.</p>
+</li>
+<li>
+<p><strong>Data-independent acquisition (DIA)</strong>: In some DIA workflows, proteins can be inferred from MS1 data when coupled with complex data analysis strategies and spectral libraries. It is important to note that while DIA collects MS1 spectra, it also involves the simultaneous fragmentation of all ions in a given mass range, and thus MS2-level data is typically available and used for identification.</p>
+</li>
+</ol>
+<p>It is important to note that MS1-only approaches may have limitations in terms of identification specificity and sensitivity compared to traditional MS2-based methods. MS1-based protein inference is generally less confident because it lacks sequence-specific information that can only be obtained from fragment ions in MS2. For this reason, MS1-based methods are often complemented by MS2 data or rely on extensive peptide libraries and sophisticated computational algorithms to increase the confidence of peptide and protein identification.</p>
 <h2 id="proteoform-analysis">Proteoform Analysis</h2>
 <h4 id="eth-zurich-u-toronto-team-develops-tool-for-bottom-up-proteomics-proteoform-analysis">ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis</h4>
 <p>Jul 28, 2021 | Adam Bonislawski</p>

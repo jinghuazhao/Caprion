@@ -29,18 +29,6 @@ However, it is possible to infer peptides and proteins using only MS1 data throu
 
 It is important to note that MS1-only approaches may have limitations in terms of identification specificity and sensitivity compared to traditional MS2-based methods. MS1-based protein inference is generally less confident because it lacks sequence-specific information that can only be obtained from fragment ions in MS2. For this reason, MS1-based methods are often complemented by MS2 data or rely on extensive peptide libraries and sophisticated computational algorithms to increase the confidence of peptide and protein identification.
 
-## Peptide and Protein ID using OpenMS tools
-
-Web: <https://usegalaxy.org/> (https://training.galaxyproject.org/training-material/)
-
-```bash
-docker run -p 8080:80 quay.io/galaxy/introduction-training
-```
-
-Visit <http://localhost:8080>. Login as **admin** with password **password** to access.
-
-See <https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html>
-
 ## III. OpenMS/crux/maxQuant/FragPipe
 
 OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for analyzing proteomics data, each with its own strengths and weaknesses. Here's a comparison:
@@ -119,7 +107,19 @@ Choosing the Right Tool:
 
 Remember to consider your specific research goals, data type, and bioinformatics expertise when choosing the best tool for your needs. You might even explore combining different tools to leverage their unique strengths for different aspects of your analysis.
 
-## IV. PoGo
+## IV. Galaxy tutorials
+
+Web: <https://usegalaxy.org/> (https://training.galaxyproject.org/training-material/)
+
+```bash
+docker run -p 8080:80 quay.io/galaxy/introduction-training
+```
+
+Visit <http://localhost:8080>. Login as **admin** with password **password** to access.
+
+See <https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html>
+
+## V. PoGo
 
 Fast Mapping of Peptides to Genomic Coordinates for Proteogenomic Analyses, <https://www.sanger.ac.uk/tool/pogo/>, GitHub, <https://github.com/cschlaffner/PoGo>.
 
@@ -166,7 +166,7 @@ mvn install
 ```
 assuming that `pom.xml` is available, e.g., `/usr/local/Cluster-Apps/ceuadmin/PoGo/1.0.0/PoGoGUI/PoGoGUI`.
 
-## V. Proteoform Analysis
+## VI. Proteoform Analysis
 
 #### ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis
 

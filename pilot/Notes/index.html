@@ -124,19 +124,19 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#peptide-and-protein-id-using-openms-tools" class="nav-link">Peptide and Protein ID using OpenMS tools</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
             <li class="nav-item" data-level="2"><a href="#iii-openmscruxmaxquantfragpipe" class="nav-link">III. OpenMS/crux/maxQuant/FragPipe</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#iv-pogo" class="nav-link">IV. PoGo</a>
+            <li class="nav-item" data-level="2"><a href="#iv-galaxy-tutorials" class="nav-link">IV. Galaxy tutorials</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#v-proteoform-analysis" class="nav-link">V. Proteoform Analysis</a>
+            <li class="nav-item" data-level="2"><a href="#v-pogo" class="nav-link">V. PoGo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#vi-proteoform-analysis" class="nav-link">VI. Proteoform Analysis</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -175,12 +175,6 @@
 </li>
 </ol>
 <p>It is important to note that MS1-only approaches may have limitations in terms of identification specificity and sensitivity compared to traditional MS2-based methods. MS1-based protein inference is generally less confident because it lacks sequence-specific information that can only be obtained from fragment ions in MS2. For this reason, MS1-based methods are often complemented by MS2 data or rely on extensive peptide libraries and sophisticated computational algorithms to increase the confidence of peptide and protein identification.</p>
-<h2 id="peptide-and-protein-id-using-openms-tools">Peptide and Protein ID using OpenMS tools</h2>
-<p>Web: <a href="https://usegalaxy.org/">https://usegalaxy.org/</a> (https://training.galaxyproject.org/training-material/)</p>
-<pre><code class="language-bash">docker run -p 8080:80 quay.io/galaxy/introduction-training
-</code></pre>
-<p>Visit <a href="http://localhost:8080">http://localhost:8080</a>. Login as <strong>admin</strong> with password <strong>password</strong> to access.</p>
-<p>See <a href="https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html">https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html</a></p>
 <h2 id="iii-openmscruxmaxquantfragpipe">III. OpenMS/crux/maxQuant/FragPipe</h2>
 <p>OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for analyzing proteomics data, each with its own strengths and weaknesses. Here's a comparison:</p>
 <ul>
@@ -345,7 +339,13 @@
 <li>FragPipe: Ideal for researchers seeking a highly flexible and customizable platform for various workflows, including DIA analysis, and who are comfortable with command-line operations.</li>
 </ul>
 <p>Remember to consider your specific research goals, data type, and bioinformatics expertise when choosing the best tool for your needs. You might even explore combining different tools to leverage their unique strengths for different aspects of your analysis.</p>
-<h2 id="iv-pogo">IV. PoGo</h2>
+<h2 id="iv-galaxy-tutorials">IV. Galaxy tutorials</h2>
+<p>Web: <a href="https://usegalaxy.org/">https://usegalaxy.org/</a> (https://training.galaxyproject.org/training-material/)</p>
+<pre><code class="language-bash">docker run -p 8080:80 quay.io/galaxy/introduction-training
+</code></pre>
+<p>Visit <a href="http://localhost:8080">http://localhost:8080</a>. Login as <strong>admin</strong> with password <strong>password</strong> to access.</p>
+<p>See <a href="https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html">https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html</a></p>
+<h2 id="v-pogo">V. PoGo</h2>
 <p>Fast Mapping of Peptides to Genomic Coordinates for Proteogenomic Analyses, <a href="https://www.sanger.ac.uk/tool/pogo/">https://www.sanger.ac.uk/tool/pogo/</a>, GitHub, <a href="https://github.com/cschlaffner/PoGo">https://github.com/cschlaffner/PoGo</a>.</p>
 <p>It uses transcript translations and reference gene annotations to identify the genomic loci of peptides and post-translational modifications. Multiple occurrences of peptides in the input data resulting in the same genomic loci will be collapsed as a single occurrence in the output.</p>
 <p>The input format is a tab delimited file with four columns with file extensions such as <em>.pogo, </em>.txt, and *.tsv.</p>
@@ -401,7 +401,7 @@ done
 mvn install
 </code></pre>
 <p>assuming that <code>pom.xml</code> is available, e.g., <code>/usr/local/Cluster-Apps/ceuadmin/PoGo/1.0.0/PoGoGUI/PoGoGUI</code>.</p>
-<h2 id="v-proteoform-analysis">V. Proteoform Analysis</h2>
+<h2 id="vi-proteoform-analysis">VI. Proteoform Analysis</h2>
 <h4 id="eth-zurich-u-toronto-team-develops-tool-for-bottom-up-proteomics-proteoform-analysis">ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis</h4>
 <p>Jul 28, 2021 | Adam Bonislawski</p>
 <p>NEW YORK – A team led by researchers at ETH Zurich and the University of Toronto has developed a tool that allows for the detection of protein proteoforms in bottom-up proteomics data.</p>

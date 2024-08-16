@@ -1,6 +1,6 @@
 # Notes
 
-**Sections I -- III are due to Claude**
+(**Sections I -- III are due to Claude**)
 
 ## I. Meta-data
 

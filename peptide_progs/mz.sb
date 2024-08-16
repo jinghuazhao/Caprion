@@ -27,16 +27,19 @@ function ZWK_ThermoRawFileParser()
 function run_metamorpheus()
 {
   module load ceuadmin/MetaMorpheus/1.0.5
-  metamorpheus --test -o test
+  module load ceuadmin/R
+  cd ~/Caprion/analysis/ZWK
+  eval $metamorpheus --test -o test
   export fasta=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0/databases/UP000005640.fasta
-  metamorpheus -g -o metamorpheus
-  metamorpheus -d ${fasta} -s $(ls *mzML) -t metamorpheus/SearchTask.toml -o metamorpheus
+  eval $metamorpheus -g -o metamorpheus
+  eval $metamorpheus -d ${fasta} -s $(ls *mzML) -t metamorpheus/SearchTask.toml -o metamorpheus
   Rscript -e '
-   library(mzR)
-   mzid <- openIDfile("metamorpheus/Task1SearchTask/rawdata.mzID")
-   methods(class=class(mzid))
-   psm <- psms(mzid)
+    library(mzR)
+    mzid <- openIDfile("metamorpheus/Task1SearchTask/rawdata.mzID")
+    methods(class=class(mzid))
+    psm <- psms(mzid)
   '
+  cd -
 }
 
 run_metamorpheus

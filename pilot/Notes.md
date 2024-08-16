@@ -29,12 +29,11 @@ However, it is possible to infer peptides and proteins using only MS1 data throu
 
 It is important to note that MS1-only approaches may have limitations in terms of identification specificity and sensitivity compared to traditional MS2-based methods. MS1-based protein inference is generally less confident because it lacks sequence-specific information that can only be obtained from fragment ions in MS2. For this reason, MS1-based methods are often complemented by MS2 data or rely on extensive peptide libraries and sophisticated computational algorithms to increase the confidence of peptide and protein identification.
 
-## III. OpenMS/crux/maxQuant/FragPipe
+## III. OpenMS/crux/MaxQuant/FragPipe
 
 OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for analyzing proteomics data, each with its own strengths and weaknesses. Here's a comparison:
 
 * OpenMS:
-
     * Focus: Provides a flexible and open-source framework for developing and executing various mass spectrometry data analysis workflows.
     * Strengths:
           *  Highly modular and customizable: Offers a vast collection of algorithms and tools that can be combined and customized to create tailored workflows.
@@ -47,7 +46,6 @@ OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for an
           *  Limited pre-built workflows: While highly customizable, it requires more manual effort to set up standard workflows compared to MaxQuant or FragPipe.
 
 * Crux:
-
     * Focus: A command-line toolkit designed for peptide identification, protein quantification, and statistical validation of proteomics data.
     * Strengths:
           *  Open-source and well-documented: Provides clear documentation and allows for community contributions.
@@ -60,7 +58,6 @@ OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for an
           *  Limited pre-built workflows: Requires more manual effort to set up complete analysis pipelines.
 
 * MaxQuant:
-
     * Focus: Primarily known for its robust and sensitive peptide and protein identification and quantification using its proprietary Andromeda search engine.
     * Strengths:
           *  User-friendly interface: Provides a GUI for easier data processing and analysis.
@@ -73,7 +70,6 @@ OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for an
           *  Closed-source: The core algorithms are not open-source, limiting community contributions and customization.
 
 * FragPipe:
-
     * Focus: Offers a more modular and flexible platform with various tools for different proteomics workflows, including both DDA and DIA.
     * Strengths:
           *  Versatile and modular: Includes a suite of tools for various tasks, including peptide identification, quantification, and statistical analysis.
@@ -107,7 +103,7 @@ Choosing the Right Tool:
 
 Remember to consider your specific research goals, data type, and bioinformatics expertise when choosing the best tool for your needs. You might even explore combining different tools to leverage their unique strengths for different aspects of your analysis.
 
-**Notes on crux/FragPipe on CSD3***. `crux/4.1` is functional (along with `comet/2024.01.1` & `kojak/2.0.0a22`) on CSD3 but `crux/4.2` is not. `FragPipe/22.0` does offer a comprehensive GUI. Moreover, `MetaMorpheus/1.0.5` and `FlashLFQ/1.2.6` are also available from CSD3.
+**Notes on crux/FragPipe on CSD3**. `crux/4.1` is functional (along with `comet/2024.01.1` & `kojak/2.0.0a22`) on CSD3 but `crux/4.2` is not. `FragPipe/22.0` does offer a comprehensive GUI. Moreover, `MetaMorpheus/1.0.5` and `FlashLFQ/1.2.6` are also available from CSD3.
 
 ## IV. Galaxy tutorials
 

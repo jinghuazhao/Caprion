@@ -70,7 +70,7 @@ mvn install
 ```
 assuming that `pom.xml` is available, e.g., `/usr/local/Cluster-Apps/ceuadmin/PoGo/1.0.0/PoGoGUI/PoGoGUI`.
 
-## Claude: how OpenMS,, crux, maxQuant and FragPipe compare
+## OpenMS/crux/maxQuant/FragPipe (Claude)
 
 OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for analyzing proteomics data, each with its own strengths and weaknesses. Here's a comparison:
 
@@ -78,52 +78,52 @@ OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for an
 
     * Focus: Provides a flexible and open-source framework for developing and executing various mass spectrometry data analysis workflows.
     * Strengths:
-      *  Highly modular and customizable: Offers a vast collection of algorithms and tools that can be combined and customized to create tailored workflows.
-      *  Open-source and extensible: Encourages community contributions and allows for the development of new tools and algorithms.
-      *  Supports various data formats and instruments: Compatible with a wide range of data formats and mass spectrometry platforms.
-      *  Strong support for metabolomics data: While primarily used for proteomics, it also offers tools for analyzing metabolomics data.
+          *  Highly modular and customizable: Offers a vast collection of algorithms and tools that can be combined and customized to create tailored workflows.
+          *  Open-source and extensible: Encourages community contributions and allows for the development of new tools and algorithms.
+          *  Supports various data formats and instruments: Compatible with a wide range of data formats and mass spectrometry platforms.
+          *  Strong support for metabolomics data: While primarily used for proteomics, it also offers tools for analyzing metabolomics data.
     * Limitations:
-      *  Steeper learning curve: Requires programming knowledge and familiarity with command-line interfaces.
-      *  Less user-friendly: Lacks a comprehensive graphical user interface (GUI), making it less accessible for beginners.
-      *  Limited pre-built workflows: While highly customizable, it requires more manual effort to set up standard workflows compared to MaxQuant or FragPipe.
+          *  Steeper learning curve: Requires programming knowledge and familiarity with command-line interfaces.
+          *  Less user-friendly: Lacks a comprehensive graphical user interface (GUI), making it less accessible for beginners.
+          *  Limited pre-built workflows: While highly customizable, it requires more manual effort to set up standard workflows compared to MaxQuant or FragPipe.
 
 * Crux:
 
     * Focus: A command-line toolkit designed for peptide identification, protein quantification, and statistical validation of proteomics data.
     * Strengths:
-      *  Open-source and well-documented: Provides clear documentation and allows for community contributions.
-      *  Fast and efficient: Known for its computational efficiency and speed.
-      *  Strong statistical validation: Offers rigorous statistical methods for validating peptide and protein identifications.
-      *  Supports various search engines: Compatible with multiple search engines, including Comet and Tide.
+          *  Open-source and well-documented: Provides clear documentation and allows for community contributions.
+          *  Fast and efficient: Known for its computational efficiency and speed.
+          *  Strong statistical validation: Offers rigorous statistical methods for validating peptide and protein identifications.
+          *  Supports various search engines: Compatible with multiple search engines, including Comet and Tide.
     * Limitations:
-      *  Command-line interface only: Requires familiarity with command-line operations.
-      *  Less user-friendly: Lacks a GUI, making it less accessible for beginners.
-      *  Limited pre-built workflows: Requires more manual effort to set up complete analysis pipelines.
+          *  Command-line interface only: Requires familiarity with command-line operations.
+          *  Less user-friendly: Lacks a GUI, making it less accessible for beginners.
+          *  Limited pre-built workflows: Requires more manual effort to set up complete analysis pipelines.
 
 * MaxQuant:
 
     * Focus: Primarily known for its robust and sensitive peptide and protein identification and quantification using its proprietary Andromeda search engine.
     * Strengths:
-      *  User-friendly interface: Provides a GUI for easier data processing and analysis.
-      *  Robust and sensitive identification and quantification: Offers high-quality results for standard DDA-based proteomics experiments.
-      *  Strong support for label-free quantification (LFQ) and match between runs (MBR).
-      *  Extensive post-translational modification (PTM) analysis: Offers comprehensive support for identifying and quantifying various PTMs.
+          *  User-friendly interface: Provides a GUI for easier data processing and analysis.
+          *  Robust and sensitive identification and quantification: Offers high-quality results for standard DDA-based proteomics experiments.
+          *  Strong support for label-free quantification (LFQ) and match between runs (MBR).
+          *  Extensive post-translational modification (PTM) analysis: Offers comprehensive support for identifying and quantifying various PTMs.
     * Limitations:
-      *  Less flexible for specialized workflows: Primarily designed for standard bottom-up proteomics experiments.
-      *  Limited support for DIA data: While it can handle DIA data, it's not its primary strength.
-      *  Closed-source: The core algorithms are not open-source, limiting community contributions and customization.
+          *  Less flexible for specialized workflows: Primarily designed for standard bottom-up proteomics experiments.
+          *  Limited support for DIA data: While it can handle DIA data, it's not its primary strength.
+          *  Closed-source: The core algorithms are not open-source, limiting community contributions and customization.
 
 * FragPipe:
 
     * Focus: Offers a more modular and flexible platform with various tools for different proteomics workflows, including both DDA and DIA.
     * Strengths:
-      *  Versatile and modular: Includes a suite of tools for various tasks, including peptide identification, quantification, and statistical analysis.
-      *  Extensive support for DIA data: Features DIA-Umpire, a dedicated tool for analyzing DIA data using various algorithms.
-      *  Highly accurate and sensitive quantification: Employs IonQuant for precise quantification using extracted ion chromatograms.
-      *  Open-source and actively developed: Encourages community contributions and continuous improvement.
+          *  Versatile and modular: Includes a suite of tools for various tasks, including peptide identification, quantification, and statistical analysis.
+          *  Extensive support for DIA data: Features DIA-Umpire, a dedicated tool for analyzing DIA data using various algorithms.
+          *  Highly accurate and sensitive quantification: Employs IonQuant for precise quantification using extracted ion chromatograms.
+          *  Open-source and actively developed: Encourages community contributions and continuous improvement.
     * Limitations:
-      *  Steeper learning curve: Primarily operates through a command-line interface, requiring more technical expertise.
-      *  Less user-friendly interface: Lacks a comprehensive GUI, making it less intuitive for beginners.
+          *  Steeper learning curve: Primarily operates through a command-line interface, requiring more technical expertise.
+          *  Less user-friendly interface: Lacks a comprehensive GUI, making it less intuitive for beginners.
 
 Here's a table summarizing the key differences:
 

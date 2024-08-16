@@ -116,7 +116,11 @@
             
             <li class="nav-item" data-level="1"><a href="#notes" class="nav-link">Notes</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#meta-data-claude" class="nav-link">Meta-data (Claude)</a>
+            <li class="nav-item" data-level="2"><a href="#i-meta-data" class="nav-link">I. Meta-data</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#ii-ms1ms2" class="nav-link">II. MS1/MS2</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -124,19 +128,15 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#pogo" class="nav-link">PoGo</a>
+            <li class="nav-item" data-level="2"><a href="#iii-openmscruxmaxquantfragpipe" class="nav-link">III. OpenMS/crux/maxQuant/FragPipe</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#openmscruxmaxquantfragpipe-claude" class="nav-link">OpenMS/crux/maxQuant/FragPipe (Claude)</a>
+            <li class="nav-item" data-level="2"><a href="#iv-pogo" class="nav-link">IV. PoGo</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#ms1ms2-claude" class="nav-link">MS1/MS2 (Claude)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#proteoform-analysis" class="nav-link">Proteoform Analysis</a>
+            <li class="nav-item" data-level="2"><a href="#v-proteoform-analysis" class="nav-link">V. Proteoform Analysis</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -148,7 +148,8 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="notes">Notes</h1>
-<h2 id="meta-data-claude">Meta-data (Claude)</h2>
+<p><strong>Sections I -- III are due to Claude</strong></p>
+<h2 id="i-meta-data">I. Meta-data</h2>
 <ol>
 <li><strong>Isotope.Group.ID</strong> is a unique identifier for a group of isotopes that belong to the same peptide or molecule. In mass spectrometry, isotopes are atoms of the same element that have the same number of protons but differ in the number of neutrons. This ID helps to group together isotopes that arise from the same peptide, allowing for easier identification and analysis.</li>
 <li><strong>Protein</strong> contains the name or identifier of the protein that the peptide (or molecule) is derived from. This information is typically obtained by searching the MS data against a protein database.</li>
@@ -158,69 +159,29 @@
 <li><strong>Charge</strong> is the charge state of the peptide or molecule. In mass spectrometry, peptides can be ionized to different charge states (e.g., +1, +2, +3, etc.), which affects their mass-to-charge ratio (m/z). The charge state is an important parameter for identifying peptides and molecules.</li>
 </ol>
 <p>They are invaluable for analyzing and interpreting MS data, including peptide identification, quantification, and characterization of post-translational modifications.</p>
+<h2 id="ii-ms1ms2">II. MS1/MS2</h2>
+<p>In mass spectrometry-based proteomics, the typical workflow for identifying peptides and proteins involves using tandem mass spectrometry (MS/MS or MS2). In this process, precursor ions (peptides) are selected in the first stage of mass spectrometry (MS1) and then fragmented to produce a series of smaller ions in the second stage (MS2). The resulting fragment ions (product ions) are analyzed to infer the sequence of the peptide and, by extension, identify the proteins from which they were derived.</p>
+<p>However, it is possible to infer peptides and proteins using only MS1 data through a process known as "MS1-only" or "untargeted" analysis. This approach can be particularly useful in the following scenarios:</p>
+<ol>
+<li><strong>Label-based quantification</strong>: Techniques like SILAC (Stable Isotope Labeling by Amino acids in Cell culture) or chemical labeling (e.g., TMT, iTRAQ) rely on MS1 data for quantification. The mass shift introduced by labels allows for the direct comparison of peptide abundances based on their MS1 ion intensities.</li>
+</ol>
+<p>2  <strong>Label-free quantification</strong>: Proteins can be quantified by comparing the intensities of their corresponding peptide ions in MS1 across different samples. This requires accurate mass and retention time alignment and often uses algorithms to detect and quantify features (peptide ions) consistently across multiple runs.</p>
+<ol>
+<li>
+<p><strong>Accurate Mass and Time tags (AMT)</strong>: This approach relies on a previously established library of peptide identifications, where each peptide is characterized by its accurate mass and normalized retention time. In subsequent analyses, peptides can be inferred by matching the observed accurate mass and retention time to the library without the need for MS2 fragmentation.</p>
+</li>
+<li>
+<p><strong>Data-independent acquisition (DIA)</strong>: In some DIA workflows, proteins can be inferred from MS1 data when coupled with complex data analysis strategies and spectral libraries. It is important to note that while DIA collects MS1 spectra, it also involves the simultaneous fragmentation of all ions in a given mass range, and thus MS2-level data is typically available and used for identification.</p>
+</li>
+</ol>
+<p>It is important to note that MS1-only approaches may have limitations in terms of identification specificity and sensitivity compared to traditional MS2-based methods. MS1-based protein inference is generally less confident because it lacks sequence-specific information that can only be obtained from fragment ions in MS2. For this reason, MS1-based methods are often complemented by MS2 data or rely on extensive peptide libraries and sophisticated computational algorithms to increase the confidence of peptide and protein identification.</p>
 <h2 id="peptide-and-protein-id-using-openms-tools">Peptide and Protein ID using OpenMS tools</h2>
 <p>Web: <a href="https://usegalaxy.org/">https://usegalaxy.org/</a> (https://training.galaxyproject.org/training-material/)</p>
 <pre><code class="language-bash">docker run -p 8080:80 quay.io/galaxy/introduction-training
 </code></pre>
 <p>Visit <a href="http://localhost:8080">http://localhost:8080</a>. Login as <strong>admin</strong> with password <strong>password</strong> to access.</p>
 <p>See <a href="https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html">https://training.galaxyproject.org/training-material/topics/proteomics/tutorials/protein-id-oms/tutorial.html</a></p>
-<h2 id="pogo">PoGo</h2>
-<p>Fast Mapping of Peptides to Genomic Coordinates for Proteogenomic Analyses, <a href="https://www.sanger.ac.uk/tool/pogo/">https://www.sanger.ac.uk/tool/pogo/</a>, GitHub, <a href="https://github.com/cschlaffner/PoGo">https://github.com/cschlaffner/PoGo</a>.</p>
-<p>It uses transcript translations and reference gene annotations to identify the genomic loci of peptides and post-translational modifications. Multiple occurrences of peptides in the input data resulting in the same genomic loci will be collapsed as a single occurrence in the output.</p>
-<p>The input format is a tab delimited file with four columns with file extensions such as <em>.pogo, </em>.txt, and *.tsv.</p>
-<table>
-<thead>
-<tr>
-<th>Column</th>
-<th>Column header</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Sample</td>
-<td>Name of sample or experiment</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Peptide</td>
-<td>Peptide sequence with PSI-MS nodification names in round brackets following the mpdified amino acid, e.g. PEPT(Phopsho)IDE for a phosphorylated threonine</td>
-</tr>
-<tr>
-<td>3</td>
-<td>PSMs</td>
-<td>Number of peptide-spectrum matches (PSMs) for the given peptide, including those redundantly identified (peptides can be “seen” more than once in a run)</td>
-</tr>
-<tr>
-<td>4</td>
-<td>Quant</td>
-<td>Quantitative value for the given peptide in the given sample</td>
-</tr>
-</tbody>
-</table>
-<p>An example is established as follows,</p>
-<pre><code class="language-bash">wget -S ftp://ftp.sanger.ac.uk/pub/teams/17/software/PoGo/PoGo_Testprocedures.zip
-unzip PoGo_Testprocedures.zip
-cd PoGo_Testprocedures/Testfiles
-module load ceuadmin/PoGo
-for Peptides in Testfile_experimental Testfile_small
-do
-  PoGo -fasta input/gencode.v25.pc_translations.fa -gtf input/gencode.v25.annotation.gtf -in input/${Peptides}.txt
-done
-</code></pre>
-<p>Output files are also contained in the <code>input/</code> directory.</p>
-<p>GENCODE annotation data are available from <a href="https://www.gencodegenes.org/human/">https://www.gencodegenes.org/human/</a> and <a href="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/">https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/</a>.</p>
-<p>The Java GUI, <a href="https://github.com/cschlaffner/PoGoGUI">https://github.com/cschlaffner/PoGoGUI</a>, is run as follows,</p>
-<pre><code class="language-bash">java -jar PoGoGUI-v1.0.0.jar
-</code></pre>
-<p>which requires PoGo executable as well.</p>
-<p>The source is compiled with maven, <a href="https://maven.apache.org/">https://maven.apache.org/</a>, e.g.,</p>
-<pre><code class="language-bash">module load maven-3.5.0-gcc-5.4.0-3sgaeze
-mvn install
-</code></pre>
-<p>assuming that <code>pom.xml</code> is available, e.g., <code>/usr/local/Cluster-Apps/ceuadmin/PoGo/1.0.0/PoGoGUI/PoGoGUI</code>.</p>
-<h2 id="openmscruxmaxquantfragpipe-claude">OpenMS/crux/maxQuant/FragPipe (Claude)</h2>
+<h2 id="iii-openmscruxmaxquantfragpipe">III. OpenMS/crux/maxQuant/FragPipe</h2>
 <p>OpenMS, Crux, MaxQuant, and FragPipe are all prominent software platforms for analyzing proteomics data, each with its own strengths and weaknesses. Here's a comparison:</p>
 <ul>
 <li>
@@ -384,23 +345,63 @@ mvn install
 <li>FragPipe: Ideal for researchers seeking a highly flexible and customizable platform for various workflows, including DIA analysis, and who are comfortable with command-line operations.</li>
 </ul>
 <p>Remember to consider your specific research goals, data type, and bioinformatics expertise when choosing the best tool for your needs. You might even explore combining different tools to leverage their unique strengths for different aspects of your analysis.</p>
-<h2 id="ms1ms2-claude">MS1/MS2 (Claude)</h2>
-<p>In mass spectrometry-based proteomics, the typical workflow for identifying peptides and proteins involves using tandem mass spectrometry (MS/MS or MS2). In this process, precursor ions (peptides) are selected in the first stage of mass spectrometry (MS1) and then fragmented to produce a series of smaller ions in the second stage (MS2). The resulting fragment ions (product ions) are analyzed to infer the sequence of the peptide and, by extension, identify the proteins from which they were derived.</p>
-<p>However, it is possible to infer peptides and proteins using only MS1 data through a process known as "MS1-only" or "untargeted" analysis. This approach can be particularly useful in the following scenarios:</p>
-<ol>
-<li><strong>Label-based quantification</strong>: Techniques like SILAC (Stable Isotope Labeling by Amino acids in Cell culture) or chemical labeling (e.g., TMT, iTRAQ) rely on MS1 data for quantification. The mass shift introduced by labels allows for the direct comparison of peptide abundances based on their MS1 ion intensities.</li>
-</ol>
-<p>2  <strong>Label-free quantification</strong>: Proteins can be quantified by comparing the intensities of their corresponding peptide ions in MS1 across different samples. This requires accurate mass and retention time alignment and often uses algorithms to detect and quantify features (peptide ions) consistently across multiple runs.</p>
-<ol>
-<li>
-<p><strong>Accurate Mass and Time tags (AMT)</strong>: This approach relies on a previously established library of peptide identifications, where each peptide is characterized by its accurate mass and normalized retention time. In subsequent analyses, peptides can be inferred by matching the observed accurate mass and retention time to the library without the need for MS2 fragmentation.</p>
-</li>
-<li>
-<p><strong>Data-independent acquisition (DIA)</strong>: In some DIA workflows, proteins can be inferred from MS1 data when coupled with complex data analysis strategies and spectral libraries. It is important to note that while DIA collects MS1 spectra, it also involves the simultaneous fragmentation of all ions in a given mass range, and thus MS2-level data is typically available and used for identification.</p>
-</li>
-</ol>
-<p>It is important to note that MS1-only approaches may have limitations in terms of identification specificity and sensitivity compared to traditional MS2-based methods. MS1-based protein inference is generally less confident because it lacks sequence-specific information that can only be obtained from fragment ions in MS2. For this reason, MS1-based methods are often complemented by MS2 data or rely on extensive peptide libraries and sophisticated computational algorithms to increase the confidence of peptide and protein identification.</p>
-<h2 id="proteoform-analysis">Proteoform Analysis</h2>
+<h2 id="iv-pogo">IV. PoGo</h2>
+<p>Fast Mapping of Peptides to Genomic Coordinates for Proteogenomic Analyses, <a href="https://www.sanger.ac.uk/tool/pogo/">https://www.sanger.ac.uk/tool/pogo/</a>, GitHub, <a href="https://github.com/cschlaffner/PoGo">https://github.com/cschlaffner/PoGo</a>.</p>
+<p>It uses transcript translations and reference gene annotations to identify the genomic loci of peptides and post-translational modifications. Multiple occurrences of peptides in the input data resulting in the same genomic loci will be collapsed as a single occurrence in the output.</p>
+<p>The input format is a tab delimited file with four columns with file extensions such as <em>.pogo, </em>.txt, and *.tsv.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Column header</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Sample</td>
+<td>Name of sample or experiment</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Peptide</td>
+<td>Peptide sequence with PSI-MS nodification names in round brackets following the mpdified amino acid, e.g. PEPT(Phopsho)IDE for a phosphorylated threonine</td>
+</tr>
+<tr>
+<td>3</td>
+<td>PSMs</td>
+<td>Number of peptide-spectrum matches (PSMs) for the given peptide, including those redundantly identified (peptides can be “seen” more than once in a run)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Quant</td>
+<td>Quantitative value for the given peptide in the given sample</td>
+</tr>
+</tbody>
+</table>
+<p>An example is established as follows,</p>
+<pre><code class="language-bash">wget -S ftp://ftp.sanger.ac.uk/pub/teams/17/software/PoGo/PoGo_Testprocedures.zip
+unzip PoGo_Testprocedures.zip
+cd PoGo_Testprocedures/Testfiles
+module load ceuadmin/PoGo
+for Peptides in Testfile_experimental Testfile_small
+do
+  PoGo -fasta input/gencode.v25.pc_translations.fa -gtf input/gencode.v25.annotation.gtf -in input/${Peptides}.txt
+done
+</code></pre>
+<p>Output files are also contained in the <code>input/</code> directory.</p>
+<p>GENCODE annotation data are available from <a href="https://www.gencodegenes.org/human/">https://www.gencodegenes.org/human/</a> and <a href="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/">https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/</a>.</p>
+<p>The Java GUI, <a href="https://github.com/cschlaffner/PoGoGUI">https://github.com/cschlaffner/PoGoGUI</a>, is run as follows,</p>
+<pre><code class="language-bash">java -jar PoGoGUI-v1.0.0.jar
+</code></pre>
+<p>which requires PoGo executable as well.</p>
+<p>The source is compiled with maven, <a href="https://maven.apache.org/">https://maven.apache.org/</a>, e.g.,</p>
+<pre><code class="language-bash">module load maven-3.5.0-gcc-5.4.0-3sgaeze
+mvn install
+</code></pre>
+<p>assuming that <code>pom.xml</code> is available, e.g., <code>/usr/local/Cluster-Apps/ceuadmin/PoGo/1.0.0/PoGoGUI/PoGoGUI</code>.</p>
+<h2 id="v-proteoform-analysis">V. Proteoform Analysis</h2>
 <h4 id="eth-zurich-u-toronto-team-develops-tool-for-bottom-up-proteomics-proteoform-analysis">ETH Zurich, U Toronto Team Develops Tool for Bottom-Up Proteomics Proteoform Analysis</h4>
 <p>Jul 28, 2021 | Adam Bonislawski</p>
 <p>NEW YORK – A team led by researchers at ETH Zurich and the University of Toronto has developed a tool that allows for the detection of protein proteoforms in bottom-up proteomics data.</p>

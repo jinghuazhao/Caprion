@@ -7,8 +7,8 @@
 #SBATCH --time=12:00:00
 #SBATCH --cpus-per-task=4
 
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mm.o
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mm.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/msa.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/msa.e
 
 . /etc/profile.d/modules.sh
 module purge
@@ -35,21 +35,28 @@ function run_metamorpheus()
   eval $metamorpheus -d ${fasta} -s $(ls *mzML) -t metamorpheus/SearchTask.toml -o metamorpheus
   Rscript -e '
     library(mzR)
-    mzid <- openIDfile("metamorpheus/Task1SearchTask/rawdata.mzID")
+    dir <- "~/Caprion/analysis/ZWK"
+    files <- list.files(file.path(dir,"metamorpheus/Task1SearchTask//Individual\ File\ Results"),
+                        pattern="mzID",full.names=TRUE,recursive=TRUE)
+    mzid <- openIDfile(files[1])
     methods(class=class(mzid))
     psm <- psms(mzid)
+    peptides <- read.delim(file.path(dir,"metamorpheus/Task1SearchTask/AllQuantifiedPeptides.tsv"))
+    dplyr::filter(peptides,Gene.Names=="PROC")
   '
   cd -
 }
 
 function run_msamanda()
-}
+{
+  module load ceuadmin/msamanda/3.0.21.532
   export src=~/Caprion/analysis/ZWK
-  export amamnda=/usr/local/Cluster-Apps/ceuadmin/msamanda/3.0.21.532
+  export msamanda=/usr/local/Cluster-Apps/ceuadmin/msamanda/3.0.21.532
   export fragpipe=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
-  cd ${amanda}
-  MSAmanda -s ${src}  -f 2 -e ${amanda}/settings.xml  -o ${src}/msamonda -d ${fragpipe}/databases/UP000005640.fasta
+  cd ${msamanda}
+  MSAmanda -s ${src}  -f 2 -e ${msamanda}/settings.xml  -o ${src}/msamonda -d ${fragpipe}/databases/UP000005640.fasta
   cd -
 }
 
-run_metamorpheus
+# run_metamorpheus
+run_msamanda

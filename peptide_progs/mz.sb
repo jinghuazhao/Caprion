@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH --job-name=_UDP
+#SBATCH --job-name=_mz
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 #SBATCH --cpus-per-task=4
 
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/UDP/raw.o
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/UDP/raw.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/mz.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/mz.e
 
 . /etc/profile.d/modules.sh
 module purge
@@ -78,18 +78,13 @@ function read_msamanda()
   '
 }
 
-function ZWK_ThermoRawFileParser()
-# legacy
+# mzML generation and MetaMorpheus/MSAmanda search
 {
-  module load ceuadmin/ThermoRawFileParser/1.4.4
-  cd /usr/local/Cluster-Apps/ceuadmin/ThermoRawFileParser/1.4.4
-  mono ThermoRawFileParser.exe -d ~/Caprion/pre_qc_data/spectral_library_ZWK -o ~/Caprion/analysis/ZWK
-  cd -
+for batch in ZWK ZYQ UDP UHZ
+do
+  echo ${batch} processing ...
+# raw_ThermoRawFileParser ${batch}
+# run_metamorpheus ${batch}
+# run_msamanda ${batch}
+done
 }
-
-# raw_ThermoRawFileParser ZWK
-# raw_ThermoRawFileParser ZYQ
-# raw_ThermoRawFileParser UDP
-# raw_ThermoRawFileParser UHZ
-# run_metamorpheus
-# run_msamanda

@@ -54,7 +54,7 @@ function run_msamanda()
   export msamanda=/usr/local/Cluster-Apps/ceuadmin/msamanda/3.0.21.532
   export fragpipe=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
   cd ${msamanda}
-  MSAmanda -s ${src} -e ${msamanda}/settings.xml  -o ${src}/msamonda -d ${fragpipe}/databases/UP000005640.fasta
+  MSAmanda -s ${src} -e ${msamanda}/settings.xml  -o ${src}/msamanda -d ${fragpipe}/databases/UP000005640.fasta
   cd -
 }
 
@@ -64,11 +64,11 @@ function read_msamanda()
   Rscript -e '
     library(mzR)
     src <- Sys.getenv("src")
-    files <- dir(file.path(src,"msamonda"),pattern="mzid",full.names=TRUE)
+    files <- dir(file.path(src,"msamanda"),pattern="mzid",full.names=TRUE)
     mzid_files <- lapply(files, function(x) {mzR::openIDfile(x)})
-    msamonda_settings <- xml2::read_xml(file.path(src,"msamonda","msamonda_settings.xml"))
-    mzid_files$msamonda_settings <- msamonda_settings
-    save(mzid_files, "msamonda.rda")
+    msamanda_settings <- xml2::read_xml(file.path(src,"msamanda","msamanda_settings.xml"))
+    mzid_files$msamanda_settings <- msamanda_settings
+    save(mzid_files, "msamanda.rda")
   '
 }
 # run_metamorpheus

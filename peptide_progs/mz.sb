@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH --job-name=_MSAmanda
+#SBATCH --job-name=_UDP
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 #SBATCH --cpus-per-task=4
 
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/msa.o
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/msa.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/UDP/raw.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/UDP/raw.e
 
 . /etc/profile.d/modules.sh
 module purge
@@ -24,11 +24,20 @@ function ZWK_ThermoRawFileParser()
   cd -
 }
 
+function raw_ThermoRawFileParser()
+{
+  export batch=${1}
+  module load ceuadmin/ThermoRawFileParser/1.4.4
+  cd /usr/local/Cluster-Apps/ceuadmin/ThermoRawFileParser/1.4.4
+  mono ThermoRawFileParser.exe -d ~/Caprion/analysis/${batch}/raw -o ~/Caprion/analysis/${batch}/mzML
+  cd -
+}
+
 function run_metamorpheus()
 {
   module load ceuadmin/MetaMorpheus/1.0.5
   module load ceuadmin/R
-  cd ~/Caprion/analysis/ZWK
+  cd ~/Caprion/analysis/ZWK/mzML
   eval $metamorpheus --test -o test
   export fasta=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0/databases/UP000005640.fasta
   eval $metamorpheus -g -o metamorpheus
@@ -50,7 +59,7 @@ function run_metamorpheus()
 function run_msamanda()
 {
   module load ceuadmin/msamanda/3.0.21.532
-  export src=~/Caprion/analysis/ZWK
+  export src=~/Caprion/analysis/ZWK/mzML
   export msamanda=/usr/local/Cluster-Apps/ceuadmin/msamanda/3.0.21.532
   export fragpipe=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
   cd ${msamanda}
@@ -71,5 +80,9 @@ function read_msamanda()
     save(mzid_files, "msamanda.rda")
   '
 }
+
+# raw_ThermoRawFileParser ZYQ
+  raw_ThermoRawFileParser UDP
+# raw_ThermoRawFileParser UHZ
 # run_metamorpheus
-run_msamanda
+# run_msamanda

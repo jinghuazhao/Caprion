@@ -10,28 +10,20 @@ The project directory above contains scripts at **peptide_progs/** and results r
 
 These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
+**Association analysis**
+
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
-**Experimental codes** |
-mz.* | handling of files in .raw and other formats
-crux.R | R/multicomp+crux benchmark
-BoxCar.py/pyteomics.py | BoxCar algorighm and its use
-utils.sh | Various utitlties
-0_crux.sh | crux search | crux/*.e/.o
-**Association analysis** |
 1_pgwas.sh | Association analysis | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
 Signal identification | see **{protein}/sentinels/slurm**
 3.1_extract.sh | Signal extraction | \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.o
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
+utils.sh | Various utitlties
 
 ```mermaid
 graph TD;
-mz.*
-crux.*
-BoxCar.py/pyteomics.py
-0_crux.sh
 1_pgwas.sh
 2_meta_analysis.sh
 3.1_extract.sh
@@ -41,13 +33,29 @@ BoxCar.py/pyteomics.py
 utils.sh
 ```
 
-The crux search is experimental and along with ongoing effort on visualization. Specfically, prerequistes for a Manhattan/peptide association plot are
+ Specfic prerequistes for a Manhattan/peptide association plot are
 
 - a call to vep_annotate functino in `0_utils.sh` for proteins.
 - a call to `bgz()` (in `utils.sh` for protein) for a indexed and compressed DR-filtered data.
 - for step 3.2, `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is used instead of `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
 - module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake`
-- module `mono-5.10.0.78-gcc-5.4.0-c6cq4hh` is required for `rawrr`, to `${HOME}/.cache/R/rawrr/rawrrassembly` (4/8/2024)
+
+**Experimental codes**
+
+Script name| Description          | Protein-specific error/output
+-----------|----------------------|-----------------------------------------------------------
+mz.* | raw --> mzML conversion & MetaMorpheus, MSAmanda.
+crux.*  | search, R/multicomp+crux benchmark
+BoxCar.py/pyteomics.py | BoxCar algorighm and its use
+
+```mermaid
+graph TD;
+mz.*
+crux.*
+BoxCar.py/pyteomics.py
+```
+
+The module `mono-5.10.0.78-gcc-5.4.0-c6cq4hh` is required for `rawrr`, to `${HOME}/.cache/R/rawrr/rawrrassembly` (4/8/2024)
 
     File   | Size
     --------|---------------------------------------------------

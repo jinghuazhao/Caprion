@@ -55,18 +55,6 @@ function run_metamorpheus()
   export fasta=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0/databases/UP000005640.fasta
   eval $metamorpheus -g -o metamorpheus
   eval $metamorpheus -d ${fasta} -s $(ls mzML/*mzML) -t metamorpheus/SearchTask.toml -o metamorpheus
-  Rscript -e '
-    library(mzR)
-    batch <- Sys.getenv("batch")
-    dir <- file.path("~/Caprion/analysis",batch)
-    files <- list.files(file.path(dir,"metamorpheus/Task1SearchTask//Individual\ File\ Results"),
-                        pattern="mzID",full.names=TRUE,recursive=TRUE)
-    mzid <- openIDfile(files[1])
-    methods(class=class(mzid))
-    psm <- psms(mzid)
-    peptides <- read.delim(file.path(dir,"metamorpheus/Task1SearchTask/AllQuantifiedPeptides.tsv"))
-    dplyr::filter(peptides,Gene.Names=="PROC")
-  '
   cd -
 }
 
@@ -78,8 +66,27 @@ function run_msamanda()
   export msamanda=/usr/local/Cluster-Apps/ceuadmin/msamanda/3.0.21.532
   export fragpipe=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
   cd ${msamanda}
-  MSAmanda -s ${src}/mzML -e ${msamanda}/settings.xml  -o ${src}/msamanda -d ${fragpipe}/databases/UP000005640.fasta
+  MSAmanda -s ${src}/mzML -e ${msamanda}/settings.xml -o ${src}/msamanda -d ${fragpipe}/databases/UP000005640.fasta
   cd -
+}
+
+function read_metamorpheus()
+{
+  export batch=${1}
+  Rscript -e '
+    library(mzR)
+    batch <- Sys.getenv("batch")
+    dir <- file.path("~/Caprion/analysis",batch)
+    files <- list.files(file.path(dir,"metamorpheus/Task1SearchTask//Individual\ File\ Results"),
+                        pattern="mzID",full.names=TRUE,recursive=TRUE)
+    mzid <- openIDfile(files[1])
+    methods(class=class(mzid))
+    psm <- psms(mzid)
+    peaks <- read.delim(file.path(dir,"metamorpheus/Task1SearchTask/AllQuantifiedPeaks.tsv"))
+    peptides <- read.delim(file.path(dir,"metamorpheus/Task1SearchTask/AllQuantifiedPeptides.tsv"))
+    proteins <- read.delim(file.path(dir,"metamorpheus/Task1SearchTask/AllQuantifiedProteinGroups.tsv"))
+    dplyr::filter(peptides,Gene.Names=="PROC")
+  '
 }
 
 function read_msamanda()

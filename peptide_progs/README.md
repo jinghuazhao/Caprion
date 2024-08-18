@@ -57,14 +57,14 @@ BoxCar.py/pyteomics.py
 
 The module `mono-5.10.0.78-gcc-5.4.0-c6cq4hh` is required for `rawrr`, to `${HOME}/.cache/R/rawrr/rawrrassembly` (4/8/2024)
 
-    File   | Size
-    --------|---------------------------------------------------
-    eula.txt | 163
-    rawrr.exe | 28672
-    ThermoFisher.CommonCore.BackgroundSubtraction.dll | 44544
-    ThermoFisher.CommonCore.Data.dll | 406016
-    ThermoFisher.CommonCore.MassPrecisionEstimator.dll | 11264
-    ThermoFisher.CommonCore.RawFileReader.dll | 654336
+File   | Size
+--------|---------------------------------------------------
+eula.txt | 163
+rawrr.exe | 28672
+ThermoFisher.CommonCore.BackgroundSubtraction.dll | 44544
+ThermoFisher.CommonCore.Data.dll | 406016
+ThermoFisher.CommonCore.MassPrecisionEstimator.dll | 11264
+ThermoFisher.CommonCore.RawFileReader.dll | 654336
 
 ## References
 

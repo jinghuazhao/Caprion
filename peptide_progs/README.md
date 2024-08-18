@@ -44,8 +44,8 @@ utils.sh
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
-mz.* | raw --> mzML conversion & MetaMorpheus, MSAmanda.
-crux.*  | search, R/multicomp+crux benchmark
+mz.* | file handling & MetaMorpheus, MSAmanda. | mzML and results in ZWK|ZYQ|UDP|UHZ/metamorpheus, msamonda
+crux.*  | search, R/multicomp+crux benchmark | crux/
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
 
 ```mermaid

@@ -6,15 +6,35 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 #SBATCH --cpus-per-task=4
+##SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/mz.o
+##SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/mz.e
 
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/mz.o
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/mz.e
+# ZWK,ZYQ,UDP,UHZ=97,1544,836,1358
+#SBATCH --array=1-1358
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/UHZ/work/raw-%A-%a.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/UHZ/work/raw-%A-%a.e
 
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
 
 export TMPDIR=${HPC_WORK}/work
+
+function raw_ThermoRawFileParser_array()
+{
+  module load ceuadmin/ThermoRawFileParser/1.4.4
+  export batch=${1}
+  export src=~/Caprion/analysis/${batch}
+  if [ ! -f ${src}/${batch}.lst ]; then
+    ls -d ${src}/raw ${src}/raw/* | sed '1d;s/\.raw//' > ${src}/${batch}.lst
+  fi
+  cd /usr/local/Cluster-Apps/ceuadmin/ThermoRawFileParser/1.4.4
+  export f=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${src}/${batch}.lst)
+  if [ ! -f ${src}/mzML/${f}.mzML ]; then
+     mono ThermoRawFileParser.exe -i=${f}.raw -o ${src}/mzML
+  fi
+  cd -
+}
 
 function raw_ThermoRawFileParser()
 {
@@ -80,10 +100,10 @@ function read_msamanda()
 
 # mzML generation and MetaMorpheus/MSAmanda search
 {
-for batch in ZWK ZYQ UDP UHZ
+for batch in UHZ
 do
   echo ${batch} processing ...
-# raw_ThermoRawFileParser ${batch}
+  raw_ThermoRawFileParser_array ${batch}
 # run_metamorpheus ${batch}
 # run_msamanda ${batch}
 done

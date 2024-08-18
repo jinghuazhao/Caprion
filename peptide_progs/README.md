@@ -10,13 +10,12 @@ The project directory above contains scripts at **peptide_progs/** and results r
 
 These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
-I. **Association analysis**
-
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
+**Association analysis**
 1_pgwas.sh | Association analysis | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
-Signal identification | see **{protein}/sentinels/slurm**
+**Signal identification** (see **{protein}/sentinels/slurm**)
 3.1_extract.sh | Signal extraction | \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.o
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
@@ -40,10 +39,9 @@ utils.sh
 - for step 3.2, `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is used instead of `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
 - module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake`
 
-II. **Experimental codes**
-
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
+ **Experimental codes**
 mz.* | file handling & MetaMorpheus, MSAmanda. | mzML and results in */metamorpheus, msamonda
 crux.*  | search, R/multicomp+crux benchmark | crux/
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use

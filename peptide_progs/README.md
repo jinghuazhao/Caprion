@@ -10,7 +10,7 @@ The project directory above contains scripts at **peptide_progs/** and results r
 
 These are also a set of scripts called from `bash` which invokes SLURM jobs.
 
-**Association analysis**
+I. **Association analysis**
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------
@@ -40,7 +40,7 @@ utils.sh
 - for step 3.2, `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is used instead of `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
 - module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake`
 
-**Experimental codes**
+II. **Experimental codes**
 
 Script name| Description          | Protein-specific error/output
 -----------|----------------------|-----------------------------------------------------------

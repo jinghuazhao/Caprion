@@ -126,6 +126,7 @@
 <h2 id="scripts-and-results">Scripts and results</h2>
 <p>The project directory above contains scripts at <strong>peptide_progs/</strong> and results results at <strong>peptide/</strong>, respectively.</p>
 <p>These are also a set of scripts called from <code>bash</code> which invokes SLURM jobs.</p>
+<p><strong>Association analysis</strong></p>
 <table>
 <thead>
 <tr>
@@ -135,41 +136,6 @@
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><strong>Experimental codes</strong></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>mz.*</td>
-<td>handling of files in .raw and other formats</td>
-<td></td>
-</tr>
-<tr>
-<td>crux.R</td>
-<td>R/multicomp+crux benchmark</td>
-<td></td>
-</tr>
-<tr>
-<td>BoxCar.py/pyteomics.py</td>
-<td>BoxCar algorighm and its use</td>
-<td></td>
-</tr>
-<tr>
-<td>utils.sh</td>
-<td>Various utitlties</td>
-<td></td>
-</tr>
-<tr>
-<td>0_crux.sh</td>
-<td>crux search</td>
-<td>crux/*.e/.o</td>
-</tr>
-<tr>
-<td><strong>Association analysis</strong></td>
-<td></td>
-<td></td>
-</tr>
 <tr>
 <td>1_pgwas.sh</td>
 <td>Association analysis</td>
@@ -200,13 +166,14 @@
 <td>Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots</td>
 <td>_step3_{SLURM_job_id}_{phenotype_number}.e / _step3_{SLURM_job_id}_{phenotype_number}.o</td>
 </tr>
+<tr>
+<td>utils.sh</td>
+<td>Various utitlties</td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <div class="mermaid">graph TD;
-mz.*
-crux.*
-BoxCar.py/pyteomics.py
-0_crux.sh
 1_pgwas.sh
 2_meta_analysis.sh
 3.1_extract.sh
@@ -215,50 +182,55 @@ BoxCar.py/pyteomics.py
 1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3.1_extract.sh --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
 utils.sh
 </div>
-<p>The crux search is experimental and along with ongoing effort on visualization. Specfically, prerequistes for a Manhattan/peptide association plot are</p>
+<p>Specfic prerequistes for a Manhattan/peptide association plot are</p>
 <ul>
 <li>a call to vep_annotate functino in <code>0_utils.sh</code> for proteins.</li>
 <li>a call to <code>bgz()</code> (in <code>utils.sh</code> for protein) for a indexed and compressed DR-filtered data.</li>
 <li>for step 3.2, <code>ceuadmin/ensembl-vep/111-icelake</code> now is the default since partition <code>icelake-himem</code> is used instead of <code>cclake</code> (CentOS 7) which has <code>ceuadmin/ensembl-vep/104</code>.</li>
 <li>module <code>ceuadmin/R/4.4.1-icelake</code> now works as smoothly as the old <code>ceuadmin/R</code> at <code>cclake</code></li>
-<li>
-<p>module <code>mono-5.10.0.78-gcc-5.4.0-c6cq4hh</code> is required for <code>rawrr</code>, to <code>${HOME}/.cache/R/rawrr/rawrrassembly</code> (4/8/2024)</p>
+</ul>
+<p><strong>Experimental codes</strong></p>
 <table>
 <thead>
 <tr>
-<th>File</th>
-<th>Size</th>
+<th>Script name</th>
+<th>Description</th>
+<th>Protein-specific error/output</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>eula.txt</td>
-<td>163</td>
+<td>mz.*</td>
+<td>raw --&gt; mzML conversion &amp; MetaMorpheus, MSAmanda.</td>
+<td></td>
 </tr>
 <tr>
-<td>rawrr.exe</td>
-<td>28672</td>
+<td>crux.*</td>
+<td>search, R/multicomp+crux benchmark</td>
+<td></td>
 </tr>
 <tr>
-<td>ThermoFisher.CommonCore.BackgroundSubtraction.dll</td>
-<td>44544</td>
-</tr>
-<tr>
-<td>ThermoFisher.CommonCore.Data.dll</td>
-<td>406016</td>
-</tr>
-<tr>
-<td>ThermoFisher.CommonCore.MassPrecisionEstimator.dll</td>
-<td>11264</td>
-</tr>
-<tr>
-<td>ThermoFisher.CommonCore.RawFileReader.dll</td>
-<td>654336</td>
+<td>BoxCar.py/pyteomics.py</td>
+<td>BoxCar algorighm and its use</td>
+<td></td>
 </tr>
 </tbody>
 </table>
-</li>
-</ul>
+<div class="mermaid">graph TD;
+mz.*
+crux.*
+BoxCar.py/pyteomics.py
+</div>
+<p>The module <code>mono-5.10.0.78-gcc-5.4.0-c6cq4hh</code> is required for <code>rawrr</code>, to <code>${HOME}/.cache/R/rawrr/rawrrassembly</code> (4/8/2024)</p>
+<pre><code>File   | Size
+--------|---------------------------------------------------
+eula.txt | 163
+rawrr.exe | 28672
+ThermoFisher.CommonCore.BackgroundSubtraction.dll | 44544
+ThermoFisher.CommonCore.Data.dll | 406016
+ThermoFisher.CommonCore.MassPrecisionEstimator.dll | 11264
+ThermoFisher.CommonCore.RawFileReader.dll | 654336
+</code></pre>
 <h2 id="references">References</h2>
 <p>Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. <em>J Proteome Res</em> 22:625–631 (2023), <a href="https://doi.org/10.1021/acs.jproteome.2c00632">https://doi.org/10.1021/acs.jproteome.2c00632</a>, <a href="https://spectrum-utils.readthedocs.io/en/latest/">https://spectrum-utils.readthedocs.io/en/latest/</a>.</p>
 <p>Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. <em>Methods Mol Biol</em> 2426:25-34 (2023), <a href="https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2">doi: 10.1007/978-1-0716-1967-4_2</a>.</p>

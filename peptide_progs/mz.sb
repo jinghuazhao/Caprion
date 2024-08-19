@@ -36,6 +36,25 @@ function raw_ThermoRawFileParser_array()
   cd -
 }
 
+function run_msamanda_array()
+{
+  module load ceuadmin/msamanda/3.0.21.532
+  export batch=${1}
+  export src=~/Caprion/analysis/${batch}
+  if [ ! -f ${src}/${batch}.lst ]; then
+    ls -d ${src}/raw ${src}/raw/* | sed '1d;s/\.raw//' > ${src}/${batch}.lst
+  fi
+  export msamanda=/usr/local/Cluster-Apps/ceuadmin/msamanda/3.0.21.532
+  export fragpipe=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
+  export f=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${src}/${batch}.lst)
+  cd ${msamanda}
+  if [ ! -f ${src}/msamanda/${f}.csv ]; then
+     MSAmanda -s ${src}/mzML/${f}.mzML -e ${msamanda}/settings.xml -o ${src}/msamanda \
+              -d ${fragpipe}/databases/UP000005640.fasta
+  fi
+  cd -
+}
+
 function raw_ThermoRawFileParser()
 {
   module load ceuadmin/ThermoRawFileParser/1.4.4
@@ -66,7 +85,8 @@ function run_msamanda()
   export msamanda=/usr/local/Cluster-Apps/ceuadmin/msamanda/3.0.21.532
   export fragpipe=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
   cd ${msamanda}
-  MSAmanda -s ${src}/mzML -e ${msamanda}/settings.xml -o ${src}/msamanda -d ${fragpipe}/databases/UP000005640.fasta
+  MSAmanda -s ${src}/mzML -e ${msamanda}/settings.xml -o ${src}/msamanda \
+           -d ${fragpipe}/databases/UP000005640.fasta
   cd -
 }
 

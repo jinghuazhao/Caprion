@@ -53,7 +53,7 @@ crux.*
 BoxCar.py/pyteomics.py
 ```
 
-The module `mono-5.10.0.78-gcc-5.4.0-c6cq4hh` is required for `rawrr`, to `${HOME}/.cache/R/rawrr/rawrrassembly` (4/8/2024)
+The module `mono-5.10.0.78-gcc-5.4.0-c6cq4hh` is required for `rawrr`, to `${HOME}/.cache/R/rawrr/rawrrassembly` (4/8/2024). Finally, `ceumadin/FragPipe/22.0` is available as a GUI for experiments on various worflows.
 
 File   | Size
 --------|---------------------------------------------------
@@ -67,6 +67,8 @@ ThermoFisher.CommonCore.RawFileReader.dll | 654336
 ## References
 
 Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. *J Proteome Res* 22:625–631 (2023), <https://doi.org/10.1021/acs.jproteome.2c00632>, <https://spectrum-utils.readthedocs.io/en/latest/>.
+
+fragpipe.nesvilab.org, <https://fragpipe.nesvilab.org/>
 
 Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. *Methods Mol Biol* 2426:25-34 (2023), [doi: 10.1007/978-1-0716-1967-4_2](https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2).
 

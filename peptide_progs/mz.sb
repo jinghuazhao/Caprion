@@ -90,6 +90,23 @@ function run_msamanda()
   cd -
 }
 
+function read_psm()
+{
+  Rscript -e '
+    library(dplyr)
+    library(tidyr)
+    psm_data <- read.table("psm.tsv", sep="\t", header=TRUE)
+    filtered_psm <- psm_data %>%
+                    filter(Probability>=0.90)
+    aggregated_data <- filtered_psm %>%
+                       group_by(Peptide, Spectrum.File) %>%
+                       summarize(intensity=sum(Intensity))
+    msstats_data <- aggregated_data %>%
+                    pivot_wider(names_from=Spectrum.File, values_from = intensity)
+    write.table(msstats_data, "msstats_input.tsv", sep = "\t", row.names = FALSE)
+  '
+}
+
 function read_metamorpheus()
 {
   export batch=${1}

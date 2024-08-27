@@ -426,3 +426,23 @@ function meta()
      print(match_peptides)
   '
 }
+Rscript -e '
+  load("~/Caprion/pilot/ZWK.rda")
+  suppressMessages(library(dplyr))
+  peptides_per_protein <- mapping_ZWK %>%
+                          filter(Protein!="-") %>%
+                          group_by(Protein) %>%
+                          summarize(N=n(),
+                                    group=cut(N, breaks = c(0, 15, 30, 50, Inf),
+                                                 labels = c("1-15", "16-30", "31-50", "51+"),
+                                                 right = FALSE))
+> dim(peptides_per_protein)
+  with(peptides_per_protein,
+  {
+   print(table(N))
+   print(table(group))
+   print(table(group)|>sum())
+  })
+  wtable <- with(peptides_per_protein, tapply(N,group,sum))
+  print(wtable)
+ '

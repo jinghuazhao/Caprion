@@ -11,6 +11,12 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_freq-0.01_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/_freq-0.01_%A_%a.e
 
+#SBATCH --job-name=_vep
+#SBATCH --mem=50000
+#SBATCH --cpus-per-task=5
+#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/vep/slurm/_vep_.o
+#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/bgen/vep/slurm/_vep_.e
+
 ##SBATCH --job-name=_fastGWA
 ##SBATCH --array=1-987
 ##SBATCH --mem=28800
@@ -22,11 +28,11 @@
 ##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.o
 ##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_qqmanhattan_%A_%a.e
 
-#SBATCH --job-name=_lz
-#SBATCH --array=1-987
-#SBATCH --mem 6800
-#SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
-#SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
+##SBATCH --job-name=_lz
+##SBATCH --array=1-987
+##SBATCH --mem 6800
+##SBATCH --output=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.o
+##SBATCH --error=/rds/project/jmmh2/rds-jmmh2-projects/Caprion_proteomics/analysis/METAL_dr/qqmanhattanlz/slurm/_lz_%A_%a.e
 
 ##SBATCH --job-name=pairs
 ##SBATCH --array=1-987
@@ -94,6 +100,33 @@ function freq.01()
          --freq \
          --out ${analysis}/bgen/${chr}-freq
   awk 'NR>1 && $5>=0.01 && $5<=0.99 {print $2}' ${analysis}/bgen/${chr}-freq.afreq > ${analysis}/bgen/${chr}-0.01.snplist
+}
+
+function vep()
+{
+  if [ ! -d ${analysis}/bgen/vep/slurm ]; then mkdir -p ${analysis}/bgen/vep/slurm; fi
+  module load ceuadmin/ensembl-vep/111-icelake
+  export dbNSFP_dir=/rds/project/rds-4o5vpvAowP0/dbNSFP4.1a
+  echo $(seq 22) X | \
+  xargs -n 1 | \
+  parallel -j5 -C' ' '
+    (
+      echo "##fileformat=VCFv4.0"
+      echo "#CHROM" "POS" "ID" "REF" "ALT" "QUAL" "FILTER" "INFO"
+      awk "{split(\$1,a,\":|_\");print \"chr\"a[1],a[2],\$1,a[3],a[4],\".\",\".\",\".\"}" ${analysis}/bgen/chr{}.snplist
+    ) | \
+    tr " " "\t" > ${analysis}/bgen/vep/chr{}.vcf
+  # VEP annotation
+    vep --input_file ${analysis}/bgen/vep/chr{}.vcf \
+        --output_file ${analysis}/bgen/vep/chr{}.tab --force_overwrite \
+        --cache --dir_cache /usr/local/Cluster-Apps/ceuadmin/ensembl-vep/111-icelake/.vep \
+        --offline \
+        --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol \
+        --plugin dbNSFP,${dbNSFP_dir}/dbNSFP4.1a_variant.chr{}.gz,filter_vcf_dbNSFP_rsid \
+        --tab
+    java -jar ${dbNSFP_dir}/search_dbNSFP41a.jar \
+         -i ${analysis}/bgen/vep/chr{}.vcf -o ${analysis}/bgen/vep/chr{}_dbNSFP.tsv
+  '
 }
 
 function fastLR()
@@ -480,11 +513,12 @@ function miamiplot2()
 #bgen
 #freq
 #freq.01
+vep
 #fastLR 1
 #fastLR 2
 #fastLR 3
 #qqmanhattan
-lz
+#lz
 #pairs_p
 #miamiplot
 #miamiplot2

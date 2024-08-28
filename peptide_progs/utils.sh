@@ -427,22 +427,31 @@ function meta()
   '
 }
 Rscript -e '
-  load("~/Caprion/pilot/ZWK.rda")
-  suppressMessages(library(dplyr))
-  peptides_per_protein <- mapping_ZWK %>%
-                          filter(Protein!="-") %>%
-                          group_by(Protein) %>%
-                          summarize(N=n(),
-                                    group=cut(N, breaks = c(0, 15, 30, 50, Inf),
-                                                 labels = c("1-15", "16-30", "31-50", "51+"),
-                                                 right = FALSE))
-> dim(peptides_per_protein)
-  with(peptides_per_protein,
+  peptides <- function(code)
   {
-   print(table(N))
-   print(table(group))
-   print(table(group)|>sum())
-  })
-  wtable <- with(peptides_per_protein, tapply(N,group,sum))
-  print(wtable)
+    suppressMessages(library(dplyr))
+    cat(code,"\n")
+    load(paste0("~/Caprion/pilot/",code,".rda"))
+    peptides_per_protein <- get(paste0("mapping_",code)) %>%
+                            filter(Protein!="-") %>%
+                            group_by(Protein) %>%
+                            summarize(N=n(),
+                                      group=cut(N, breaks = c(0, 15, 30, 50, Inf),
+                                                   labels = c("1-15", "16-30", "31-50", "51+"),
+                                                   right = FALSE))
+    print(dim(peptides_per_protein))
+    attach(peptides_per_protein)
+    print(table(N))
+    table_group <- table(group)
+    table_sum <- table(group)|>sum()
+    detach(peptides_per_protein)
+    wtable <- with(peptides_per_protein, tapply(N,group,sum))
+    list(table_group=c(code,table_group),table_sum=c(code,table_sum),wtable=c(code,wtable))
+  }
+  ZWK <- peptides("ZWK")
+  ZYQ <- peptides("ZYQ")
+  UDP <- peptides("UDP")
+  UHZ <- peptides("UHZ")
+  knitr::kable(rbind(ZWK$table_group,ZYQ$table_group,UDP$table_group,UHZ$table_group),caption="Frequencies of categories")
+  knitr::kable(rbind(ZWK$wtable,ZYQ$wtable,UDP$wtable,UHZ$wtable),caption="Total number of peptides")
  '

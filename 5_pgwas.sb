@@ -106,7 +106,8 @@ function vep()
 {
   if [ ! -d ${analysis}/bgen/vep/slurm ]; then mkdir -p ${analysis}/bgen/vep/slurm; fi
   module load ceuadmin/ensembl-vep/111-icelake
-  export dbNSFP_dir=/rds/project/rds-4o5vpvAowP0/dbNSFP4.1a
+  module load ceuadmin/htslib
+  export dbNSFP_dir=/rds/project/rds-4o5vpvAowP0/software/dbNSFP4.9a
   echo $(seq 22) X | \
   xargs -n 1 | \
   parallel -j5 -C' ' '
@@ -117,15 +118,20 @@ function vep()
     ) | \
     tr " " "\t" > ${analysis}/bgen/vep/chr{}.vcf
   # VEP annotation
-    vep --input_file ${analysis}/bgen/vep/chr{}.vcf \
-        --output_file ${analysis}/bgen/vep/chr{}.tab --force_overwrite \
+    export rt=${analysis}/bgen/vep/chr{}
+    vep --input_file ${rt}.vcf \
+        --output_file ${rt}.tab --force_overwrite \
         --cache --dir_cache /usr/local/Cluster-Apps/ceuadmin/ensembl-vep/111-icelake/.vep \
         --offline \
         --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol \
-        --plugin dbNSFP,${dbNSFP_dir}/dbNSFP4.1a_variant.chr{}.gz,filter_vcf_dbNSFP_rsid \
+        --plugin dbNSFP,${dbNSFP_dir}/dbNSFP4.9a_variant.chr{}.gz \
         --tab
-    java -jar ${dbNSFP_dir}/search_dbNSFP41a.jar \
-         -i ${analysis}/bgen/vep/chr{}.vcf -o ${analysis}/bgen/vep/chr{}_dbNSFP.tsv
+    sed "/##/d" ${rt}.tab | \
+    awk -v OFS="\t" "{if(NR==1){print \"Chrom\",\"Pos\",\$0}{gsub(/:/,\"\t\");print}}" | \
+    bgzip -f > ${rt}.tab.gz
+    tabix -S1 -s1 -b2 -e2 ${rt}.tab.gz
+  # only works interactively
+    java -Djava.awt.headless=true -jar ${dbNSFP_dir}/search_dbNSFP49a.jar -i ${rt}.vcf -o ${rt}_dbNSFP.tsv
   '
 }
 

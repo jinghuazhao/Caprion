@@ -111,6 +111,7 @@ function vep()
   echo $(seq 22) X | \
   xargs -n 1 | \
   parallel -j5 -C' ' '
+    echo chr{}
     (
       echo "##fileformat=VCFv4.0"
       echo "#CHROM" "POS" "ID" "REF" "ALT" "QUAL" "FILTER" "INFO"
@@ -124,14 +125,16 @@ function vep()
         --cache --dir_cache /usr/local/Cluster-Apps/ceuadmin/ensembl-vep/111-icelake/.vep \
         --offline \
         --species homo_sapiens --assembly GRCh37 --pick --nearest symbol --symbol \
-        --plugin dbNSFP,${dbNSFP_dir}/dbNSFP4.9a_variant.chr{}.gz \
+        --plugin dbNSFP,${dbNSFP_dir}/dbNSFP4.9a_variant.chr{}.gz,rs_dbSNP \
         --tab
     sed "/##/d" ${rt}.tab | \
-    awk -v OFS="\t" "{if(NR==1){print \"Chrom\",\"Pos\",\$0}{gsub(/:/,\"\t\");print}}" | \
+    awk -v OFS="\t" "{
+        if(NR==1) print \"Chrom\",\"Pos\",\$0; else {split(\$1,a,\":|_\");print a[1],a[2],\$0}
+    }" | \
     bgzip -f > ${rt}.tab.gz
     tabix -S1 -s1 -b2 -e2 ${rt}.tab.gz
   # only works interactively
-    java -Djava.awt.headless=true -jar ${dbNSFP_dir}/search_dbNSFP49a.jar -i ${rt}.vcf -o ${rt}_dbNSFP.tsv
+  # java -jar ${dbNSFP_dir}/search_dbNSFP49a.jar -i ${rt}.vcf -o ${rt}_dbNSFP.tsv
   '
 }
 

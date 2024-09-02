@@ -72,7 +72,7 @@ Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC
 
 fragpipe.nesvilab.org, <https://fragpipe.nesvilab.org/>
 
-Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. *Methods Mol Biol* 2426:25-34 (2023), [doi: 10.1007/978-1-0716-1967-4_2](https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2).
+Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Multiple Decoys. *Methods Mol Biol* 2023;2426:25-34, [doi: 10.1007/978-1-0716-1967-4_2](https://link.springer.com/protocol/10.1007/978-1-0716-1967-4_2).
 
 <details>
 
@@ -80,10 +80,12 @@ Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Mult
 
 </details>
 
-Kertesz-Farkas A, Nii Adoquaye Acquaye FL, Bhimani K, Eng JK, Fondrie WE, Grant C, Hoopmann MR, Lin A, Lu YY, Moritz RL, MacCoss MJ, Noble WS. The Crux Toolkit for Analysis of Bottom-Up Tandem Mass Spectrometry Proteomics Data. *J Proteome Res* 22(2):561-569 (2023), <https://doi.org/10.1021/acs.jproteome.2c00615>, <https://crux.ms>.
+Kertesz-Farkas A, Nii Adoquaye Acquaye FL, Bhimani K, Eng JK, Fondrie WE, Grant C, Hoopmann MR, Lin A, Lu YY, Moritz RL, MacCoss MJ, Noble WS. The Crux Toolkit for Analysis of Bottom-Up Tandem Mass Spectrometry Proteomics Data. *J Proteome Res* 2023;22(2):561-569, <https://doi.org/10.1021/acs.jproteome.2c00615>, <https://crux.ms>.
 
-Levitsky LI, Klein J, Ivanov, MV, Gorshkov MV. Pyteomics 4.0: five years of development of a Python proteomics framework, *J Proteome Res* 2018, <https://doi.org/10.1021/acs.jproteome.8b00717>, <https://pyteomics.readthedocs.io/en/latest/>
+Levitsky LI, Klein JA, Ivanov MV, Gorshkov MV. Pyteomics 4.0: Five Years of Development of a Python Proteomics Framework. *J Proteome Res.* 2019;18(2):709-714. [doi: 10.1021/acs.jproteome.8b00717](https://pubs.acs.org/doi/10.1021/acs.jproteome.8b00717).
 
 ms-utils.org, <https://ms-utils.org/>.
 
-Rehfeldt TG, Gabriels R, Bouwmeester R, Gessulat S, Neely BA, Palmblad M, Perez-Riverol Y, Schmidt T, Vizcaíno JA, Deutsch EW. ProteomicsML: An Online Platform for Community-Curated Data sets and Tutorials for Machine Learning in Proteomics. *J Proteome Res*, 22(2):632-636 (2023), <https://doi.org/10.1021/acs.jproteome.2c00629>, <https://proteomicsml.org/>.
+Rehfeldt TG, Gabriels R, Bouwmeester R, Gessulat S, Neely BA, Palmblad M, Perez-Riverol Y, Schmidt T, Vizcaíno JA, Deutsch EW. ProteomicsML: An Online Platform for Community-Curated Data sets and Tutorials for Machine Learning in Proteomics. *J Proteome Res*, 2023;22(2):632-636, <https://doi.org/10.1021/acs.jproteome.2c00629>, <https://proteomicsml.org/>.
+
+Sturm M, Bertsch A, Gröpl C, Hildebrandt A, Hussong R, Lange E, Pfeifer N, Schulz-Trieglaff O, Zerck A, Reinert K, Kohlbacher O. OpenMS - an open-source software framework for mass spectrometry. *BMC Bioinformatics*. 2008;9:163. [doi: 10.1186/1471-2105-9-163](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-163).

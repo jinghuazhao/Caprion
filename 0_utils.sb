@@ -1409,30 +1409,42 @@ Rscript -e '
   load(file.path(analysis,"work","eSet.rda"))
   library(tidyverse)
 
-  dr <- function(prot)
+  dr <- function(prot="PROC")
   {
     protein <- paste0(prot,"_HUMAN")
     mapping <- raw_ZWK[1:2]
     isotope <- subset(mapping,Protein==protein)[["Isotope.Group.ID"]]
+    na_rm_dr <- function(x) !is.na(x) & x <50000
     zwk <- subset(raw_ZWK,Isotope.Group.ID %in% isotope)[-(2:6)]
     rownames(zwk) <- NULL
     zwk <- column_to_rownames(zwk,"Isotope.Group.ID")
     zwk_n <- ncol(zwk)
-    zwk_dr <- apply(zwk,1,"<",50000) |> apply(2,sum)
+    zwk_dr <- apply(zwk,1,na_rm_dr) |> apply(2,sum)
     zwk_na <- apply(zwk,1,is.na) |> apply(2,sum)
     zyq <- subset(raw_ZYQ,Isotope.Group.ID %in% isotope)
     rownames(zyq) <- NULL
     zyq <- column_to_rownames(zyq,"Isotope.Group.ID")
     zyq_n <- ncol(zyq)
-    zyq_dr <- apply(zyq,1,"<",50000) |> apply(2,sum)
+    zyq_dr <- apply(zyq,1,na_rm_dr) |> apply(2,sum)
     zyq_na <- apply(zyq,1,is.na) |> apply(2,sum)
     udp <- subset(raw_UDP,Isotope.Group.ID %in% isotope)
     rownames(udp) <- NULL
     udp <- column_to_rownames(udp,"Isotope.Group.ID")
     udp_n <- ncol(udp)
-    udp_dr <- apply(udp,1,"<",50000) |> apply(2,sum)
+    udp_dr <- apply(udp,1,na_rm_dr) |> apply(2,sum)
     udp_na <- apply(udp,1,is.na) |> apply(2,sum)
-    list(ZWK=list(zwk,zwk_n,zwk_dr,zwk_na),ZYQ=list(zyq,zyq_n,zyq_dr,zyq_na),UDP=list(udp,udp_n,udp_dr,udp_na))
+    raw <- full_join(rownames_to_column(zwk, "Isotope.Group.ID"),
+                     rownames_to_column(zyq, "Isotope.Group.ID"),
+                     by = "Isotope.Group.ID") %>%
+          full_join(rownames_to_column(udp, "Isotope.Group.ID"),
+                     by = "Isotope.Group.ID")
+    dr <- t(bind_rows(zwk_dr,zyq_dr,udp_dr))
+    colnames(dr) <- c("ZWK","ZYQ","UDP")
+    n <- c(zwk_n,zyq_n,udp_n)
+    names(n) <- c("ZWK","ZYQ","UDP")
+    na <- t(bind_rows(zwk_na,zyq_na,udp_na))
+    colnames(na) <- c("ZWK","ZYQ","UDP")
+    list(raw=raw,dr=dr,n=n,na=na)
   }
 
   for (protein in c("A1BG","APOB","EPCR","ERAP2","PROC"))

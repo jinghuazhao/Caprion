@@ -1408,7 +1408,6 @@ Rscript -e '
   require(openxlsx)
   load(file.path(analysis,"work","eSet.rda"))
   library(tidyverse)
-
   dr <- function(prot="PROC")
   {
     protein <- paste0(prot,"_HUMAN")
@@ -1444,10 +1443,21 @@ Rscript -e '
     names(n) <- c("ZWK","ZYQ","UDP")
     na <- t(bind_rows(zwk_na,zyq_na,udp_na))
     colnames(na) <- c("ZWK","ZYQ","UDP")
-    list(raw=raw,dr=dr,n=n,na=na)
+    dr_filt <- (dr/n > 0.1) + 0
+    list(raw=raw,dr=dr,n=n,na=na,dr_filt=dr_filt)
   }
-
-  for (protein in c("A1BG","APOB","EPCR","ERAP2","PROC"))
+  bookmarks <- c("A1BG","APOB","EPCR","ERAP2","PROC")
+  for (prot in bookmarks)
+  {
+     sink(paste0(prot,"_dr_filt.md"))
+     assign(paste0("z_",prot),dr(prot))
+     print(knitr::kable(get(paste0("z_",prot))$dr_filt,
+                        caption=paste("DR indicator for",prot)))
+     sink()
+     cmd <- paste("pandoc",paste0(prot,"_dr_filt.md"),"-o",paste0(prot,"_dr_filt.html"))
+     system(cmd)
+  }
+  for (protein in bookmarks)
   {
      cat("Protein:",protein,"\n")
      sink(file.path(analysis,"work",paste0(protein,".log")))

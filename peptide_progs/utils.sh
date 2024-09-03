@@ -455,3 +455,29 @@ Rscript -e '
   knitr::kable(rbind(ZWK$table_group,ZYQ$table_group,UDP$table_group,UHZ$table_group),caption="Frequencies of categories")
   knitr::kable(rbind(ZWK$wtable,ZYQ$wtable,UDP$wtable,UHZ$wtable),caption="Total number of peptides")
  '
+
+module load ceuadmin/htslib
+export PERL5LIB=
+
+function sumstats()
+{
+  export prot=${1}
+  cd ~/Caprion/analysis
+# ls peptide/${prot}/*gz | parallel -j10 -C' ' 'tabix -f -S1 -s1 -b3 -e3 {}'
+  if [ ! -d peptide/${prot}/sumstats ]; then mkdir peptide/${prot}/sumstats; fi
+  parallel -j1 -C' ' '
+     export isotope_batch=$(basename -s .fastGWA.gz {2})
+     echo ${isotope_batch}
+     export out=peptide/${prot}/sumstats/${isotope_batch}.txt
+     gunzip -c {2} | \
+     head -1 > ${out}
+     tabix {2} {1} >> ${out}
+  '  ::: $(grep -w ${prot} work/caprion_dr.cis.vs.trans | \
+           awk -v FS=, '{print $8,$9}' | \
+           awk -vM=1e6 '{print $1":"$2-M"-"$2+M}') ::: $(ls peptide/${prot}/*gz)
+  ls peptide/${prot}/sumstats/*.txt | \
+  parallel -C' ' 'if [ "$(wc -l < {})" == 1 ]; then rm {}; fi'
+  cd -
+}
+
+sumstats PROC

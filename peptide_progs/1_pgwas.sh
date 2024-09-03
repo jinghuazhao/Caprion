@@ -118,6 +118,7 @@ cat << 'EOL' > ${sbatch}
 module purge
 module load rhel8/default-icl
 module load samtools/1.13/gcc/zwxn7ug3
+module load ceuadmin/htslib/1.20
 
 export protein=PROTEIN
 export TMPDIR=${HPC_WORK}/work
@@ -156,7 +157,9 @@ function fastLR()
              --threads 10 \
              --out ${root}-${batch}-${peptide}-chrX
   bgzip -f ${root}-${batch}-${peptide}.fastGWA
+  tabix -f -S1 -s1 -b3 -e3 ${root}-${batch}-${peptide}.fastGWA.gz
   bgzip -f ${root}-${batch}-${peptide}-chrX.fastGWA
+  tabix -f -S1 -s1 -b3 -e3 ${root}-${batch}-${peptide}-chrX.fastGWA.gz
 }
 
 fastLR 1

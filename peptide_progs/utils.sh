@@ -463,12 +463,13 @@ function sumstats()
 {
   export prot=${1}
   cd ~/Caprion/analysis
+# uncomment below for a fresh run
 # ls peptide/${prot}/*gz | parallel -j10 -C' ' 'tabix -f -S1 -s1 -b3 -e3 {}'
   if [ ! -d peptide/${prot}/sumstats ]; then mkdir peptide/${prot}/sumstats; fi
   parallel -j1 -C' ' '
      export isotope_batch=$(basename -s .fastGWA.gz {2})
      echo ${isotope_batch}
-     export out=peptide/${prot}/sumstats/${isotope_batch}.txt
+     export out=peptide/${prot}/sumstats/${isotope_batch}-{1}.txt
      gunzip -c {2} | \
      head -1 > ${out}
      tabix {2} {1} >> ${out}

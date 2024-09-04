@@ -478,7 +478,26 @@ function sumstats()
            awk -vM=1e6 '{print $1":"$2-M"-"$2+M}') ::: $(ls peptide/${prot}/*gz)
   ls peptide/${prot}/sumstats/*.txt | \
   parallel -C' ' 'if [ "$(wc -l < {})" == 1 ]; then rm {}; fi'
+  (
+    gunzip -c peptide/${prot}/*gz | \
+    head -1 | \
+    awk -vOFS="\t" '{print "source",$0}'
+    (
+      parallel -j1 -C' ' '
+         export isotope_batch=$(basename -s .fastGWA.gz {2})
+         tabix {2} {1} | \
+         awk -vOFS="\t" -vsource=${isotope_batch}:{1} "{print source,\$0}"
+      '  ::: $(grep -w ${prot} work/caprion_dr.cis.vs.trans | \
+               awk -v FS=, '{print $8,$9}' | \
+               awk -vM=0 '{print $1":"$2-M"-"$2+M}') ::: $(ls peptide/${prot}/*gz)
+    ) | \
+    sort -k1,1
+  ) > peptide/${prot}/${prot}.sumstats
   cd -
 }
 
 sumstats PROC
+sumstats ERAP2
+sumstats EPCR
+sumstats A1BG
+sumstats APOB

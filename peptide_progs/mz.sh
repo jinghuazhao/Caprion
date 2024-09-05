@@ -43,7 +43,7 @@ wine64 $(which msconvert.exe) --mzML ${ZWK}/${raw}
 export sprot=~/rds/public_databases/UniProt/uniprot_sprot.fasta.gz
 export sprot=uniprot_sprot.fasta
 export uniref100=~/rds/public_databases/UniProt/uniref100.fasta.gz
-export uniprot=uniprot
+export uniprot='Human_database_including_decoys_(cRAP_added)'
 
 function yeast_files()
 # Rscript multidecoy_peptides.R yeast_parameters.txt
@@ -101,16 +101,16 @@ FileConverter -in rawdata.raw -out rawdata.mzML
 XTandemAdapter -in ${spectra}.mzML -database ${unprot}.fasta -xtandem_executable $(which tandem.exe)
 
 # Perform peak picking
-PeakPickerHiRes -in ${spectra}.mzML -out picked.mzML
+PeakPickerHiRes -in ${spectra}.mzML -out ${spectra}_picked.mzML
 
 # Run peptide identification using Comet
-CometAdapter -in picked.mzML -out comet.idXML -database ${uniprot}.fasta
+CometAdapter -in ${spectra}_picked.mzML -out ${spectra}_comet.idXML -database ${uniprot}.fasta
 
 # Convert identification results to OpenMS format using comet.exe
-IDFileConverter -in comet.idXML -out comet.idXML
+IDFileConverter -in ${spectra}_comet.idXML -out comet.idXML
 
 # Map peptide identifications to features
-IDMapper -in picked.mzML -id comet.idXML -out mapped.mzML
+IDMapper -in ${spectra}_picked.mzML -id comet.idXML -out mapped.mzML
 
 # Annotate peptides with protein information
 PeptideIndexer -in comet.idXML -fasta ${uniprot}.fasta -out indexed.idXML
@@ -122,13 +122,14 @@ singularity exec -B /usr/local/Cluster-Apps/ceuadmin/OpenMS/3.0.0-pre-develop-20
                 -in /data/qExactive01819_profile.mzml -database /data/'Human_database_including_decoys_(cRAP_added).fasta'
 ## 2.
 
+export spectra2=szwk021704i19101xms1
 export db=Human_database_including_decoys_(cRAP_added).fasta
 
-# Feature detection: 16193 features found for szwk021704i19101xms1.mzML.
-FeatureFinderCentroided -in szwk021704i19101xms1.mzML -out features.featureXML
+# Feature detection: 16193 features found.
+FeatureFinderCentroided -in ${spectra2}.mzML -out ${spectra2}.featureXML
 
 # Peptide Identification
-XTandemAdapter -in szwk021704i19101xms1.mzML -out identifications.idXML -database ${db}
+XTandemAdapter -in ${spectra2}.mzML -out identifications.idXML -database ${db}
 
 # Validation and Filtering
 IDFilter -in identifications.idXML -out filtered_identifications.idXML -score:pep 0.01
@@ -138,6 +139,28 @@ PeptideIndexer -in filtered_identifications.idXML -out indexed_identifications.i
 
 # Protein Inference
 ProteinQuantifier -in indexed_identifications.idXML -out protein_quant.csv -consensus:protein_level
+
+## 3.
+
+INPUT_DIR="."
+OUTPUT_DIR="."
+
+for file in $INPUT_DIR/sz*mzML
+do
+    filename=$(basename "$file" .mzML)
+
+  # Perform peak detection
+    PeakPickerHiRes -in "$file" -out "$OUTPUT_DIR/${filename}_peaks.mzML"
+
+  # Detect and quantify features
+    FeatureFinderCentroided -in "$OUTPUT_DIR/${filename}_peaks.mzML" -out "$OUTPUT_DIR/${filename}.featureXML"
+done
+
+# Align features across samples (if applicable)
+FeatureLinkerUnlabeledQT -in $OUTPUT_DIR/*featureXML -out $OUTPUT_DIR/aligned.consesusXML
+
+# Statistical analysis
+ProteinQuantifier -in aligned.consensusXML -out quantified.csv
 }
 
 function docker()

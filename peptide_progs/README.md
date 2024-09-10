@@ -82,7 +82,7 @@ Hasam S, Emery K, Noble WS, Keich U. A Pipeline for Peptide Detection Using Mult
 
 Kertesz-Farkas A, Nii Adoquaye Acquaye FL, Bhimani K, Eng JK, Fondrie WE, Grant C, Hoopmann MR, Lin A, Lu YY, Moritz RL, MacCoss MJ, Noble WS. The Crux Toolkit for Analysis of Bottom-Up Tandem Mass Spectrometry Proteomics Data. *J Proteome Res* 2023;22(2):561-569, <https://doi.org/10.1021/acs.jproteome.2c00615>, <https://crux.ms>.
 
-Levitsky LI, Klein JA, Ivanov MV, Gorshkov MV. Pyteomics 4.0: Five Years of Development of a Python Proteomics Framework. *J Proteome Res.* 2019;18(2):709-714. [doi: 10.1021/acs.jproteome.8b00717](https://pubs.acs.org/doi/10.1021/acs.jproteome.8b00717).
+Levitsky LI, Klein JA, Ivanov MV, Gorshkov MV. Pyteomics 4.0: Five Years of Development of a Python Proteomics Framework. *J Proteome Res.* 2019;18(2):709-714. [doi: 10.1021/acs.jproteome.8b00717](https://pubs.acs.org/doi/10.1021/acs.jproteome.8b00717), <https://github.com/levitsky/pyteomics>.
 
 ms-utils.org, <https://ms-utils.org/>.
 

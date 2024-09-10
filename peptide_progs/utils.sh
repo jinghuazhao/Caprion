@@ -501,3 +501,43 @@ sumstats ERAP2
 sumstats EPCR
 sumstats A1BG
 sumstats APOB
+
+function csq()
+{
+   Rscript -e '
+     options(width=2000)
+     suppressMessages(require(dplyr))
+     suppressMessages(require(pQTLtools))
+     suppressMessages(require(stringr))
+   # Caprion peptides
+     peptide <- read.csv("~/Caprion/analysis/reports/peptide.cis.vs.trans") %>%
+                dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP) %>%
+                select(chr,pos,MarkerName,prot)
+   # VEP output
+     vep <- "/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/bgen/vep"
+     pattern <- paste( protein_altering_variants, collapse = "|")
+     suppressMessages(require(GenomicRanges))
+     INF <- "/rds/project/rds-zuZwCZMsS0w/olink_proteomics/scallop/INF"
+     plink <- "/rds/user/jhz22/hpc-work/bin/plink"
+   # CSQ
+     b <- list()
+     for (i in unique(dplyr::pull(peptide,chr))) {
+       m <- dplyr::filter(peptide, prot %in% c("A1BG","APOB","EPCR","ERAP2","PROC") & chr %in% i) %>%
+            dplyr::mutate(rsid = gsub("chr", "", MarkerName)) %>%
+            dplyr::select(-MarkerName)
+       u <- read.delim(file.path(vep, paste0("chr", i, ".tab.gz"))) %>%
+            dplyr::select(Chrom, Pos, X.Uploaded_variation, Consequence) %>%
+            setNames(c("chr", "pos", "rsid", "csq")) %>%
+            dplyr::mutate(chr=if_else(chr=="X","23",chr),chr=as.numeric(chr))
+       bfile <- file.path(INF, "INTERVAL", "per_chr", paste0("snpid", i))
+       b[[i]] <- csq(m, u, pattern, ldops = list(bfile = bfile, plink = plink))
+     }
+     r <- dplyr::bind_rows(b) %>%
+          dplyr::filter(r2 >= 0.8) %>%
+          dplyr::rename(gene = prot) %>%
+          dplyr::mutate(seqnames = as.integer(seqnames), pos = as.integer(pos)) %>%
+          dplyr::arrange(seqnames, pos) %>%
+          dplyr::select(-ref.seqnames, -ref.start, -ref.end, -seqnames, -pos, -start, -end)
+     save(r,file="~/Caprion/analysis/work/csq.rda",compress="xz",version=2)
+  '
+}

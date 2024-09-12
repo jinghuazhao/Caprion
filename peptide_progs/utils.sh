@@ -505,14 +505,21 @@ sumstats APOB
 function csq()
 {
    Rscript -e '
-     options(width=2000)
+     options(width=200)
      suppressMessages(require(dplyr))
      suppressMessages(require(pQTLtools))
      suppressMessages(require(stringr))
+   # Caprion proteins
+     caprion <- read.csv("~/Caprion/analysis/work/caprion.cis.vs.trans") %>%
+                dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP) %>%
+                select(chr,pos,MarkerName,prot,Type)
+     caprion_dr <- read.csv("~/Caprion/analysis/work/caprion_dr.cis.vs.trans") %>%
+                   dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP) %>%
+                   select(chr,pos,MarkerName,prot,Type)
    # Caprion peptides
      peptide <- read.csv("~/Caprion/analysis/reports/peptide.cis.vs.trans") %>%
                 dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP) %>%
-                select(chr,pos,MarkerName,prot)
+                select(chr,pos,MarkerName,prot,Type)
    # VEP output
      vep <- "/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/bgen/vep"
      pattern <- paste( protein_altering_variants, collapse = "|")
@@ -520,24 +527,38 @@ function csq()
      INF <- "/rds/project/rds-zuZwCZMsS0w/olink_proteomics/scallop/INF"
      plink <- "/rds/user/jhz22/hpc-work/bin/plink"
    # CSQ
-     b <- list()
-     for (i in unique(dplyr::pull(peptide,chr))) {
-       m <- dplyr::filter(peptide, prot %in% c("A1BG","APOB","EPCR","ERAP2","PROC") & chr %in% i) %>%
-            dplyr::mutate(rsid = gsub("chr", "", MarkerName)) %>%
-            dplyr::select(-MarkerName)
-       u <- read.delim(file.path(vep, paste0("chr", i, ".tab.gz"))) %>%
-            dplyr::select(Chrom, Pos, X.Uploaded_variation, Consequence) %>%
-            setNames(c("chr", "pos", "rsid", "csq")) %>%
-            dplyr::mutate(chr=if_else(chr=="X","23",chr),chr=as.numeric(chr))
-       bfile <- file.path(INF, "INTERVAL", "per_chr", paste0("snpid", i))
-       b[[i]] <- csq(m, u, pattern, ldops = list(bfile = bfile, plink = plink))
+     CSQ <- function(cvt)
+     {
+       b <- list()
+       for (i in unique(dplyr::pull(cvt,chr))) {
+         m <- dplyr::filter(cvt, chr %in% i) %>%
+              dplyr::mutate(rsid = gsub("chr", "", MarkerName)) %>%
+              dplyr::select(-MarkerName)
+         u <- read.delim(file.path(vep, paste0("chr", i, ".tab.gz"))) %>%
+              dplyr::select(Chrom, Pos, X.Uploaded_variation, Consequence) %>%
+              setNames(c("chr", "pos", "rsid", "csq")) %>%
+              dplyr::mutate(chr=as.character(chr),
+                            chr=if_else(chr=="X","23",chr),chr=as.numeric(chr))
+         bfile <- file.path(INF, "INTERVAL", "per_chr", paste0("snpid", i))
+         b[[i]] <- csq(m, u, pattern, ldops = list(bfile = bfile, plink = plink))
+       }
+       dplyr::bind_rows(b) %>%
+       dplyr::filter(r2 >= 0.8) %>%
+       dplyr::rename(gene = prot) %>%
+       dplyr::mutate(seqnames = as.integer(seqnames), pos = as.integer(pos)) %>%
+       dplyr::arrange(seqnames, pos) %>%
+       dplyr::select(-c(ref.seqnames, ref.start, ref.end, seqnames, pos, start, end)) %>%
+       group_by(gene,rsid) %>%
+       summarise(ref.rsid.all=paste(ref.rsid,collapse=";"),
+                 ref.pos.all=paste(ref.pos,collapse=";"),
+                 ref.csq=paste(ref.csq,collapse=";"),
+                 r2.all=paste(r2,collapse=";"))
      }
-     r <- dplyr::bind_rows(b) %>%
-          dplyr::filter(r2 >= 0.8) %>%
-          dplyr::rename(gene = prot) %>%
-          dplyr::mutate(seqnames = as.integer(seqnames), pos = as.integer(pos)) %>%
-          dplyr::arrange(seqnames, pos) %>%
-          dplyr::select(-ref.seqnames, -ref.start, -ref.end, -seqnames, -pos, -start, -end)
-     save(r,file="~/Caprion/analysis/work/csq.rda",compress="xz",version=2)
+     caprion_csq <- CSQ(caprion)
+     save(caprion,caprion_csq,file="~/Caprion/analysis/reports/caprion_csq.rda",compress="xz",version=2)
+     caprion_dr_csq <- CSQ(caprion_dr)
+     save(caprion_dr,caprion_dr_csq,file="~/Caprion/analysis/reports/caprion_dr_csq.rda",compress="xz",version=2)
+     r <- CSQ(peptide)
+     save(peptide,r,file="~/Caprion/analysis/reports/peptide_csq.rda",compress="xz",version=2)
   '
 }

@@ -561,7 +561,20 @@ function csq()
      peptide_csq <- CSQ(peptide)
      save(peptide,peptide_csq,file="~/Caprion/analysis/reports/peptide_csq.rda",compress="xz",version=2)
    # Examination
+     library(psych)
      benchmarks <- c("A1BG","APOB","EPCR","ERAP2","PROC")
+     load("~/Caprion/pilot/ZWK.rda")
+     s <- data.frame()
+     for (prot in benchmarks)
+     {
+       mps <- subset(mapping_ZWK,grepl(prot,Protein)) %>%
+              mutate(mps=gsub("\\[.*?\\]", "-", Modified.Peptide.Sequence),width=nchar(mps))
+       d <- describe(pull(mps,width)) %>%
+            select(n,median,min,max,range,skew,kurtosis)
+       rownames(d) <- prot
+       s <- rbind(s,d)
+     }
+     knitr::kable(s,caption="Length of peptides",digits=2)
      load("~/Caprion/analysis/reports/caprion_csq.rda")
      dim(caprion)
      dim(caprion_csq)

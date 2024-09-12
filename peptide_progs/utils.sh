@@ -551,14 +551,34 @@ function csq()
        group_by(gene,rsid) %>%
        summarise(ref.rsid.all=paste(ref.rsid,collapse=";"),
                  ref.pos.all=paste(ref.pos,collapse=";"),
-                 ref.csq=paste(ref.csq,collapse=";"),
+                 ref.csq.all=paste(ref.csq,collapse=";"),
                  r2.all=paste(r2,collapse=";"))
      }
      caprion_csq <- CSQ(caprion)
      save(caprion,caprion_csq,file="~/Caprion/analysis/reports/caprion_csq.rda",compress="xz",version=2)
      caprion_dr_csq <- CSQ(caprion_dr)
      save(caprion_dr,caprion_dr_csq,file="~/Caprion/analysis/reports/caprion_dr_csq.rda",compress="xz",version=2)
-     r <- CSQ(peptide)
-     save(peptide,r,file="~/Caprion/analysis/reports/peptide_csq.rda",compress="xz",version=2)
+     peptide_csq <- CSQ(peptide)
+     save(peptide,peptide_csq,file="~/Caprion/analysis/reports/peptide_csq.rda",compress="xz",version=2)
+   # Examination
+     benchmarks <- c("A1BG","APOB","EPCR","ERAP2","PROC")
+     load("~/Caprion/analysis/reports/caprion_csq.rda")
+     dim(caprion)
+     dim(caprion_csq)
+     filter(caprion,prot%in%benchmarks)
+     filter(caprion_csq,gene%in%benchmarks)
+     load("~/Caprion/analysis/reports/caprion_dr_csq.rda")
+     filter(caprion_dr,prot%in%benchmarks)
+     filter(caprion_dr_csq,gene%in%benchmarks)
+     dim(caprion_dr)
+     dim(caprion_dr_csq)
+     load("~/Caprion/analysis/reports/peptide_csq.rda")
+     dim(peptide)
+     dim(peptide_csq)
+     filter(peptide,prot%in%benchmarks)
+     filter(peptide_csq,gene%in%benchmarks)
+     peptide_csq_all <- left_join(peptide_csq,peptide,by=c('gene'='prot','rsid'='MarkerName'))
+     table(peptide$Type)
+     table(peptide_csq_all$Type)
   '
 }

@@ -53,8 +53,14 @@ function cistrans()
                   filter(! chr %in% c("XY","Y"))
     X <- with(glist_hg19,chr=="X")
     glist_hg19[X,"chr"] <- "23"
+    sept7 <- filter(pQTLdata::hg19, SYMBOL == "SEPTIN7") %>%
+             group_by(SYMBOL, chr) %>%
+             summarize(start = min(start), end = max(end), .groups = 'drop') %>%
+             transmute(Gene = as.character(SYMBOL), chr = gsub("chr", "", chr), start, end) %>%
+             data.frame()
     ucsc <- transmute(pQTLdata::hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
-            select(Gene,chr,start,end)
+            select(Gene,chr,start,end) %>%
+            bind_rows(sept7)
     X <- with(ucsc,chr=="X")
     ucsc[X,"chr"] <- "23"
     caprion <- select(pQTLdata::caprion,Protein,Accession,Gene) %>%

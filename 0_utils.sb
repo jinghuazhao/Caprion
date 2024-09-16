@@ -6,8 +6,8 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/glmnet_pense.e
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/glmnet_pense.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/normalize.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/normalize.o
 
 ##SBATCH --array=1-987
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/fp/slurm/_fp_%A_%a.o
@@ -1048,7 +1048,7 @@ Protein_dr <- read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")) %>%
            select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
            left_join(tbl_dr) %>%
            select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
-proteins <- setdiff(dir("~/Caprion/analysis/peptide"),"15-01-2024") # c("A1BG","APOB","EPCR","ERAP2","PROC")
+proteins <- dir("~/Caprion/analysis/peptide") # c("A1BG","APOB","EPCR","ERAP2","PROC")
 Peptides <- data.frame()
 for (peptide in proteins)
 {
@@ -1060,8 +1060,13 @@ for (peptide in proteins)
    }
 }
 repl <- with(Peptides,grepl("1433$",prot))
-Peptides[repl,"prot"] <- "1433E"
-Peptides <- left_join(Peptides,freq) %>%
+if (nrow(Peptides[repl,])>0) Peptides[repl,"prot"] <- "1433E"
+any(duplicated(freq$SNP))
+dup_freq <- freq[duplicated(freq$SNP) | duplicated(freq$SNP, fromLast = TRUE), ]
+dim(dup_freq)
+freq_unique <- freq %>%
+               distinct(SNP, .keep_all = TRUE)
+Peptides <- left_join(Peptides,freq_unique,by="SNP") %>%
             arrange(prot,isotope,SNPChrom,SNPPos) %>%
             rename(Protein=prot)
 snplist_0.01 <- filter(freq,ALT_FREQS>=0.01 & ALT_FREQS<=0.99) %>%
@@ -1107,7 +1112,7 @@ Replication <- dplyr::mutate(replication,seqnames=as.integer(known.seqnames),pos
                dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
 hs <- createStyle(textDecoration="BOLD", fontColour="#FFFFFF", fontSize=12, fontName="Arial Narrow", fgFill="#4F80BD")
 xlsx <- "https://jhz22.user.srcf.net/Caprion/results.xlsx"
-xlsx <- file.path(analysis,"reports","results.xlsx")
+xlsx <- file.path(analysis,"reports","Supplementary-Tables.xlsx")
 wb <- createWorkbook(xlsx)
 addWorksheet(wb,"Summary",zoom=150)
 writeData(wb,"Summary","Summary",xy=c(1,1),headerStyle=createStyle(textDecoration="BOLD",
@@ -1609,6 +1614,53 @@ Rscript -e '
 '
 }
 
+function normalize()
+{
+   Rscript -e '
+      suppressMessages(library(dplyr))
+      replace_below_threshold <- function(column, threshold = 50000) {
+        column <- ifelse(column < threshold, NA, column)
+        column[is.na(column)] <- mean(column, na.rm = TRUE)
+        return(column)
+      }
+      log2_transform <- function(column) log2(column+1)
+      normalize_min_max <- function(x) (x - min(x)) / (max(x) - min(x))
+      log2s <- function(normalized_column, log2_column) {
+        fit <- lm(log2_column ~ normalized_column)
+        return(fit$coefficients[1] + fit$coefficients[2] * normalized_column)
+      }
+      normalize <- function(code)
+      {
+        raw <- get(paste0("raw_",code))
+        samples <- names(raw)[grep(code,names(raw))]
+        proteins <- unique(raw[["Protein"]])
+        dropped_proteins <- grep("\\||-", Proteins, value = TRUE)
+        split_data <- split(raw, Proteins)
+        processed_list <- sapply(setdiff(names(split_data),dropped_proteins), function(protein) {
+          prot_data <- split_data[[protein]]
+          prot_data[samples] <- sapply(prot_data[samples], replace_below_threshold)
+          prot_data[paste0(samples, "_log2")] <- sapply(prot_data[samples], log2_transform)
+          prot_data[paste0(samples, "_norm")] <- sapply(prot_data[samples], normalize_min_max)
+          prot_data[paste0(samples, "_log2s")] <- mapply(log2s, prot_data[paste0(samples, "_norm")], prot_data[paste0(samples, "_log2")])
+          return(prot_data)
+        }, simplify = FALSE)
+        result <- do.call(rbind, processed_list)
+        return(result)
+      }
+      caprion <- "~/Caprion"
+      load(file.path(caprion,"pilot","ZYQ.rda"))
+      load(file.path(caprion,"pilot","UDP.rda"))
+      load(file.path(caprion,"pilot","UHZ.rda"))
+      load(file.path(caprion,"analysis","work","eSet.rda"))
+      raw_ZYQ <- left_join(mapping_ZYQ,raw_ZYQ)
+      raw_UDP <- left_join(mapping_UDP,raw_UDP)
+      norm_ZWK <- normalize("ZWK")
+      norm_ZYQ <- normalize("ZYQ")
+      norm_UDP <- normalize("UDP")
+      save(norm_ZWK,norm_ZYQ,norm_UDP,file=file.path(caprion,"analysis","work","normalize.rda"))
+   '
+}
+
 # fp_data
 # fp
 # HetISq
@@ -1621,5 +1673,6 @@ Rscript -e '
 # benchmark
 # X: 127,156,325,471,567,691,748,792
 # lookup
+normalize
 
 # srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i

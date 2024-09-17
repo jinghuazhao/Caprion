@@ -1618,35 +1618,6 @@ function normalize()
 {
    Rscript -e '
       suppressMessages(library(dplyr))
-      replace_below_threshold <- function(column, threshold = 50000) {
-        column <- ifelse(column < threshold, NA, column)
-        column[is.na(column)] <- mean(column, na.rm = TRUE)
-        return(column)
-      }
-      log2_transform <- function(column) log2(column+1)
-      normalize_min_max <- function(x) (x - min(x)) / (max(x) - min(x))
-      log2s <- function(normalized_column, log2_column) {
-        fit <- lm(log2_column ~ normalized_column)
-        return(fit$coefficients[1] + fit$coefficients[2] * normalized_column)
-      }
-      normalize <- function(code)
-      {
-        raw <- get(paste0("raw_",code))
-        samples <- names(raw)[grep(code,names(raw))]
-        proteins <- unique(raw[["Protein"]])
-        dropped_proteins <- grep("\\||-", Proteins, value = TRUE)
-        split_data <- split(raw, Proteins)
-        processed_list <- sapply(setdiff(names(split_data),dropped_proteins), function(protein) {
-          prot_data <- split_data[[protein]]
-          prot_data[samples] <- sapply(prot_data[samples], replace_below_threshold)
-          prot_data[paste0(samples, "_log2")] <- sapply(prot_data[samples], log2_transform)
-          prot_data[paste0(samples, "_norm")] <- sapply(prot_data[samples], normalize_min_max)
-          prot_data[paste0(samples, "_log2s")] <- mapply(log2s, prot_data[paste0(samples, "_norm")], prot_data[paste0(samples, "_log2")])
-          return(prot_data)
-        }, simplify = FALSE)
-        result <- do.call(rbind, processed_list)
-        return(result)
-      }
       caprion <- "~/Caprion"
       load(file.path(caprion,"pilot","ZYQ.rda"))
       load(file.path(caprion,"pilot","UDP.rda"))
@@ -1654,6 +1625,36 @@ function normalize()
       load(file.path(caprion,"analysis","work","eSet.rda"))
       raw_ZYQ <- left_join(mapping_ZYQ,raw_ZYQ)
       raw_UDP <- left_join(mapping_UDP,raw_UDP)
+      replace_below_threshold <- function(x, threshold = 50000) {
+        x <- ifelse(x < threshold, NA, x)
+        x[is.na(x)] <- mean(x, na.rm = TRUE)
+        return(x)
+      }
+      normalize_minmax <- function(x) (x - min(x)) / (max(x) - min(x))
+      normalize <- function(code)
+      {
+        raw <- get(paste0("raw_",code))
+        samples <- grep(code,names(raw),value=TRUE)
+        all_proteins <- unique(raw[["Protein"]])
+        dropped_proteins <- grep("\\||-", all_proteins, value = TRUE)
+        proteins <- setdiff(all_proteins,dropped_proteins)
+        isotopes <- subset(raw,Protein %in% proteins) %>%
+                    mutate(Isotope.Group.ID=as.character(Isotope.Group.ID))
+        split_data <- split(isotopes,intersect(isotopes$Isotope.Group.ID,raw$Isotope.Group.ID))
+        result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
+          pept_data <- split_data[[isotope]]
+          rownames(pept_data) <- isotope
+          pept_data[samples] <- replace_below_threshold(unlist(pept_data[samples]))
+          pept_data[paste0(samples, "_log2")] <- log2(pept_data[samples]+1)
+          pept_data[paste0(samples, "_norm")] <- normalize_minmax(pept_data[samples])
+        # x <- pept_data[paste0(samples, "_norm")] |> unlist()
+        # y <- pept_data[paste0(samples, "_log2")] |> unlist()
+        # m <- lm(y~x)
+        # pept_data[paste0(samples, "_log2s")] <- predict(m,newdata=data.frame(x))
+          return(pept_data)
+        }, simplify = FALSE)
+        result <- do.call(rbind, result_list)
+      }
       norm_ZWK <- normalize("ZWK")
       norm_ZYQ <- normalize("ZYQ")
       norm_UDP <- normalize("UDP")

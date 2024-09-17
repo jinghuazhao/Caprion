@@ -6,8 +6,8 @@
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/normalize.e
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/normalize.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/impute.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/impute.o
 
 ##SBATCH --array=1-987
 ##SBATCH --output=/home/jhz22/Caprion/analysis/METAL_dr/fp/slurm/_fp_%A_%a.o
@@ -1630,7 +1630,7 @@ function normalize()
         x[is.na(x)] <- mean(x, na.rm = TRUE)
         return(x)
       }
-      normalize_minmax <- function(x) (x - min(x)) / (max(x) - min(x))
+      normalize_minmax <- function(x) (x - min(x,na.rm=TRUE)) / (max(x,na.rm=TRUE) - min(x,na.rm=TRUE))
       normalize <- function(code)
       {
         raw <- get(paste0("raw_",code))
@@ -1643,22 +1643,27 @@ function normalize()
         split_data <- split(isotopes,intersect(isotopes$Isotope.Group.ID,raw$Isotope.Group.ID))
         result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
           pept_data <- split_data[[isotope]]
-          rownames(pept_data) <- isotope
+        # rownames(pept_data) <- isotope
           pept_data[samples] <- replace_below_threshold(unlist(pept_data[samples]))
-          pept_data[paste0(samples, "_log2")] <- log2(pept_data[samples]+1)
-          pept_data[paste0(samples, "_norm")] <- normalize_minmax(pept_data[samples])
+          pept_data[paste0(samples, "_log2")] <- log2(unlist(pept_data[samples]+1))
+          pept_data[paste0(samples, "_norm")] <- normalize_minmax(unlist(pept_data[samples]))
         # x <- pept_data[paste0(samples, "_norm")] |> unlist()
         # y <- pept_data[paste0(samples, "_log2")] |> unlist()
         # m <- lm(y~x)
-        # pept_data[paste0(samples, "_log2s")] <- predict(m,newdata=data.frame(x))
+        # pept_data[paste0(samples, "_log2s")] <- predict(m,newdata=data.frame(x),na.action=na.pass)
           return(pept_data)
         }, simplify = FALSE)
         result <- do.call(rbind, result_list)
+        prot <- result[c("Protein",samples)] %>%
+                group_by(Protein) %>%
+                summarize(across(starts_with("ZWK"), sum, na.rm = TRUE), .groups = 'drop')
+        invisible(list(code=code,samples=samples,norm=result,prot=prot))
       }
       norm_ZWK <- normalize("ZWK")
       norm_ZYQ <- normalize("ZYQ")
       norm_UDP <- normalize("UDP")
-      save(norm_ZWK,norm_ZYQ,norm_UDP,file=file.path(caprion,"analysis","work","normalize.rda"))
+      save(norm_ZWK,norm_ZYQ,norm_UDP,file=file.path(caprion,"analysis","work","impute.rda"))
+
    '
 }
 

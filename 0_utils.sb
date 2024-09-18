@@ -1617,11 +1617,13 @@ Rscript -e '
 function normalize()
 {
    Rscript -e '
+      suppressMessages(library(Biobase))
       suppressMessages(library(dplyr))
+      suppressMessages(library(tibble))
       caprion <- "~/Caprion"
+      load(file.path(caprion,"pilot","ZWK.rda"))
       load(file.path(caprion,"pilot","ZYQ.rda"))
       load(file.path(caprion,"pilot","UDP.rda"))
-      load(file.path(caprion,"pilot","UHZ.rda"))
       load(file.path(caprion,"analysis","work","eSet.rda"))
       raw_ZYQ <- left_join(mapping_ZYQ,raw_ZYQ)
       raw_UDP <- left_join(mapping_UDP,raw_UDP)
@@ -1633,13 +1635,18 @@ function normalize()
       normalize_minmax <- function(x) (x - min(x,na.rm=TRUE)) / (max(x,na.rm=TRUE) - min(x,na.rm=TRUE))
       normalize <- function(code)
       {
+        dr <- Biobase::exprs(get(paste0("dr_",code))) %>% t()
+        protein <- Biobase::exprs(get(paste0("protein_",code))) %>% t()
+        proteins <- colnames(protein)
+        peptide <- Biobase::exprs(get(paste0("peptide_",code))) %>% t()
+        peptides <- colnames(peptide)
         raw <- get(paste0("raw_",code))
         samples <- grep(code,names(raw),value=TRUE)
         all_proteins <- unique(raw[["Protein"]])
         dropped_proteins <- grep("\\||-", all_proteins, value = TRUE)
         proteins <- setdiff(all_proteins,dropped_proteins)
         isotopes <- subset(raw,Protein %in% proteins) %>%
-                    mutate(Isotope.Group.ID=as.character(Isotope.Group.ID))
+                    dplyr::mutate(Isotope.Group.ID=as.character(Isotope.Group.ID))
         split_data <- split(isotopes,intersect(isotopes$Isotope.Group.ID,raw$Isotope.Group.ID))
         result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
           pept_data <- split_data[[isotope]]
@@ -1655,15 +1662,21 @@ function normalize()
         }, simplify = FALSE)
         result <- do.call(rbind, result_list)
         prot <- result[c("Protein",samples)] %>%
-                group_by(Protein) %>%
-                summarize(across(starts_with("ZWK"), sum, na.rm = TRUE), .groups = 'drop')
-        invisible(list(code=code,samples=samples,norm=result,prot=prot))
+                dplyr::group_by(Protein) %>%
+                dplyr::summarize(across(starts_with(code), sum, na.rm = TRUE), .groups = "drop") %>%
+                tibble::column_to_rownames(var = "Protein") %>%
+                t()
+        z <-list(code=code,dropped_proteins=dropped_proteins,
+                 peptide=peptide,peptides=peptides,dr=dr,protein=protein,proteins=proteins,
+                 samples=samples,norm=result,prot=prot)
+        invisiable(z)
       }
       norm_ZWK <- normalize("ZWK")
+      save(norm_ZWK,file=file.path(caprion,"analysis","work","impute_ZWK.rda"))
       norm_ZYQ <- normalize("ZYQ")
+      save(norm_ZYQ,file=file.path(caprion,"analysis","work","impute_ZYQ.rda"))
       norm_UDP <- normalize("UDP")
-      save(norm_ZWK,norm_ZYQ,norm_UDP,file=file.path(caprion,"analysis","work","impute.rda"))
-
+      save(norm_UDP,file=file.path(caprion,"analysis","work","impute_UDP.rda"))
    '
 }
 

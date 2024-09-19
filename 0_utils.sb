@@ -1614,7 +1614,7 @@ Rscript -e '
 '
 }
 
-function normalize()
+function impute()
 {
    Rscript -e '
       suppressMessages(library(Biobase))
@@ -1644,8 +1644,8 @@ function normalize()
         samples <- grep(code,names(raw),value=TRUE)
         all_proteins <- unique(raw[["Protein"]])
         dropped_proteins <- grep("\\||-", all_proteins, value = TRUE)
-        proteins <- setdiff(all_proteins,dropped_proteins)
-        isotopes <- subset(raw,Protein %in% proteins) %>%
+      # 1,043 for ZYQ/UDP instead of 983/984 with setdiff(all_proteins,dropped_proteins)
+        isotopes <- subset(raw,Protein %in% all_proteins) %>%
                     dplyr::mutate(Isotope.Group.ID=as.character(Isotope.Group.ID))
         split_data <- split(isotopes,intersect(isotopes$Isotope.Group.ID,raw$Isotope.Group.ID))
         result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
@@ -1666,17 +1666,43 @@ function normalize()
                 dplyr::summarize(across(starts_with(code), sum, na.rm = TRUE), .groups = "drop") %>%
                 tibble::column_to_rownames(var = "Protein") %>%
                 t()
-        z <-list(code=code,dropped_proteins=dropped_proteins,
+        z <-list(code=code,proteins=proteins,all_proteins=all_proteins,dropped_proteins=dropped_proteins,
                  peptide=peptide,peptides=peptides,dr=dr,protein=protein,proteins=proteins,
-                 samples=samples,norm=result,prot=prot)
-        invisiable(z)
+                 samples=samples,norm=result,prot=log2(prot))
+        invisible(z)
       }
-      norm_ZWK <- normalize("ZWK")
-      save(norm_ZWK,file=file.path(caprion,"analysis","work","impute_ZWK.rda"))
-      norm_ZYQ <- normalize("ZYQ")
-      save(norm_ZYQ,file=file.path(caprion,"analysis","work","impute_ZYQ.rda"))
-      norm_UDP <- normalize("UDP")
-      save(norm_UDP,file=file.path(caprion,"analysis","work","impute_UDP.rda"))
+      impute_ZWK <- normalize("ZWK")
+      save(impute_ZWK,file=file.path(caprion,"analysis","work","impute_ZWK.rda"))
+      impute_ZYQ <- normalize("ZYQ")
+      save(impute_ZYQ,file=file.path(caprion,"analysis","work","impute_ZYQ.rda"))
+      impute_UDP <- normalize("UDP")
+      save(impute_UDP,file=file.path(caprion,"analysis","work","impute_UDP.rda"))
+   '
+   Rscript -e '
+      suppressMessages(library(mclust))
+      caprion <- "~/Caprion"
+      batch <- "ZYQ"
+      load(file.path(caprion,"analysis","work",paste0("impute_",batch,".rda")))
+      pdf(file.path(caprion,"analysis","work",paste0("impute_",batch,".pdf")))
+      par(mfrow=c(2,2))
+      attach(impute_ZYQ)
+    # problematic with scale=TRUE
+      pca <- prcomp(protein,scale=FALSE)
+      plot(pca$x[,1],pca$x[,2],xlab="PC1",ylab="PC2")
+      pc1pc2 <- with(pca,x)[,1:2]
+      mc <- Mclust(pc1pc2,G=2)
+      scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
+                                   main="Plot of the PC1, PC2 and PC3", pch=16)
+      legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
+      pca2 <- prcomp(prot[,proteins],scale=FALSE)
+      plot(pca2$x[,1],pca2$x[,2],xlab="PC1",ylab="PC2")
+      pc1pc2 <- with(pca2,x)[,1:2]
+      mc <- Mclust(pc1pc2,G=2)
+      scatterplot3d::scatterplot3d(with(pca2,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
+                                   main="Plot of the PC1, PC2 and PC3", pch=16)
+      legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
+      detach(impute_ZYQ)
+      dev.off()
    '
 }
 
@@ -1692,6 +1718,6 @@ function normalize()
 # benchmark
 # X: 127,156,325,471,567,691,748,792
 # lookup
-normalize
+impute
 
 # srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i

@@ -1678,23 +1678,26 @@ function impute()
       impute_UDP <- normalize("UDP")
       save(impute_UDP,file=file.path(caprion,"analysis","work","impute_UDP.rda"))
    '
+}
+
+function mcpca()
+{
    Rscript -e '
       suppressMessages(library(mclust))
       caprion <- "~/Caprion"
-      for(batch in c("ZWK","ZYQ","UDP")
+      for(batch in c("ZWK","ZYQ","UDP"))
       {
         load(file.path(caprion,"analysis","work",paste0("impute_",batch,".rda")))
         pdf(file.path(caprion,"analysis","work",paste0("impute_",batch,".pdf")))
         par(mfrow=c(2,2))
         attach(get(paste0("impute_",batch)))
-      # problematic with scale=TRUE
-        pca <- prcomp(protein,scale=FALSE)
+        pca <- prcomp(protein,scale=TRUE)
         plot(pca$x[,1],pca$x[,2],xlab="PC1",ylab="PC2")
         pc1pc2 <- with(pca,x)[,1:2]
-        mc <- Mclust(pc1pc2,G=2)
+        mc <- Mclust(pc1pc2,G=4)
         scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
                                      main="Plot of the PC1, PC2 and PC3", pch=16)
-        legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
+        legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red", "black","yellow"), pch=16)
         pca2 <- prcomp(prot[,proteins],scale=FALSE)
         plot(pca2$x[,1],pca2$x[,2],xlab="PC1",ylab="PC2")
         pc1pc2 <- with(pca2,x)[,1:2]
@@ -1720,6 +1723,7 @@ function impute()
 # benchmark
 # X: 127,156,325,471,567,691,748,792
 # lookup
-impute
+# impute
+mcpca
 
 # srun -A PETERS-SL3-CPU -p cclake-himem -t 12:0:0 --pty bash -i

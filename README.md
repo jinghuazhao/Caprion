@@ -133,7 +133,9 @@ The hped file from CookHLA (or converted from HIBAG) can be used by HATK for ass
     
 [^HLA]: **HLA**
 
-     Whole cohort imputation is feasible with a HIBAG reference panel,
+    A database of 3D structures of Major Histocompatibility Complex, <https://www.histo.fyi/>
+
+    Whole cohort imputation is feasible with a HIBAG reference panel,
     
     | **Locus** | A    | B    | C    | DPB1 | DQA1 | DQB1 | DRB1 |
     | ----------- | ------ | ------ | ------ | ------ | ------ | ------ | ------ |

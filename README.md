@@ -12,3 +12,7 @@ This is now in [peptide_progs/](peptide_progs).
 ## Miscellaneous analysis
 
 This is in [misc/](misc/).
+
+## Additional data
+
+See <https://jinghuazhao.github.io/pQTLdata/>.

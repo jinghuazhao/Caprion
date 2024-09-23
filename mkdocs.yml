@@ -8,8 +8,9 @@ nav:
     - pilot/gwas2.md
     - pilot/README.md
   - Analysis:
-    - README.md
+    - progs/README.md
     - peptide_progs/README.md
+    - misc/README.md
   - pilot/Notes.md
 theme:
     name: mkdocs

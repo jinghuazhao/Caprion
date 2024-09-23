@@ -7,11 +7,11 @@
         
         
         
-        <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>Autoencoder - Caprion</title>
-        <link href="../../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Miscellaneous analysis - Caprion</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Bash.min.js"></script>
@@ -29,7 +29,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="../..">Caprion</a>
+                <a class="navbar-brand" href="..">Caprion</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -40,44 +40,44 @@
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
                             <li class="navitem">
-                                <a href="../.." class="nav-link"></a>
+                                <a href=".." class="nav-link"></a>
                             </li>
-                            <li class="dropdown active">
+                            <li class="dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pilot studies <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="./" class="dropdown-item active">Autoencoder</a>
+    <a href="../pilot/autoencoder/" class="dropdown-item">Autoencoder</a>
 </li>
                                     
 <li>
-    <a href="../gwas2/" class="dropdown-item">gwas2</a>
+    <a href="../pilot/gwas2/" class="dropdown-item">gwas2</a>
 </li>
                                     
 <li>
-    <a href="../" class="dropdown-item">Pilot studies</a>
+    <a href="../pilot/" class="dropdown-item">Pilot studies</a>
 </li>
                                 </ul>
                             </li>
-                            <li class="dropdown">
+                            <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Analysis <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="../../progs/" class="dropdown-item">Protein analysis</a>
+    <a href="../progs/" class="dropdown-item">Protein analysis</a>
 </li>
                                     
 <li>
-    <a href="../../peptide_progs/" class="dropdown-item">Peptide analysis</a>
+    <a href="../peptide_progs/" class="dropdown-item">Peptide analysis</a>
 </li>
                                     
 <li>
-    <a href="../../misc/" class="dropdown-item">Miscellaneous analysis</a>
+    <a href="./" class="dropdown-item active">Miscellaneous analysis</a>
 </li>
                                 </ul>
                             </li>
                             <li class="navitem">
-                                <a href="../Notes/" class="nav-link">Notes</a>
+                                <a href="../pilot/Notes/" class="nav-link">Notes</a>
                             </li>
                         </ul>
 
@@ -88,12 +88,12 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" href="../.." class="nav-link">
+                                <a rel="prev" href="../peptide_progs/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" href="../gwas2/" class="nav-link">
+                                <a rel="next" href="../pilot/Notes/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -118,16 +118,8 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#autoencoder" class="nav-link">Autoencoder</a>
+            <li class="nav-item" data-level="1"><a href="#miscellaneous-analysis" class="nav-link">Miscellaneous analysis</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#references" class="nav-link">REFERENCES</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#urls" class="nav-link">URLs</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
               </ul>
             </li>
         </ul>
@@ -135,29 +127,9 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="autoencoder">Autoencoder</h1>
-<p>As shown at <a href="https://www.r-bloggers.com/pca-vs-autoencoders-for-dimensionality-reduction/">R-bloggers<img src="https://i0.wp.com/gradientdescending.com/wp-content/uploads/2018/07/reconstruction-1.png" width="560" height="400" align="right"></a>,</p>
-<blockquote>
-<p>autoencoder is better at reconstructing the original data set than PCA when k is small, </p>
-</blockquote>
-<p>where <code>k</code> corresponds to the number of principal components in PCA or bottleneck dimension in AE,</p>
-<blockquote>
-<p>however the error converges as k increases. For very large data sets this difference will be
-larger and means a smaller data set could be used for the same error as PCA. When dealing 
-with big data this is an important property`.</p>
-</blockquote>
-<p>The local adoption is <a href="../utils/ae_test.Rmd">ae_test.Rmd</a> which produces <a href="../utils/ae_test.html">ae_test.html</a> and <a href="../utils/ae_test.pdf">ae_test.pdf</a>.</p>
-<p>Additional work will be on variatinoal autoencoder (VAE) and denoising counterpart as indicated in the references below.</p>
-<h2 id="references">REFERENCES</h2>
-<p>Bishop CM, Bishop H (2024), Deep learning: foundations and concepts, Springer International Publishing, <a href="https://link.springer.com/book/10.1007/978-3-031-45468-4">DOI: 10.1007/978-3-031-45468-4</a>.</p>
-<p>Bludau I, Frank M, Dörig C. et al. Systematic detection of functional proteoform groups from bottom-up proteomic datasets. Nat Commun 12, 3810 (2021). <a href="https://doi.org/10.1038/s41467-021-24030-x">https://doi.org/10.1038/s41467-021-24030-x</a>.</p>
-<p>Hofert M, Prasad A, Zhu M (2019). Quasi-Monte Carlo for multivariate distributions viagenerative neural networks. <a href="https://arxiv.org/abs/1811.00683">https://arxiv.org/abs/1811.00683</a>, <a href="https://CRAN.R-project.org/package=gnn">https://CRAN.R-project.org/package=gnn</a>.</p>
-<p>Kingma DP, Welling M (2014). Auto-Encoding Variational Bayes. <a href="https://arxiv.org/abs/1312.6114">https://arxiv.org/abs/1312.6114</a>, <a href="https://keras.rstudio.com/articles/examples/variational_autoencoder.html">https://keras.rstudio.com/articles/examples/variational_autoencoder.html</a>.</p>
-<p>Ng A. Sparse autoencoder, CS294A Lecture notes, <a href="https://web.stanford.edu/class/archive/cs/cs294a/cs294a.1104/sparseAutoencoder.pdf">https://web.stanford.edu/class/archive/cs/cs294a/cs294a.1104/sparseAutoencoder.pdf</a>.</p>
-<p>Sattarov T, Herurkar D, Hees J (2023). Explaining Anomalies using Denoising Autoencoders for Financial Tabular Data. Technical Report 2023-01. Deutsche Bundesban.</p>
-<p>Trivadis SK (2017). Variational autoencoders for anomaly detection. <a href="https://rpubs.com/zkajdan/308801">https://rpubs.com/zkajdan/308801</a>.</p>
-<h2 id="urls">URLs</h2>
-<p><a href="https://github.com/diazale/gt-dimred">https://github.com/diazale/gt-dimred</a>, <a href="https://github.com/lmcinnes/umap">https://github.com/lmcinnes/umap</a> (<a href="https://umap-learn.readthedocs.io/en/latest/">https://umap-learn.readthedocs.io/en/latest/</a>) and <a href="https://keras.io/examples/timeseries/timeseries_anomaly_detection/">https://keras.io/examples/timeseries/timeseries_anomaly_detection/</a>, <a href="https://www.mathworks.com/help/deeplearning/ug/anomaly-detection-using-autoencoder-and-wavelets.html">https://www.mathworks.com/help/deeplearning/ug/anomaly-detection-using-autoencoder-and-wavelets.html</a>, among others.</p></div>
+<h1 id="miscellaneous-analysis">Miscellaneous analysis</h1>
+<p>23/9/2024</p>
+<p>This directory is created to accommodate many largely independent jobs.</p></div>
             </div>
         </div>
 
@@ -165,17 +137,17 @@ with big data this is an important property`.</p>
             <hr>
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
-        <script src="../../js/jquery-3.6.0.min.js"></script>
-        <script src="../../js/bootstrap.min.js"></script>
+        <script src="../js/jquery-3.6.0.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>
         <script>
-            var base_url = "../..",
+            var base_url = "..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../../js/base.js"></script>
-        <script src="../../javascripts/config.js"></script>
+        <script src="../js/base.js"></script>
+        <script src="../javascripts/config.js"></script>
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script src="../../search/main.js"></script>
+        <script src="../search/main.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

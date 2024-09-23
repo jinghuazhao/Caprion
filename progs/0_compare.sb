@@ -1,0 +1,342 @@
+#!/usr/bin/bash
+
+#SBATCH --job-name=_comp
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=cclake
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+
+#SBATCH --array=1-987
+#SBATCH --output=/home/jhz22/Caprion/analysis/compare/slurm/_comp_%A_%a.o
+#SBATCH --error=/home/jhz22/Caprion/analysis/compare/slurm/_comp_%A_%a.e
+
+. /etc/profile.d/modules.sh
+module purge
+module load rhel7/default-ccl
+module load ceuadmin/readline/8.0
+
+export TMPDIR=${HPC_WORK}/work
+export analysis=~/Caprion/analysis
+export suffix=_dr
+
+export deCODE=~/rds/results/public/proteomics/deCODE
+export UKB_PPP=~/rds/results/public/proteomics/UKB-PPP/sun23/European
+
+function idx()
+#idx METAL3 _3
+{
+  export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${analysis}/work/caprion${suffix}.varlist)
+  export d=$1
+  export s=$2
+  (
+    cat <(gunzip -c ${analysis}/${d}/${prot}-1.tbl.gz | head -1) \
+        <(gunzip -c ${analysis}/${d}/${prot}-1.tbl.gz | sed '1d' | sort -k1,1n -k2,2n) \
+        <(gunzip -c ${analysis}/${d}/${prot}-chrX-1.tbl.gz | sed '1d' | sort -k1,1n -k2,2n)
+  ) | \
+  bgzip -f > ${analysis}/METAL${s}/${prot}${s}-1.tbl.gz
+  tabix -f -S1 -s1 -b2 -e2 ${analysis}/METAL${s}/${prot}${s}-1.tbl.gz
+}
+
+function assoc()
+{
+  export s=${1}
+  (
+    awk 'NR>1{print $3,$2,$8,$9}' FS="," ${analysis}/work/caprion${suffix}.cis.vs.trans  | \
+    parallel -C' ' 'tabix ${analysis}/METAL${s}/{1}${s}-1.tbl.gz {3}:{4}-{4} | awk -vprot={1} "{print prot, \$0}"'
+  ) > ${analysis}/work/caprion${s}.assoc
+}
+
+function ukb_ppp_assoc()
+# ukb_ppp_assoc
+{
+  (
+    echo \#chrom start end chrpos| tr ' ' '\t'
+    awk 'NR>1{print "chr"$8,$8,$9-1,$9,$8":"$9}' FS="," OFS="\t" ${analysis}/work/caprion${suffix}.cis.vs.trans | \
+    sort -k2,2n -k3,3n | \
+    cut -f2 --complement | \
+    sed 's/chr23/chrX/' | \
+    uniq
+  ) > ${analysis}/work/caprion${suffix}.hg19
+  liftOver $analysis/work/caprion${suffix}.hg19 ~/hpc-work/bin/hg19ToHg38.over.chain.gz \
+           ${analysis}/work/caprion${suffix}-b38.bed \
+           ${analysis}/work/caprion${suffix}-b38.unlifted.bed
+  (
+    echo $(sed 's/,/ /g' ${analysis}/work/caprion${suffix}.cis.vs.trans | head -1) pos38
+    cut -f1,2 --complement ${analysis}/work/caprion${suffix}-b38.bed | \
+    sed 's/chr//' | \
+    sort -k2,2 | \
+    join -22 -a1 <(sed '1d;s/,/ /g' ${analysis}/work/caprion${suffix}.cis.vs.trans | awk '{print $8":"$9,$0}' | sort -k1,1) - | \
+    cut -d' ' -f1 --complement
+   ) > ${analysis}/work/caprion${suffix}.cvt
+  export ukb_ppp=~/rds/results/public/proteomics/UKB-PPP/sun23
+  (
+    echo Protein $(gunzip -c ${ukb_ppp}/European/*bgz | head -1) | sed 's/ /\t/g'
+    awk 'NR>1{print $3,$8,$12}' ${analysis}/work/caprion${suffix}.cvt | \
+    parallel -j1 -C ' ' 'tabix ${ukb_ppp}/European/{1}_*bgz {2}:{3}-{3} | awk -vprot={1} -vOFS="\t" "{print prot, \$0}"'
+  ) > ${analysis}/work/caprion_ukb_ppp.assoc
+}
+
+function merge()
+{
+  awk '
+  {
+    a1=toupper($5); a2=toupper($6)
+    if (a1<a2) snpid=$2":"$3":"a1":"a2; else snpid=$2":"$3":"a2":"a1
+    print $1":"snpid,a1,a2,$11,$12,$13
+  }
+  ' ${analysis}/work/caprion${suffix}.assoc | \
+  sort -k1,1 | \
+  join - <(awk '
+           {
+             a1=toupper($5); a2=toupper($6)
+             if (a1<a2) snpid=$2":"$3":"a1":"a2; else snpid=$2":"$3":"a2":"a1
+             print $1":"snpid,a1,a2,$11,$12,$13
+           }
+   ' ${analysis}/work/caprion_3.assoc | \
+   sort -k1,1
+  ) | \
+  join - <(awk '
+           {
+             a1=toupper($5); a2=toupper($6)
+             if (a1<a2) snpid=$2":"$3":"a1":"a2; else snpid=$2":"$3":"a2":"a1
+             print $1":"snpid,a1,a2,$11,$12,$13
+           }
+   ' ${analysis}/work/caprion.assoc | \
+   sort -k1,1
+  ) | \
+  join - -a1 <(cut -f1,4-6,11-12,14 work/caprion_ukb_ppp.assoc | \
+    sed '1d;s/:/\t/2' | \
+    cut -f3 --complement | \
+    awk '
+    {
+      a1=$3; a2=$4
+      if (a1<a2) snpid=$2":"a1":"a2; else snpid=$2":"a2":"a1
+      print $1":"snpid,a1,a2,$5,$6,$7
+    }' | \
+    sort -k1,1
+  ) > ${analysis}/compare/compare.assoc
+  Rscript -e '
+    options(width=200)
+    analysis <- Sys.getenv("analysis")
+    library(dplyr)
+    library(GGally)
+    vnames <- c("id","a1","a2","b_DR","se_DR","logp_DR",
+                     "b1","b2","b_All","se_All","logp_All",
+                     "c1","c2","b_ZYQ_UDP","se_ZYQ_UDP","logp_ZYQ_UDP",
+                     "d1","d2","b_UKB","se_UKB","logp_UKB")
+    assoc <- read.table(file.path(analysis,"compare","compare.assoc"),col.names=vnames, na.strings="", fill=TRUE) %>%
+             mutate(b_UKB=if_else(a1==d2,b_UKB,-b_UKB))
+    write.csv(assoc,file=file.path(analysis,"compare","compare.csv"),quote=FALSE,row.names=FALSE)
+    pdf(file.path(analysis,"compare","b_DR_All_ZYQ+UDP_UKB.pdf"),width=10,height=10)
+    pairs(assoc[c("b_DR","b_All","b_ZYQ_UDP","b_UKB")],pch=16,main="Effect sizes of DR-filtered, All data and UKB-PPP")
+    ggpairs(assoc[c("b_DR","b_All","b_ZYQ_UDP","b_UKB")],title="Effect sizes of DR-filtered, All data and UKB-PPP")
+    dev.off()
+    library(plotly)
+    assoc <- mutate(assoc,  x1 = b_DR, x2 = b_All, x3=b_ZYQ_UDP, x4 = b_UKB)
+    library(htmlwidgets)
+    scatter <- plot_ly(assoc, x = ~x1, y = ~x2, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               add_trace(x = ~x1, y = ~x3, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               add_trace(x = ~x1, y = ~x4, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               add_trace(x = ~x2, y = ~x3, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               add_trace(x = ~x2, y = ~x4, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               add_trace(x = ~x3, y = ~x4, type = 'scatter', mode = 'markers', marker = list(size = 10), showlegend = FALSE) %>%
+               layout(title = "Effect sizes of DR−filtered, All data and UKB−PPP",
+                      xaxis = list(title = "Effect size"), yaxis = list(title = "Effect size"))
+    saveWidget(scatter,file=file.path(analysis,"compare","b_DR_All_ZYQ+UDP_UKB.html"))
+  '
+}
+
+function signal_grouping()
+{
+  Rscript -e '
+  options(width=200)
+  suppressMessages(library(dplyr))
+  protein <- read.csv("~/Caprion/analysis/work/caprion.cis.vs.trans")
+  peptide <- read.csv("~/Caprion/analysis/reports/peptide.cis.vs.trans")
+  protein_peptide <- full_join(select(protein,Gene,prot,SNP,Type),select(peptide,Gene,prot,isotope,SNP,Type),by=c("Gene","prot"))
+# protein only
+  x <- filter(protein_peptide,is.na(isotope)) %>% select(Gene) %>% unique %>% pull
+  filter(peptide,Gene%in%x)
+# peptide only
+  y <- filter(protein_peptide,is.na(SNP.x)) %>% select(Gene) %>% unique %>% pull
+  filter(protein,Gene %in% y)
+  z <- filter(protein_peptide,!Gene%in%c(x,y))
+  filter(peptide,!Gene%in%c(x,y)) %>% nrow
+  '
+}
+
+
+function lookup_r()
+{
+  Rscript -e '
+    options(width=200)
+    library(pQTLdata)
+    suppressMessages(library(dplyr))
+    benchmarks <- subset(caprion[1:3],grepl("A1BG|APOB|EPCR|ERAP2|PROC",Gene))
+    uniprot <- benchmarks[["Accession"]]
+    genes <- benchmarks[["Gene"]]
+    filter(Olink_Explore_3072,UniProt.ID %in% uniprot|Gene.name %in% genes)
+    filter(SomaScanV4.1,UniProt.ID%in%uniprot|GeneID %in% genes)
+  '
+}
+
+function lookup_bash()
+{
+  export prot=${1}
+  export f=${2}
+  Rscript -e '
+    suppressMessages(library(rtracklayer))
+    suppressMessages(library(dplyr))
+    protein <- Sys.getenv("prot")
+    cvt <- "~/Caprion/analysis/work/caprion_dr.cis.vs.trans"
+    f <- filter(read.csv(cvt),prot==protein) %>%
+         mutate(seqname=paste0("chr",SNPChrom),start=as.integer(SNPPos),end=SNPPos) %>%
+         arrange(SNPChrom,SNPPos)
+    gr <- with(f,GenomicRanges::GRanges(seqnames=seqname,IRanges::IRanges(start,end,names=SNP))) %>%
+          unique()
+    hpc_work <- Sys.getenv("HPC_WORK")
+    path <- file.path(hpc_work, "bin", "hg19ToHg38.over.chain")
+    ch <- import.chain(path)
+    seqlevelsStyle(gr) <- "UCSC"
+    gr38 <- liftOver(gr,ch)
+    dat <- select(f,SNP,prot,Gene,Type,SNPChrom,SNPPos) %>%
+           left_join(data.frame(gr38),by=c("SNP"="group_name")) %>%
+           mutate(seqnames=gsub("chr","",seqnames)) %>%
+           select(prot,Gene,Type,SNP,SNPChrom,SNPPos,seqnames,start)
+    write.table(dat,quote=FALSE,col.names=FALSE,row.names=FALSE)
+  ' | \
+  parallel -C' ' '
+    gunzip -c ${f} | \
+    awk -vOFS="\t" "NR==1||/{5}:{6}/||/{7}:{8}/{print \"{1}\",\"{2}\",\"{3}\",\$0}"
+  '
+}
+
+function lookup()
+# A1BG, APOB, EPCR(PROCR), PROC
+{
+  (
+    export UKB_PPP=~/rds/results/public/proteomics/UKB-PPP/sun23/European
+    lookup_bash A1BG ${UKB_PPP}/A1BG_P04217_OID30771_v1_Inflammation_II.bgz
+    lookup_bash APOB ${UKB_PPP}/APOB_P04114_OID30673_v1_Inflammation_II.bgz
+    lookup_bash EPCR ${UKB_PPP}/PROCR_Q9UNN8_OID30149_v1_Cardiometabolic_II.bgz
+    lookup_bash PROC ${UKB_PPP}/PROC_P04070_OID20402_v1_Cardiometabolic.bgz
+  ) | awk -vOFS="\t" '{
+      if (NR==1) {$1="Protein";$2="Gene";$3="Type";print}
+      if (NR>1 && !/ALLELE/) print
+      }' | \
+  Rscript -e '
+     f <- read.delim("stdin")
+     write.table(f,file="~/Caprion/analysis/work/lookup_olink.tsv",row.names=FALSE,quote=FALSE,sep="\t")
+     print(knitr::kable(f,caption="UKB-PPP Olink replication"))
+  ' | \
+  pandoc - -o ~/Caprion/analysis/work/lookup_olink.html
+
+  (
+    lookup_bash A1BG ${deCODE}/16561_9_A1BG_Alpha_1B_glycoprotein.txt.gz
+    lookup_bash APOB ${deCODE}/2797_56_APOB_Apo_B.txt.gz
+    lookup_bash ERAP2 ${deCODE}/8960_3_ERAP2_LRAP.txt.gz
+    lookup_bash PROC ${deCODE}/2961_1_PROC_Protein_C.txt.gz
+    lookup_bash PROC ${deCODE}/3758_68_PROC_Activated_Protein_C.txt.gz
+  ) | awk -vOFS="\t" '{
+      if (NR==1) {$1="Protein";$2="Gene";$3="Type";print}
+      if (NR>1 && !/Chrom/) print
+      }' | \
+  Rscript -e '
+     f <- read.delim("stdin")
+     write.table(f,file="~/Caprion/analysis/work/lookup_somascan.tsv",row.names=FALSE,quote=FALSE,sep="\t")
+     print(knitr::kable(f,caption="deCODE Somescan replication"))
+  ' | \
+  pandoc - -o ~/Caprion/analysis/work/lookup_somascan.html
+}
+
+function qq_manhattan_subs()
+{
+  export prot=${1}
+  export f=${2}
+  if [[ "${f}" == *"UKB-PPP"* ]]; then
+     export src=olink
+  else
+     export src=somascan
+  fi
+  export rt=~/Caprion/analysis/work
+  export gz=${rt}/${prot}_${src}.gz
+  export an=${rt}/${prot}_${src}.annotate
+  if [ ${src} == "olink" ]; then
+  # chromsome position log_pvalue beta se
+    cat <(echo chromsome position log_pvalue beta se) \
+        <(gunzip -c ${f} | \
+          awk ' NR>1 {print $1, $2, $13, $10, $11}') | \
+    gzip -f > ${gz}
+    Rscript -e '
+      suppressMessages(library(dplyr))
+      an <- Sys.getenv("an")
+      prot <- Sys.getenv("prot")
+      rt <- Sys.getenv("rt")
+      annotate <- read.delim(file.path(rt,paste0("lookup_olink.tsv"))) %>%
+                  filter(Protein==prot) %>%
+                  select(CHROM,GENPOS,Gene,Type) %>%
+                  setNames(c("chromosome", "position", "nearest_gene_name", "cistrans"))
+      write.table(annotate,file=an,row.names=FALSE,quote=FALSE)
+    '
+   else
+    cat <(echo chromsome position log_pvalue beta se) \
+        <(gunzip -c ${f} | \
+          awk ' NR>1 {gsub(/chr/,"",$1);gsub(/X/,23,$1);print $1, $2, $9, $7, $10}' | \
+          Rscript -e '
+            suppressMessages(library(dplyr))
+            f <- read.table("stdin",col.names=c("chr","pos","log10p","beta","se")) %>%
+                 mutate(log10p=-gap::log10p(beta/se))
+            write.table(f,col.names=FALSE,row.names=FALSE,quote=FALSE)
+          ' | \
+          sort -k1,1n -k2,2n ) | \
+    gzip -f > ${gz}
+    Rscript -e '
+      suppressMessages(library(dplyr))
+      an <- Sys.getenv("an")
+      prot <- Sys.getenv("prot")
+      rt <- Sys.getenv("rt")
+      annotate <- read.delim(file.path(rt,paste0("lookup_somascan.tsv"))) %>%
+                  mutate(chr=gsub("chr","",Chrom)) %>%
+                  filter(Protein==prot) %>%
+                  select(chr,Pos,Gene,Type) %>%
+                  setNames(c("chromosome", "position", "nearest_gene_name", "cistrans"))
+      write.table(annotate,file=an,row.names=FALSE,quote=FALSE)
+    '
+  fi
+  Rscript -e '
+     analysis <- Sys.getenv("analysis")
+     protein <- Sys.getenv("prot")
+     src <- Sys.getenv("src")
+     png(file.path(analysis,"work",paste0(protein,"_",src,".png")),width=3600, height=3600, pointsize=12, res=450)
+     input_data_path <- Sys.getenv("gz")
+     custom_peak_annotation_file_path <- Sys.getenv("an")
+     reference_file_path <- file.path(find.package("pQTLtools"),"turboman","turboman_hg38_reference_data.rda")
+     pvalue_sign <- 5e-8
+     plot_title <- protein
+     library(pQTLtools)
+     turboman(input_data_path, custom_peak_annotation_file_path,
+              reference_file_path, pvalue_sign, plot_title)
+     dev.off()
+'
+}
+
+function qq_manhattan()
+{
+    qq_manhattan_subs A1BG ${UKB_PPP}/A1BG_P04217_OID30771_v1_Inflammation_II.bgz
+    qq_manhattan_subs APOB ${UKB_PPP}/APOB_P04114_OID30673_v1_Inflammation_II.bgz
+    qq_manhattan_subs EPCR ${UKB_PPP}/PROCR_Q9UNN8_OID30149_v1_Cardiometabolic_II.bgz
+    qq_manhattan_subs PROC ${UKB_PPP}/PROC_P04070_OID20402_v1_Cardiometabolic.bgz
+    qq_manhattan_subs A1BG ${deCODE}/16561_9_A1BG_Alpha_1B_glycoprotein.txt.gz
+    qq_manhattan_subs APOB ${deCODE}/2797_56_APOB_Apo_B.txt.gz
+    qq_manhattan_subs ERAP2 ${deCODE}/8960_3_ERAP2_LRAP.txt.gz
+    qq_manhattan_subs PROC ${deCODE}/2961_1_PROC_Protein_C.txt.gz
+  # qq_manhattan_subs PROC ${deCODE}/3758_68_PROC_Activated_Protein_C.txt.gz
+  # to avoid overwrite, remove its annotation at lookup_somascan.tsv
+}
+
+#assoc _dr
+#assoc _3
+#assoc
+#ukb_ppp_assoc
+#merge
+qq_manhattan

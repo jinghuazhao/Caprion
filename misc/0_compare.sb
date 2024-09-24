@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=_comp
 #SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=cclake
+#SBATCH --partition=icelake-himem
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
 
@@ -12,8 +12,9 @@
 
 . /etc/profile.d/modules.sh
 module purge
-module load rhel7/default-ccl
+module load rhel8/default-icl
 module load ceuadmin/readline/8.0
+module load ceuadmin/htslib/1.20
 
 export TMPDIR=${HPC_WORK}/work
 export analysis=~/Caprion/analysis
@@ -23,7 +24,7 @@ export deCODE=~/rds/results/public/proteomics/deCODE
 export UKB_PPP=~/rds/results/public/proteomics/UKB-PPP/sun23/European
 
 function idx()
-#idx METAL3 _3
+#idx METAL3 _3, but now it is done internally with pGWAS
 {
   export prot=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${analysis}/work/caprion${suffix}.varlist)
   export d=$1
@@ -164,7 +165,6 @@ function signal_grouping()
   filter(peptide,!Gene%in%c(x,y)) %>% nrow
   '
 }
-
 
 function lookup_r()
 {

@@ -1025,29 +1025,29 @@ options("openxlsx.borderColour"="#4F80BD")
 analysis <- Sys.getenv("analysis")
 freq <- read.table("~/Caprion/analysis/bgen/caprion.freq",col.names=c("SNP","REF","ALT","ALT_FREQS"))
 tbl <- read.delim(file.path(analysis,"work","tbl.tsv")) %>%
-       select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
-       mutate(Allele1=toupper(Allele1),Allele2=toupper(Allele2)) %>%
-       rename(Protein=prot,SNP=MarkerName,EA=Allele1,OA=Allele2,EAF=Freq1,Log10P=log.P.)
+       dplyr::select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
+       dplyr::mutate(Allele1=toupper(Allele1),Allele2=toupper(Allele2)) %>%
+       dplyr::rename(Protein=prot,SNP=MarkerName,EA=Allele1,OA=Allele2,EAF=Freq1,Log10P=log.P.)
 tbl_dr <- read.delim(file.path(analysis,"work","tbl_dr.tsv")) %>%
-          select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
-          mutate(Allele1=toupper(Allele1),Allele2=toupper(Allele2)) %>%
-          rename(Protein=prot,SNP=MarkerName,EA=Allele1,OA=Allele2,EAF=Freq1,Log10P=log.P.)
+          dplyr::select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
+          dplyr::mutate(Allele1=toupper(Allele1),Allele2=toupper(Allele2)) %>%
+          dplyr::rename(Protein=prot,SNP=MarkerName,EA=Allele1,OA=Allele2,EAF=Freq1,Log10P=log.P.)
 Protein <- read.csv(file.path(analysis,"work","caprion.cis.vs.trans")) %>%
-           mutate(geneRegion=paste(geneChrom,":",geneStart,"-",geneEnd)) %>%
-           left_join(freq) %>%
-           arrange(prot,SNPChrom,SNPPos) %>%
-           rename(Protein=prot) %>%
-           select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
-           left_join(tbl) %>%
-           select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
+           dplyr::mutate(geneRegion=paste(geneChrom,":",geneStart,"-",geneEnd)) %>%
+           dplyr::left_join(freq) %>%
+           dplyr::arrange(prot,SNPChrom,SNPPos) %>%
+           dplyr::rename(Protein=prot) %>%
+           dplyr::select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
+           dplyr::left_join(tbl) %>%
+           dplyr::select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
 Protein_dr <- read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")) %>%
-           mutate(geneRegion=paste(geneChrom,":",geneStart,"-",geneEnd)) %>%
-           left_join(freq) %>%
-           arrange(prot,SNPChrom,SNPPos) %>%
-           rename(Protein=prot) %>%
-           select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
-           left_join(tbl_dr) %>%
-           select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
+           dplyr::mutate(geneRegion=paste(geneChrom,":",geneStart,"-",geneEnd)) %>%
+           dplyr::left_join(freq) %>%
+           dplyr::arrange(prot,SNPChrom,SNPPos) %>%
+           dplyr::rename(Protein=prot) %>%
+           dplyr::select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
+           dplyr::left_join(tbl_dr) %>%
+           dplyr::select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
 proteins <- dir("~/Caprion/analysis/peptide") # c("A1BG","APOB","EPCR","ERAP2","PROC")
 Peptides <- data.frame()
 for (peptide in proteins)
@@ -1065,31 +1065,31 @@ any(duplicated(freq$SNP))
 dup_freq <- freq[duplicated(freq$SNP) | duplicated(freq$SNP, fromLast = TRUE), ]
 dim(dup_freq)
 freq_unique <- freq %>%
-               distinct(SNP, .keep_all = TRUE)
-Peptides <- left_join(Peptides,freq_unique,by="SNP") %>%
-            arrange(prot,isotope,SNPChrom,SNPPos) %>%
-            rename(Protein=prot)
-snplist_0.01 <- filter(freq,ALT_FREQS>=0.01 & ALT_FREQS<=0.99) %>%
-                pull(SNP)
-Protein_0.01 <- filter(Protein,SNP %in% snplist_0.01)
-Protein_dr_0.01 <- filter(Protein_dr,SNP %in% snplist_0.01)
-Peptides_0.01 <- filter(Peptides,SNP %in% snplist_0.01)
-snplist_0.01_0.001 <- filter(freq,(ALT_FREQS>=0.001 & ALT_FREQS<0.01)|(ALT_FREQS>0.99 & ALT_FREQS<=0.999)) %>%
-                      pull(SNP)
-Protein_0.01_0.001 <- filter(Protein,SNP %in% snplist_0.01_0.001)
-Protein_dr_0.01_0.001 <- filter(Protein_dr,SNP %in% snplist_0.01_0.001)
-Peptides_0.01_0.001 <- filter(Peptides,SNP %in% snplist_0.01_0.001)
+               dplyr::distinct(SNP, .keep_all = TRUE)
+Peptides <- dplyr::left_join(Peptides,freq_unique,by="SNP") %>%
+            dplyr::arrange(prot,isotope,SNPChrom,SNPPos) %>%
+            dplyr::rename(Protein=prot)
+snplist_0.01 <- dplyr::filter(freq,ALT_FREQS>=0.01 & ALT_FREQS<=0.99) %>%
+                dplyr::pull(SNP)
+Protein_0.01 <- dplyr::filter(Protein,SNP %in% snplist_0.01)
+Protein_dr_0.01 <- dplyr::filter(Protein_dr,SNP %in% snplist_0.01)
+Peptides_0.01 <- dplyr::filter(Peptides,SNP %in% snplist_0.01)
+snplist_0.01_0.001 <- dplyr::filter(freq,(ALT_FREQS>=0.001 & ALT_FREQS<0.01)|(ALT_FREQS>0.99 & ALT_FREQS<=0.999)) %>%
+                      dplyr::pull(SNP)
+Protein_0.01_0.001 <- dplyr::filter(Protein,SNP %in% snplist_0.01_0.001)
+Protein_dr_0.01_0.001 <- dplyr::filter(Protein_dr,SNP %in% snplist_0.01_0.001)
+Peptides_0.01_0.001 <- dplyr::filter(Peptides,SNP %in% snplist_0.01_0.001)
 caprion <- dplyr::mutate(Protein, ProteinSNP=paste0(Protein,"-",SNP),inv_chr_pos_a1_a2(SNP),pos=as.integer(pos)) %>%
            dplyr::rename(prot=Protein,rsid=SNP,uniprot=Gene)
 caprion_dr <- dplyr::mutate(Protein_dr, ProteinSNP=paste0(Protein,"-",SNP),inv_chr_pos_a1_a2(SNP),pos=as.integer(pos)) %>%
               dplyr::rename(prot=Protein,rsid=SNP,uniprot=Gene)
 same <- intersect(caprion[["ProteinSNP"]],caprion_dr[["ProteinSNP"]])
 cat("Total # of chromosome X signals =",length(same[grepl("X:",same)]),"\n")
-r <- cor(filter(caprion,ProteinSNP %in% same)["Effect"],
-         filter(caprion_dr,ProteinSNP %in% same)["Effect"])
+r <- cor(dplyr::filter(caprion,ProteinSNP %in% same)["Effect"],
+         dplyr::filter(caprion_dr,ProteinSNP %in% same)["Effect"])
 png(file.path(analysis,"work","un_dr_overlap.png"),height=8,width=8,units="in",res=300)
-plot(filter(caprion,ProteinSNP %in% same)[["Effect"]],
-     filter(caprion_dr,ProteinSNP %in% same)[["Effect"]],pch=19,
+plot(dplyr::filter(caprion,ProteinSNP %in% same)[["Effect"]],
+     dplyr::filter(caprion_dr,ProteinSNP %in% same)[["Effect"]],pch=19,
      main=paste0("Effect size comparison (N. pQTLs=",length(same),",r=",trunc(r*1e5,5)/1e5,")"),xlab="Beta",ylab="Beta_dr")
 dev.off()
 INF <- "/rds/project/jmmh2/rds-jmmh2-projects/olink_proteomics/scallop/INF"

@@ -141,10 +141,6 @@
 <ul class="nav flex-column">
 </ul>
 </li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#9-lookup">9. Lookup</a>
-<ul class="nav flex-column">
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -162,7 +158,6 @@
 6_meta_analysis.sh
 7_merge.sh
 8_hla.sh
-9_lookup.sh
 </code></pre>
 <div class="mermaid">graph TB
 1_pca_projection.sh
@@ -170,7 +165,6 @@
 3_wgcna.R
 4_pca_clustering.R --&gt; 5_pgwas.sb --&gt; 6_meta_analysis.sh --&gt; 6_meta_analysis.sb --&gt; 7_merge.sb --&gt; 7_merge.sh --&gt; 0_utils.sb --&gt; 5_pgwas.sb
 8_hla.sh
-9_lookup.sh
 </div>
 <p>Chromose X is handled together with autosomes, and the loop from <code>0_utils.sb</code> to <code>5_pgwas.sb</code> is to produce mean-by-genotype/QQ/Manhattan/LocusZoom plots -- the former also implements vep_annotate(), fp_data(), fp() which only requires <code>--array=1</code>. Note also that HetISq() only works inside an interactive R session.</p>
 <h2 id="1-data-handling-and-pca-projection">1. Data handling and PCA projection</h2>
@@ -198,7 +192,6 @@
 <h2 id="8-hla-imputation5">8. HLA imputation<sup id="fnref:HLA"><a class="footnote-ref" href="#fn:HLA">5</a></sup></h2>
 <p>This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed <a href="https://cambridge-ceu.github.io/csd3/applications/CookHLA.html">here</a>. The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.</p>
 <p>The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.</p>
-<h2 id="9-lookup">9. Lookup</h2>
 <div class="footnote">
 <hr/>
 <ol>

@@ -11,6 +11,10 @@ function deCODE()
   R --no-save -q <<END
     options(width=200)
     suppressMessages(library(dplyr))
+    cvt <- "~/Caprion/analysis/work/caprion_dr.cis.vs.trans"
+    f <- read.csv(cvt) %>%
+         mutate(seqname=paste0("chr",SNPChrom),start=as.integer(SNPPos),end=SNPPos) %>%
+         arrange(SNPChrom,SNPPos)
     f <- file.path(Sys.getenv("deCODE"),"doc","ferkingstad21.xlsx")
     SomaLogicv4 <- openxlsx::read.xlsx(f,sheet=1,startRow=3,colNames=TRUE,cols=1:12)
     out <- file.path(Sys.getenv("analysis"),"deCODE",Sys.getenv("v4"))
@@ -23,22 +27,15 @@ function deCODE()
     rep38 <- sentinels %>%
              mutate(seqname=chr,start=as.integer(pos),end=pos) %>%
                     arrange(chr,pos)
-    gr <- with(rep38,GenomicRanges::GRanges(seqnames=seqname,IRanges::IRanges(start,end,names=Name))) %>% unique()
+    gr <- with(rep38,GenomicRanges::GRanges(seqnames=seqname,
+                                    IRanges::IRanges(start,end,names=snpid),
+                                    rsid=variant,chr38=chr,pos38=pos,prot=prot,uniprot=uniprot,
+                                    beta=beta,se=se,log10p=log10p))
     suppressMessages(library(rtracklayer))
     path <- system.file(package="liftOver", "extdata", "hg38ToHg19.over.chain")
     ch <- import.chain(path)
     seqlevelsStyle(gr) <- "UCSC"
     gr19 <- liftOver(gr,ch)
-    df <- mutate(data.frame(gr),group_name=names(gr)) %>%
-          left_join(data.frame(gr19),by=c("group_name")) %>%
-          mutate(chr=seqnames.x,pos=end.y,Name=group_name) %>%
-          select(Name,chr,pos,group) %>%
-          full_join(rep38) %>%
-          mutate(snpid=if_else(effectAllele>otherAllele,paste0(chr,":",pos,"_",otherAllele,"_",effectAllele),
-                                                        paste0(chr,":",pos,"_",effectAllele,"_",otherAllele)),
-                 chr=gsub("chr","",chr),
-                 mlog10p=-gap::log10p(Beta/SE)) %>%
-          select(-c(Name,Chrom,Pos,seqname,start,end,minus_log10_pval))
     write.table(select(df,snpid,prot,Pval),file=file.path(INF,"deCODE","replication.tsv"),
                 row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
     df_ids <- read.table(file.path(INF,"deCODE","olink_inf.full"),

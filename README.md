@@ -3,7 +3,7 @@
 
 Welcome!
 
-This repository/site is dedicated to protein/peptide quantitative trait analysis using the Caprion platform, which is organised in the following sections.
+This repository/site is dedicated to protein/peptide quantitative trait analysis using the Caprion platform, which is organised into the following sections.
 
 ## I. Protein analysis
 

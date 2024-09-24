@@ -13,7 +13,6 @@ Work was done in a named sequence[^workflow].
 6_meta_analysis.sh
 7_merge.sh
 8_hla.sh
-9_lookup.sh
 ```
 
 ```mermaid
@@ -23,7 +22,6 @@ graph TB
 3_wgcna.R
 4_pca_clustering.R --> 5_pgwas.sb --> 6_meta_analysis.sh --> 6_meta_analysis.sb --> 7_merge.sb --> 7_merge.sh --> 0_utils.sb --> 5_pgwas.sb
 8_hla.sh
-9_lookup.sh
 ```
 
 Chromose X is handled together with autosomes, and the loop from `0_utils.sb` to `5_pgwas.sb` is to produce mean-by-genotype/QQ/Manhattan/LocusZoom plots -- the former also implements vep_annotate(), fp_data(), fp() which only requires `--array=1`. Note also that HetISq() only works inside an interactive R session.
@@ -77,8 +75,6 @@ A SLURM job is executed, to be followed by collection of results.
 This is experimented on several software including HIBAG, CookHLA and SNP2HLA as desribed [here](https://cambridge-ceu.github.io/csd3/applications/CookHLA.html). The whole cohort imputation requests resources exceeding the system limits, so a cardio SLURM job is used instead.
 
 The hped file from CookHLA (or converted from HIBAG) can be used by HATK for association analysis while the advantage of SNP2HLA is that binary ped files are ready for use as usual.
-
-## 9. Lookup
 
 [^directory]: **Directories**
     

@@ -1,18 +1,14 @@
 <a href="https://jinghuazhao.github.io/Caprion/"><img src="pilot/qrcode.png" height=200 width=200 align="right"></img></a>
 # Caprion data analysis
 
-## Protein analysis
+Welcome!
 
-This is now in [progs/](progs).
+This repository/site is dedicated to protein/peptide quantitative trait analysis using the Caprion platform, which is organised in the following sections.
 
-## Peptide analysis
+## I. [Protein analysis](progs/)
 
-This is now in [peptide_progs/](peptide_progs).
+## II. [Peptide analysis](peptide_progs)
 
-## Miscellaneous analysis
+## III. [Miscellaneous analysis](misc/)
 
-This is in [misc/](misc/).
-
-## Additional data
-
-See <https://jinghuazhao.github.io/pQTLdata/>.
+## IV. [Additional data](https://jinghuazhao.github.io/pQTLdata/).

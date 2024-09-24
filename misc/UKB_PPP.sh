@@ -3,6 +3,7 @@ function UKB_PPP
   Rscript -e '
      options(width=2000)
      suppressMessages(require(dplyr))
+     suppressMessages(require(pQTLtools))
      # SCALLOP-INF list
      METAL <- read.delim(file.path(find.package("pQTLtools"),"tests","INF1.METAL")) %>%
               left_join(gap.datasets::inf1[c("prot","gene")]) %>%
@@ -50,7 +51,7 @@ function UKB_PPP
         m <- filter(METAL,Chromosome %in% i) %>%
              select(chr,pos,uniprot,rsid,prot)
         bfile <- file.path(INF,"INTERVAL","per_chr",paste0("chr",i))
-        b[[i]] <- novelty_check(u,m,ldops=list(bfile,plink))
+        b[[i]] <- novelty_check(u,m,ldops=list(bfile=bfile,plink=plink))
      }
      replication2 <- filter(bind_rows(b), r2>=0.8)
      prot_rsid <- with(novel_data %>%

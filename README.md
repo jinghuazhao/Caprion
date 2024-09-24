@@ -5,10 +5,20 @@ Welcome!
 
 This repository/site is dedicated to protein/peptide quantitative trait analysis using the Caprion platform, which is organised in the following sections.
 
-## I. [Protein analysis](progs/)
+## I. Protein analysis
 
-## II. [Peptide analysis](peptide_progs)
+- [autoencoder](https://jinghuazhao.github.io/Caprion/pilot/autoencoder/)
+- [gwas2](https://jinghuazhao.github.io/Caprion/pilot/gwas2/)
+- [Pilot studies](https://jinghuazhao.github.io/Caprion/pilot/)
+- [Analysis](progs/)
+
+## II. Peptide analysis
+
+- [Analysis](peptide_progs)
 
 ## III. [Miscellaneous analysis](misc/)
 
-## IV. [Additional data](https://jinghuazhao.github.io/pQTLdata/).
+## IV. Additional data
+
+- [Panel information](https://jinghuazhao.github.io/pQTLdata/)
+- [Notes](https://jinghuazhao.github.io/Caprion/pilot/Notes/)

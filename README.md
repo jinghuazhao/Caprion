@@ -10,15 +10,15 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 - [autoencoder](https://jinghuazhao.github.io/Caprion/pilot/autoencoder/)
 - [gwas2](https://jinghuazhao.github.io/Caprion/pilot/gwas2/)
 - [Pilot studies](https://jinghuazhao.github.io/Caprion/pilot/)
-- [Analysis](progs/)
+- [Details](progs/)
 
 ## II. Peptide analysis
 
-- [Analysis](peptide_progs)
+- [Details](peptide_progs)
 
 ## III. Miscellaneous analysis
 
-- [Analysis](misc/)
+- [Details](misc/)
 
 ## IV. Additional data
 

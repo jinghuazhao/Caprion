@@ -4,7 +4,7 @@ This directory is created to accommodate many largely independent jobs.
 
 ## Lookup
 
-- `deCODE_UKB_PPP.sh`. extension from ?`pQTLtools::novelty_check()`.
+- `deCODE_UKB_PPP.sh`. adaptation from tables() and extension from ?`pQTLtools::novelty_check()`.
 
 ## Legacy codes
 

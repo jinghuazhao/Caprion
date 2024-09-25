@@ -16,7 +16,9 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 - [Analysis](peptide_progs)
 
-## III. [Miscellaneous analysis](misc/)
+## III. Miscellaneous analysis
+
+- [Analysis](misc/)
 
 ## IV. Additional data
 

@@ -17,7 +17,7 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 - [Peptide analysis](peptide_progs)
 - [Miscellaneous analysis](misc/)
 
-## Notes
+## Additional information
 
 - [Panel information](https://jinghuazhao.github.io/pQTLdata/reference/caprion.html)
 - [Notes](https://jinghuazhao.github.io/Caprion/pilot/Notes/)

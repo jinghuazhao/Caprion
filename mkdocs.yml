@@ -11,7 +11,9 @@ nav:
     - progs/README.md
     - peptide_progs/README.md
     - misc/README.md
-  - pilot/Notes.md
+  - "Notes"
+    - "Panel information": https://jinghuazhao.github.io/pQTLdata/reference/caprion.html
+    - pilot/Notes.md
 theme:
     name: mkdocs
     nav_style: dark

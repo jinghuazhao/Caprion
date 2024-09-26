@@ -94,18 +94,18 @@ function deCODE()
     sentinels <- openxlsx::read.xlsx(xlsx,sheet=2,startRow=3,colNames=TRUE) %>%
                dplyr::select(10,9,3,7,11,14,15,18,19,27,29) %>%
                setNames(c("SeqId","uniprot","gene","prot","variant","chr","pos","A1","A2","beta","log10p")) %>%
+               dplyr::filter(A1!="!" & A2!="!") %>%
                dplyr::mutate(chr=gsub("chr","",chr),
-                             snpid=gap::chr_pos_a1_a2(chr,pos,A1,A2,prefix=""),
-                             se=TwoSampleMR::get_se(beta,10^(-log10p)))
+                             se=TwoSampleMR::get_se(beta,10^(-log10p))) %>%
+               dplyr::mutate(seqname=chr,start=as.integer(pos),end=pos) %>%
+               dplyr::arrange(chr,pos)
+    gr <- with(sentinels,GenomicRanges::GRanges(seqnames=seqname,
+                                                IRanges::IRanges(start,end,names=variant),
+                                                rsid=variant,chr38=chr,pos38=pos,A1=A1,A2=A2,
+                                                prot=prot,uniprot=uniprot,
+                                                beta=beta,se=se,log10p=log10p))
     uniprots <- intersect(with(sentinels,uniprot),caprion_dr[["uniprot"]])
     print(length(uniprots))
-    rep38 <- sentinels %>%
-             dplyr::mutate(seqname=chr,start=as.integer(pos),end=pos) %>%
-             dplyr::arrange(chr,pos)
-    gr <- with(rep38,GenomicRanges::GRanges(seqnames=seqname,
-                                    IRanges::IRanges(start,end,names=snpid),
-                                    rsid=variant,chr38=chr,pos38=pos,prot=prot,uniprot=uniprot,
-                                    beta=beta,se=se,log10p=log10p))
     f <- system.file(package="liftOver", "extdata", "hg38ToHg19.over.chain")
     ch <- rtracklayer::import.chain(f)
     GenomeInfoDb::seqlevelsStyle(gr) <- "UCSC"
@@ -113,8 +113,9 @@ function deCODE()
               data.frame %>%
               dplyr::filter(uniprot %in% uniprots) %>%
               dplyr::mutate(seqnames=gsub("chr","",seqnames)) %>%
-              dplyr::select(-group,-end,-width,-strand) %>%
-              dplyr::rename(snpid=group_name,chr=seqnames,pos=start)
+              dplyr::select(-group_name,-group,-end,-width,-strand) %>%
+              dplyr::rename(chr=seqnames,pos=start) %>%
+              dplyr::mutate(snpid=gap::chr_pos_a1_a2(chr,pos,A1,A2,prefix=""))
     z <- list()
     for(i in unique(dplyr::pull(caprion_dr,chr)))
     {
@@ -135,7 +136,7 @@ function deCODE()
     f <- file.path(Sys.getenv("analysis"),"deCODE","SomaLogicv4.tsv")
     SomaLogicv4 <- openxlsx::read.xlsx(xlsx,sheet=1,startRow=3,colNames=TRUE,cols=1:12)
     write.table(SomaLogicv4,file=f,quote=FALSE,row.names=FALSE,sep="\t")
-    write.table(s,file=file.path(analysis,"deCODE","deCODE.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
+    write.table(dplyr::filter(s,r2>=0.8),file=file.path(analysis,"deCODE","deCODE.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
 END
 }
 
@@ -187,7 +188,7 @@ function UKB_PPP()
          dplyr::arrange(seqnames,pos) %>%
          dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
     save(UKB_PPP,t,file=file.path(analysis,"UKB_PPP","UKB_PPP.rda"))
-    write.table(x,file=file.path(analysis,"UKB_PPP","UKB_PPP.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
+    write.table(t,file=file.path(analysis,"UKB_PPP","UKB_PPP.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
 END
 }
 

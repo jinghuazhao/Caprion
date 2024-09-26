@@ -22,5 +22,5 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 ## IV. Additional data
 
-- [Panel information](https://jinghuazhao.github.io/pQTLdata/)
+- [Panel information](https://jinghuazhao.github.io/pQTLdata/reference/caprion.html)
 - [Notes](https://jinghuazhao.github.io/Caprion/pilot/Notes/)

@@ -12,7 +12,7 @@ nav:
     - peptide_progs/README.md
     - misc/README.md
   - "Additional information":
-    - "Panel information": https://jinghuazhao.github.io/pQTLdata/reference/caprion.html
+    - "Caprion panel": https://jinghuazhao.github.io/pQTLdata/reference/caprion.html
     - pilot/Notes.md
 theme:
     name: mkdocs

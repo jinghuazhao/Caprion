@@ -91,12 +91,13 @@ function deCODE()
     load(file.path(analysis,"reports","caprion-caprion_dr.rda"))
     # deCODE
     xlsx <- file.path(Sys.getenv("deCODE"),"doc","ferkingstad21.xlsx")
-    SomaLogicv4 <- openxlsx::read.xlsx(xlsx,sheet=1,startRow=3,colNames=TRUE,cols=1:12)
     sentinels <- openxlsx::read.xlsx(xlsx,sheet=2,startRow=3,colNames=TRUE) %>%
                dplyr::select(10,9,3,7,11,14,15,18,19,27,29) %>%
                setNames(c("SeqId","uniprot","gene","prot","variant","chr","pos","A1","A2","beta","log10p")) %>%
                dplyr::mutate(chr=gsub("chr","",chr),snpid=gap::chr_pos_a1_a2(chr,pos,A1,A2,prefix=""),
                              se=TwoSampleMR::get_se(beta,10^(-log10p)))
+    uniprots <- intersect(with(sentinels,uniprot),caprion_dr[["uniprot"]])
+    print(length(uniprots))
     rep38 <- sentinels %>%
              dplyr::mutate(seqname=chr,start=as.integer(pos),end=pos) %>%
              dplyr::arrange(chr,pos)
@@ -109,6 +110,7 @@ function deCODE()
     GenomeInfoDb::seqlevelsStyle(gr) <- "UCSC"
     deCODE <- rtracklayer::liftOver(gr,ch) %>%
               data.frame %>%
+              dplyr::filter(uniprot %in% uniprots) %>%
               dplyr::mutate(seqnames=gsub("chr","",seqnames)) %>%
               dplyr::select(-group,-end,-width,-strand) %>%
               dplyr::rename(snpid=group_name,chr=seqnames,pos=start)
@@ -131,6 +133,7 @@ function deCODE()
          dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
     save(deCODE,u,v,file=file.path(analysis,"deCODE","deCODE.rda"))
     f <- file.path(Sys.getenv("analysis"),"deCODE","SomaLogicv4.tsv")
+    SomaLogicv4 <- openxlsx::read.xlsx(xlsx,sheet=1,startRow=3,colNames=TRUE,cols=1:12)
     write.table(SomaLogicv4,file=f,quote=FALSE,row.names=FALSE,sep="\t")
     write.table(gr19,file=file.path(analysis,"deCODE","deCODE.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
 END
@@ -153,18 +156,17 @@ function UKB_PPP()
     results <- "/rds/project/jmmh2/rds-jmmh2-results/public/proteomics"
     url <- file.path(results,"UKB-PPP","doc","sun23.xlsx")
     ST10 <- read.xlsx(url,"ST10",startRow=4) %>%
+            dplyr::rename(snpid37=1) %>%
             dplyr::mutate(uniprot=Target.UniProt,rsid=rsID,prot=Assay.Target) %>%
             dplyr::mutate(prot_rsid=paste0(uniprot,"-",rsid))
-    uniprots <- c(with(panel,uniprot),with(caprion_dr,uniprot)) %>%
-                unique()
-    overlap <- dplyr::filter(ST10,uniprot %in% uniprots)
-    dim(overlap)
-    UKB_PPP <- dplyr::mutate(overlap,
-               chrpos=strsplit(overlap[["Variant.ID.(CHROM:GENPOS.(hg37):A0:A1:imp:v1)"]],":"),
-               chr=unlist(lapply(chrpos,"[[",1)),
-               pos=as.integer(unlist(lapply(chrpos,"[[",2))),
-               a1=unlist(lapply(chrpos,"[[",3)),
-               a2=unlist(lapply(chrpos,"[[",4))) %>%
+    uniprots <- intersect(with(ST10,uniprot),with(caprion_dr,uniprot))
+    print(length(uniprots))
+    UKB_PPP <- dplyr::filter(ST10,uniprot %in% uniprots) %>%
+               dplyr::mutate(chrpos=strsplit(snpid37,":"),
+                        chr=unlist(lapply(chrpos,"[[",1)),
+                        pos=as.integer(unlist(lapply(chrpos,"[[",2))),
+                        a1=unlist(lapply(chrpos,"[[",3)),
+                        a2=unlist(lapply(chrpos,"[[",4))) %>%
                dplyr::filter(!is.na(a1)&!is.na(a2)) %>%
                dplyr::mutate(rsid=gap::chr_pos_a1_a2(chr,pos,a1,a2)) %>%
                dplyr::select(-chrpos)
@@ -184,14 +186,10 @@ function UKB_PPP()
     x <- dplyr::mutate(w,seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
          dplyr::arrange(seqnames,pos) %>%
          dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
-    save(UKB_PPP,w,x,file=file.path(analysis,"deCODE","deCODE.rda"))
-    prot_rsid <- with(novel_data %>%
-                 dplyr::left_join(gap.datasets::inf1[c("prot","gene")]),paste0(gene,"-",rsid))
-    prot_rsid_repl <- with(replication2,paste0(query.prot,"-",query.rsid))
-    novel <- setdiff(prot_rsid,prot_rsid_repl)
+    save(UKB_PPP,w,x,file=file.path(analysis,"UKB_PPP","UKB_PPP.rda"))
 END
 }
 
 #caprion_caprion_dr
-#deCODE
+deCODE
 UKB_PPP

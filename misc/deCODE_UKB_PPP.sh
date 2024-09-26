@@ -63,11 +63,11 @@ function caprion_caprion_dr()
     }
     z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
     r <- dplyr::filter(dplyr::bind_rows(z[-which(names(z)=="X")]),r2>=0.8) %>%
-         dplyr::rename(known.gene=known.uniprot,query.gene=query.uniprot)
-    s <- dplyr::mutate(r,seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
+         dplyr::mutate(seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
          dplyr::arrange(seqnames,pos) %>%
          dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
-    save(panel,caprion,caprion_dr,r,s,file=file.path(analysis,"reports","caprion-caprion_dr.rda"))
+    save(panel,caprion,caprion_dr,r,file=file.path(analysis,"reports","caprion-caprion_dr.rda"))
+    write.table(r,file=file.path(analysis,"reports","caprion-caprion_dr.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
     cvt <- "~/Caprion/analysis/work/caprion_dr.cis.vs.trans"
     f <- read.csv(cvt) %>%
          mutate(seqname=paste0("chr",SNPChrom),start=as.integer(SNPPos),end=SNPPos) %>%
@@ -94,7 +94,8 @@ function deCODE()
     sentinels <- openxlsx::read.xlsx(xlsx,sheet=2,startRow=3,colNames=TRUE) %>%
                dplyr::select(10,9,3,7,11,14,15,18,19,27,29) %>%
                setNames(c("SeqId","uniprot","gene","prot","variant","chr","pos","A1","A2","beta","log10p")) %>%
-               dplyr::mutate(chr=gsub("chr","",chr),snpid=gap::chr_pos_a1_a2(chr,pos,A1,A2,prefix=""),
+               dplyr::mutate(chr=gsub("chr","",chr),
+                             snpid=gap::chr_pos_a1_a2(chr,pos,A1,A2,prefix=""),
                              se=TwoSampleMR::get_se(beta,10^(-log10p)))
     uniprots <- intersect(with(sentinels,uniprot),caprion_dr[["uniprot"]])
     print(length(uniprots))
@@ -126,23 +127,22 @@ function deCODE()
        z[[i]] <- pQTLtools::novelty_check(decode,dr,ldops=list(bfile=bfile,plink=plink))
     }
     z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
-    u <- dplyr::bind_rows(z[-which(names(z)=="X")]) %>%
-         dplyr::rename(known.gene=known.uniprot,query.gene=query.uniprot)
-    v <- dplyr::mutate(u,seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
+    s <- dplyr::bind_rows(z[-which(names(z)=="X")]) %>%
+         dplyr::mutate(seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
          dplyr::arrange(seqnames,pos) %>%
          dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
-    save(deCODE,u,v,file=file.path(analysis,"deCODE","deCODE.rda"))
+    save(deCODE,s,file=file.path(analysis,"deCODE","deCODE.rda"))
     f <- file.path(Sys.getenv("analysis"),"deCODE","SomaLogicv4.tsv")
     SomaLogicv4 <- openxlsx::read.xlsx(xlsx,sheet=1,startRow=3,colNames=TRUE,cols=1:12)
     write.table(SomaLogicv4,file=f,quote=FALSE,row.names=FALSE,sep="\t")
-    write.table(gr19,file=file.path(analysis,"deCODE","deCODE.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
+    write.table(s,file=file.path(analysis,"deCODE","deCODE.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
 END
 }
 
 function UKB_PPP()
 {
   R --no-save -q <<END
-    options(width=2000)
+    options(width=200)
     suppressMessages(require(dplyr))
     suppressMessages(require(openxlsx))
     suppressMessages(require(pQTLtools))
@@ -168,7 +168,7 @@ function UKB_PPP()
                         a1=unlist(lapply(chrpos,"[[",3)),
                         a2=unlist(lapply(chrpos,"[[",4))) %>%
                dplyr::filter(!is.na(a1)&!is.na(a2)) %>%
-               dplyr::mutate(rsid=gap::chr_pos_a1_a2(chr,pos,a1,a2)) %>%
+               dplyr::mutate(rsid=gap::chr_pos_a1_a2(chr,pos,a1,a2,prefix="")) %>%
                dplyr::select(-chrpos)
     z <- list()
     for(i in unique(dplyr::pull(caprion_dr,chr)))
@@ -181,15 +181,16 @@ function UKB_PPP()
        z[[i]] <- novelty_check(ukb_ppp,dr,ldops=list(bfile=bfile,plink=plink))
     }
     z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
-    w <- dplyr::bind_rows(z[-which(names(z)=="X")]) %>%
-         dplyr::rename(known.gene=known.uniprot,query.gene=query.uniprot)
-    x <- dplyr::mutate(w,seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
+    t <- dplyr::bind_rows(z[-which(names(z)=="X")]) %>%
+         dplyr::filter(r2>=0.8) %>%
+         dplyr::mutate(seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
          dplyr::arrange(seqnames,pos) %>%
          dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
-    save(UKB_PPP,w,x,file=file.path(analysis,"UKB_PPP","UKB_PPP.rda"))
+    save(UKB_PPP,t,file=file.path(analysis,"UKB_PPP","UKB_PPP.rda"))
+    write.table(x,file=file.path(analysis,"UKB_PPP","UKB_PPP.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
 END
 }
 
-#caprion_caprion_dr
+caprion_caprion_dr
 deCODE
 UKB_PPP

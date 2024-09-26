@@ -8,7 +8,7 @@ export plink=/rds/user/jhz22/hpc-work/bin/plink
 if [ ! -d ${analysis}/deCODE ]; then mkdir -p ${analysis}/deCODE; fi
 if [ ! -d ${analysis}/UKB_PPP ]; then mkdir -p ${analysis}/UKB_PPP; fi
 
-function caprion()
+function caprion_caprion_dr()
 {
   R --no-save -q <<END
     suppressMessages(library(dplyr))
@@ -115,16 +115,16 @@ function deCODE()
     z <- list()
     for(i in unique(dplyr::pull(caprion_dr,chr)))
     {
-       dr <- dplyr::filter(caprion_dr,chr %in% i) %>%
-            dplyr::select(chr,pos,uniprot,rsid,prot)
        decode <- dplyr::filter(deCODE,chr %in% i) %>%
                  dplyr::select(chr,pos,uniprot,snpid,prot) %>%
                  dplyr::rename(rsid=snpid)
+       dr <- dplyr::filter(caprion_dr,chr %in% i) %>%
+             dplyr::select(chr,pos,uniprot,rsid,prot)
        bfile <- file.path(INF,"INTERVAL","per_chr",paste0("snpid",i))
        z[[i]] <- pQTLtools::novelty_check(decode,dr,ldops=list(bfile=bfile,plink=plink))
     }
     z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
-    u <- dplyr::filter(dplyr::bind_rows(z[-which(names(z)=="X")]),r2>=0.8) %>%
+    u <- dplyr::bind_rows(z[-which(names(z)=="X")]) %>%
          dplyr::rename(known.gene=known.uniprot,query.gene=query.uniprot)
     v <- dplyr::mutate(u,seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
          dplyr::arrange(seqnames,pos) %>%
@@ -162,7 +162,7 @@ function UKB_PPP()
     UKB_PPP <- dplyr::mutate(overlap,
                chrpos=strsplit(overlap[["Variant.ID.(CHROM:GENPOS.(hg37):A0:A1:imp:v1)"]],":"),
                chr=unlist(lapply(chrpos,"[[",1)),
-               pos=unlist(lapply(chrpos,"[[",2)),
+               pos=as.integer(unlist(lapply(chrpos,"[[",2))),
                a1=unlist(lapply(chrpos,"[[",3)),
                a2=unlist(lapply(chrpos,"[[",4))) %>%
                dplyr::filter(!is.na(a1)&!is.na(a2)) %>%
@@ -171,15 +171,15 @@ function UKB_PPP()
     z <- list()
     for(i in unique(dplyr::pull(caprion_dr,chr)))
     {
-       u <- dplyr::filter(UKB_PPP,chr %in% i) %>%
-            dplyr::select(chr,pos,uniprot,rsid,prot)
-       m <- dplyr::filter(caprion_dr,chr %in% i) %>%
-            dplyr::select(chr,pos,uniprot,rsid,prot)
+       ukb_ppp <- dplyr::filter(UKB_PPP,chr %in% i) %>%
+                  dplyr::select(chr,pos,uniprot,rsid,prot)
+       dr <- dplyr::filter(caprion_dr,chr %in% i) %>%
+             dplyr::select(chr,pos,uniprot,rsid,prot)
        bfile <- file.path(INF,"INTERVAL","per_chr",paste0("snpid",i))
-       z[[i]] <- novelty_check(u,m,ldops=list(bfile=bfile,plink=plink))
+       z[[i]] <- novelty_check(ukb_ppp,dr,ldops=list(bfile=bfile,plink=plink))
     }
     z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
-    w <- dplyr::filter(dplyr::bind_rows(z[-which(names(z)=="X")]),r2>=0.8) %>%
+    w <- dplyr::bind_rows(z[-which(names(z)=="X")]) %>%
          dplyr::rename(known.gene=known.uniprot,query.gene=query.uniprot)
     x <- dplyr::mutate(w,seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
          dplyr::arrange(seqnames,pos) %>%
@@ -192,6 +192,6 @@ function UKB_PPP()
 END
 }
 
-caprion
-deCODE
+#caprion_caprion_dr
+#deCODE
 UKB_PPP

@@ -1,27 +1,27 @@
 # Miscellaneous analysis
 
-This directory is created to accommodate many largely independent tasks.
+This section accommodates many largely independent tasks.
 
-Due to their somewhat generic nature, implementations might well cover both proteins and peptides.
+Implementation might well be generic so that both proteins and peptides are covered.
 
-## Programs and their utilities
+## Programs and applications
 
 These are summarised in the following table,
 
-Program   | Application
+Program   | Description
 ----------|------------------------------------------------------------------------
 `csq.sh` | Consequences of variants
-`deCODE_UKB_PPP.sh` | adaptation from `tables.sh` and ?`pQTLtools::novelty_check()`
+`deCODE_UKB_PPP.sh` | deCODE?UKB-PPP replication
 `eSet.sh` | ExpresssionSet implementations
 `glmnet_pense.sh` | glmnet/pense modeling
 `impute.sh` | imputation experiments
 `peptideAssociationPlot.sh` | protein Manhattan-peptide signal plots
 `tables.sh` | `Supplementary-Tables.xlsx` generator
-`ToDo.sh` | various experiments
+`ToDo.sh` | various staged experiments
 
 ## Legacy codes
 
-- `0_compare.sb`. contrast with deCODE/UKB-PPP.
+- `0_compare.sb`. earlier contrast with deCODE/UKB-PPP.
 - `inf1.sh`. snapshot from SCALLOP/INF meta-analysis.
 
 Created on **23/9/2024**

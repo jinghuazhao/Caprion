@@ -8,6 +8,8 @@ Due to somewhat generic nature, implementations might well cover both proteins a
 
 - `csq.sh`. Consequences of variants.
 - `deCODE_UKB_PPP.sh`. adaptation from tables() and extension from ?`pQTLtools::novelty_check()`.
+- `eSet.sh`. ExpresssionSet implementations.
+- `glmnet_pense.sh`. glmnet/pense modeling.
 - `impute.sh`. imputation experiments.
 - `tables.sh`. summary tables from `progs/0_utils.sh`.
 

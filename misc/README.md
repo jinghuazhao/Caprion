@@ -2,8 +2,11 @@
 
 This directory is created to accommodate many largely independent jobs.
 
-## Lookup
+Due to somewhat generic nature, implementations might well cover both proteins and peptides.
 
+## Analysis
+
+- `csq.sh`. Consequences of variants.
 - `deCODE_UKB_PPP.sh`. adaptation from tables() and extension from ?`pQTLtools::novelty_check()`.
 - `impute.sh`. imputation experiments.
 - `tables.sh`. summary tables from `progs/0_utils.sh`.

@@ -1,17 +1,23 @@
 # Miscellaneous analysis
 
-This directory is created to accommodate many largely independent jobs.
+This directory is created to accommodate many largely independent tasks.
 
-Due to somewhat generic nature, implementations might well cover both proteins and peptides.
+Due to their somewhat generic nature, implementations might well cover both proteins and peptides.
 
-## Analysis
+## Programs and their utilities
 
-- `csq.sh`. Consequences of variants.
-- `deCODE_UKB_PPP.sh`. adaptation from tables() and extension from ?`pQTLtools::novelty_check()`.
-- `eSet.sh`. ExpresssionSet implementations.
-- `glmnet_pense.sh`. glmnet/pense modeling.
-- `impute.sh`. imputation experiments.
-- `tables.sh`. summary tables from `progs/0_utils.sh`.
+These are summarised in the following table,
+
+Program   | Application
+----------|------------------------------------------------------------------------
+`csq.sh` | Consequences of variants
+`deCODE_UKB_PPP.sh` | adaptation from `tables.sh` and ?`pQTLtools::novelty_check()`
+`eSet.sh` | ExpresssionSet implementations
+`glmnet_pense.sh` | glmnet/pense modeling
+`impute.sh` | imputation experiments
+`peptideAssociationPlot.sh` | protein Manhattan-peptide signal plots
+`tables.sh` | `Supplementary-Tables.xlsx` generator
+`ToDo.sh` | various experiments
 
 ## Legacy codes
 

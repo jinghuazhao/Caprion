@@ -25,17 +25,17 @@ git add .gitignore
 git commit -m ".gitignore"
 git add README.md pilot/README.md
 git commit -m "README"
-git add pilot/qrcode.svg pilot/qrcode.png
-git commit -m "QR code"
+git add docs/
+git commit -m "docs"
 git add misc/ progs/ peptide_progs/
 git commit -m "Analysis"
 git add pilot/caprion.ini pilot/caprion.R pilot/caprion.ipynb
 git commit -m "Primary Code"
-git add pilot/gwas2.md
+git add pilot/pilot/gwas2.md
 git commit -m "gwas2"
-git add pilot/autoencoder.md
+git add pilot/pilot/autoencoder.md
 git commit -m "autoencoder"
-git add docs.sh pilot/.gitignore pilot/utils pilot/docs.sh pilot/Notes.md
+git add docs.sh pilot/.gitignore pilot/utils pilot/docs.sh
 git commit -m "utils"
 git add mkdocs.yml pilot/mkdocs.yml
 git commit -m "mkdocs.yml"

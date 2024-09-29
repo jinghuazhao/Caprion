@@ -31,9 +31,9 @@ git add misc/ progs/ peptide_progs/
 git commit -m "Analysis"
 git add pilot/caprion.ini pilot/caprion.R pilot/caprion.ipynb
 git commit -m "Primary Code"
-git add pilot/pilot/gwas2.md
+git add pilot/gwas2.md
 git commit -m "gwas2"
-git add pilot/pilot/autoencoder.md
+git add pilot/autoencoder.md
 git commit -m "autoencoder"
 git add docs.sh pilot/.gitignore pilot/utils pilot/docs.sh
 git commit -m "utils"

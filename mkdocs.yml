@@ -4,6 +4,8 @@ edit_uri: ""
 nav:
   - "": README.md
   - "Pilot studies":
+    - pilot/autoencode/README.md
+    - pilot/gwas2/README.md
     - pilot/README.md
   - Analysis:
     - progs/README.md

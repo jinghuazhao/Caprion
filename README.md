@@ -7,9 +7,9 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 ## Pilot studies
 
-- [autoencoder](https://jinghuazhao.github.io/Caprion/pilot/autoencoder/)
-- [gwas2](https://jinghuazhao.github.io/Caprion/pilot/gwas2/)
-- [Pilot studies](https://jinghuazhao.github.io/Caprion/pilot/)
+- [autoencoder](pilot/autoencoder/)
+- [gwas2](pilot/gwas2/)
+- [Pilot studies](pilot/)
 
 ## Analysis
 

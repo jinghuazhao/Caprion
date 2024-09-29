@@ -10,7 +10,7 @@ where `k` corresponds to the number of principal components in PCA or bottleneck
 > larger and means a smaller data set could be used for the same error as PCA. When dealing 
 > with big data this is an important property`.
 
-The local adoption is [ae_test.Rmd](utils/ae_test.Rmd) which produces [ae_test.html](utils/ae_test.html) and [ae_test.pdf](utils/ae_test.pdf).
+The local adoption is [ae_test.Rmd](../utils/ae_test.Rmd) which produces [ae_test.html](../utils/ae_test.html) and [ae_test.pdf](utils/ae_test.pdf).
 
 Additional work will be on variatinoal autoencoder (VAE) and denoising counterpart as indicated in the references below.
 

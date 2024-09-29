@@ -4,8 +4,6 @@ edit_uri: ""
 nav:
   - "": README.md
   - "Pilot studies":
-    - autoencoder.md
-    - gwas2.md
     - pilot/README.md
   - Analysis:
     - progs/README.md

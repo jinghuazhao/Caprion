@@ -4,9 +4,11 @@ function setup()
 {
   module load python/3.8
   source ~/rds/public_databases/software/py38/bin/activate
-  for f in .gitignore README.md autoencoder.md caprion.ini caprion.ipynb caprion.R docs.sh gwas2.md mkdocs.yml utils
+  for f in .gitignore README.md caprion.ini caprion.ipynb caprion.R docs.sh mkdocs.yml utils
   do cp -r -p ../pilot/${f} pilot; done
 }
+cp -p ../pilot/autoencoder.md pilot/autoencoder
+cp -p ../pilot/gwas2.md pilot/gwas2
 
 if [ "$(uname -n | sed 's/-[0-9]*$//')" == "login-q" ]; then
    module load ceuadmin/libssh/0.10.6-icelake

@@ -6,7 +6,7 @@
 <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <link href="../img/favicon.ico" rel="shortcut icon"/>
-<title>Pilot studies - Caprion</title>
+<title>gwas2 - Caprion</title>
 <link href="../css/bootstrap.min.css" rel="stylesheet"/>
 <link href="../css/font-awesome.min.css" rel="stylesheet"/>
 <link href="../css/base.css" rel="stylesheet"/>
@@ -45,10 +45,10 @@
 <a class="dropdown-item" href="../autoencoder/">Autoencoder</a>
 </li>
 <li>
-<a class="dropdown-item" href="../gwas2/">gwas2</a>
+<a class="dropdown-item active" href="./">gwas2</a>
 </li>
 <li>
-<a class="dropdown-item active" href="./">Pilot studies</a>
+<a class="dropdown-item" href="../pilot/">Pilot studies</a>
 </li>
 </ul>
 </li>
@@ -85,12 +85,12 @@
                             </a>
 </li>
 <li class="nav-item">
-<a class="nav-link" href="../gwas2/" rel="prev">
+<a class="nav-link" href="../autoencoder/" rel="prev">
 <i class="fa fa-arrow-left"></i> Previous
                                 </a>
 </li>
 <li class="nav-item">
-<a class="nav-link" href="../progs/" rel="next">
+<a class="nav-link" href="../pilot/" rel="next">
                                     Next <i class="fa fa-arrow-right"></i>
 </a>
 </li>
@@ -111,117 +111,22 @@
 </div>
 <div class="navbar-collapse collapse card bg-secondary" id="toc-collapse">
 <ul class="nav flex-column">
-<li class="nav-item" data-level="1"><a class="nav-link" href="#pilot-studies">Pilot studies</a>
+<li class="nav-item" data-level="1"><a class="nav-link" href="#gwas2">gwas2</a>
 <ul class="nav flex-column">
-<li class="nav-item" data-level="2"><a class="nav-link" href="#site-map">Site map</a>
-<ul class="nav flex-column">
-</ul>
-</li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#coding">Coding</a>
-<ul class="nav flex-column">
-</ul>
-</li>
-<li class="nav-item" data-level="2"><a class="nav-link" href="#reference">Reference</a>
-<ul class="nav flex-column">
-</ul>
-</li>
 </ul>
 </li>
 </ul>
 </div>
 </div></div>
 <div class="col-md-9" role="main">
-<h1 id="pilot-studies">Pilot studies</h1>
-<h2 id="site-map">Site map</h2>
-<ul>
-<li>Pilot (N=196)<ul>
-<li>data/ contains genotype files in .bgen format</li>
-<li>bgen/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories<ul>
-<li>1e-5</li>
-<li>1e-6</li>
-<li>5e-8</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Batch 2 (N=1,488)<ul>
-<li>data2/ contains genotype files in .bgen format</li>
-<li>bgen2/ PLINK2 results according to .bgen files; summary outputs and sentinels/ directory are in the following directories<ul>
-<li>1e-5</li>
-<li>5e-8</li>
-</ul>
-</li>
-<li>Comparison of pilot and batch 2<ul>
-<li>miamiplot</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Batch 3 data (N=807)<ul>
-<li>data3/ .bgen data</li>
-<li>bgen3/ PLINK2 results<ul>
-<li>1e-5</li>
-<li>5e-8</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="coding">Coding</h2>
-<p>There are apparent commonalities between batches from the list of programs and diagrams; many of which are activated as subroutines.</p>
-<ul>
-<li>Pilot<ul>
-<li><a href="caprion.R">caprion.R</a> and <a href="caprion.ini">caprion.ini</a> are for data processing. Their derivatives are in the utils/ subdirectory:<ul>
-<li><a href="utils/affymetrix.sh">affymetrix.sh</a> is for variant-specific association analysis.</li>
-<li><a href="utils/qctool.sb">qctool.sb</a> is used to extract available sample and genotypes.</li>
-<li><a href="utils/qctool.sh">qctool.sh</a> further extracts genotypes with MAF 0.01 only.</li>
-<li><a href="utils/plink2.sh">plink2.sh</a> non-SLURM version of association analysis.</li>
-<li><a href="utils/qqman.sh">qqman.sh</a> and <a href="utils/qqman.R">qqman.R</a> produce QQ and Manhattan plots.</li>
-<li><a href="utils/sentinels_nold.sh">sentinels_nold.sh</a> and <a href="utils/merge.sh">merge.sh</a> select sentinels.</li>
-<li><a href="utils/ps.sh">ps.sh</a> and <a href="utils/ps.R">ps.R</a> run through PhenoScanner.</li>
-<li><a href="utils/lookup.sh">lookup.sh</a> looks up for overlap with SomaLogic and Olink.</li>
-<li><a href="caprion.ipynb">caprion.ipynb</a> is a Jupyter notebook with some preprocessing done by <a href="utils/tensorqtl.sh">tensorqtl.sh</a>.</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Batch 2 (prefix=utils/ when unspecified)</li>
-</ul>
-<div class="mermaid">graph TB
-tensoqtl.sh
-2020.sh --&gt; EPCR-PROC/
-2020.sh --&gt; data2/affymetrix.id
-qctool.sb --&gt; qctool.sh
-qctool.sh --&gt; plink2.sh
-plink2.sh --&gt; sentinels_nold.sh
-sentinels_nold.sh --&gt; merge.sh
+<h1 id="gwas2">gwas2</h1>
+<p>This is a promising alternative showing through RCN3/FCGRN with <a href="utils/gwas2.sh">gwas2.sh</a> (all with prefix=utils/).</p>
+<div class="mermaid">graph TB;
+gwas2.sh --&gt; gwas.do
+gwas2.sh --&gt; gwas2.do
 </div>
-<ul>
-<li>Batch 3 (prefix=utils/)</li>
-</ul>
-<div class="mermaid">graph TB
-2021.sh
-2021.sh --&gt; eSet.R
-2021.sh --&gt; 2021.R
-eSet.R --&gt; 2021.R
-eSet.R --&gt; UDP.R
-2021.sh --&gt; UDP.R
-UDP.R --&gt; qctool.sb
-qctool.sb --&gt; qctool.sh
-qctool.sh --&gt; plink2.*
-2021.sh --&gt; plink2.*
-plink2.* --&gt; sentinels_nold.sh+merge.sh
-</div>
-<p>Note that <code>eSet.R</code> actually covers data from pilot, batches 2 and 3.</p>
-<h3 id="documents">Documents</h3>
-<ul>
-<li>ppr.md</li>
-<li>EPCR-PROC.md</li>
-<li>2021.md</li>
-</ul>
-<h2 id="reference">Reference</h2>
-<p>Klaus B, Reisenauer S (2018). <a href="https://bioconductor.org/packages/devel/workflows/vignettes/maEndToEnd/inst/doc/MA-Workflow.html">An end to end workflow for differential gene expression using Affymetrix microarrays</a>.</p>
-<p><a href="https://bioinformatics.psb.ugent.be/webtools/Venn/">https://bioinformatics.psb.ugent.be/webtools/Venn/</a></p></div>
+<p>where <code>gwas.do</code> (<code>caprion.dat</code> also contains _invn data) and <code>gwas2.do</code> (<code>gwas2_invn.do</code> for _invn data) are for the pilot and batch 2 data, respectively.</p>
+<p>See <a href="https://jinghuazhao.github.io/gwas2/">gwas2</a> repository for additional information.</p></div>
 </div>
 </div>
 <footer class="col-md-12">

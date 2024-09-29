@@ -7,8 +7,8 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 ## Pilot studies
 
-- [autoencoder](pilot/)
-- [gwas2](pilot/)
+- [autoencoder](autoencoder/)
+- [gwas2](gwas2/)
 - [Pilot studies](pilot/)
 
 ## Analysis

@@ -68,11 +68,29 @@ Finally, `ceumadin/FragPipe/22.0` is available as a GUI for experiments on vario
 
 ## Glossary
 
-The atomic mass unit (dalton) is equal to the mass of one-twelvth of the mass of a $^{12}C$ atom ($1,661 \times 10^{-27}$g).
+The atomic mass unit (dalton) is equal to the mass of one-twelvth of the mass of a $^{12}C$ atom ($1.660 540 2 \times 10^{-27}$g).
+
+<details>
+
+Peptides are the short stretches of amino acids that are obtained after the proteolytic cleavage of proteins. Peptides are usually around 10–15 amino acids long, and a single protein yields approximately 35 peptides on average.
+
+The mass (m) of a molecule or atom is expressed in unified atomic mass units (u).
+
+Isotopes are (chemical) elements that have the same atomic number (and therefore similar chemical properties), but different molecular mass (slightly different physical properties).
+
+Monoisotopic mass is the exact mass of an ion or molecule calculated using the mass of the most abundant isotope of each element.
+
+A posttranslational modification (PTM) can be defined as any alteration to the chemical structure of the protein effected by the cellular machinery after the formation of the protein.
+
+The raw data spectrum contains signals from the peptides, as well as signals derived from different forms of noise.
+
+</details>
 
 ## References
 
 Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. *J Proteome Res* 22:625–631 (2023), <https://doi.org/10.1021/acs.jproteome.2c00632>, <https://spectrum-utils.readthedocs.io/en/latest/>.
+
+Eidhammer I, Flikka K, Martens L, Mikalsen S-O. Computational Methods for Mass Spectrometry Proteomics. Wiley, 2007. ISBN: 978-0-470-51297-5
 
 fragpipe.nesvilab.org, <https://fragpipe.nesvilab.org/>
 

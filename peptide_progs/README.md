@@ -66,6 +66,10 @@ ThermoFisher.CommonCore.RawFileReader.dll | 654336
 
 Finally, `ceumadin/FragPipe/22.0` is available as a GUI for experiments on various worflows.
 
+## Glossary
+
+The atomic mass unit (dalton) is equal to the mass of one-twelvth of the mass of a $^{12}C$ atom ($1,661 \times 10^{-27}$g).
+
 ## References
 
 Bittremieux W, Levitsky L, Pilz M, Sachsenberg T, Huber F, Wang M, Dorrestein PC. Unified and standardized mass spectrometry data processing in Python using spectrum_utils. *J Proteome Res* 22:625–631 (2023), <https://doi.org/10.1021/acs.jproteome.2c00632>, <https://spectrum-utils.readthedocs.io/en/latest/>.

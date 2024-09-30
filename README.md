@@ -1,4 +1,4 @@
-<a href="https://jinghuazhao.github.io/Caprion/"><img src="docs/qrcode.png" height=200 width=200 align="right"></img></a>
+<a href="https://jinghuazhao.github.io/Caprion/"><img src="https://github.com/jinghuazhao/Caprion/blob/master/docs/qrcode.png" height=200 width=200 align="right"></img></a>
 # Caprion data analysis
 
 ### Welcome!

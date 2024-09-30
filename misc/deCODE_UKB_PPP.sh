@@ -133,10 +133,10 @@ function deCODE()
          dplyr::arrange(seqnames,pos) %>%
          dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
     save(deCODE,s,file=file.path(analysis,"deCODE","deCODE.rda"))
+    write.table(dplyr::filter(s,r2>=0.8),file=file.path(analysis,"deCODE","deCODE.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
     f <- file.path(Sys.getenv("analysis"),"deCODE","SomaLogicv4.tsv")
     SomaLogicv4 <- openxlsx::read.xlsx(xlsx,sheet=1,startRow=3,colNames=TRUE,cols=1:12)
     write.table(SomaLogicv4,file=f,quote=FALSE,row.names=FALSE,sep="\t")
-    write.table(dplyr::filter(s,r2>=0.8),file=file.path(analysis,"deCODE","deCODE.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
 END
 }
 

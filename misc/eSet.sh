@@ -72,6 +72,13 @@ function eSet()
                 left_join(raw_UDP3[names(raw_UDP3)[grep("UDP|Isotope.Group.ID", names(raw_UDP3))]])
      neq_UDP <- openxlsx::read.xlsx(file.path(UDP_path,"UDP_EDR_20210423.xlsx"),
                                     sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=1)
+     UHZ_path <- file.path(pre_qc_data,"batch4")
+     f <- file.path(UHZ_path,"UHZ_Comp_Raw_Int_20240118_v1.csv")
+     raw_UHZ <- read.csv(f) %>%
+                select(1:5,grep("^UHZ",names(raw_UHZ),value=TRUE))
+     neq_UHZ <- openxlsx::read.xlsx(file.path(UHZ_path,"UHZ_EDR_20240214_v1_Final.xlsx"),
+                                    sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=1)
+     rm(f,f1,f2,f3,f4)
      save(list=ls(),file=file.path(analysis,"work","eSet.rda"))
   '
 }

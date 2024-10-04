@@ -10,6 +10,7 @@ suppressMessages(library(openxlsx))
 suppressMessages(library(pQTLtools))
 
 array_data <- function(data_frame,id,id_end_col)
+# commonly used as column_to_rowname
 {
   arrayData <- data_frame[,-(1:id_end_col)]
   chars <- sapply(arrayData, is.character)
@@ -115,17 +116,16 @@ uhz <- function()
   Normalized_Peptides <- read.xlsx(wb, sheet=5, startRow=1)
   Normalized_All <- read.xlsx(wb, sheet=6, startRow=1)
   Protein_DR_Filt <- read.xlsx(wb, sheet=7, startRow=1)
-  Comp_Raw_Int <- read.csv(file.path(dir,"UHZ_Comp_Raw_Int_20240118_v1.csv"))
   phenoData <- AnnotatedDataFrame(Samples)
   proteinData <- array_data(Normalized_All,"Protein",1)
   drData <- array_data(Protein_DR_Filt,"Protein",1)
-  peptideData <- array_data(Comp_Raw_Int[c("Isotope.Group.ID",LIMS.ID)],"Isotope.Group.ID",1)
+  peptideData <- array_data(Normalized_Peptides[-(2:6)],"Isotope.Group.ID",1)
   all(rownames(Samples)==colnames(proteinData))
   protein_UHZ <- ExpressionSet(proteinData,phenoData)
   dr_UHZ <- ExpressionSet(drData,phenoData)
   peptide_UHZ <- ExpressionSet(peptideData,phenoData)
   mapping_UHZ <- Mapping %>%
-                 left_join(peptideData[1:5])
+                 left_join(Normalized_Peptides[1:6])
   save(protein_UHZ,dr_UHZ,peptide_UHZ,mapping_UHZ,file="UHZ.rda")
 }
 

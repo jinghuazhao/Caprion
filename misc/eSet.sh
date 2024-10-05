@@ -41,6 +41,7 @@ function eSet()
      }
      require(openxlsx)
      suppressMessages(library(dplyr))
+     suppressMessages(library(tidyselect))
      ZWK_path <- file.path(pre_qc_data,"pilot","ZWK_EDR_20191002.xlsx")
      raw_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Raw IGs",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
      neq_ZWK <- openxlsx::read.xlsx(ZWK_path, sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=5)
@@ -75,10 +76,10 @@ function eSet()
      UHZ_path <- file.path(pre_qc_data,"batch4")
      f <- file.path(UHZ_path,"UHZ_Comp_Raw_Int_20240118_v1.csv")
      raw_UHZ <- read.csv(f) %>%
-                select(1:5,grep("^UHZ",names(raw_UHZ),value=TRUE))
+                select(1:5,tidyselect::contains("UHZ"))
      neq_UHZ <- openxlsx::read.xlsx(file.path(UHZ_path,"UHZ_EDR_20240214_v1_Final.xlsx"),
                                     sheet="Normalized Peptides",colNames=TRUE, skipEmptyRows=TRUE, startRow=1)
-     rm(f,f1,f2,f3,f4)
+     rm(f,f1,f2,f3,f4,raw_process)
      save(list=ls(),file=file.path(analysis,"work","eSet.rda"))
   '
 }

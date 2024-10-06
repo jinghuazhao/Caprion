@@ -74,7 +74,7 @@ function impute()
         print(dim(isotopes))
         split_data <- split(isotopes,isotopes[["Isotope.Group.ID"]])
         result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
-          pept_data <- split_data[[isotope]]
+          pept_data <- split_data[[as.character(isotope)]]
         # rownames(pept_data) <- isotope
           pept_data[samples] <- replace_below_threshold(unlist(pept_data[samples]))
           pept_data[paste0(samples, "_log2")] <- log2(unlist(pept_data[samples]+1))

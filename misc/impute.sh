@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-#SBATCH --job-name=_utils
+#SBATCH --job-name=_impute
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --mem=28800
@@ -24,7 +24,7 @@ export analysis=~/Caprion/analysis
 export pre_qc_data=/rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics
 export suffix=_dr
 
-function impute(type="all")
+function impute()
 {
    Rscript -e '
       suppressMessages(library(Biobase))
@@ -43,31 +43,36 @@ function impute(type="all")
       load(file.path(caprion,"analysis","reports","peptide_csq.rda"))
       csq_isotope <- peptide_cvt %>%
                      dplyr::select(Gene,SNP,prot,isotope,Type) %>%
-                     dplyr::left_join(peptide_csq,by=c('Gene'='gene','SNP'='rsid')) %>%
-                     dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1),Isotope.Group.ID=as.character(isotope))
+                     dplyr::left_join(peptide_csq,by=c("Gene"="gene","SNP"="rsid")) %>%
+                     dplyr::rename(Isotope.Group.ID=isotope) %>%
+                     dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
+                     dplyr::group_by(Isotope.Group.ID) %>%
+                     dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
       replace_below_threshold <- function(x, threshold = 50000) {
         x <- ifelse(x < threshold, NA, x)
         x[is.na(x)] <- mean(x, na.rm = TRUE)
         return(x)
       }
       normalize_minmax <- function(x) (x - min(x,na.rm=TRUE)) / (max(x,na.rm=TRUE) - min(x,na.rm=TRUE))
-      normalize <- function(code)
+      z <- list()
+      for (code in c("ZWK","ZYQ","UDP","UHZ"))
       {
         dr <- Biobase::exprs(get(paste0("dr_",code))) %>% t()
         protein <- Biobase::exprs(get(paste0("protein_",code))) %>% t()
         proteins <- colnames(protein)
         peptide <- Biobase::exprs(get(paste0("peptide_",code))) %>% t()
         peptides <- colnames(peptide)
-        raw <- get(paste0("raw_",code))
+        raw <- get(paste0("raw_",code)) %>%
+               dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
         samples <- grep(code,names(raw),value=TRUE)
         all_proteins <- unique(raw[["Protein"]])
         dropped_proteins <- grep("\\||-", all_proteins, value = TRUE)
       # 1,043 for ZYQ/UDP instead of 983/984
-        isotopes <- subset(raw,Protein %in% setdiff(all_proteins,dropped_proteins)) %>%
-                    dplyr::mutate(Isotope.Group.ID=as.character(Isotope.Group.ID)) %>%
-                    dplyr::left_join(csq_isotope[c("Isotope.Group.ID","pav")]) %>%
-                    dplyr::select(1:6,"pav",tidyselect::contains("UHZ"))
-        split_data <- split(isotopes,intersect(isotopes$Isotope.Group.ID,raw$Isotope.Group.ID))
+        isotopes <- filter(raw, Protein %in% setdiff(all_proteins,dropped_proteins)) %>%
+                    dplyr::left_join(csq_isotope) %>%
+                    dplyr::select(1:6,"pav",tidyselect::contains(code))
+        print(dim(isotopes))
+        split_data <- split(isotopes,isotopes[["Isotope.Group.ID"]])
         result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
           pept_data <- split_data[[isotope]]
         # rownames(pept_data) <- isotope
@@ -86,18 +91,17 @@ function impute(type="all")
                 dplyr::summarize(across(starts_with(code), mean, na.rm = TRUE), .groups = "drop") %>%
                 tibble::column_to_rownames(var = "Protein") %>%
                 t()
-        z <-list(code=code,proteins=proteins,all_proteins=all_proteins,dropped_proteins=dropped_proteins,
-                 peptide=peptide,peptides=peptides,dr=dr,protein=protein,proteins=proteins,
-                 samples=samples,norm=result,prot=log2(prot+1))
-        invisible(z)
+        z[[code]] <-list(code=code,proteins=proteins,all_proteins=all_proteins,dropped_proteins=dropped_proteins,
+                    peptide=peptide,peptides=peptides,dr=dr,protein=protein,proteins=proteins,
+                    samples=samples,norm=result,prot=log2(prot+1))
       }
-      impute_ZWK <- normalize("ZWK")
+      impute_ZWK <- z[["ZWK"]]
       save(impute_ZWK,file=file.path(caprion,"analysis","work","impute_ZWK.rda"))
-      impute_ZYQ <- normalize("ZYQ")
+      impute_ZYQ <- z[["ZYQ"]]
       save(impute_ZYQ,file=file.path(caprion,"analysis","work","impute_ZYQ.rda"))
-      impute_UDP <- normalize("UDP")
+      impute_UDP <- z[["UDP"]]
       save(impute_UDP,file=file.path(caprion,"analysis","work","impute_UDP.rda"))
-      impute_UHZ <- normalize("UHZ")
+      impute_UHZ <- z[["UHZ"]]
       save(impute_UDP,file=file.path(caprion,"analysis","work","impute_UHZ.rda"))
    '
 }
@@ -107,7 +111,7 @@ function mcpca()
    Rscript -e '
       suppressMessages(library(mclust))
       caprion <- "~/Caprion"
-      for(batch in c("ZWK","ZYQ","UDP"))
+      for(batch in c("ZWK","ZYQ","UDP","UHZ"))
       {
         load(file.path(caprion,"analysis","work",paste0("impute_",batch,".rda")))
         pdf(file.path(caprion,"analysis","work",paste0("impute_",batch,".pdf")))
@@ -133,3 +137,5 @@ function mcpca()
    '
 }
 
+impute
+mcpca

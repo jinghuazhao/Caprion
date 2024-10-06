@@ -13,15 +13,18 @@ function csq()
      suppressMessages(require(pQTLtools))
      suppressMessages(require(stringr))
    # Caprion proteins
-     caprion <- read.csv("~/Caprion/analysis/work/caprion.cis.vs.trans") %>%
-                dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP) %>%
-                select(chr,pos,MarkerName,prot,Type)
-     caprion_dr <- read.csv("~/Caprion/analysis/work/caprion_dr.cis.vs.trans") %>%
-                   dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP) %>%
-                   select(chr,pos,MarkerName,prot,Type)
+     caprion_cvt <- read.csv("~/Caprion/analysis/work/caprion.cis.vs.trans") %>%
+                    dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP)
+     caprion_dr_cvt <- read.csv("~/Caprion/analysis/work/caprion_dr.cis.vs.trans") %>%
+                       dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP)
    # Caprion peptides
-     peptide <- read.csv("~/Caprion/analysis/reports/peptide.cis.vs.trans") %>%
-                dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP) %>%
+     peptide_cvt <- read.csv("~/Caprion/analysis/reports/peptide.cis.vs.trans") %>%
+                    dplyr::mutate(chr=SNPChrom,pos=SNPPos,MarkerName=SNP)
+     caprion <- caprion_cvt %>%
+                select(chr,pos,MarkerName,prot,Type)
+     caprion_dr <- caprion_dr_cvt %>%
+                   select(chr,pos,MarkerName,prot,Type)
+     peptide <- peptide_cvt %>%
                 select(chr,pos,MarkerName,prot,Type)
    # VEP output
      vep <- "/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/bgen/vep"
@@ -58,11 +61,11 @@ function csq()
                  r2.all=paste(r2,collapse=";"))
      }
      caprion_csq <- CSQ(caprion)
-     save(caprion,caprion_csq,file="~/Caprion/analysis/reports/caprion_csq.rda",compress="xz",version=2)
+     save(caprion_cvt,caprion_csq,file="~/Caprion/analysis/reports/caprion_csq.rda",compress="xz",version=2)
      caprion_dr_csq <- CSQ(caprion_dr)
-     save(caprion_dr,caprion_dr_csq,file="~/Caprion/analysis/reports/caprion_dr_csq.rda",compress="xz",version=2)
+     save(caprion_dr_cvt,caprion_dr_csq,file="~/Caprion/analysis/reports/caprion_dr_csq.rda",compress="xz",version=2)
      peptide_csq <- CSQ(peptide)
-     save(peptide,peptide_csq,file="~/Caprion/analysis/reports/peptide_csq.rda",compress="xz",version=2)
+     save(peptide_cvt,peptide_csq,file="~/Caprion/analysis/reports/peptide_csq.rda",compress="xz",version=2)
    # Examination
      library(psych)
      benchmarks <- c("A1BG","APOB","EPCR","ERAP2","PROC")

@@ -24,19 +24,27 @@ export analysis=~/Caprion/analysis
 export pre_qc_data=/rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics
 export suffix=_dr
 
-function impute()
+function impute(type="all")
 {
    Rscript -e '
       suppressMessages(library(Biobase))
       suppressMessages(library(dplyr))
       suppressMessages(library(tibble))
+      suppressMessages(library(tidyselect))
       caprion <- "~/Caprion"
       load(file.path(caprion,"pilot","ZWK.rda"))
       load(file.path(caprion,"pilot","ZYQ.rda"))
       load(file.path(caprion,"pilot","UDP.rda"))
+      load(file.path(caprion,"pilot","UHZ.rda"))
       load(file.path(caprion,"analysis","work","eSet.rda"))
       raw_ZYQ <- left_join(mapping_ZYQ,raw_ZYQ)
       raw_UDP <- left_join(mapping_UDP,raw_UDP)
+      raw_UHZ <- left_join(mapping_UHZ[c("Isotope.Group.ID", "Protein")],raw_UHZ)
+      load(file.path(caprion,"analysis","reports","peptide_csq.rda"))
+      csq_isotope <- peptide_cvt %>%
+                     dplyr::select(Gene,SNP,prot,isotope,Type) %>%
+                     dplyr::left_join(peptide_csq,by=c('Gene'='gene','SNP'='rsid')) %>%
+                     dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1),Isotope.Group.ID=as.character(isotope))
       replace_below_threshold <- function(x, threshold = 50000) {
         x <- ifelse(x < threshold, NA, x)
         x[is.na(x)] <- mean(x, na.rm = TRUE)
@@ -56,7 +64,9 @@ function impute()
         dropped_proteins <- grep("\\||-", all_proteins, value = TRUE)
       # 1,043 for ZYQ/UDP instead of 983/984
         isotopes <- subset(raw,Protein %in% setdiff(all_proteins,dropped_proteins)) %>%
-                    dplyr::mutate(Isotope.Group.ID=as.character(Isotope.Group.ID))
+                    dplyr::mutate(Isotope.Group.ID=as.character(Isotope.Group.ID)) %>%
+                    dplyr::left_join(csq_isotope[c("Isotope.Group.ID","pav")]) %>%
+                    dplyr::select(1:6,"pav",tidyselect::contains("UHZ"))
         split_data <- split(isotopes,intersect(isotopes$Isotope.Group.ID,raw$Isotope.Group.ID))
         result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
           pept_data <- split_data[[isotope]]
@@ -73,7 +83,7 @@ function impute()
         result <- do.call(rbind, result_list)
         prot <- result[c("Protein",samples)] %>%
                 dplyr::group_by(Protein) %>%
-                dplyr::summarize(across(starts_with(code), sum, na.rm = TRUE), .groups = "drop") %>%
+                dplyr::summarize(across(starts_with(code), mean, na.rm = TRUE), .groups = "drop") %>%
                 tibble::column_to_rownames(var = "Protein") %>%
                 t()
         z <-list(code=code,proteins=proteins,all_proteins=all_proteins,dropped_proteins=dropped_proteins,
@@ -87,6 +97,8 @@ function impute()
       save(impute_ZYQ,file=file.path(caprion,"analysis","work","impute_ZYQ.rda"))
       impute_UDP <- normalize("UDP")
       save(impute_UDP,file=file.path(caprion,"analysis","work","impute_UDP.rda"))
+      impute_UHZ <- normalize("UHZ")
+      save(impute_UDP,file=file.path(caprion,"analysis","work","impute_UHZ.rda"))
    '
 }
 

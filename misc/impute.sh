@@ -28,6 +28,7 @@ function impute()
 {
    Rscript -e '
       suppressMessages(library(Biobase))
+      suppressMessages(library(MsCoreUtils))
       suppressMessages(library(dplyr))
       suppressMessages(library(tibble))
       suppressMessages(library(tidyselect))
@@ -41,6 +42,7 @@ function impute()
       raw_UDP <- left_join(mapping_UDP,raw_UDP)
       raw_UHZ <- left_join(mapping_UHZ[c("Isotope.Group.ID", "Protein")],raw_UHZ)
       load(file.path(caprion,"analysis","reports","peptide_csq.rda"))
+      threshold <- 50000
       csq_isotope <- peptide_cvt %>%
                      dplyr::select(Gene,SNP,prot,isotope,Type) %>%
                      dplyr::left_join(peptide_csq,by=c("Gene"="gene","SNP"="rsid")) %>%
@@ -71,21 +73,26 @@ function impute()
         isotopes <- filter(raw, Protein %in% setdiff(all_proteins,dropped_proteins)) %>%
                     dplyr::left_join(csq_isotope) %>%
                     dplyr::select(1:6,"pav",tidyselect::contains(code))
+        isotopes[samples][!is.na(isotopes[samples])&isotopes[samples]<threshold] <- NA
         print(dim(isotopes))
-        split_data <- split(isotopes,isotopes[["Isotope.Group.ID"]])
-        result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
-          pept_data <- split_data[[as.character(isotope)]]
-        # rownames(pept_data) <- isotope
-          pept_data[samples] <- replace_below_threshold(unlist(pept_data[samples]))
-          pept_data[paste0(samples, "_log2")] <- log2(unlist(pept_data[samples]+1))
-          pept_data[paste0(samples, "_norm")] <- normalize_minmax(unlist(pept_data[samples]))
-        # x <- pept_data[paste0(samples, "_norm")] |> unlist()
-        # y <- pept_data[paste0(samples, "_log2")] |> unlist()
-        # m <- lm(y~x)
-        # pept_data[paste0(samples, "_log2s")] <- predict(m,newdata=data.frame(x),na.action=na.pass)
-          return(pept_data)
-        }, simplify = FALSE)
-        result <- do.call(rbind, result_list)
+        result <- isotopes
+        if (FALSE) {
+          split_data <- split(isotopes,isotopes[["Isotope.Group.ID"]])
+          result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
+            pept_data <- split_data[[as.character(isotope)]]
+          # rownames(pept_data) <- isotope
+            pept_data[samples] <- replace_below_threshold(unlist(pept_data[samples]))
+            pept_data[paste0(samples, "_log2")] <- log2(unlist(pept_data[samples]+1))
+            pept_data[paste0(samples, "_norm")] <- normalize_minmax(unlist(pept_data[samples]))
+          # x <- pept_data[paste0(samples, "_norm")] |> unlist()
+          # y <- pept_data[paste0(samples, "_log2")] |> unlist()
+          # m <- lm(y~x)
+          # pept_data[paste0(samples, "_log2s")] <- predict(m,newdata=data.frame(x),na.action=na.pass)
+            return(pept_data)
+          }, simplify = FALSE)
+          result <- do.call(rbind, result_list)
+        }
+        result[samples] <- MsCoreUtils::impute_RF(result[samples],2)
         prot <- result[c("Protein",samples)] %>%
                 dplyr::group_by(Protein) %>%
                 dplyr::summarize(across(starts_with(code), mean, na.rm = TRUE), .groups = "drop") %>%
@@ -93,7 +100,7 @@ function impute()
                 t()
         z[[code]] <-list(code=code,proteins=proteins,all_proteins=all_proteins,dropped_proteins=dropped_proteins,
                     peptide=peptide,peptides=peptides,dr=dr,protein=protein,proteins=proteins,
-                    samples=samples,norm=result,prot=log2(prot+1))
+                    samples=samples,impute=result,prot=log2(prot+1))
       }
       impute_ZWK <- z[["ZWK"]]
       save(impute_ZWK,file=file.path(caprion,"analysis","work","impute_ZWK.rda"))
@@ -108,11 +115,16 @@ function impute()
 
 function mcpca()
 {
+for batch in ZWK ZYQ UDP UHZ
+do
+   export code=${batch}
    Rscript -e '
       suppressMessages(library(mclust))
       caprion <- "~/Caprion"
-      for(batch in c("ZWK","ZYQ","UDP","UHZ"))
+      batches <- Sys.getenv("code")
+      for(batch in batches)
       {
+        cat(batch,"\n")
         load(file.path(caprion,"analysis","work",paste0("impute_",batch,".rda")))
         pdf(file.path(caprion,"analysis","work",paste0("impute_",batch,".pdf")))
         par(mfrow=c(2,2))
@@ -135,6 +147,7 @@ function mcpca()
         dev.off()
       }
    '
+done
 }
 
 impute

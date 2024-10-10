@@ -7,7 +7,7 @@
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/impute__%A_%a.e
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/impute_%A_%a.e
 #SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/impute_%A_%a.o
 
 . /etc/profile.d/modules.sh
@@ -24,6 +24,7 @@ export TMPDIR=${HPC_WORK}/work
 export analysis=~/Caprion/analysis
 export pre_qc_data=/rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics
 export suffix=_dr
+export job=${SLURM_ARRAY_TASK_ID}
 
 function impute()
 {
@@ -34,7 +35,7 @@ function impute()
       suppressMessages(library(tibble))
       suppressMessages(library(tidyselect))
       caprion <- "~/Caprion"
-      jobid <- Sys.getenv("SLURM_ARRAY_TASK_ID")
+      job <- Sys.getenv("job")
       load(file.path(caprion,"pilot","ZWK.rda"))
       load(file.path(caprion,"pilot","ZYQ.rda"))
       load(file.path(caprion,"pilot","UDP.rda"))
@@ -52,11 +53,11 @@ function impute()
                      dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
                      dplyr::group_by(Isotope.Group.ID) %>%
                      dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
-      code <- c("ZWK","ZYQ","UDP","UHZ")[jobid]
-      dr <- Biobase::exprs(get(paste0("dr_",code))) %>% t()
-      protein <- Biobase::exprs(get(paste0("protein_",code))) %>% t()
+      code <- c("ZWK","ZYQ","UDP","UHZ")[as.integer(job)]
+      dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
+      protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
       proteins <- colnames(protein)
-      peptide <- Biobase::exprs(get(paste0("peptide_",code))) %>% t()
+      peptide <- Biobase::exprs(get(paste0("peptide_",code))) %>% base::t()
       peptides <- colnames(peptide)
       raw <- get(paste0("raw_",code)) %>%
              dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
@@ -70,12 +71,13 @@ function impute()
       isotopes[samples][!is.na(isotopes[samples])&isotopes[samples]<threshold] <- NA
       print(dim(isotopes))
       result <- isotopes
-      result[samples] <- MsCoreUtils::impute_RF(result[samples],2)
-      prot <- result[c("Protein",samples)] %>%
+      result[samples] <- MsCoreUtils::impute_RF(result[samples],MARGIN=2)
+      prot <- result %>%
+              dplyr::select(Protein, all_of(samples)) %>%
               dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(starts_with(code), mean, na.rm = TRUE), .groups = "drop") %>%
+              dplyr::summarize(across(all_of(samples), ~ mean(.x, na.rm = TRUE))) %>%
               tibble::column_to_rownames(var = "Protein") %>%
-              t()
+              base::t()
       z <-list(code=code,proteins=proteins,all_proteins=all_proteins,dropped_proteins=dropped_proteins,
                peptide=peptide,peptides=peptides,dr=dr,protein=protein,proteins=proteins,
                samples=samples,impute=result,prot=log2(prot+1))
@@ -99,7 +101,6 @@ function impute()
         stop("Invalid code")
       )
       suppressMessages(library(mclust))
-      caprion <- "~/Caprion"
       load(file.path(caprion,"analysis","work",paste0("impute_",code,".rda")))
       pdf(file.path(caprion,"analysis","work",paste0("impute_",code,".pdf")))
       par(mfrow=c(2,2))

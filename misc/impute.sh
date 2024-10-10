@@ -3,7 +3,9 @@
 #SBATCH --job-name=_impute
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
-#SBATCH --mem=28800
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=100000
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 
@@ -31,7 +33,10 @@ function impute()
    Rscript -e '
       suppressMessages(library(Biobase))
       suppressMessages(library(MsCoreUtils))
+      suppressMessages(library(doParallel))
       suppressMessages(library(dplyr))
+      suppressMessages(library(foreach))
+      suppressMessages(library(parallel))
       suppressMessages(library(tibble))
       suppressMessages(library(tidyselect))
       caprion <- "~/Caprion"
@@ -71,7 +76,20 @@ function impute()
       isotopes[samples][!is.na(isotopes[samples])&isotopes[samples]<threshold] <- NA
       print(dim(isotopes))
       result <- isotopes
-      result[samples] <- MsCoreUtils::impute_RF(result[samples],MARGIN=2)
+    # result[samples] <- MsCoreUtils::impute_RF(result[samples],MARGIN=2)
+      nCores <- parallel::detectCores() - 1
+      cl <- parallel::makeCluster(nCores)
+      doParallel::registerDoParallel(cl)
+      impute_column <- function(column) {
+          if (all(is.na(column))) {
+              return(column)
+          }
+          MsCoreUtils::impute_matrix(column, method = "RF", MARGIN = 2)
+      }
+      result[samples] <- foreach(i = 1:length(samples), .combine = cbind) %dopar% {
+          impute_column(result[, samples[i], drop = FALSE])
+      }
+      parallel::stopCluster(cl)
       prot <- result %>%
               dplyr::select(Protein, all_of(samples)) %>%
               dplyr::group_by(Protein) %>%

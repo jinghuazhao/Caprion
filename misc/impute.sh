@@ -80,13 +80,22 @@ function impute()
       nCores <- parallel::detectCores() - 1
       cl <- parallel::makeCluster(nCores)
       doParallel::registerDoParallel(cl)
+      on.exit(parallel::stopCluster(cl))
       impute_row <- function(row) {
           if (all(is.na(row))) return(row)
-          MsCoreUtils::impute_matrix(row, method = "RF", MARGIN = 2)
+      #   MsCoreUtils::impute_matrix(row, method = "RF", MARGIN = 2)
+          tryCatch({
+            MsCoreUtils::impute_matrix(row, method = "RF", MARGIN = 2)
+          }, error = function(e) {
+            row
+          })
       }
-      result[samples] <- foreach(i = 1:nrow(result), .combine = cbind) %dopar% {
-          impute_row(result[i, samples, drop = FALSE])
-      }
+      result[samples] <- parLapply(cl, 1:nrow(result), function(i) {
+        impute_row(result[i, samples, drop = FALSE])
+      })
+    # result[samples] <- foreach(i = 1:nrow(result), .combine = rbind) %dopar% {
+    #     impute_row(result[i, samples, drop = FALSE])
+    # }
       parallel::stopCluster(cl)
       prot <- result %>%
               dplyr::select(Protein, all_of(samples)) %>%

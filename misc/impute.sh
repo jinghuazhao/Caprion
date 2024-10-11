@@ -80,14 +80,12 @@ function impute()
       nCores <- parallel::detectCores() - 1
       cl <- parallel::makeCluster(nCores)
       doParallel::registerDoParallel(cl)
-      impute_column <- function(column) {
-          if (all(is.na(column))) {
-              return(column)
-          }
-          MsCoreUtils::impute_matrix(column, method = "RF", MARGIN = 2)
+      impute_row <- function(row) {
+          if (all(is.na(row))) return(row)
+          MsCoreUtils::impute_matrix(row, method = "RF", MARGIN = 2)
       }
-      result[samples] <- foreach(i = 1:length(samples), .combine = cbind) %dopar% {
-          impute_column(result[, samples[i], drop = FALSE])
+      result[samples] <- foreach(i = 1:nrow(result), .combine = cbind) %dopar% {
+          impute_row(result[i, samples, drop = FALSE])
       }
       parallel::stopCluster(cl)
       prot <- result %>%

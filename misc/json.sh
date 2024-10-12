@@ -5,29 +5,36 @@ export analysis=~/Caprion/analysis
 export pre_qc_data=/rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics
 export suffix=_dr
 
+module load ceuadmin/htslib
+
 function tojson()
 {
   export flanking=250000
   export r=$(echo ${chr}:$(expr ${pos} - ${flanking})-$(expr ${pos} + ${flanking}))
+  echo ${r}
   (
     echo chromosome position variant rsid ref_allele alt_allele alt_allele_freq log_pvalue beta se
     tabix ~/Caprion/analysis/METAL_dr/${prot}_dr-1.tbl.gz ${r} | \
+    awk '{$3="chr"$3};1' | \
+    sort -k3,3 | \
+    join -23 <(awk -vchr=${chr} '$1 ~ "^chr"chr":"' ${INF}/work/INTERVAL.rsid) - | \
     awk '{
-          $5=toupper($5);$4=toupper($4)
-          print $1,$2,$1":"$2"_"$5"/"$4,$3,$5,$4,$6,-$12,$10,$11
+          $6=toupper($6);$5=toupper($5)
+          print $3,$4,$3":"$4"_"$6"/"$5,$2,$6,$5,$7,-$13,$11,$12
     }' | \
     sort -k1,1n -k2,2n
   ) | \
   tr ' ' '\t' | \
-  bgzip -f > ${prot}-${rsid}.gz
-  tabix -S1 -s1 -b2 -e2 ${prot}-${rsid}.gz
+  bgzip -f > ${analysis}/json/${prot}-${snpid}.gz
+  tabix -S1 -s1 -b2 -e2 ${analysis}/json/${prot}-${snpid}.gz
   Rscript -e '
     library(dplyr)
     library(jsonlite)
+    analysis <- Sys.getenv("analysis")
     prot <- Sys.getenv("prot")
-    pqtl <- Sys.getenv("rsid")
-    d <- read.delim(paste0(prot,"-",pqtl,".gz"))
-    sink(paste0(prot,"-",pqtl,".json"))
+    pqtl <- Sys.getenv("snpid")
+    d <- read.delim(file.path(analysis,"json",paste0(prot,"-",pqtl,".gz")))
+    sink(file.path(analysis,"json",paste0(prot,"-",pqtl,".json")))
     toJSON(list(data=d,analysis=paste0(prot,"-",pqtl)),auto_unbox=TRUE,pretty=FALSE)
     sink()
   '
@@ -39,11 +46,10 @@ function lz_json()
   awk 'NR>1{print $1,$7}' ${analysis}/work/caprion${suffix}.signals | \
   parallel -C' ' '
     export prot={1}
-    export rsid={2}
-    export chrpos=$(grep -w ${rsid} ~/INF/work/INTERVAL.rsid | awk "{gsub(/chr|_[A-Z]*/,\"\",\$1);print \$1}")
-    export chr=$(echo ${chrpos} | cut -d ":" -f1)
-    export pos=$(echo ${chrpos} | cut -d ":" -f2)
-    echo ${prot} ${rsid} ${chr} ${pos}
+    export snpid={2}
+    IFS=\_ read chrpos a1 a2 <<<${snpid}
+    IFS=\: read chr pos <<<${chrpos}
+    echo ${prot} ${snpid} ${chr} ${pos}
     tojson
   '
 }
@@ -53,17 +59,25 @@ function json()
   Rscript -e '
     library(dplyr)
     library(jsonlite)
+    analysis <- Sys.getenv("analysis")
     suffix <- Sys.getenv("suffix")
     merged_data <- list()
-    flist <- dir(pattern="json")
+    jsonlist <- dir(file.path(analysis,"json"),pattern="json")
+    flist <- grep("A1BG|ACE",jsonlist,value=TRUE)
+    vars <- c("variant","position","ref_allele","alt_allele_freq","beta","log_pvalue")
     for (i in 1:length(flist))
     {
       s <- unlist(strsplit(flist[i],"-|[.]"))
-      f <- list(ppid=paste0(s[1],"-",s[2]),data=fromJSON(flist[i])$data[c("variant","position","ref_allele","alt_allele_freq","beta","log_pvalue")])
+      f <- list(ppid=paste0(s[1],"-",s[2]),data=fromJSON(file.path(analysis,"json",flist[i]))$data[vars])
+      json <- toJSON(list(f))
+      sink(file.path(analysis,"json",gsub("json","js",flist[i])))
+      cat("input=")
+      writeLines(json)
+      sink()
       merged_data <- c(merged_data,list(f))
     }
     merged_json <- toJSON(merged_data)
-    sink(paste0("caprion",suffix,".js"))
+    sink(file.path(analysis,"json",paste0("caprion",suffix,".js")))
     cat("input=")
     writeLines(merged_json)
     sink()
@@ -88,4 +102,5 @@ function umich()
   '
 }
 
-
+lz_json
+json

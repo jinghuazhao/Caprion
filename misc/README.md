@@ -15,6 +15,7 @@ Program   | Description
 `eSet.sh` | ExpresssionSet implementations
 `glmnet_pense.sh` | glmnet/pense modeling
 `impute.sh` | imputation experiments
+`json.sh` | Some notes on JSON files
 `peptideAssociationPlot.sh` | protein Manhattan-peptide signal plots
 `tables.sh` | `Supplementary-Tables.xlsx` generator
 `ToDo.sh` | various staged experiments

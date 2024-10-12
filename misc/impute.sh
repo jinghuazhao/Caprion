@@ -4,7 +4,7 @@
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=10
 #SBATCH --mem=100000
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
@@ -40,6 +40,7 @@ function impute()
       suppressMessages(library(tibble))
       suppressMessages(library(tidyselect))
       caprion <- "~/Caprion"
+      cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
       job <- Sys.getenv("job")
       load(file.path(caprion,"pilot","ZWK.rda"))
       load(file.path(caprion,"pilot","ZYQ.rda"))
@@ -77,26 +78,26 @@ function impute()
       print(dim(isotopes))
       result <- isotopes
     # result[samples] <- MsCoreUtils::impute_RF(result[samples],MARGIN=2)
-      nCores <- parallel::detectCores() - 1
-      cl <- parallel::makeCluster(nCores)
+      cl <- parallel::makeCluster(as.integer(cpus_per_task))
       doParallel::registerDoParallel(cl)
       on.exit(parallel::stopCluster(cl))
       impute_row <- function(row) {
-          if (all(is.na(row))) return(row)
-      #   MsCoreUtils::impute_matrix(row, method = "RF", MARGIN = 2)
-          tryCatch({
-            MsCoreUtils::impute_matrix(row, method = "RF", MARGIN = 2)
-          }, error = function(e) {
-            row
-          })
+        if (all(is.na(row))) return(row)
+        tryCatch({
+          MsCoreUtils::impute_matrix(row, method="RF", MARGIN=2)
+        }, error = function(e) {
+          print(paste("Error encountered:", e))
+          row
+        })
       }
-      result[samples] <- parLapply(cl, 1:nrow(result), function(i) {
+      clusterExport(cl, "impute_row")
+      clusterExport(cl, c("result", "samples"))
+      impute_result <- parLapply(cl, 1:nrow(result), function(i) {
         impute_row(result[i, samples, drop = FALSE])
       })
-    # result[samples] <- foreach(i = 1:nrow(result), .combine = rbind) %dopar% {
-    #     impute_row(result[i, samples, drop = FALSE])
-    # }
       parallel::stopCluster(cl)
+      impute_data <- do.call(dplyr::bind_rows, impute_result)
+      result[names(impute_data)] <- impute_data
       prot <- result %>%
               dplyr::select(Protein, all_of(samples)) %>%
               dplyr::group_by(Protein) %>%

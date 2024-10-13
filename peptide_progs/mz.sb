@@ -21,6 +21,7 @@ module load rhel8/default-icl
 export TMPDIR=${HPC_WORK}/work
 
 function raw_ThermoRawFileParser_array()
+# -N -f1 -g
 {
   module load ceuadmin/ThermoRawFileParser/1.4.4
   export batch=${1}

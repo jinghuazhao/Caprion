@@ -142,6 +142,29 @@ function read_msamanda()
   '
 }
 
+
+function run_sage()
+{
+  module load ceuadmin/sage/0.14.7
+  export FASTA=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0/databases/UP000005640-canonical-proteins-20420.fasta
+  export caprion=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
+  for code in ZWK ZYQ UDP UHZ
+  do
+    export batch=${code}
+    if [ ! -d ${caprion}/${batch}/sage ]; then mkdir -p ${caprion}/${batch}/sage; fi
+    cd ${caprion}/${batch}/sage
+    ls ${caprion}/${batch}/mzML/*mzML | \
+    parallel -j10 -C' ' '
+      echo ${batch} {}
+      export out=$(basename {} .mzML)
+      sage -f ${FASTA} ${tests}/config.json {} > /dev/null 2>&1
+      if [ -f results.sage.tsv ]; then mv results.sage.tsv ${out}.tsv; fi
+      if [ -f results.json ]; then mv results.json ${out}.json; fi
+    '
+    cd -
+  done
+}
+
 # mzML generation and MetaMorpheus/MSAmanda search
 {
 for batch in UHZ

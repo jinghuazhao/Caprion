@@ -171,3 +171,11 @@ function docker()
   docker run -p 8080:80 quay.io/galaxy/introduction-training
   module load ceuadmin/docker/24.0.5
 }
+
+function sage_tests()
+# SAGE/0.14.7
+{
+  module load ceuadmin/sage/0.14.7
+  export tests=/rds/project/rds-4o5vpvAowP0/software/sage-0.14.7/tests
+  sage -f ${tests}/Q99536.fasta ${tests}/config.json ${tests}/LQSRPAAPPAPGPGQLTLR.mzML
+}

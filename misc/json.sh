@@ -56,16 +56,16 @@ function lz_json()
     IFS=\: read chr pos <<<${chrpos}
     echo ${prot} ${snpid} ${chrpos}
   # gz
-    json
+  # json
   ' | \
   awk '!/X/' | \
-  awk '{print $0,NR-1}' | \
   Rscript -e '
     suppressMessages(library(jsonlite))
-    d <- read.table("stdin",col.names=c("prot","snpid","chrpos","no"))
-    d <- within(d,{no=as.character(no)})
+    analysis <- Sys.getenv("analysis")
+    d <- read.table("stdin",col.names=c("prot","snpid","chrpos"))
     writeLines(toJSON(d,dataframe="values",pretty=TRUE))
-  ' > ${analysis}/json/top_hits.json
+    write.table(d[,-4],file=file.path(analysis,"json","top_hits.txt"),col.names=FALSE,row.names=FALSE,quote=FALSE,sep="\t")
+  ' | gzip -f > ${analysis}/json/gz/top_hits.json.gz
 }
 
 function umich()

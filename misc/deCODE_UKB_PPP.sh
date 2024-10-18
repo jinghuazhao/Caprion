@@ -8,6 +8,8 @@ export plink=/rds/user/jhz22/hpc-work/bin/plink
 if [ ! -d ${analysis}/deCODE ]; then mkdir -p ${analysis}/deCODE; fi
 if [ ! -d ${analysis}/UKB_PPP ]; then mkdir -p ${analysis}/UKB_PPP; fi
 
+module load ceuadmin/R
+
 function caprion_caprion_dr()
 {
   R --no-save -q <<END
@@ -59,7 +61,7 @@ function caprion_caprion_dr()
        dr <- dplyr::filter(caprion_dr,chr %in% i) %>%
              dplyr::select(chr,pos,uniprot,rsid,prot)
        bfile <- file.path(INF,"INTERVAL","per_chr",paste0("snpid",i))
-       z[[i]] <- pQTLtools::novelty_check(k,dr,ldops=list(bfile=bfile,plink=plink))
+       z[[i]] <- pQTLtools::novelty_check(k,dr,ldops=list(bfile=bfile,plink=plink),flanking=500000)
     }
     z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
     r <- dplyr::filter(dplyr::bind_rows(z[-which(names(z)=="X")]),r2>=0.8) %>%
@@ -125,7 +127,7 @@ function deCODE()
        dr <- dplyr::filter(caprion_dr,chr %in% i) %>%
              dplyr::select(chr,pos,uniprot,rsid,prot)
        bfile <- file.path(INF,"INTERVAL","per_chr",paste0("snpid",i))
-       z[[i]] <- pQTLtools::novelty_check(decode,dr,ldops=list(bfile=bfile,plink=plink))
+       z[[i]] <- pQTLtools::novelty_check(decode,dr,ldops=list(bfile=bfile,plink=plink),flanking=500000)
     }
     z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
     s <- dplyr::bind_rows(z[-which(names(z)=="X")]) %>%
@@ -156,7 +158,7 @@ function UKB_PPP()
     # UKB_PPP list
     results <- "/rds/project/jmmh2/rds-jmmh2-results/public/proteomics"
     url <- file.path(results,"UKB-PPP","doc","sun23.xlsx")
-    ST10 <- read.xlsx(url,"ST10",startRow=4) %>%
+    ST10 <- openxlsx::read.xlsx(url,"ST10",startRow=4) %>%
             dplyr::rename(snpid37=1) %>%
             dplyr::mutate(uniprot=Target.UniProt,rsid=rsID,prot=Assay.Target) %>%
             dplyr::mutate(prot_rsid=paste0(uniprot,"-",rsid))
@@ -179,7 +181,7 @@ function UKB_PPP()
        dr <- dplyr::filter(caprion_dr,chr %in% i) %>%
              dplyr::select(chr,pos,uniprot,rsid,prot)
        bfile <- file.path(INF,"INTERVAL","per_chr",paste0("snpid",i))
-       z[[i]] <- novelty_check(ukb_ppp,dr,ldops=list(bfile=bfile,plink=plink))
+       z[[i]] <- novelty_check(ukb_ppp,dr,ldops=list(bfile=bfile,plink=plink),flanking=500000)
     }
     z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
     t <- dplyr::bind_rows(z[-which(names(z)=="X")]) %>%

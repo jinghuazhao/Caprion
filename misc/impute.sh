@@ -36,6 +36,7 @@ function impute()
       suppressMessages(library(doParallel))
       suppressMessages(library(dplyr))
       suppressMessages(library(foreach))
+      suppressMessages(library(mi4p))
       suppressMessages(library(parallel))
       suppressMessages(library(tibble))
       suppressMessages(library(tidyselect))
@@ -68,15 +69,48 @@ function impute()
       raw <- get(paste0("raw_",code)) %>%
              dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
       samples <- grep(code,names(raw),value=TRUE)
-      all_proteins <- unique(raw[["Protein"]])
-      dropped_proteins <- grep("\\||-", all_proteins, value = TRUE)
+      raw_proteins <- unique(raw[["Protein"]])
+      dup_proteins <- grep("\\||-", raw_proteins, value = TRUE)
     # 1,043 for ZYQ/UDP instead of 983/984
-      isotopes <- filter(raw, Protein %in% setdiff(all_proteins,dropped_proteins)) %>%
+      isotopes <- filter(raw, Protein %in% setdiff(raw_proteins,dup_proteins)) %>%
                   dplyr::left_join(csq_isotope) %>%
-                  dplyr::select(1:6,"pav",tidyselect::contains(code))
+                  dplyr::select(1:6,pav,tidyselect::contains(code))
       isotopes[samples][!is.na(isotopes[samples])&isotopes[samples]<threshold] <- NA
       print(dim(isotopes))
       result <- isotopes
+      result[samples] <- log2(result[samples]+1)
+      impute_mi4p <- function(result, samples) {
+            metadata <- data.frame(
+                  Sample = samples,
+                  Condition = rep("Equal", length(samples))
+            )
+            impute_data <- mi4p::multi.impute(data = result[samples],
+                                              conditions = rep(1, length(samples)),
+                                              nb.imp = 5,
+                                              method = "RF",
+                                              parallel = TRUE)
+            impute_var <- rubin2.all(data = impute_data)
+            impute_var.S2 <- sapply(impute_var, function(aaa) {
+                  DesMat <- mi4p::make.design(metadata)
+                  max(diag(aaa) %*% t(DesMat) %*% DesMat)
+            })
+            res <- mi4limma(qData = apply(impute_data, 1:2, mean),
+                            sTab = metadata,
+                            VarRubin = sqrt(impute_var.S2))
+            p_values <- simplify2array(res)$P_Value.A_vs_B_pval
+            top10_pvals <- p_values[1:10]
+            pvals_11_200 <- p_values[11:200]
+            p_value_summary <- list(
+                  top10_significant = sum(top10_pvals <= 0.05) / 10,
+                  significant_11_200 = sum(pvals_11_200 <= 0.05) / 190
+            )
+            dapar_res <- limmaCompleteTest.mod(qData = apply(impute_data, 1:2, mean),
+                                                sTab = metadata)
+            return(list(
+                  p_value_summary = p_value_summary,
+                  dapar_res = dapar_res
+            ))
+      }
     # result[samples] <- MsCoreUtils::impute_RF(result[samples],MARGIN=2)
       cl <- parallel::makeCluster(as.integer(cpus_per_task))
       doParallel::registerDoParallel(cl)
@@ -101,12 +135,29 @@ function impute()
       prot <- result %>%
               dplyr::select(Protein, all_of(samples)) %>%
               dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(all_of(samples), ~ mean(.x, na.rm = TRUE))) %>%
+              dplyr::summarize(across(all_of(samples), ~ log2(sum(2^.x, na.rm = TRUE))+1), .names = "{col}") %>%
+              dplyr::mutate(across(all_of(samples), ~ . / sum(!is.na(.)))) %>%
               tibble::column_to_rownames(var = "Protein") %>%
               base::t()
-      z <-list(code=code,proteins=proteins,all_proteins=all_proteins,dropped_proteins=dropped_proteins,
-               peptide=peptide,peptides=peptides,dr=dr,protein=protein,proteins=proteins,
-               samples=samples,impute=result,prot=log2(prot+1))
+      prot0 <- result %>%
+               dplyr::filter(pav==0) %>%
+               dplyr::select(Protein, all_of(samples)) %>%
+               dplyr::group_by(Protein) %>%
+               dplyr::summarize(across(all_of(samples), ~ log2(sum(2^.x, na.rm = TRUE))+1), .names = "{col}") %>%
+               dplyr::mutate(across(all_of(samples), ~ . / sum(!is.na(.)))) %>%
+               tibble::column_to_rownames(var = "Protein") %>%
+               base::t()
+      prot1 <- result %>%
+               dplyr::filter(pav==1) %>%
+               dplyr::select(Protein, all_of(samples)) %>%
+               dplyr::group_by(Protein) %>%
+               dplyr::summarize(across(all_of(samples), ~ log2(sum(2^.x, na.rm = TRUE))+1), .names = "{col}") %>%
+               dplyr::mutate(across(all_of(samples), ~ . / sum(!is.na(.)))) %>%
+               tibble::column_to_rownames(var = "Protein") %>%
+               base::t()
+      z <-list(code=code,proteins=proteins,raw_proteins=raw_proteins,dup_proteins=dup_proteins,
+               peptide=peptide,peptides=peptides,dr=dr,protein=protein,
+               samples=samples,impute=result,prot=prot.prot0=prot0,prot1=prot1)
       switch(code,
         "ZWK" = {
           impute_ZWK <- z

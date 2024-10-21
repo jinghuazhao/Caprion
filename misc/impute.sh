@@ -15,34 +15,22 @@
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
-export PERL5LIB=
 module load ceuadmin/R
-module load samtools/1.13/gcc/zwxn7ug3
-module load perl/5.26.3_system/gcc-8.4.1-4cl2czq
-module load libiconv/1.16/intel/64iicvbf
-module load ceuadmin/ensembl-vep/111-icelake
 
 export TMPDIR=${HPC_WORK}/work
-export analysis=~/Caprion/analysis
-export pre_qc_data=/rds/project/rds-MkfvQMuSUxk/interval/caprion_proteomics
-export suffix=_dr
-export job=${SLURM_ARRAY_TASK_ID}
 
 function impute()
 {
-   Rscript -e '
+   R --no-save <<\ \ \ END
       suppressMessages(library(Biobase))
       suppressMessages(library(MsCoreUtils))
       suppressMessages(library(doParallel))
       suppressMessages(library(dplyr))
-      suppressMessages(library(foreach))
       suppressMessages(library(mi4p))
       suppressMessages(library(parallel))
       suppressMessages(library(tibble))
       suppressMessages(library(tidyselect))
       caprion <- "~/Caprion"
-      cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
-      job <- Sys.getenv("job")
       load(file.path(caprion,"pilot","ZWK.rda"))
       load(file.path(caprion,"pilot","ZYQ.rda"))
       load(file.path(caprion,"pilot","UDP.rda"))
@@ -60,6 +48,8 @@ function impute()
                      dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
                      dplyr::group_by(Isotope.Group.ID) %>%
                      dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
+      cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
+      job <- Sys.getenv("SLURM_ARRAY_TASK_ID")
       code <- c("ZWK","ZYQ","UDP","UHZ")[as.integer(job)]
       dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
       protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
@@ -79,46 +69,14 @@ function impute()
       print(dim(isotopes))
       result <- isotopes
       result[samples] <- log2(result[samples]+1)
-      impute_mi4p <- function(result, samples) {
-            metadata <- data.frame(
-                  Sample = samples,
-                  Condition = rep("Equal", length(samples))
-            )
-            impute_data <- mi4p::multi.impute(data = result[samples],
-                                              conditions = rep(1, length(samples)),
-                                              nb.imp = 5,
-                                              method = "RF",
-                                              parallel = TRUE)
-            impute_var <- rubin2.all(data = impute_data)
-            impute_var.S2 <- sapply(impute_var, function(aaa) {
-                  DesMat <- mi4p::make.design(metadata)
-                  max(diag(aaa) %*% t(DesMat) %*% DesMat)
-            })
-            res <- mi4limma(qData = apply(impute_data, 1:2, mean),
-                            sTab = metadata,
-                            VarRubin = sqrt(impute_var.S2))
-            p_values <- simplify2array(res)$P_Value.A_vs_B_pval
-            top10_pvals <- p_values[1:10]
-            pvals_11_200 <- p_values[11:200]
-            p_value_summary <- list(
-                  top10_significant = sum(top10_pvals <= 0.05) / 10,
-                  significant_11_200 = sum(pvals_11_200 <= 0.05) / 190
-            )
-            dapar_res <- limmaCompleteTest.mod(qData = apply(impute_data, 1:2, mean),
-                                                sTab = metadata)
-            return(list(
-                  p_value_summary = p_value_summary,
-                  dapar_res = dapar_res
-            ))
-      }
-    # result[samples] <- MsCoreUtils::impute_RF(result[samples],MARGIN=2)
+    # result[samples] <- MsCoreUtils::impute_knn(result[samples],MARGIN=2)
       cl <- parallel::makeCluster(as.integer(cpus_per_task))
       doParallel::registerDoParallel(cl)
       on.exit(parallel::stopCluster(cl))
       impute_row <- function(row) {
         if (all(is.na(row))) return(row)
         tryCatch({
-          MsCoreUtils::impute_matrix(row, method="RF", MARGIN=2)
+          MsCoreUtils::impute_knn(row, MARGIN=2)
         }, error = function(e) {
           print(paste("Error encountered:", e))
           row
@@ -126,38 +84,43 @@ function impute()
       }
       clusterExport(cl, "impute_row")
       clusterExport(cl, c("result", "samples"))
-      impute_result <- parLapply(cl, 1:nrow(result), function(i) {
-        impute_row(result[i, samples, drop = FALSE])
-      })
+      impute_result <- parLapply(cl, 1:nrow(result), function(i) {impute_row(result[i, samples, drop = FALSE])})
       parallel::stopCluster(cl)
+      impute_result <- lapply(impute_result, function(x) {
+          if (!is.data.frame(x)) return(as.data.frame(x))
+          return(x)
+      })
       impute_data <- do.call(dplyr::bind_rows, impute_result)
       result[names(impute_data)] <- impute_data
       prot <- result %>%
-              dplyr::select(Protein, all_of(samples)) %>%
-              dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(all_of(samples), ~ log2(sum(2^.x, na.rm = TRUE))+1), .names = "{col}") %>%
-              dplyr::mutate(across(all_of(samples), ~ . / sum(!is.na(.)))) %>%
-              tibble::column_to_rownames(var = "Protein") %>%
-              base::t()
+          dplyr::select(Protein, all_of(samples)) %>%
+          dplyr::group_by(Protein) %>%
+          dplyr::summarize(across(all_of(samples),
+                                  ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                  .names = "{col}")) %>%
+          tibble::column_to_rownames(var = "Protein") %>%
+          base::t()
       prot0 <- result %>%
                dplyr::filter(pav==0) %>%
                dplyr::select(Protein, all_of(samples)) %>%
                dplyr::group_by(Protein) %>%
-               dplyr::summarize(across(all_of(samples), ~ log2(sum(2^.x, na.rm = TRUE))+1), .names = "{col}") %>%
-               dplyr::mutate(across(all_of(samples), ~ . / sum(!is.na(.)))) %>%
+               dplyr::summarize(across(all_of(samples),
+                                      ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                       .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
       prot1 <- result %>%
                dplyr::filter(pav==1) %>%
                dplyr::select(Protein, all_of(samples)) %>%
                dplyr::group_by(Protein) %>%
-               dplyr::summarize(across(all_of(samples), ~ log2(sum(2^.x, na.rm = TRUE))+1), .names = "{col}") %>%
-               dplyr::mutate(across(all_of(samples), ~ . / sum(!is.na(.)))) %>%
+               dplyr::summarize(across(all_of(samples),
+                                       ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                         .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
       z <-list(code=code,proteins=proteins,raw_proteins=raw_proteins,dup_proteins=dup_proteins,
                peptide=peptide,peptides=peptides,dr=dr,protein=protein,
-               samples=samples,impute=result,prot=prot.prot0=prot0,prot1=prot1)
+               samples=samples,impute=result,prot=prot,prot0=prot0,prot1=prot1)
       switch(code,
         "ZWK" = {
           impute_ZWK <- z
@@ -198,14 +161,39 @@ function impute()
       legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
       detach(get(paste0("impute_",code)))
       dev.off()
-   '
+   END
 }
 
 impute
 
-function legacy()
+function tests()
 {
    Rscript -e '
+      impute_mi4p <- function(result, samples)
+      {
+         metadata <- data.frame(Sample = samples, Condition = rep("Equal", length(samples)))
+         impute_data <- mi4p::multi.impute(data = result[samples],
+                                           conditions = rep(1, length(samples)),
+                                           nb.imp = 5,
+                                           method = "kNN",
+                                           parallel = TRUE)
+         impute_var <- rubin2.all(data = impute_data)
+         impute_var.S2 <- sapply(impute_var, function(aaa) {
+               DesMat <- mi4p::make.design(metadata)
+               max(diag(aaa) %*% t(DesMat) %*% DesMat)
+         })
+         res <- mi4limma(qData = apply(impute_data, 1:2, mean), sTab = metadata,
+                         VarRubin = sqrt(impute_var.S2))
+         p_values <- simplify2array(res)$P_Value.A_vs_B_pval
+         top10_pvals <- p_values[1:10]
+         pvals_11_200 <- p_values[11:200]
+         p_value_summary <- list(
+               top10_significant = sum(top10_pvals <= 0.05) / 10,
+               significant_11_200 = sum(pvals_11_200 <= 0.05) / 190
+         )
+         dapar_res <- limmaCompleteTest.mod(qData = apply(impute_data, 1:2, mean), sTab = metadata)
+         return(list(p_value_summary = p_value_summary, dapar_res = dapar_res))
+      }
       replace_below_threshold <- function(x, threshold = 50000) {
         x <- ifelse(x < threshold, NA, x)
         x[is.na(x)] <- mean(x, na.rm = TRUE)

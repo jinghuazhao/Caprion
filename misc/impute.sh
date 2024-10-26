@@ -3,9 +3,9 @@
 #SBATCH --job-name=_impute
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=10
-#SBATCH --mem=100000
+#SBATCH --ntasks=3
+#SBATCH --cpus-per-task=60
+#SBATCH --mem=50000
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 
@@ -49,8 +49,8 @@ function impute()
                      dplyr::group_by(Isotope.Group.ID) %>%
                      dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
       cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
-      job <- Sys.getenv("SLURM_ARRAY_TASK_ID")
-      code <- c("ZWK","ZYQ","UDP","UHZ")[as.integer(job)]
+      batch <- Sys.getenv("SLURM_ARRAY_TASK_ID")
+      code <- c("ZWK","ZYQ","UDP","UHZ")[as.integer(batch)]
       dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
       protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
       proteins <- colnames(protein)
@@ -69,29 +69,28 @@ function impute()
       print(dim(isotopes))
       result <- isotopes
       result[samples] <- log2(result[samples]+1)
-    # result[samples] <- MsCoreUtils::impute_knn(result[samples],MARGIN=2)
+    # result[samples] <- MsCoreUtils::impute_knn(result[samples],MARGIN=1)
       cl <- parallel::makeCluster(as.integer(cpus_per_task))
       doParallel::registerDoParallel(cl)
       on.exit(parallel::stopCluster(cl))
-      impute_row <- function(row) {
-        if (all(is.na(row))) return(row)
-        tryCatch({
-          MsCoreUtils::impute_knn(row, MARGIN=2)
-        }, error = function(e) {
-          print(paste("Error encountered:", e))
-          row
-        })
-      }
       clusterExport(cl, "impute_row")
       clusterExport(cl, c("result", "samples"))
-      impute_result <- parLapply(cl, 1:nrow(result), function(i) {impute_row(result[i, samples, drop = FALSE])})
-      parallel::stopCluster(cl)
-      impute_result <- lapply(impute_result, function(x) {
-          if (!is.data.frame(x)) return(as.data.frame(x))
-          return(x)
+      impute_result <- parLapply(cl, 1:nrow(result), function(i) {
+          row <- result[i, samples, drop = FALSE]
+          if (all(is.na(row))) {
+              return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
+          }
+          tryCatch({
+              imputed_row <- MsCoreUtils::impute_knn(row, MARGIN=1)
+              return(cbind(imputed_row, was_suppressed = FALSE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
+          }, error = function(e) {
+              print(paste("Error encountered:", e))
+              return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
+          })
       })
       impute_data <- do.call(dplyr::bind_rows, impute_result)
       result[names(impute_data)] <- impute_data
+      parallel::stopCluster(cl)
       prot <- result %>%
           dplyr::select(Protein, all_of(samples)) %>%
           dplyr::group_by(Protein) %>%

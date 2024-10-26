@@ -28,7 +28,7 @@ There are available in two ways, both from the following directory:
 
 `/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/srcf`
 
-## File exploration
+### File exploration
 
 This allows for examination of each file
 
@@ -37,7 +37,7 @@ module load ceuadmin/chrome
 chrome index.html &
 ```
 
-## Web-style navigation
+### Web-style navigation
 
 This is more involved and via a port number, e.g., 8000,
 

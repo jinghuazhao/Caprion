@@ -24,7 +24,9 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 ## Mirror of SRCF
 
-There are available in two ways.
+There are available in two ways, both from the following directory:
+
+`/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/srcf`
 
 ## File exploration
 
@@ -32,9 +34,7 @@ This allows for examination of each file
 
 ```bash
 module load ceuadmin/chrome
-cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/srcf
 chrome index.html &
-cd -
 ```
 
 ## Web-style navigation

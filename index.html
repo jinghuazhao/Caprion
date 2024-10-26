@@ -146,6 +146,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#file-exploration" class="nav-link">File exploration</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#web-style-navigation" class="nav-link">Web-style navigation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -175,23 +183,28 @@
 <li><a href="https://jinghuazhao.github.io/Caprion/Notes/">Notes</a></li>
 </ul>
 <h2 id="mirror-of-srcf">Mirror of SRCF</h2>
+<p>There are available in two ways.</p>
+<h2 id="file-exploration">File exploration</h2>
+<p>This allows for examination of each file</p>
 <pre><code class="language-bash">module load ceuadmin/chrome
 cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/srcf
 chrome index.html &amp;
 cd -
 </code></pre>
-<p>A more involved version is via a port number, e.g., 8000,</p>
+<h2 id="web-style-navigation">Web-style navigation</h2>
+<p>This is more involved and via a port number, e.g., 8000,</p>
 <pre><code class="language-bash">export pn=8000
 if lsof -i :${pn}; then
     echo &quot;Port ${pn} is already in use.&quot;
 else
+    module load ceuadmin/chrome
     module load python/3.8.11/gcc/pqdmnzmw
     python -m http.server ${pn} &amp;
     server_pid=$!
     chrome http://localhost:${pn} &amp;
 fi
 </code></pre>
-<p>where the port can be released with <code>kill $server_pid</code>.</p></div>
+<p>where the port number can be released with <code>kill $server_pid</code>.</p></div>
             </div>
         </div>
 
@@ -277,5 +290,5 @@ fi
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-10-26 14:21:53.557903+00:00
+Build Date UTC : 2024-10-26 15:14:12.730765+00:00
 -->

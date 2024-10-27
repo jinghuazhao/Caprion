@@ -73,7 +73,6 @@ function impute()
       cl <- parallel::makeCluster(as.integer(cpus_per_task))
       doParallel::registerDoParallel(cl)
       on.exit(parallel::stopCluster(cl))
-      clusterExport(cl, "impute_row")
       clusterExport(cl, c("result", "samples"))
       impute_result <- parLapply(cl, 1:nrow(result), function(i) {
           row <- result[i, samples, drop = FALSE]
@@ -82,6 +81,7 @@ function impute()
           }
           tryCatch({
               imputed_row <- MsCoreUtils::impute_knn(row, MARGIN=1)
+              clusterExport(cl, "impute_row")
               return(cbind(imputed_row, was_suppressed = FALSE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
           }, error = function(e) {
               print(paste("Error encountered:", e))

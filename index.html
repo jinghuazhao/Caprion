@@ -192,10 +192,10 @@ else
     module load python/3.8.11/gcc/pqdmnzmw
     python -m http.server ${pn} &amp;
     server_pid=$!
-    chrome http://localhost:${pn} &amp;
+    chrome http://localhost:${pn}/ &amp;
 fi
 </code></pre>
-<p>where the port number can be released with <code>kill $server_pid</code>.</p></div>
+<p>where the port number can be released with <code>kill $server_pid</code>. It might be helpful to clear browse history when chrome is repeatedly used.</p></div>
             </div>
         </div>
 
@@ -281,5 +281,5 @@ fi
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-10-26 15:24:48.806956+00:00
+Build Date UTC : 2024-10-27 10:20:54.246137+00:00
 -->

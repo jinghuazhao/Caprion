@@ -50,8 +50,8 @@ else
     module load python/3.8.11/gcc/pqdmnzmw
     python -m http.server ${pn} &
     server_pid=$!
-    chrome http://localhost:${pn} &
+    chrome http://localhost:${pn}/ &
 fi
 ```
 
-where the port number can be released with `kill $server_pid`.
+where the port number can be released with `kill $server_pid`. It might be helpful to clear browse history when chrome is repeatedly used.

@@ -65,7 +65,8 @@ function impute()
       isotopes <- filter(raw, Protein %in% setdiff(raw_proteins,dup_proteins)) %>%
                   dplyr::left_join(csq_isotope) %>%
                   dplyr::select(1:6,pav,tidyselect::contains(code))
-      isotopes[samples][!is.na(isotopes[samples])&isotopes[samples]<threshold] <- NA
+      p10 <- sapply(1:nrow(isotopes), function(x) quantile(isotopes[x,samples],0.09999,na.rm=TRUE))
+      isotopes[samples][!is.na(isotopes[samples])&(isotopes[samples]<threshold|isotopes[samples]<p10)] <- NA
       print(dim(isotopes))
       result <- isotopes
       result[samples] <- log2(result[samples]+1)
@@ -74,13 +75,14 @@ function impute()
       doParallel::registerDoParallel(cl)
       on.exit(parallel::stopCluster(cl))
       clusterExport(cl, c("result", "samples"))
-      impute_result <- parLapply(cl, 1:nrow(result), function(i) {
+      impute_result <- parLapply(cl, proteins, function(p) {
+          i <- grepl(p, result["Protein"])
           row <- result[i, samples, drop = FALSE]
           if (all(is.na(row))) {
               return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
           }
           tryCatch({
-              imputed_row <- MsCoreUtils::impute_knn(row, MARGIN=1)
+              imputed_row <- MsCoreUtils::impute_RF(row, MARGIN=2)
               clusterExport(cl, "impute_row")
               return(cbind(imputed_row, was_suppressed = FALSE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
           }, error = function(e) {

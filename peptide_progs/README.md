@@ -27,13 +27,10 @@ graph LR;
 1_pgwas.sh
 2_meta_analysis.sh
 setup.sh
-3.1_extract.sh
-3.2_collect.sh
-3.3_plot.sh
-1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
 setup.sh --> 3.1_extract.sh
 setup.sh --> 3.2_collect.sh
 setup.sh --> 3.3_plot.sh
+1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
 utils.sh
 ```
 

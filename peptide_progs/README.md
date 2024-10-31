@@ -23,7 +23,7 @@ setup.sh | Environmental variables
 utils.sh | Various utitlties
 
 ```mermaid
-graph TD;
+graph LR;
 1_pgwas.sh
 2_meta_analysis.sh
 setup.sh

@@ -11,7 +11,7 @@ These are summarised in the following table,
 Program   | Description
 ----------|------------------------------------------------------------------------
 `csq.sh` | Consequences of variants
-`deCODE_UKB_PPP.sh` | deCODE?UKB-PPP replication
+`Caprion_deCODE_UKB_PPP.sh` | Caprion/deCODE/UKB-PPP replication
 `eSet.sh` | ExpresssionSet implementations
 `glmnet_pense.sh` | glmnet/pense modeling
 `impute.sh` | imputation experiments
@@ -25,4 +25,4 @@ Program   | Description
 - `0_compare.sb`. earlier contrast with deCODE/UKB-PPP.
 - `inf1.sh`. snapshot from SCALLOP/INF meta-analysis.
 
-Created on **23/9/2024**
+Created on **31/10/2024**

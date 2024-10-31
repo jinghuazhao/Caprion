@@ -5,7 +5,7 @@
 #SBATCH --partition=icelake-himem
 #SBATCH --ntasks=3
 #SBATCH --cpus-per-task=60
-#SBATCH --mem=50000
+#SBATCH --mem=150000
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 

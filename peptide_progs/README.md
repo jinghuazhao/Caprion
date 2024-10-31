@@ -16,6 +16,7 @@ Script name| Description          | Protein-specific error/output
 1_pgwas.sh | Association analysis | {protein}.e / {protein}.o
 2_meta_analysis.sh | Meta-analysis| {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.e / {protein}-METAL\_{SLURM\_job\_id}\_{phenotype\_number}.o
 **Signal identification** (see **{protein}/sentinels/slurm**)
+setup.sh | Environmental variables
 3.1_extract.sh | Signal extraction | \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step1\_{SLURM\_job\_id}\_{phenotype\_number}.o
 3.2_collect.sh | Signal collection/classification | \_step2\_{protein}.e / \_step2\_{protein}.o
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
@@ -25,16 +26,20 @@ utils.sh | Various utitlties
 graph TD;
 1_pgwas.sh
 2_meta_analysis.sh
+setup.sh
 3.1_extract.sh
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --> 2_meta_analysis.sh --> 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
+setup.sh --> 3.1_extract.sh
+setup.sh --> 3.2_collect.sh
+setup.sh --> 3.3_plot.sh
 utils.sh
 ```
 
  Specfic prerequistes for a Manhattan/peptide association plot are
 
-- a call to vep_annotate functino in `0_utils.sh` for proteins.
+- a call to vep_annotate functino in `3.2_collect.sh` for proteins.
 - a call to `bgz()` (in `utils.sh` for protein) for a indexed and compressed DR-filtered data.
 - for step 3.2, `ceuadmin/ensembl-vep/111-icelake` now is the default since partition `icelake-himem` is used instead of `cclake` (CentOS 7) which has `ceuadmin/ensembl-vep/104`.
 - module `ceuadmin/R/4.4.1-icelake` now works as smoothly as the old `ceuadmin/R` at `cclake`

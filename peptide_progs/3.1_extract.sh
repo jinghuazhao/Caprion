@@ -118,7 +118,7 @@ export N=$(head -1 ${root}/${protein}.pheno | awk '{print NF-2}')
 sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|;s|_N_|${N}|" ${root}/${protein}-step1.sb
 }
 
-source 0_setup.sh
+source setup.sh
 
 # all proteins:
 while IFS=":" read -r protein_index protein; do

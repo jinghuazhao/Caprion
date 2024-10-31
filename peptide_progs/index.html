@@ -171,6 +171,11 @@
 <td></td>
 </tr>
 <tr>
+<td>setup.sh</td>
+<td>Environmental variables</td>
+<td></td>
+</tr>
+<tr>
 <td>3.1_extract.sh</td>
 <td>Signal extraction</td>
 <td>_step1_{SLURM_job_id}_{phenotype_number}.e / _step1_{SLURM_job_id}_{phenotype_number}.o</td>
@@ -195,15 +200,19 @@
 <div class="mermaid">graph TD;
 1_pgwas.sh
 2_meta_analysis.sh
+setup.sh
 3.1_extract.sh
 3.2_collect.sh
 3.3_plot.sh
 1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; 3.1_extract.sh --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
+setup.sh --&gt; 3.1_extract.sh
+setup.sh --&gt; 3.2_collect.sh
+setup.sh --&gt; 3.3_plot.sh
 utils.sh
 </div>
 <p>Specfic prerequistes for a Manhattan/peptide association plot are</p>
 <ul>
-<li>a call to vep_annotate functino in <code>0_utils.sh</code> for proteins.</li>
+<li>a call to vep_annotate functino in <code>3.2_collect.sh</code> for proteins.</li>
 <li>a call to <code>bgz()</code> (in <code>utils.sh</code> for protein) for a indexed and compressed DR-filtered data.</li>
 <li>for step 3.2, <code>ceuadmin/ensembl-vep/111-icelake</code> now is the default since partition <code>icelake-himem</code> is used instead of <code>cclake</code> (CentOS 7) which has <code>ceuadmin/ensembl-vep/104</code>.</li>
 <li>module <code>ceuadmin/R/4.4.1-icelake</code> now works as smoothly as the old <code>ceuadmin/R</code> at <code>cclake</code></li>

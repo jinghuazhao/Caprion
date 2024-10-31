@@ -377,7 +377,7 @@ function fplz()
   sort -k1,1 -k4,4 | awk '$15>=75{printf " "NR}' | sed 's/ //;s/ /,/g') -- ${root}/HetISq75.pdf
 }
 
-source 0_setup.sh
+source setup.sh
 
 # all proteins:
 while IFS=":" read -r protein_index protein; do

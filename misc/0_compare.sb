@@ -147,25 +147,6 @@ function merge()
   '
 }
 
-function signal_grouping()
-{
-  Rscript -e '
-  options(width=200)
-  suppressMessages(library(dplyr))
-  protein <- read.csv("~/Caprion/analysis/work/caprion.cis.vs.trans")
-  peptide <- read.csv("~/Caprion/analysis/reports/peptide.cis.vs.trans")
-  protein_peptide <- full_join(select(protein,Gene,prot,SNP,Type),select(peptide,Gene,prot,isotope,SNP,Type),by=c("Gene","prot"))
-# protein only
-  x <- filter(protein_peptide,is.na(isotope)) %>% select(Gene) %>% unique %>% pull
-  filter(peptide,Gene%in%x)
-# peptide only
-  y <- filter(protein_peptide,is.na(SNP.x)) %>% select(Gene) %>% unique %>% pull
-  filter(protein,Gene %in% y)
-  z <- filter(protein_peptide,!Gene%in%c(x,y))
-  filter(peptide,!Gene%in%c(x,y)) %>% nrow
-  '
-}
-
 function lookup_r()
 {
   Rscript -e '

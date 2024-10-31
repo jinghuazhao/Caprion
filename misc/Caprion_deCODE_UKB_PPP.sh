@@ -77,6 +77,76 @@ function caprion_caprion_dr()
 END
 }
 
+function dr_peptide()
+{
+  cat <(cat  ${analysis}/peptide/*/fp/*-tbl.tsv | head -1) \
+      <(ls ${analysis}/peptide/*/fp/*-tbl.tsv | parallel -C' ' 'sed "1d" {}') > ${analysis}/reports/peptide-tbl.tsv
+  R --no-save -q <<\ \ END
+    suppressMessages(library(dplyr))
+    suppressMessages(library(gap))
+    require(stringr)
+    options(width=2000)
+    analysis <- Sys.getenv("analysis")
+    INF <- Sys.getenv("INF")
+    plink <- Sys.getenv("plink")
+    freq <- read.table("~/Caprion/analysis/bgen/caprion.freq",col.names=c("SNP","REF","ALT","ALT_FREQS")) %>%
+            filter(!duplicated(SNP))
+    tbl_dr <- read.delim(file.path(analysis,"work","tbl_dr.tsv")) %>%
+              dplyr::select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
+              dplyr::mutate(Allele1=toupper(Allele1),Allele2=toupper(Allele2)) %>%
+              dplyr::rename(Protein=prot,SNP=MarkerName,EA=Allele1,OA=Allele2,EAF=Freq1,Log10P=log.P.)
+    peptide_tbl <- read.delim(file.path(analysis,"reports","peptide-tbl.tsv")) %>%
+                   dplyr::select(prot,MarkerName,Allele1,Allele2,Freq1,Effect,StdErr,log.P.,Direction,HetISq,logHetP,N) %>%
+                   dplyr::mutate(Allele1=toupper(Allele1),Allele2=toupper(Allele2)) %>%
+                   dplyr::rename(isotope=prot,SNP=MarkerName,EA=Allele1,OA=Allele2,EAF=Freq1,Log10P=log.P.)
+    Protein_dr <- read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")) %>%
+                  dplyr::mutate(geneRegion=paste(geneChrom,":",geneStart,"-",geneEnd)) %>%
+                  dplyr::left_join(freq) %>%
+                  dplyr::arrange(prot,SNPChrom,SNPPos) %>%
+                  dplyr::rename(Protein=prot) %>%
+                  dplyr::select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
+                  dplyr::left_join(tbl_dr) %>%
+                  dplyr::select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
+    peptide <- read.csv(file.path(analysis,"reports","peptide.cis.vs.trans")) %>%
+               dplyr::mutate(geneRegion=paste(geneChrom,":",geneStart,"-",geneEnd)) %>%
+               dplyr::arrange(prot,SNPChrom,SNPPos) %>%
+               dplyr::rename(Protein=prot) %>%
+               dplyr::left_join(peptide_tbl) %>%
+               dplyr::left_join(freq) %>%
+               dplyr::select(-log10p,-geneChrom,-geneStart,-geneEnd,-SNPChrom,-SNPPos,-cis) %>%
+               dplyr::select(Gene,Protein,geneRegion,SNP,Type,EA,OA,EAF,Effect,StdErr,Log10P,Direction,HetISq,logHetP,N,REF,ALT,ALT_FREQS)
+    panel <- pQTLdata::caprion %>%
+             transmute(prot=gsub("_HUMAN","",Protein),uniprot=Accession)
+    dr <- dplyr::mutate(Protein_dr, ProteinSNP=paste0(Protein,"-",SNP),inv_chr_pos_a1_a2(SNP),pos=as.integer(pos)) %>%
+          dplyr::rename(prot=Protein,rsid=SNP) %>%
+          dplyr::left_join(panel)
+    peptide <- dplyr::mutate(peptide, ProteinSNP=paste0(peptide,"-",SNP),inv_chr_pos_a1_a2(SNP),pos=as.integer(pos)) %>%
+               dplyr::rename(prot=Protein,rsid=SNP) %>%
+               dplyr::left_join(panel)
+    z <- list()
+    for(i in unique(dplyr::pull(caprion,chr)))
+    {
+       j <- dplyr::filter(dr,chr %in% i) %>%
+            dplyr::select(chr,pos,uniprot,rsid,prot)
+       k <- dplyr::filter(peptide,chr %in% i) %>%
+            dplyr::select(chr,pos,uniprot,rsid,prot)
+       bfile <- file.path(INF,"INTERVAL","per_chr",paste0("snpid",i))
+       z[[i]] <- pQTLtools::novelty_check(j,k,ldops=list(bfile=bfile,plink=plink),flanking=500000)
+    }
+    z[["23"]] <- dplyr::mutate(z[["X"]],known.seqnames="23",query.seqnames="23")
+    r <- dplyr::filter(dplyr::bind_rows(z[-which(names(z)=="X")]),r2>=0.8) %>%
+         dplyr::mutate(seqnames=as.integer(known.seqnames),pos=as.integer(known.pos)) %>%
+         dplyr::arrange(seqnames,pos) %>%
+         dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos) %>%
+         unique()
+    r %>%
+    group_by(known.prot) %>%
+    summarize(n=n(),protein=paste(known.rsid,collapse=","),peptide=paste(query.rsid,collapse=","),r2=paste(r2,collapse=","))
+    save(panel,dr,peptide,r,file=file.path(analysis,"reports","dr-peptide.rda"))
+    write.table(r,file=file.path(analysis,"reports","dr_peptide.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
+  END
+}
+
 function deCODE()
 {
   R --no-save -q <<END

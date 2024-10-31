@@ -184,7 +184,7 @@ EOL
 sed -i "s|ROOT|${root}|;s|LABEL|${protein}|;s|PROTEIN|${protein}|" ${root}/${protein}-step2.sb
 }
 
-source 0_setup.sh
+source setup.sh
 
 # all proteins:
 while IFS=":" read -r protein_index protein; do

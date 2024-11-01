@@ -195,7 +195,9 @@ else
     chrome http://localhost:${pn}/ &amp;
 fi
 </code></pre>
-<p>where the port number can be released with <code>kill $server_pid</code>. It might be helpful to clear browse history when chrome is repeatedly used.</p></div>
+<p>where the port number can be released with <code>kill $server_pid</code>. It might be helpful to clear browse history when chrome is repeatedly used, or to start a new profile.</p>
+<pre><code class="language-bash">chrome --no-sandbox --user-data-dir=/tmp/jhz22
+</code></pre></div>
             </div>
         </div>
 
@@ -281,5 +283,5 @@ fi
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-10-31 16:16:13.582233+00:00
+Build Date UTC : 2024-11-01 11:42:14.941872+00:00
 -->

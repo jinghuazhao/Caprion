@@ -3,9 +3,9 @@
 #SBATCH --job-name=_impute
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
-#SBATCH --ntasks=3
-#SBATCH --cpus-per-task=60
-#SBATCH --mem=150000
+#SBATCH --ntasks=4
+#SBATCH --cpus-per-task=50
+#SBATCH --mem=300000
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 

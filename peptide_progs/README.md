@@ -22,6 +22,7 @@ setup.sh | Environmental variables
 3.3_plot.sh | Forest, Q-Q, Manhattan, LocusZoom, mean-by-genotype/dosage plots | \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.e / \_step3\_{SLURM\_job\_id}\_{phenotype\_number}.o
 utils.sh | Various utitlties
 
+<div style="text-align: center;">
 ```mermaid
 graph TD;
 1_pgwas.sh
@@ -33,8 +34,9 @@ setup.sh --> 3.3_plot.sh
 3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
 utils.sh
 ```
+</div>
 
- Specfic prerequistes for a Manhattan/peptide association plot are
+Specfic prerequistes for a Manhattan/peptide association plot are
 
 - a call to vep_annotate functino in `3.2_collect.sh` for proteins.
 - a call to `bgz()` (in `utils.sh` for protein) for a indexed and compressed DR-filtered data.

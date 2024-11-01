@@ -57,5 +57,5 @@ fi
 where the port number can be released with `kill $server_pid`. It might be helpful to clear browse history when chrome is repeatedly used, or to start a new profile.
 
 ```bash
-chrome --no-sandbox --user-data-dir=/tmp/jhz22
+chrome --user-data-dir=/tmp/jhz22
 ```

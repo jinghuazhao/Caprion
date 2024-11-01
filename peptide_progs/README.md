@@ -28,11 +28,9 @@ graph TD;
     1_pgwas.sh
     2_meta_analysis.sh
     1_pgwas.sh --> 2_meta_analysis.sh --> setup.sh
-    setup.sh --> subgraph group1[ ]
-        3.1_extract.sh
-        3.2_collect.sh
-        3.3_plot.sh
-    end
+    setup.sh --> 3.1_extract.sh
+    setup.sh --> 3.2_collect.sh
+    setup.sh --> 3.3_plot.sh
     3.1_extract.sh --> 3.2_collect.sh
     3.2_collect.sh --> 3.3_plot.sh
     utils.sh

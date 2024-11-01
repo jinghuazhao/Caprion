@@ -198,7 +198,7 @@
 </tbody>
 </table>
 <div style="text-align: center;">
-<div class="mermaid">graph TD;
+<div class="mermaid">graph LR;
     1_pgwas.sh
     2_meta_analysis.sh
     1_pgwas.sh --&gt; 2_meta_analysis.sh --&gt; setup.sh
@@ -207,7 +207,7 @@
     setup.sh --&gt; 3.3_plot.sh
 
     subgraph Group1[ ]
-        direction LR
+        direction TD
         3.1_extract.sh --&gt; 3.2_collect.sh --&gt; 3.3_plot.sh
     end
 

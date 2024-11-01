@@ -24,7 +24,7 @@ utils.sh | Various utitlties
 
 <div style="text-align: center;">
 ```mermaid
-graph TD;
+graph LR;
     1_pgwas.sh
     2_meta_analysis.sh
     1_pgwas.sh --> 2_meta_analysis.sh --> setup.sh
@@ -33,7 +33,7 @@ graph TD;
     setup.sh --> 3.3_plot.sh
 
     subgraph Group1[ ]
-        direction LR
+        direction TD
         3.1_extract.sh --> 3.2_collect.sh --> 3.3_plot.sh
     end
 

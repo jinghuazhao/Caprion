@@ -139,9 +139,16 @@ function dr_peptide()
          dplyr::arrange(seqnames,pos) %>%
          dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos) %>%
          unique()
+    r %>% mutate(id=paste0(known.prot,"-",known.rsid)) |> select(id) |> unique() |> dim()
+    r %>% mutate(id=paste0(query.prot,"-",query.rsid)) |> select(id) |> unique() |> dim()
     r %>%
     group_by(known.prot) %>%
     summarize(n=n(),protein=paste(known.rsid,collapse=","),peptide=paste(query.rsid,collapse=","),r2=paste(r2,collapse=","))
+  # .lst files generated from utils.sh
+    ZWK_protein1 <- scan(file.path(analysis,"reports","ZWK1.lst"),what="")
+    ZYQ_protein1 <- scan(file.path(analysis,"reports","ZYQ1.lst"),what="")
+    UDP_protein1 <- scan(file.path(analysis,"reports","UDP1.lst"),what="")
+    filter(r,known.prot%in%c(ZWK_protein1,ZYQ_protein1,UDP_protein1)) %>% select(known.prot) |> table() |> length()
     save(panel,dr,peptide,r,file=file.path(analysis,"reports","dr-peptide.rda"))
     write.table(r,file=file.path(analysis,"reports","dr_peptide.tsv"),row.names=FALSE,quote=FALSE,sep="\t")
   END

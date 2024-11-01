@@ -240,7 +240,7 @@ Rscript -e '
     cat(code,"\n")
     load(paste0("~/Caprion/pilot/",code,".rda"))
     peptides_per_protein <- get(paste0("mapping_",code)) %>%
-                            filter(Protein!="-") %>%
+                            filter(Protein!="-"&!grepl("\\|",Protein)) %>%
                             group_by(Protein) %>%
                             summarize(N=n(),
                                       group=cut(N, breaks = c(0, 15, 30, 50, Inf),
@@ -248,13 +248,20 @@ Rscript -e '
                                                    right = FALSE))
     print(dim(peptides_per_protein))
     attach(peptides_per_protein)
+    protein1 <- data.frame(Protein=gsub("_HUMAN","",Protein),N) %>%
+                subset(N==1) %>%
+                select(Protein)
+    print(protein1)
     print(table(N))
     table_group <- table(group)
     table_sum <- table(group)|>sum()
     detach(peptides_per_protein)
     wtable <- with(peptides_per_protein, tapply(N,group,sum))
-    list(table_group=c(code,table_group),table_sum=c(code,table_sum),wtable=c(code,wtable))
+    write.table(protein1, file = paste0("~/Caprion/analysis/reports/", code, "1.lst"),
+                row.names = FALSE, col.names = FALSE, quote = FALSE)
+    list(protein1=protein1[["Protein"]],table_group=c(code,table_group),table_sum=c(code,table_sum),wtable=c(code,wtable))
   }
+  options(width=150)
   ZWK <- peptides("ZWK")
   ZYQ <- peptides("ZYQ")
   UDP <- peptides("UDP")

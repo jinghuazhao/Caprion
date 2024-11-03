@@ -17,6 +17,7 @@ compare/
 crux/
 doc/
 eQTLCatalog/
+impute/
 json/
 logs/
 peptide/

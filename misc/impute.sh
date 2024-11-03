@@ -4,13 +4,13 @@
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --ntasks=4
-#SBATCH --cpus-per-task=50
-#SBATCH --mem=300000
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50000
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 
-#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/impute_%A_%a.e
-#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/work/impute_%A_%a.o
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/impute/slurm/impute_%A_%a.e
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/impute/slurm/impute_%A_%a.o
 
 . /etc/profile.d/modules.sh
 module purge
@@ -48,6 +48,7 @@ function impute()
                      dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
                      dplyr::group_by(Isotope.Group.ID) %>%
                      dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
+      ntask <- Sys.getenv("SLURM_NTASKS")
       cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
       batch <- Sys.getenv("SLURM_ARRAY_TASK_ID")
       code <- c("ZWK","ZYQ","UDP","UHZ")[as.integer(batch)]
@@ -76,7 +77,7 @@ function impute()
       on.exit(parallel::stopCluster(cl))
       clusterExport(cl, c("result", "samples"))
       impute_result <- parLapply(cl, proteins, function(p) {
-          i <- grepl(p, result["Protein"])
+          i <- which(grepl(p, result[["Protein"]]))
           row <- result[i, samples, drop = FALSE]
           if (all(is.na(row))) {
               return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
@@ -92,6 +93,10 @@ function impute()
       })
       impute_data <- do.call(dplyr::bind_rows, impute_result)
       result[names(impute_data)] <- impute_data
+    # id1 <- result[["Isotope.Group.ID"]]
+    # id2 <- impute_data[["Isotope.Group.ID"]]
+    # matching_ids <- id1 %in% id2
+    # result[matching_ids, names(impute_data)] <- impute_data[match(id1[matching_ids], id2),]
       parallel::stopCluster(cl)
       prot <- result %>%
           dplyr::select(Protein, all_of(samples)) %>%
@@ -125,19 +130,19 @@ function impute()
       switch(code,
         "ZWK" = {
           impute_ZWK <- z
-          save(impute_ZWK, file = file.path(caprion, "analysis", "work", "impute_ZWK.rda"))
+          save(impute_ZWK, file = file.path(caprion, "analysis", "impute", "impute_ZWK.rda"))
         },
         "ZYQ" = {
           impute_ZYQ <- z
-          save(impute_ZYQ, file = file.path(caprion, "analysis", "work", "impute_ZYQ.rda"))
+          save(impute_ZYQ, file = file.path(caprion, "analysis", "impute", "impute_ZYQ.rda"))
         },
         "UDP" = {
           impute_UDP <- z
-          save(impute_UDP, file = file.path(caprion, "analysis", "work", "impute_UDP.rda"))
+          save(impute_UDP, file = file.path(caprion, "analysis", "impute", "impute_UDP.rda"))
         },
         "UHZ" = {
           impute_UHZ <- z
-          save(impute_UHZ, file = file.path(caprion, "analysis", "work", "impute_UHZ.rda"))
+          save(impute_UHZ, file = file.path(caprion, "analysis", "impute", "impute_UHZ.rda"))
         },
         stop("Invalid code")
       )

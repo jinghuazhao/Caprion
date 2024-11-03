@@ -52,6 +52,7 @@ function impute()
       cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
       batch <- Sys.getenv("SLURM_ARRAY_TASK_ID")
       code <- c("ZWK","ZYQ","UDP","UHZ")[as.integer(batch)]
+      cat(code,"\n")
       dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
       protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
       proteins <- colnames(protein)
@@ -70,7 +71,8 @@ function impute()
       isotopes[samples][!is.na(isotopes[samples])&(isotopes[samples]<threshold|isotopes[samples]<p10)] <- NA
       print(dim(isotopes))
       result <- isotopes
-      result[samples] <- log2(result[samples]+1)
+      log2n <- function(x) ifelse(is.na(x), NA, log2(x))
+      result[samples] <- log2n(result[samples])
     # result[samples] <- MsCoreUtils::impute_knn(result[samples],MARGIN=1)
       cl <- parallel::makeCluster(as.integer(cpus_per_task))
       doParallel::registerDoParallel(cl)
@@ -93,16 +95,12 @@ function impute()
       })
       impute_data <- do.call(dplyr::bind_rows, impute_result)
       result[names(impute_data)] <- impute_data
-    # id1 <- result[["Isotope.Group.ID"]]
-    # id2 <- impute_data[["Isotope.Group.ID"]]
-    # matching_ids <- id1 %in% id2
-    # result[matching_ids, names(impute_data)] <- impute_data[match(id1[matching_ids], id2),]
       parallel::stopCluster(cl)
       prot <- result %>%
           dplyr::select(Protein, all_of(samples)) %>%
           dplyr::group_by(Protein) %>%
           dplyr::summarize(across(all_of(samples),
-                                  ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                  ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
                                   .names = "{col}")) %>%
           tibble::column_to_rownames(var = "Protein") %>%
           base::t()
@@ -111,7 +109,7 @@ function impute()
                dplyr::select(Protein, all_of(samples)) %>%
                dplyr::group_by(Protein) %>%
                dplyr::summarize(across(all_of(samples),
-                                      ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                      ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
                                        .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
@@ -120,7 +118,7 @@ function impute()
                dplyr::select(Protein, all_of(samples)) %>%
                dplyr::group_by(Protein) %>%
                dplyr::summarize(across(all_of(samples),
-                                       ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                       ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
                                          .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
@@ -147,8 +145,8 @@ function impute()
         stop("Invalid code")
       )
       suppressMessages(library(mclust))
-      load(file.path(caprion,"analysis","work",paste0("impute_",code,".rda")))
-      pdf(file.path(caprion,"analysis","work",paste0("impute_",code,".pdf")))
+      load(file.path(caprion,"analysis","impute",paste0("impute_",code,".rda")))
+      pdf(file.path(caprion,"analysis","impute",paste0("impute_",code,".pdf")))
       par(mfrow=c(2,2))
       attach(get(paste0("impute_",code)))
       pca <- prcomp(protein,scale=TRUE)
@@ -175,6 +173,10 @@ impute
 function tests()
 {
    Rscript -e '
+    # id1 <- result[["Isotope.Group.ID"]]
+    # id2 <- impute_data[["Isotope.Group.ID"]]
+    # matching_ids <- id1 %in% id2
+    # result[matching_ids, names(impute_data)] <- impute_data[match(id1[matching_ids], id2),]
       impute_mi4p <- function(result, samples)
       {
          metadata <- data.frame(Sample = samples, Condition = rep("Equal", length(samples)))

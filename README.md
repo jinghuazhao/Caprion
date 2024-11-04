@@ -33,7 +33,7 @@ There are available in two ways, both from the following directory:
 This allows for examination of each file
 
 ```bash
-module load ceuadmin/chrome
+module load ceuadmin/chromium
 chrome index.html &
 ```
 
@@ -46,16 +46,16 @@ export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use."
 else
-    module load ceuadmin/chrome
+    module load ceuadmin/chromium
     module load python/3.8.11/gcc/pqdmnzmw
     python -m http.server ${pn} &
     server_pid=$!
-    chrome http://localhost:${pn}/ &
+    chrome http://localhost:${pn} &
 fi
 ```
 
 where the port number can be released with `kill $server_pid`. It might be helpful to clear browse history when chrome is repeatedly used, or to start a new profile.
 
 ```bash
-chrome --user-data-dir=/tmp/jhz22
+chrome --user-data-dir=/tmp/jhz22 http://localhost:${pn} &
 ```

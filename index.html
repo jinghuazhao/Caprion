@@ -179,7 +179,7 @@
 <p><code>/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/srcf</code></p>
 <h3 id="file-exploration">File exploration</h3>
 <p>This allows for examination of each file</p>
-<pre><code class="language-bash">module load ceuadmin/chrome
+<pre><code class="language-bash">module load ceuadmin/chromium
 chrome index.html &amp;
 </code></pre>
 <h3 id="web-style-navigation">Web-style navigation</h3>
@@ -188,15 +188,15 @@ chrome index.html &amp;
 if lsof -i :${pn}; then
     echo &quot;Port ${pn} is already in use.&quot;
 else
-    module load ceuadmin/chrome
+    module load ceuadmin/chromium
     module load python/3.8.11/gcc/pqdmnzmw
     python -m http.server ${pn} &amp;
     server_pid=$!
-    chrome http://localhost:${pn}/ &amp;
+    chrome http://localhost:${pn} &amp;
 fi
 </code></pre>
 <p>where the port number can be released with <code>kill $server_pid</code>. It might be helpful to clear browse history when chrome is repeatedly used, or to start a new profile.</p>
-<pre><code class="language-bash">chrome --user-data-dir=/tmp/jhz22
+<pre><code class="language-bash">chrome --user-data-dir=/tmp/jhz22 http://localhost:${pn} &amp;
 </code></pre></div>
             </div>
         </div>
@@ -283,5 +283,5 @@ fi
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-11-03 17:28:23.310836+00:00
+Build Date UTC : 2024-11-04 09:49:12.618478+00:00
 -->

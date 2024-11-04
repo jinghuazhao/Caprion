@@ -24,38 +24,24 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 ## Mirror of SRCF
 
-There are available in two ways, both from the following directory:
+The mirror is within the following directory:
 
 `/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/srcf`
 
-### File exploration
-
-This allows for examination of each file
+A web-style navigation is furnised via a port number, e.g., 8000,
 
 ```bash
-module load ceuadmin/chromium
-chrome index.html &
-```
+module load python/3.8.11/gcc/pqdmnzmw
+module load ceuadmin/edge
 
-### Web-style navigation
-
-This is more involved and via a port number, e.g., 8000,
-
-```bash
 export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use."
 else
-    module load ceuadmin/chromium
-    module load python/3.8.11/gcc/pqdmnzmw
     python -m http.server ${pn} &
     server_pid=$!
-    chrome http://localhost:${pn} &
+    edge http://localhost:${pn} &
 fi
 ```
 
-where the port number can be released with `kill $server_pid`. It might be helpful to clear browse history when chrome is repeatedly used, or to start a new profile.
-
-```bash
-chrome --user-data-dir=/tmp/jhz22 http://localhost:${pn} &
-```
+where the port number can be released with `kill $server_pid`.

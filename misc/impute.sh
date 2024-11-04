@@ -4,8 +4,8 @@
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --ntasks=4
-#SBATCH --cpus-per-task=20
-#SBATCH --mem=50000
+#SBATCH --cpus-per-task=30
+#SBATCH --mem=120000
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 

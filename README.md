@@ -31,7 +31,7 @@ The mirror is within the following directory:
 A web-style navigation is furnised via a port number, e.g., 8000,
 
 ```bash
-module load python/3.8.11/gcc/pqdmnzmw
+module load python/3.8.1-icl
 module load ceuadmin/edge
 
 export pn=8000

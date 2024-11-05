@@ -4,8 +4,8 @@
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
 #SBATCH --ntasks=4
-#SBATCH --cpus-per-task=30
-#SBATCH --mem=120000
+#SBATCH --cpus-per-task=25
+#SBATCH --mem=100000
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 
@@ -48,11 +48,11 @@ function impute()
                      dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
                      dplyr::group_by(Isotope.Group.ID) %>%
                      dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
-      ntask <- Sys.getenv("SLURM_NTASKS")
+      ntasks <- Sys.getenv("SLURM_NTASKS")
       cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
       batch <- Sys.getenv("SLURM_ARRAY_TASK_ID")
       code <- c("ZWK","ZYQ","UDP","UHZ")[as.integer(batch)]
-      cat(code,"\n")
+      cat(paste("ntasks =",ntasks),paste("cpus-per-task =",cpus_per_task),code,sep="\n")
       dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
       protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
       proteins <- colnames(protein)

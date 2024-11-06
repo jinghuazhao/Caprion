@@ -38,7 +38,7 @@ export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use."
 else
-    python -m http.server ${pn} &
+    python3 -m http.server ${pn} &
     server_pid=$!
     edge http://localhost:${pn} &
 fi

@@ -44,4 +44,8 @@ else
 fi
 ```
 
-where the port number can be released with `kill $server_pid`.
+where the port number can be released with `kill $server_pid`. In case it does now show, use
+
+`edge --user-data-dir=${TMPDIR} http://localhost:${pn} &`
+
+where TMPDIR is a directory name.

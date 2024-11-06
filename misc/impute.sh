@@ -9,8 +9,18 @@
 #SBATCH --array=1-4
 #SBATCH --time=12:00:00
 
+#SBATCH --job-name=_impute
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --partition=icelake-himem
+#SBATCH --mem=80000
+#SBATCH --array=1-987
+#SBATCH --time=12:00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=5
+
 #SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/impute/slurm/impute_%A_%a.e
 #SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/impute/slurm/impute_%A_%a.o
+
 
 . /etc/profile.d/modules.sh
 module purge
@@ -20,6 +30,128 @@ module load ceuadmin/R
 export TMPDIR=${HPC_WORK}/work
 
 function impute()
+{
+   export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ~/Caprion/analysis/work/caprion_dr.varlist)
+   R --no-save <<\ \ \ END
+      suppressMessages(library(Biobase))
+      suppressMessages(library(MsCoreUtils))
+      suppressMessages(library(doParallel))
+      suppressMessages(library(dplyr))
+      suppressMessages(library(mi4p))
+      suppressMessages(library(parallel))
+      suppressMessages(library(tibble))
+      suppressMessages(library(tidyselect))
+      caprion <- "~/Caprion"
+      load(file.path(caprion,"pilot","ZWK.rda"))
+      load(file.path(caprion,"pilot","ZYQ.rda"))
+      load(file.path(caprion,"pilot","UDP.rda"))
+      load(file.path(caprion,"pilot","UHZ.rda"))
+      load(file.path(caprion,"analysis","work","eSet.rda"))
+      raw_ZYQ <- left_join(mapping_ZYQ,raw_ZYQ)
+      raw_UDP <- left_join(mapping_UDP,raw_UDP)
+      raw_UHZ <- left_join(mapping_UHZ[c("Isotope.Group.ID", "Protein")],raw_UHZ)
+      load(file.path(caprion,"analysis","reports","peptide_csq.rda"))
+      threshold <- 50000
+      csq_isotope <- peptide_cvt %>%
+                     dplyr::select(Gene,SNP,prot,isotope,Type) %>%
+                     dplyr::left_join(peptide_csq,by=c("Gene"="gene","SNP"="rsid")) %>%
+                     dplyr::rename(Isotope.Group.ID=isotope) %>%
+                     dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
+                     dplyr::group_by(Isotope.Group.ID) %>%
+                     dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
+      p <- Sys.getenv("p")
+      for (code in c("ZWK","ZYQ","UDP","UHZ"))
+      {
+      cat(paste("code =",code),sep="\n")
+      dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
+      protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
+      proteins <- colnames(protein)
+      peptide <- Biobase::exprs(get(paste0("peptide_",code))) %>% base::t()
+      peptides <- colnames(peptide)
+      raw <- get(paste0("raw_",code)) %>%
+             dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
+      samples <- grep(code,names(raw),value=TRUE)
+      raw_proteins <- unique(raw[["Protein"]])
+      dup_proteins <- grep("\\||-", raw_proteins, value = TRUE)
+      isotopes <- filter(raw, Protein %in% setdiff(raw_proteins,dup_proteins)) %>%
+                  dplyr::left_join(csq_isotope) %>%
+                  dplyr::select(1:6,pav,tidyselect::contains(code))
+      p10 <- sapply(1:nrow(isotopes), function(x) quantile(isotopes[x,samples],0.09999,na.rm=TRUE))
+      isotopes[samples][!is.na(isotopes[samples])&(isotopes[samples]<threshold|isotopes[samples]<p10)] <- NA
+      print(dim(isotopes))
+      result <- isotopes
+      result[samples] <- log2(result[samples]+1)
+      impute_result <- sapply(p, function(p) {
+          i <- which(grepl(p, result[["Protein"]]))
+          row <- result[i, samples, drop = FALSE]
+          if (all(is.na(row))) {
+              return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
+          }
+          tryCatch({
+              imputed_row <- MsCoreUtils::impute_RF(row, MARGIN=2)
+              return(cbind(imputed_row, was_suppressed = FALSE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
+          }, error = function(e) {
+              print(paste("Error encountered:", e))
+              return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
+          })
+      })
+      impute_data <- impute_result
+      result[names(impute_data)] <- impute_data
+      prot <- result %>%
+          dplyr::select(Protein, all_of(samples)) %>%
+          dplyr::group_by(Protein) %>%
+          dplyr::summarize(across(all_of(samples),
+                                  ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                  .names = "{col}")) %>%
+          tibble::column_to_rownames(var = "Protein") %>%
+          base::t()
+      prot0 <- result %>%
+               dplyr::filter(pav==0) %>%
+               dplyr::select(Protein, all_of(samples)) %>%
+               dplyr::group_by(Protein) %>%
+               dplyr::summarize(across(all_of(samples),
+                                      ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                       .names = "{col}")) %>%
+               tibble::column_to_rownames(var = "Protein") %>%
+               base::t()
+      prot1 <- result %>%
+               dplyr::filter(pav==1) %>%
+               dplyr::select(Protein, all_of(samples)) %>%
+               dplyr::group_by(Protein) %>%
+               dplyr::summarize(across(all_of(samples),
+                                       ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                         .names = "{col}")) %>%
+               tibble::column_to_rownames(var = "Protein") %>%
+               base::t()
+      z <-list(code=code,proteins=proteins,raw_proteins=raw_proteins,dup_proteins=dup_proteins,
+               peptide=peptide,peptides=peptides,dr=dr,protein=protein,
+               samples=samples,impute=result,prot=prot,prot0=prot0,prot1=prot1)
+      switch(code,
+        "ZWK" = {
+          impute_ZWK <- z
+          save(impute_ZWK, file = file.path(caprion, "analysis", "impute", "ZWK", paste0("impute_ZWK-",p,".rda")))
+        },
+        "ZYQ" = {
+          impute_ZYQ <- z
+          save(impute_ZYQ, file = file.path(caprion, "analysis", "impute", "ZYQ", paste0("impute_ZYQ-",p,".rda")))
+        },
+        "UDP" = {
+          impute_UDP <- z
+          save(impute_UDP, file = file.path(caprion, "analysis", "impute", "UDP", paste0("impute_UDP-",p,".rda")))
+        },
+        "UHZ" = {
+          impute_UHZ <- z
+          save(impute_UHZ, file = file.path(caprion, "analysis", "impute", "UHZ", paste0("impute_UHZ-",p,".rda")))
+        },
+        stop("Invalid code")
+      )
+      }
+   END
+}
+
+impute
+
+function tests()
 {
    R --no-save <<\ \ \ END
       suppressMessages(library(Biobase))
@@ -166,12 +298,6 @@ function impute()
       detach(get(paste0("impute_",code)))
       dev.off()
    END
-}
-
-impute
-
-function tests()
-{
    Rscript -e '
     # id1 <- result[["Isotope.Group.ID"]]
     # id2 <- impute_data[["Isotope.Group.ID"]]

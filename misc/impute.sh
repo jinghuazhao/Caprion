@@ -62,7 +62,7 @@ function impute()
       p <- Sys.getenv("p")
       for (code in c("ZWK","ZYQ","UDP","UHZ"))
       {
-      cat(paste("code =",code),sep="\n")
+      cat(paste("Protein =",p),paste("code =",code),sep="\n")
       dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
       protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
       proteins <- colnames(protein)

@@ -17,6 +17,7 @@ Program   | Description
 `impute.sh` | imputation experiments
 `json.sh` | JSON file generation
 `peptideAssociationPlot.sh` | protein Manhattan-peptide signal plots
+`duppgwas.sh` | pGWAS for duplicated proteins
 `tables.sh` | `Supplementary-Tables.xlsx` generator
 `ToDo.sh` | various staged experiments
 
@@ -25,4 +26,4 @@ Program   | Description
 - `0_compare.sb`. earlier contrast with deCODE/UKB-PPP.
 - `inf1.sh`. snapshot from SCALLOP/INF meta-analysis.
 
-Created on **31/10/2024**
+Created on **7/11/2024**

@@ -14,7 +14,7 @@ Program   | Description
 `Caprion_deCODE_UKB_PPP.sh` | Caprion/deCODE/UKB-PPP replication
 `eSet.sh` | ExpresssionSet implementations
 `glmnet_pense.sh` | glmnet/pense modeling
-`impute.sh` | imputation experiments
+`impute.sb` | imputation experiments
 `json.sh` | JSON file generation
 `peptideAssociationPlot.sh` | protein Manhattan-peptide signal plots
 `duppgwas.sh` | pGWAS for duplicated proteins
@@ -26,4 +26,4 @@ Program   | Description
 - `0_compare.sb`. earlier contrast with deCODE/UKB-PPP.
 - `inf1.sh`. snapshot from SCALLOP/INF meta-analysis.
 
-Created on **7/11/2024**
+Created on **8/11/2024**

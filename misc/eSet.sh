@@ -82,12 +82,6 @@ function eSet()
      rm(f,f1,f2,f3,f4,raw_process)
      save(list=ls(),file=file.path(analysis,"work","eSet.rda"))
   '
-  Rscript -e '
-     analysis <- Sys.getenv("analysis")
-     load(file.path(analysis,"work","eSet.rda"))
-     dup <- subset(raw_ZWK,grepl("\\|",raw_ZWK[[2]]))
-     write.table(dup[1:6],file=file.path(caprion,"analysis","dup","dup.list"),col.names=FALSE,quote=FALSE,row.names=FALSE,sep="\t")
-  '
 }
 
 eSet

@@ -1,14 +1,10 @@
 #!/usr/bin/bash
 
 function sb()
-# select from a list of duplicated proteins (either continuously in 1-706 or its subset)
+# select from a list of peptide on duplicated proteins (1-706)
 {
-  export index=${1}
-  export isotope=$(awk 'NR==ENVIRON["index"]{print $1}' ${analysis}/dup/dup.list)
-  export sbatch=${analysis}/dup/dup-pgwas.sb
-
-  export pheno=${analysis}/dup/ZWK.pheno
-  export N=$(awk 'NR==1{print NF-2}' ${pheno})
+export analysis=~/Caprion/analysis
+export sbatch=${analysis}/dup/dup-pgwas.sb
 cat << 'EOL' > ${sbatch}
 #!/usr/bin/bash
 
@@ -16,27 +12,27 @@ cat << 'EOL' > ${sbatch}
 #SBATCH --partition icelake-himem
 #SBATCH --mem=28800
 #SBATCH --time=12:00:00
-#SBATCH --job-name=PROTEIN
+#SBATCH --job-name=_dup
 #SBATCH --array=1-RUNS
-#SBATCH --output=ANALYSIS/dup/slurm/ISOTOPE.o
-#SBATCH --error=ANALYSIS/dup/slurm/ISOTOPE.e
+#SBATCH --output=ANALYSIS/dup/slurm/_dup_%A_%a.o
+#SBATCH --error=ANALYSIS/dup/slurm/_dup_%A_%a.e
 
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
 module load ceuadmin/htslib/1.20
 
-export isotope=ISOTOPE
 export TMPDIR=${HPC_WORK}/work
 export analysis=~/Caprion/analysis
+export pheno=${analysis}/dup/ZWK.pheno
 
 function fastLR()
 {
-  export batch=${1}
+  export batch=1
   export fastGWA=gcta-1.9
   export col=${SLURM_ARRAY_TASK_ID}
   export peptide=$(awk 'NR==1{print $(col+2)}' col=${col} ${pheno})
-  export root=${analysis}/dup/${peptide}
+  export root=${analysis}/dup/dup
   ${fastGWA} --mbgen ${analysis}/bgen/caprion.bgenlist \
              --sample ${analysis}/bgen/caprion.sample \
              --extract ${analysis}/bgen/caprion.snplist \
@@ -71,10 +67,15 @@ function fastLR()
 fastLR 1
 EOL
 
-sed -i "s|ANALYSIS|${analysis}|;s|ISOTOPE|${isotope}|g;s|RUNS|${N}|" ${sbatch}
+export analysis=~/Caprion/analysis
+export pheno=${analysis}/dup/ZWK.pheno
+export N=$(awk 'NR==1{print NF-2}' ${pheno})
+sed -i "s|ANALYSIS|${analysis}|;s|RUNS|${N}|" ${sbatch}
 sbatch ${sbatch}
 }
 
+function setup()
+{
 module load ceuadmin/R
 Rscript -e '
     .libPaths()
@@ -135,17 +136,7 @@ Rscript -e '
     write.table(ZWK,file=file.path(analysis,"dup","ZWK.mpheno"),
                 col.names=FALSE,row.names=FALSE,quote=FALSE)
 '
+}
 
-export TMPDIR=${HPC_WORK}/work
-export analysis=~/Caprion/analysis
-export varlist=${analysis}/dup/dup.list
-
-while IFS=":" read -r isotope_index isotope; do
-    export isotope_index
-    export isotope
-    echo ${isotope_index} ${isotope}
-    export root=${analysis}/dup
-    sb ${isotope_index}
-    export pheno=${root}/ZWK.pheno
-    export N=$(awk "NR==1{print NF-2}" ${pheno})
-done < <(cut -f1 ${varlist} | awk '{print NR":"$1}')
+setup
+sb

@@ -12,7 +12,7 @@
 #SBATCH --job-name=_impute
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
-#SBATCH --mem=80000
+#SBATCH --mem=50000
 #SBATCH --array=1-987
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
@@ -73,14 +73,15 @@ function impute()
       samples <- grep(code,names(raw),value=TRUE)
       raw_proteins <- unique(raw[["Protein"]])
       dup_proteins <- grep("\\||-", raw_proteins, value = TRUE)
-      isotopes <- filter(raw, Protein %in% setdiff(raw_proteins,dup_proteins)) %>%
+      isotopes <- dplyr::filter(raw, Protein %in% setdiff(raw_proteins,dup_proteins)) %>%
                   dplyr::left_join(csq_isotope) %>%
                   dplyr::select(1:6,pav,tidyselect::contains(code))
       p10 <- sapply(1:nrow(isotopes), function(x) quantile(isotopes[x,samples],0.09999,na.rm=TRUE))
       isotopes[samples][!is.na(isotopes[samples])&(isotopes[samples]<threshold|isotopes[samples]<p10)] <- NA
       print(dim(isotopes))
-      result <- isotopes
-      result[samples] <- log2(result[samples]+1)
+      result <- dplyr::filter(isotopes,grepl(p,Protein))
+      log2n <- function(x) ifelse(is.na(x), NA, log2(x))
+      result[samples] <- log2n(result[samples])
       impute_result <- sapply(p, function(p) {
           i <- which(grepl(p, result[["Protein"]]))
           row <- result[i, samples, drop = FALSE]
@@ -101,7 +102,7 @@ function impute()
           dplyr::select(Protein, all_of(samples)) %>%
           dplyr::group_by(Protein) %>%
           dplyr::summarize(across(all_of(samples),
-                                  ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                  ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
                                   .names = "{col}")) %>%
           tibble::column_to_rownames(var = "Protein") %>%
           base::t()
@@ -110,7 +111,7 @@ function impute()
                dplyr::select(Protein, all_of(samples)) %>%
                dplyr::group_by(Protein) %>%
                dplyr::summarize(across(all_of(samples),
-                                      ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                      ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
                                        .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
@@ -119,7 +120,7 @@ function impute()
                dplyr::select(Protein, all_of(samples)) %>%
                dplyr::group_by(Protein) %>%
                dplyr::summarize(across(all_of(samples),
-                                       ~ log2(sum(2^.x, na.rm = TRUE) / n() + 1),
+                                       ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
                                          .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()

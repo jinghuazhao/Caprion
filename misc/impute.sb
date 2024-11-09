@@ -28,10 +28,12 @@ module load rhel8/default-icl
 module load ceuadmin/R
 
 export TMPDIR=${HPC_WORK}/work
+export analysis=~/Capriont/analysis
 
 function impute()
 {
-   export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ~/Caprion/analysis/work/caprion_dr.varlist)
+   export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${analysis}/work/caprion_dr.varlist)
+   if [ ! -d ${analysis}/impute/slurm ]; then mkdir -p ${analysis}/impute/slurm; fi
    R --no-save <<\ \ \ END
       suppressMessages(library(Biobase))
       suppressMessages(library(MsCoreUtils))
@@ -52,36 +54,42 @@ function impute()
       raw_UHZ <- left_join(mapping_UHZ[c("Isotope.Group.ID", "Protein")],raw_UHZ)
       load(file.path(caprion,"analysis","reports","peptide_csq.rda"))
       threshold <- 50000
-      csq_isotope <- peptide_cvt %>%
+      p <- Sys.getenv("p")
+      for (code in c("ZWK","ZYQ","UDP","UHZ"))
+      {
+      cat(paste("Protein =",p),paste("code =",code),sep="\n")
+      dr <- get(paste0("dr_",code))
+      dr <- Biobase::exprs(subset(dr,grepl(p,featureNames(dr)))) %>% base::t()
+      protein <- get(paste0("protein_",code))
+      proteins <- colnames(protein)
+      protein <- Biobase::exprs(subset(protein,grepl(p,featureNames(protein)))) %>% base::t()
+      peptide <- get(paste0("peptide_",code))
+      mapping <- get(paste0("mapping_",code)) %>%
+                 dplyr::filter(grepl(p,Protein))
+      peptides <- pull(mapping,Isotope.Group.ID)
+      peptide <- Biobase::exprs(subset(peptide,Biobase::featureNames(peptide) %in% peptides)) %>% base::t()
+      raw <- get(paste0("raw_",code)) %>%
+             dplyr::filter(grepl(p,Protein)) %>%
+             dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
+      samples <- grep(code,names(raw),value=TRUE)
+      csq_isotope <- dplyr::transmute(mapping,isotope=as.integer(Isotope.Group.ID)) %>%
+                     dplyr::left_join(peptide_cvt) %>%
                      dplyr::select(Gene,SNP,prot,isotope,Type) %>%
                      dplyr::left_join(peptide_csq,by=c("Gene"="gene","SNP"="rsid")) %>%
                      dplyr::rename(Isotope.Group.ID=isotope) %>%
                      dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
                      dplyr::group_by(Isotope.Group.ID) %>%
                      dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
-      p <- Sys.getenv("p")
-      for (code in c("ZWK","ZYQ","UDP","UHZ"))
-      {
-      cat(paste("Protein =",p),paste("code =",code),sep="\n")
-      dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
-      protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
-      proteins <- colnames(protein)
-      peptide <- Biobase::exprs(get(paste0("peptide_",code))) %>% base::t()
-      peptides <- colnames(peptide)
-      raw <- get(paste0("raw_",code)) %>%
-             dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
-      samples <- grep(code,names(raw),value=TRUE)
-      raw_proteins <- unique(raw[["Protein"]])
-      dup_proteins <- grep("\\||-", raw_proteins, value = TRUE)
-      isotopes <- dplyr::filter(raw, Protein %in% setdiff(raw_proteins,dup_proteins)) %>%
-                  dplyr::left_join(csq_isotope) %>%
-                  dplyr::select(1:6,pav,tidyselect::contains(code))
-      p10 <- sapply(1:nrow(isotopes), function(x) quantile(isotopes[x,samples],0.09999,na.rm=TRUE))
-      isotopes[samples][!is.na(isotopes[samples])&(isotopes[samples]<threshold|isotopes[samples]<p10)] <- NA
-      print(dim(isotopes))
-      result <- dplyr::filter(isotopes,grepl(p,Protein))
+      isotope <- raw %>%
+                 dplyr::left_join(csq_isotope) %>%
+                 dplyr::select(1:6,pav,tidyselect::contains(code))
+      isotope_pav <- isotope
+      p10 <- sapply(1:nrow(isotope), function(x) quantile(isotope[x,samples],0.09999,na.rm=TRUE))
+      isotope[samples][!is.na(isotope[samples])&(isotope[samples]<threshold|isotope[samples]<p10)] <- NA
+      print(dim(isotope))
+      result <- isotope
       log2n <- function(x) ifelse(is.na(x), NA, log2(x))
-      result[samples] <- log2n(result[samples])
+      result[samples] <- lapply(result[samples], log2n)
       impute_result <- sapply(p, function(p) {
           i <- which(grepl(p, result[["Protein"]]))
           row <- result[i, samples, drop = FALSE]
@@ -124,9 +132,10 @@ function impute()
                                          .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
-      z <-list(code=code,proteins=proteins,raw_proteins=raw_proteins,dup_proteins=dup_proteins,
-               peptide=peptide,peptides=peptides,dr=dr,protein=protein,
-               samples=samples,impute=result,prot=prot,prot0=prot0,prot1=prot1)
+      z <-list(code=code,proteins=proteins,peptides=peptides,samples=samples,
+               dr=dr,protein=protein,peptide=peptide,isotope=isotope_pav,isotope_dr=isotope,csq=csq_isotope,
+               impute=result,prot=prot,prot0=prot0,prot1=prot1)
+      if(!dir.exists(file.path(analysis,"impute",code))) dir.create(file.path(analysis,"impute",code))
       switch(code,
         "ZWK" = {
           impute_ZWK <- z

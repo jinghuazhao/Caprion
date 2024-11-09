@@ -32,7 +32,7 @@ function fastLR()
   export fastGWA=gcta-1.9
   export col=${SLURM_ARRAY_TASK_ID}
   export peptide=$(awk 'NR==1{print $(col+2)}' col=${col} ${pheno})
-  export root=${analysis}/dup/dup
+  export root=${analysis}/dup/ZWK
   ${fastGWA} --mbgen ${analysis}/bgen/caprion.bgenlist \
              --sample ${analysis}/bgen/caprion.sample \
              --extract ${analysis}/bgen/caprion.snplist \

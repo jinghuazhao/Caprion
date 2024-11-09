@@ -61,7 +61,7 @@ function impute()
       dr <- get(paste0("dr_",code))
       dr <- Biobase::exprs(subset(dr,grepl(p,featureNames(dr)))) %>% base::t()
       protein <- get(paste0("protein_",code))
-      proteins <- colnames(protein)
+      proteins <- rownames(protein)
       protein <- Biobase::exprs(subset(protein,grepl(p,featureNames(protein)))) %>% base::t()
       peptide <- get(paste0("peptide_",code))
       mapping <- get(paste0("mapping_",code)) %>%
@@ -132,7 +132,7 @@ function impute()
                                          .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
-      z <-list(code=code,proteins=proteins,peptides=peptides,samples=samples,
+      z <-list(code=code,proteins=proteins,p=p,peptides=peptides,samples=samples,
                dr=dr,protein=protein,peptide=peptide,isotope=isotope_pav,isotope_dr=isotope,csq=csq_isotope,
                impute=result,prot=prot,prot0=prot0,prot1=prot1)
       if(!dir.exists(file.path(analysis,"impute",code))) dir.create(file.path(analysis,"impute",code))

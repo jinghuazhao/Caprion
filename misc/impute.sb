@@ -90,21 +90,21 @@ function impute()
       result <- isotope
       log2n <- function(x) ifelse(is.na(x), NA, log2(x))
       result[samples] <- lapply(result[samples], log2n)
-      impute_result <- sapply(p, function(p) {
-          i <- which(grepl(p, result[["Protein"]]))
-          row <- result[i, samples, drop = FALSE]
-          if (all(is.na(row))) {
-              return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
-          }
-          tryCatch({
-              imputed_row <- MsCoreUtils::impute_RF(row, MARGIN=2)
-              return(cbind(imputed_row, was_suppressed = FALSE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
-          }, error = function(e) {
-              print(paste("Error encountered:", e))
-              return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
-          })
-      })
-      impute_data <- impute_result
+      impute <- function()
+      {
+        r <- result[,samples,drop=FALSE]
+        if (all(is.na(r))) {
+            return(cbind(r, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID))
+        }
+        tryCatch({
+            imputed_row <- MsCoreUtils::impute_RF(r, MARGIN=2)
+            return(cbind(imputed_row, was_suppressed = FALSE, Isotope.Group.ID = result$Isotope.Group.ID))
+        }, error = function(e) {
+            print(paste("Error encountered:", e))
+            return(cbind(r, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID))
+        })
+      }
+      impute_data <- impute()
       result[names(impute_data)] <- impute_data
       prot <- result %>%
           dplyr::select(Protein, all_of(samples)) %>%

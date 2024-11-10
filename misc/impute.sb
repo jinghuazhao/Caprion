@@ -65,11 +65,11 @@ function impute()
       protein <- Biobase::exprs(subset(protein,grepl(p,featureNames(protein)))) %>% base::t()
       peptide <- get(paste0("peptide_",code))
       mapping <- get(paste0("mapping_",code)) %>%
-                 dplyr::filter(grepl(p,Protein))
+                 dplyr::filter(Protein == paste0(p,"_HUMAN"))
       peptides <- pull(mapping,Isotope.Group.ID)
       peptide <- Biobase::exprs(subset(peptide,Biobase::featureNames(peptide) %in% peptides)) %>% base::t()
       raw <- get(paste0("raw_",code)) %>%
-             dplyr::filter(grepl(p,Protein)) %>%
+             dplyr::filter(Protein==paste0(p,"_HUMAN")) %>%
              dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
       samples <- grep(code,names(raw),value=TRUE)
       csq_isotope <- dplyr::transmute(mapping,isotope=as.integer(Isotope.Group.ID)) %>%

@@ -28,10 +28,10 @@ module load rhel8/default-icl
 module load ceuadmin/R
 
 export TMPDIR=${HPC_WORK}/work
-export analysis=~/Capriont/analysis
 
 function impute()
 {
+   export analysis=~/Caprion/analysis
    export p=$(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${analysis}/work/caprion_dr.varlist)
    if [ ! -d ${analysis}/impute/slurm ]; then mkdir -p ${analysis}/impute/slurm; fi
    R --no-save <<\ \ \ END

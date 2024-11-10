@@ -59,10 +59,10 @@ function impute()
       {
       cat(paste("Protein =",p),paste("code =",code),sep="\n")
       dr <- get(paste0("dr_",code))
-      dr <- Biobase::exprs(subset(dr,grepl(p,featureNames(dr)))) %>% base::t()
+      dr <- Biobase::exprs(subset(dr,paste0(p,"_HUMAN")==featureNames(dr))) %>% base::t()
       protein <- get(paste0("protein_",code))
       proteins <- rownames(protein)
-      protein <- Biobase::exprs(subset(protein,grepl(p,featureNames(protein)))) %>% base::t()
+      protein <- Biobase::exprs(subset(protein,paste0(p,"_HUMAN")==featureNames(protein))) %>% base::t()
       peptide <- get(paste0("peptide_",code))
       mapping <- get(paste0("mapping_",code)) %>%
                  dplyr::filter(Protein == paste0(p,"_HUMAN"))

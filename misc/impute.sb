@@ -39,7 +39,6 @@ function impute()
       suppressMessages(library(MsCoreUtils))
       suppressMessages(library(doParallel))
       suppressMessages(library(dplyr))
-      suppressMessages(library(mi4p))
       suppressMessages(library(parallel))
       suppressMessages(library(tibble))
       suppressMessages(library(tidyselect))
@@ -157,6 +156,43 @@ function impute()
       )
       }
    END
+}
+
+function micombine()
+{
+   export analysis=~/Caprion/analysis
+   Rscript -e '
+      suppressMessages(library(dplyr))
+      options(width=200)
+      analysis <- Sys.getenv("analysis")
+      proteins <- scan(file.path(analysis,"work","caprion_dr.varlist"),what="")
+      for (code in c("ZWK", "ZYQ", "UDP", "UHZ")) {
+        cat(code, "\n")
+        both <- prot_pav <- prot_non <- NULL
+        for (p in proteins) {
+          f <- file.path(analysis, "impute", code, paste0("impute_", code, "-", p, ".rda"))
+          tryCatch({
+            load(f)
+            dat <- get(paste0("impute_", code))
+            if (is.null(both)) {
+              both <- prot_pav <- prot_non <- data.frame(caprion_id=dat$samples)
+            }
+            both <- dplyr::bind_cols(both, dat$prot)
+            prot_pav <- dplyr::bind_cols(prot_pav, dat$prot0)
+            prot_non <- dplyr::bind_cols(prot_non, dat$prot1)
+          }, error = function(e) {
+            warning(paste("Error loading file for protein:", p, "in code:", code, "- Error message:", e$message))
+          })
+        }
+        if (!is.null(both)) {
+          save(both, file = file.path(analysis, "impute", paste0("both-", code, ".rda")))
+          save(prot_pav, file = file.path(analysis, "impute", paste0("prot_pav-", code, ".rda")))
+          save(prot_non, file = file.path(analysis, "impute", paste0("prot_non-", code, ".rda")))
+        } else {
+          warning(paste("No data to save for code:", code))
+        }
+      }
+   '
 }
 
 impute

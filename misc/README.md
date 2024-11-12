@@ -21,6 +21,8 @@ Program   | Description
 `tables.sh` | `Supplementary-Tables.xlsx` generator
 `ToDo.sh` | various staged experiments
 
+NB: `impute.sb` purposely masks `impute_parallel()` which needs to be activated for ZYQ/APOB.
+
 ## Legacy codes
 
 - `0_compare.sb`. earlier contrast with deCODE/UKB-PPP.

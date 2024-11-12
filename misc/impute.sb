@@ -16,7 +16,7 @@
 #SBATCH --array=1-987
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=5
+#SBATCH --cpus-per-task=15
 
 #SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/impute/slurm/impute_%A_%a.e
 #SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/impute/slurm/impute_%A_%a.o
@@ -103,7 +103,19 @@ function impute()
             return(cbind(r, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID))
         })
       }
+      impute_parallel <- function()
+      {
+        impute_chunk <- function(data_chunk) {
+          MsCoreUtils::impute_RF(data_chunk, MARGIN=2)
+        }
+        r <- result[,samples,drop=FALSE]
+        n_cores <- Sys.getenv("SLURM_CPUS_PER_TASK")
+        data_chunks <- split(as.data.frame(data), rep(1:n_cores, each = nrow(r) / n_cores, length.out = nrow(r)))
+        imputed_data <- mclapply(data_chunks, impute_parallel, mc.cores = n_cores)
+        do.call(rbind, imputed_data)
+      }
       impute_data <- impute()
+    # impute_data <- impute_parallel()
       result[names(impute_data)] <- impute_data
       prot <- result %>%
           dplyr::select(Protein, all_of(samples)) %>%

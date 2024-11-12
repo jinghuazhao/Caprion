@@ -21,7 +21,7 @@ Program   | Description
 `tables.sh` | `Supplementary-Tables.xlsx` generator
 `ToDo.sh` | various staged experiments
 
-NB: `impute.sb` purposely masks `impute_parallel()` which needs to be activated for ZYQ/APOB.
+NB: `impute.sb` employs `impute_parallel()` when N(isotope groups) > 500.
 
 ## Legacy codes
 

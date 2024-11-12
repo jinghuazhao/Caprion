@@ -37,7 +37,6 @@ function impute()
    R --no-save <<\ \ \ END
       suppressMessages(library(Biobase))
       suppressMessages(library(MsCoreUtils))
-      suppressMessages(library(doParallel))
       suppressMessages(library(dplyr))
       suppressMessages(library(parallel))
       suppressMessages(library(tibble))
@@ -89,9 +88,8 @@ function impute()
       result <- isotope
       log2n <- function(x) ifelse(is.na(x), NA, log2(x))
       result[samples] <- lapply(result[samples], log2n)
-      impute <- function()
+      impute <- function(r)
       {
-        r <- result[,samples,drop=FALSE]
         if (all(is.na(r))) {
             return(cbind(r, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID))
         }
@@ -103,19 +101,18 @@ function impute()
             return(cbind(r, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID))
         })
       }
-      impute_parallel <- function()
-      {
-        impute_chunk <- function(data_chunk) {
-          MsCoreUtils::impute_RF(data_chunk, MARGIN=2)
+      impute_parallel <- function(r) {
+        n_cores <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", unset = 1))
+        n_rows <- nrow(r)
+        if (n_rows<=500 || n_cores==1) {
+          return(impute(r))
         }
-        r <- result[,samples,drop=FALSE]
-        n_cores <- Sys.getenv("SLURM_CPUS_PER_TASK")
-        data_chunks <- split(as.data.frame(r), rep(1:n_cores, each = nrow(r) / n_cores, length.out = nrow(r)))
-        imputed_data <- parallel::mclapply(data_chunks, impute_parallel, mc.cores = n_cores)
+        data_chunks <- split(r, rep(1:n_cores, each=ceiling(n_rows / n_cores), length.out=n_rows))
+        imputed_data <- parallel::mclapply(data_chunks, impute, mc.cores=n_cores)
         do.call(rbind, imputed_data)
       }
-    # impute_data <- impute()
-      impute_data <- impute_parallel()
+      r <- result[,samples,drop=FALSE]
+      impute_data <- impute_parallel(r)
       result[names(impute_data)] <- impute_data
       prot <- result %>%
           dplyr::select(Protein, all_of(samples)) %>%

@@ -110,12 +110,12 @@ function impute()
         }
         r <- result[,samples,drop=FALSE]
         n_cores <- Sys.getenv("SLURM_CPUS_PER_TASK")
-        data_chunks <- split(as.data.frame(data), rep(1:n_cores, each = nrow(r) / n_cores, length.out = nrow(r)))
-        imputed_data <- mclapply(data_chunks, impute_parallel, mc.cores = n_cores)
+        data_chunks <- split(as.data.frame(r), rep(1:n_cores, each = nrow(r) / n_cores, length.out = nrow(r)))
+        imputed_data <- parallel::mclapply(data_chunks, impute_parallel, mc.cores = n_cores)
         do.call(rbind, imputed_data)
       }
-      impute_data <- impute()
-    # impute_data <- impute_parallel()
+    # impute_data <- impute()
+      impute_data <- impute_parallel()
       result[names(impute_data)] <- impute_data
       prot <- result %>%
           dplyr::select(Protein, all_of(samples)) %>%
@@ -190,8 +190,8 @@ function micombine()
               prot_all <- prot_pav <- prot_vap <- data.frame(caprion_id=dat$samples)
             }
             prot_all <- dplyr::bind_cols(prot_all, dat$prot)
-            prot_pav <- dplyr::bind_cols(prot_pav, dat$prot0)
-            prot_vap <- dplyr::bind_cols(prot_vap, dat$prot1)
+            prot_pav <- dplyr::bind_cols(prot_pav, dat$prot1)
+            prot_vap <- dplyr::bind_cols(prot_vap, dat$prot0)
           }, error = function(e) {
             warning(paste("Error loading file for protein:", p, "in code:", code, "- Error message:", e$message))
           })
@@ -232,12 +232,13 @@ function tests()
       load(file.path(caprion,"analysis","reports","peptide_csq.rda"))
       threshold <- 50000
       csq_isotope <- peptide_cvt %>%
-                     dplyr::select(Gene,SNP,prot,isotope,Type) %>%
-                     dplyr::left_join(peptide_csq,by=c("Gene"="gene","SNP"="rsid")) %>%
-                     dplyr::rename(Isotope.Group.ID=isotope) %>%
-                     dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
+                     dplyr::select(Gene, SNP, prot, isotope, Type) %>%
+                     dplyr::rename(Isotope.Group.ID = isotope) %>%
+                     dplyr::left_join(peptide_csq, by = c("prot" = "gene", "SNP" = "rsid")) %>%
+                     dplyr::mutate(ppav = if_else(is.na(ref.csq.all), NA_real_, 1)) %>%
                      dplyr::group_by(Isotope.Group.ID) %>%
-                     dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
+                     dplyr::mutate(pav = if_else(any(!is.na(ppav)), 1, 0)) %>%
+                     dplyr::ungroup()
       ntasks <- Sys.getenv("SLURM_NTASKS")
       cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
       batch <- Sys.getenv("SLURM_ARRAY_TASK_ID")
@@ -268,7 +269,7 @@ function tests()
       doParallel::registerDoParallel(cl)
       on.exit(parallel::stopCluster(cl))
       clusterExport(cl, c("result", "samples"))
-      impute_result <- parLapply(cl, proteins, function(p) {
+      impute_result <- parallel::parLapply(cl, proteins, function(p) {
           i <- which(grepl(p, result[["Protein"]]))
           row <- result[i, samples, drop = FALSE]
           if (all(is.na(row))) {

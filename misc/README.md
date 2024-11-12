@@ -17,7 +17,9 @@ Program   | Description
 `impute.sb` | imputation experiments
 `json.sh` | JSON file generation
 `peptideAssociationPlot.sh` | protein Manhattan-peptide signal plots
-`duppgwas.sh` | pGWAS for duplicated proteins
+`dup-pgwas.sh` | pGWAS for duplicated proteins
+`dup-extract.sh` | pQTL extractions
+`dup-plot.sh` | pQTL plots
 `tables.sh` | `Supplementary-Tables.xlsx` generator
 `ToDo.sh` | various staged experiments
 
@@ -28,4 +30,4 @@ NB: `impute.sb` employs `impute_parallel()` when N(isotope groups) > 500.
 - `0_compare.sb`. earlier contrast with deCODE/UKB-PPP.
 - `inf1.sh`. snapshot from SCALLOP/INF meta-analysis.
 
-Created on **8/11/2024**
+Created on **12/11/2024**

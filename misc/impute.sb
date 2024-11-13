@@ -38,6 +38,7 @@ function impute()
       suppressMessages(library(Biobase))
       suppressMessages(library(MsCoreUtils))
       suppressMessages(library(dplyr))
+      suppressMessages(library(future.apply))
       suppressMessages(library(parallel))
       suppressMessages(library(tibble))
       suppressMessages(library(tidyselect))
@@ -173,6 +174,7 @@ function micombine()
    Rscript -e '
       suppressMessages(library(dplyr))
       suppressMessages(library(mclust))
+      suppressMessages(library(parallel))
       analysis <- Sys.getenv("analysis")
       proteins <- scan(file.path(analysis,"work","caprion_dr.varlist"),what="")
       srcdir <- file.path(analysis,"tests","impute")
@@ -261,10 +263,139 @@ function micombine()
           legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
           dev.off()
       }
+      combine_parallel <- function(srcdir, code, impute) {
+        prot_all <- prot_pav <- prot_vap <- NULL
+        protein_results <- mclapply(proteins, function(p) {
+          f <- file.path(srcdir, code, paste0("impute_", code, "-", p, ".rda"))
+          tryCatch({
+            load(f)
+            dat <- get(paste0("impute_", code))
+            if (is.null(prot_all)) {
+              prot_all <- prot_pav <- prot_vap <- data.frame(caprion_id = dat$samples)
+            }
+            prot <- dat$isotope %>%
+              dplyr::select(Protein, all_of(dat$samples)) %>%
+              dplyr::group_by(Protein) %>%
+              dplyr::summarize(across(all_of(dat$samples),
+                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                      .names = "{col}")) %>%
+              tibble::column_to_rownames(var = "Protein") %>%
+              base::t()
+            prot0 <- dat$isotope %>%
+              dplyr::filter(pav == 0) %>%
+              dplyr::select(Protein, all_of(dat$samples)) %>%
+              dplyr::group_by(Protein) %>%
+              dplyr::summarize(across(all_of(dat$samples),
+                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                      .names = "{col}")) %>%
+              tibble::column_to_rownames(var = "Protein") %>%
+              base::t()
+            prot1 <- dat$isotope %>%
+              dplyr::filter(pav == 1) %>%
+              dplyr::select(Protein, all_of(dat$samples)) %>%
+              dplyr::group_by(Protein) %>%
+              dplyr::summarize(across(all_of(dat$samples),
+                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                      .names = "{col}")) %>%
+              tibble::column_to_rownames(var = "Protein") %>%
+              base::t()
+            if (impute) {
+              return(list(prot = dat$prot, prot1 = dat$prot1, prot0 = dat$prot0))
+            } else {
+              return(list(prot = prot, prot1 = prot1, prot0 = prot0))
+            }
+          }, error = function(e) {
+            warning(paste("Error loading file for protein:", p, "in code:", code, "- Error message:", e$message))
+            return(NULL)
+          })
+        }, mc.cores = 10)
+        for (result in protein_results) {
+          if (!is.null(result)) {
+            prot_all <- dplyr::bind_cols(prot_all, result$prot)
+            prot_pav <- dplyr::bind_cols(prot_pav, result$prot1)
+            prot_vap <- dplyr::bind_cols(prot_vap, result$prot0)
+          }
+        }
+        if (!is.null(prot_all)) {
+          prot_all[prot_all == -Inf] <- 0
+          prot_pav[prot_pav == -Inf] <- 0
+          prot_vap[prot_vap == -Inf] <- 0
+          save(prot_all, file = file.path(srcdir, paste0("prot_all-", code, ".rda")))
+          save(prot_pav, file = file.path(srcdir, paste0("prot_pav-", code, ".rda")))
+          save(prot_vap, file = file.path(srcdir, paste0("prot_vap-", code, ".rda")))
+        } else {
+          warning(paste("No data to save for code:", code))
+        }
+      }
+      combine_apply <- function(srcdir, code, impute) {
+        prot_all <- prot_pav <- prot_vap <- NULL
+        plan(multisession, workers = availableCores())
+        protein_results <- future_lapply(proteins, function(p) {
+          f <- file.path(srcdir, code, paste0("impute_", code, "-", p, ".rda"))
+          tryCatch({
+            load(f)
+            dat <- get(paste0("impute_", code))
+            if (is.null(prot_all)) {
+              prot_all <- prot_pav <- prot_vap <- data.frame(caprion_id = dat$samples)
+            }
+            prot <- dat$isotope %>%
+              dplyr::select(Protein, all_of(dat$samples)) %>%
+              dplyr::group_by(Protein) %>%
+              dplyr::summarize(across(all_of(dat$samples),
+                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                      .names = "{col}")) %>%
+              tibble::column_to_rownames(var = "Protein") %>%
+              base::t()
+            prot0 <- dat$isotope %>%
+              dplyr::filter(pav == 0) %>%
+              dplyr::select(Protein, all_of(dat$samples)) %>%
+              dplyr::group_by(Protein) %>%
+              dplyr::summarize(across(all_of(dat$samples),
+                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                      .names = "{col}")) %>%
+              tibble::column_to_rownames(var = "Protein") %>%
+              base::t()
+            prot1 <- dat$isotope %>%
+              dplyr::filter(pav == 1) %>%
+              dplyr::select(Protein, all_of(dat$samples)) %>%
+              dplyr::group_by(Protein) %>%
+              dplyr::summarize(across(all_of(dat$samples),
+                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                      .names = "{col}")) %>%
+              tibble::column_to_rownames(var = "Protein") %>%
+              base::t()
+            if (impute) {
+              return(list(prot = dat$prot, prot1 = dat$prot1, prot0 = dat$prot0))
+            } else {
+              return(list(prot = prot, prot1 = prot1, prot0 = prot0))
+            }
+          }, error = function(e) {
+            warning(paste("Error loading file for protein:", p, "in code:", code, "- Error message:", e$message))
+            return(NULL)
+          })
+        })
+        for (result in protein_results) {
+          if (!is.null(result)) {
+            prot_all <- dplyr::bind_cols(prot_all, result$prot)
+            prot_pav <- dplyr::bind_cols(prot_pav, result$prot1)
+            prot_vap <- dplyr::bind_cols(prot_vap, result$prot0)
+          }
+        }
+        if (!is.null(prot_all)) {
+          prot_all[prot_all == -Inf] <- 0
+          prot_pav[prot_pav == -Inf] <- 0
+          prot_vap[prot_vap == -Inf] <- 0
+          save(prot_all, file = file.path(srcdir, paste0("prot_all-", code, ".rda")))
+          save(prot_pav, file = file.path(srcdir, paste0("prot_pav-", code, ".rda")))
+          save(prot_vap, file = file.path(srcdir, paste0("prot_vap-", code, ".rda")))
+        } else {
+          warning(paste("No data to save for code:", code))
+        }
+      }
       options(width=200)
       for (code in c("ZWK", "ZYQ", "UDP", "UHZ")) {
         cat(code, "\n")
-        combine(srcdir,code,FALSE)
+        combine_parallel(srcdir,code,FALSE)
         mcplot(srcdir,code,"all")
       }
    '

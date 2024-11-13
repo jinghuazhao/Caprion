@@ -33,12 +33,12 @@ function qqmanhattan()
 {
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
-  head -1 ${root}/${protein}.pheno | cut -d' ' -f1-2 --complement | cut -d' ' -f${SLURM_ARRAY_TASK_ID} | tr ' ' '\n' | \
+  head -1 ${root}/ZWK.pheno | cut -d' ' -f1-2 --complement | cut -d' ' -f${SLURM_ARRAY_TASK_ID} | tr ' ' '\n' | \
   parallel -C' ' --env root '
   (
     echo chromosome position log_pvalue beta se
-    gunzip -c ${root}/METAL/{}-1.tbl.gz | \
-    awk "NR>1{print \$1,\$2,-\$12,\$10,\$11}" | \
+    gunzip -c ${root}/ZWK-1-{}.fastGWA.gz | \
+    awk "NR>1{print \$1,\$3,-\$10,\$8,\$9}" | \
     sort -k1,1n -k2,2n
   ) > ${root}/work/{}.txt
   R --slave --vanilla --args \
@@ -52,14 +52,6 @@ function qqmanhattan()
        reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
        pvalue_sign=5e-8 \
        plot_title="{}" < ~/cambridge-ceu/turboman/test.r
-  else
-    R --slave --vanilla --args \
-      input_data_path=${root}/work/{}.txt \
-      output_data_rootname=${dir}/{}_manhattan \
-      custom_peak_annotation_file_path=${root}/METAL/vep/{}.txt \
-      reference_file_path=~/cambridge-ceu/turboman/turboman_hg19_reference_data.rda \
-      pvalue_sign=5e-8 \
-      plot_title="{}" < ~/cambridge-ceu/turboman/test.r
   fi
   rm ${root}/work/{}.txt
   if [ -f ${dir}/{}_manhattan.png ]; then

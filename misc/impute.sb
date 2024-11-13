@@ -172,14 +172,14 @@ function micombine()
    export analysis=~/Caprion/analysis
    Rscript -e '
       suppressMessages(library(dplyr))
-      options(width=200)
+      suppressMessages(library(mclust))
       analysis <- Sys.getenv("analysis")
       proteins <- scan(file.path(analysis,"work","caprion_dr.varlist"),what="")
-      for (code in c("ZWK", "ZYQ", "UDP", "UHZ")) {
-        cat(code, "\n")
+      combine <- function(src,code)
+      {
         prot_all <- prot_pav <- prot_vap <- NULL
         for (p in proteins) {
-          f <- file.path(analysis, "impute", code, paste0("impute_", code, "-", p, ".rda"))
+          f <- file.path(src, code, paste0("impute_", code, "-", p, ".rda"))
           tryCatch({
             load(f)
             dat <- get(paste0("impute_", code))
@@ -194,218 +194,47 @@ function micombine()
           })
         }
         if (!is.null(prot_all)) {
-          save(prot_all, file = file.path(analysis, "impute", paste0("prot_all-", code, ".rda")))
-          save(prot_pav, file = file.path(analysis, "impute", paste0("prot_pav-", code, ".rda")))
-          save(prot_vap, file = file.path(analysis, "impute", paste0("prot_vap-", code, ".rda")))
+          prot_all[prot_all==-Inf] <- 0
+          prot_pav[prot_pav==-Inf] <- 0
+          prot_vap[prot_vap==-Inf] <- 0
+          save(prot_all, file=file.path(src, paste0("prot_all-", code, ".rda")))
+          save(prot_pav, file=file.path(src, paste0("prot_pav-", code, ".rda")))
+          save(prot_vap, file=file.path(src, paste0("prot_vap-", code, ".rda")))
         } else {
           warning(paste("No data to save for code:", code))
         }
+      }
+      mcplot <- function(src,code,type)
+      {
+          load(file.path(src,paste0("prot_",type,"-",code,".rda")))
+          pdf(file.path(src,paste0("prot_",type,"-",code,".pdf")))
+          par(mfrow=c(2,2))
+          prot <- get(paste0("prot_",type))
+          prot_no_const <- prot[-1][, apply(prot[-1], 2, var) != 0]
+          pca <- prcomp(prot_no_const, scale = TRUE)
+          plot(pca$x[,1],pca$x[,2],xlab="PC1",ylab="PC2")
+          pc1pc2 <- with(pca,x)[,1:2]
+          mc <- Mclust(pc1pc2, G=4)
+          scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
+                                       main="Plot of the PC1, PC2 and PC3", pch=16)
+          legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red", "black","yellow"), pch=16)
+          pca2 <- prcomp(prot_no_const,scale=FALSE)
+          plot(pca2$x[,1],pca2$x[,2],xlab="PC1",ylab="PC2")
+          pc1pc2 <- with(pca2,x)[,1:2]
+          mc <- Mclust(pc1pc2, G=2)
+          scatterplot3d::scatterplot3d(with(pca2,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
+                                       main="Plot of the PC1, PC2 and PC3", pch=16)
+          legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
+          dev.off()
+      }
+      options(width=200)
+      src <- file.path(analysis,"tests","impute")
+      for (code in c("ZWK", "ZYQ", "UDP", "UHZ")) {
+        cat(code, "\n")
+        combine(src,code)
+        mcplot(src,code,"all")
       }
    '
 }
 
 impute
-
-function tests()
-{
-   R --no-save <<\ \ \ END
-      suppressMessages(library(Biobase))
-      suppressMessages(library(MsCoreUtils))
-      suppressMessages(library(doParallel))
-      suppressMessages(library(dplyr))
-      suppressMessages(library(mi4p))
-      suppressMessages(library(parallel))
-      suppressMessages(library(tibble))
-      suppressMessages(library(tidyselect))
-      caprion <- "~/Caprion"
-      load(file.path(caprion,"pilot","ZWK.rda"))
-      load(file.path(caprion,"pilot","ZYQ.rda"))
-      load(file.path(caprion,"pilot","UDP.rda"))
-      load(file.path(caprion,"pilot","UHZ.rda"))
-      load(file.path(caprion,"analysis","work","eSet.rda"))
-      raw_ZYQ <- left_join(mapping_ZYQ,raw_ZYQ)
-      raw_UDP <- left_join(mapping_UDP,raw_UDP)
-      raw_UHZ <- left_join(mapping_UHZ[c("Isotope.Group.ID", "Protein")],raw_UHZ)
-      load(file.path(caprion,"analysis","reports","peptide_csq.rda"))
-      threshold <- 50000
-      csq_isotope <- peptide_cvt %>%
-                     dplyr::select(Gene, SNP, prot, isotope, Type) %>%
-                     dplyr::rename(Isotope.Group.ID = isotope) %>%
-                     dplyr::left_join(peptide_csq, by = c("prot" = "gene", "SNP" = "rsid")) %>%
-                     dplyr::mutate(ppav = if_else(is.na(ref.csq.all), NA_real_, 1)) %>%
-                     dplyr::group_by(Isotope.Group.ID) %>%
-                     dplyr::mutate(pav = if_else(any(!is.na(ppav)), 1, 0)) %>%
-                     dplyr::ungroup()
-      ntasks <- Sys.getenv("SLURM_NTASKS")
-      cpus_per_task <- Sys.getenv("SLURM_CPUS_PER_TASK")
-      batch <- Sys.getenv("SLURM_ARRAY_TASK_ID")
-      code <- c("ZWK","ZYQ","UDP","UHZ")[as.integer(batch)]
-      cat(paste("ntasks =",ntasks),paste("cpus-per-task =",cpus_per_task),code,sep="\n")
-      dr <- Biobase::exprs(get(paste0("dr_",code))) %>% base::t()
-      protein <- Biobase::exprs(get(paste0("protein_",code))) %>% base::t()
-      proteins <- colnames(protein)
-      peptide <- Biobase::exprs(get(paste0("peptide_",code))) %>% base::t()
-      peptides <- colnames(peptide)
-      raw <- get(paste0("raw_",code)) %>%
-             dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
-      samples <- grep(code,names(raw),value=TRUE)
-      raw_proteins <- unique(raw[["Protein"]])
-      dup_proteins <- grep("\\||-", raw_proteins, value = TRUE)
-    # 1,043 for ZYQ/UDP instead of 983/984
-      isotopes <- filter(raw, Protein %in% setdiff(raw_proteins,dup_proteins)) %>%
-                  dplyr::left_join(csq_isotope) %>%
-                  dplyr::select(1:6,pav,tidyselect::contains(code))
-      p10 <- sapply(1:nrow(isotopes), function(x) quantile(isotopes[x,samples],0.09999,na.rm=TRUE))
-      isotopes[samples][!is.na(isotopes[samples])&(isotopes[samples]<threshold|isotopes[samples]<p10)] <- NA
-      print(dim(isotopes))
-      result <- isotopes
-      log2n <- function(x) ifelse(is.na(x), NA, log2(x))
-      result[samples] <- log2n(result[samples])
-    # result[samples] <- MsCoreUtils::impute_knn(result[samples],MARGIN=1)
-      cl <- parallel::makeCluster(as.integer(cpus_per_task))
-      doParallel::registerDoParallel(cl)
-      on.exit(parallel::stopCluster(cl))
-      clusterExport(cl, c("result", "samples"))
-      impute_result <- parallel::parLapply(cl, proteins, function(p) {
-          i <- which(grepl(p, result[["Protein"]]))
-          row <- result[i, samples, drop = FALSE]
-          if (all(is.na(row))) {
-              return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
-          }
-          tryCatch({
-              imputed_row <- MsCoreUtils::impute_RF(row, MARGIN=2)
-              clusterExport(cl, "impute_row")
-              return(cbind(imputed_row, was_suppressed = FALSE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
-          }, error = function(e) {
-              print(paste("Error encountered:", e))
-              return(cbind(row, was_suppressed = TRUE, Isotope.Group.ID = result$Isotope.Group.ID[i]))
-          })
-      })
-      impute_data <- do.call(dplyr::bind_rows, impute_result)
-      result[names(impute_data)] <- impute_data
-      parallel::stopCluster(cl)
-      prot <- result %>%
-          dplyr::select(Protein, all_of(samples)) %>%
-          dplyr::group_by(Protein) %>%
-          dplyr::summarize(across(all_of(samples),
-                                  ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
-                                  .names = "{col}")) %>%
-          tibble::column_to_rownames(var = "Protein") %>%
-          base::t()
-      prot0 <- result %>%
-               dplyr::filter(pav==0) %>%
-               dplyr::select(Protein, all_of(samples)) %>%
-               dplyr::group_by(Protein) %>%
-               dplyr::summarize(across(all_of(samples),
-                                      ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
-                                       .names = "{col}")) %>%
-               tibble::column_to_rownames(var = "Protein") %>%
-               base::t()
-      prot1 <- result %>%
-               dplyr::filter(pav==1) %>%
-               dplyr::select(Protein, all_of(samples)) %>%
-               dplyr::group_by(Protein) %>%
-               dplyr::summarize(across(all_of(samples),
-                                       ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
-                                         .names = "{col}")) %>%
-               tibble::column_to_rownames(var = "Protein") %>%
-               base::t()
-      z <-list(code=code,proteins=proteins,raw_proteins=raw_proteins,dup_proteins=dup_proteins,
-               peptide=peptide,peptides=peptides,dr=dr,protein=protein,
-               samples=samples,impute=result,prot=prot,prot0=prot0,prot1=prot1)
-      switch(code,
-        "ZWK" = {
-          impute_ZWK <- z
-          save(impute_ZWK, file = file.path(caprion, "analysis", "impute", "impute_ZWK.rda"))
-        },
-        "ZYQ" = {
-          impute_ZYQ <- z
-          save(impute_ZYQ, file = file.path(caprion, "analysis", "impute", "impute_ZYQ.rda"))
-        },
-        "UDP" = {
-          impute_UDP <- z
-          save(impute_UDP, file = file.path(caprion, "analysis", "impute", "impute_UDP.rda"))
-        },
-        "UHZ" = {
-          impute_UHZ <- z
-          save(impute_UHZ, file = file.path(caprion, "analysis", "impute", "impute_UHZ.rda"))
-        },
-        stop("Invalid code")
-      )
-      suppressMessages(library(mclust))
-      load(file.path(caprion,"analysis","impute",paste0("impute_",code,".rda")))
-      pdf(file.path(caprion,"analysis","impute",paste0("impute_",code,".pdf")))
-      par(mfrow=c(2,2))
-      attach(get(paste0("impute_",code)))
-      pca <- prcomp(protein,scale=TRUE)
-      plot(pca$x[,1],pca$x[,2],xlab="PC1",ylab="PC2")
-      pc1pc2 <- with(pca,x)[,1:2]
-      mc <- Mclust(pc1pc2,G=4)
-      scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
-                                   main="Plot of the PC1, PC2 and PC3", pch=16)
-      legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red", "black","yellow"), pch=16)
-      pca2 <- prcomp(prot[,proteins],scale=FALSE)
-      plot(pca2$x[,1],pca2$x[,2],xlab="PC1",ylab="PC2")
-      pc1pc2 <- with(pca2,x)[,1:2]
-      mc <- Mclust(pc1pc2,G=2)
-      scatterplot3d::scatterplot3d(with(pca2,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
-                                   main="Plot of the PC1, PC2 and PC3", pch=16)
-      legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
-      detach(get(paste0("impute_",code)))
-      dev.off()
-   END
-   Rscript -e '
-    # id1 <- result[["Isotope.Group.ID"]]
-    # id2 <- impute_data[["Isotope.Group.ID"]]
-    # matching_ids <- id1 %in% id2
-    # result[matching_ids, names(impute_data)] <- impute_data[match(id1[matching_ids], id2),]
-      impute_mi4p <- function(result, samples)
-      {
-         metadata <- data.frame(Sample = samples, Condition = rep("Equal", length(samples)))
-         impute_data <- mi4p::multi.impute(data = result[samples],
-                                           conditions = rep(1, length(samples)),
-                                           nb.imp = 5,
-                                           method = "kNN",
-                                           parallel = TRUE)
-         impute_var <- rubin2.all(data = impute_data)
-         impute_var.S2 <- sapply(impute_var, function(aaa) {
-               DesMat <- mi4p::make.design(metadata)
-               max(diag(aaa) %*% t(DesMat) %*% DesMat)
-         })
-         res <- mi4limma(qData = apply(impute_data, 1:2, mean), sTab = metadata,
-                         VarRubin = sqrt(impute_var.S2))
-         p_values <- simplify2array(res)$P_Value.A_vs_B_pval
-         top10_pvals <- p_values[1:10]
-         pvals_11_200 <- p_values[11:200]
-         p_value_summary <- list(
-               top10_significant = sum(top10_pvals <= 0.05) / 10,
-               significant_11_200 = sum(pvals_11_200 <= 0.05) / 190
-         )
-         dapar_res <- limmaCompleteTest.mod(qData = apply(impute_data, 1:2, mean), sTab = metadata)
-         return(list(p_value_summary = p_value_summary, dapar_res = dapar_res))
-      }
-      replace_below_threshold <- function(x, threshold = 50000) {
-        x <- ifelse(x < threshold, NA, x)
-        x[is.na(x)] <- mean(x, na.rm = TRUE)
-        return(x)
-      }
-      normalize_minmax <- function(x) (x - min(x,na.rm=TRUE)) / (max(x,na.rm=TRUE) - min(x,na.rm=TRUE))
-    # initial attempt
-      if (FALSE) {
-        split_data <- split(isotopes,isotopes[["Isotope.Group.ID"]])
-        result_list <- sapply(isotopes[["Isotope.Group.ID"]], function(isotope) {
-          pept_data <- split_data[[as.character(isotope)]]
-        # rownames(pept_data) <- isotope
-          pept_data[samples] <- replace_below_threshold(unlist(pept_data[samples]))
-          pept_data[paste0(samples, "_log2")] <- log2(unlist(pept_data[samples]+1))
-          pept_data[paste0(samples, "_norm")] <- normalize_minmax(unlist(pept_data[samples]))
-        # x <- pept_data[paste0(samples, "_norm")] |> unlist()
-        # y <- pept_data[paste0(samples, "_log2")] |> unlist()
-        # m <- lm(y~x)
-        # pept_data[paste0(samples, "_log2s")] <- predict(m,newdata=data.frame(x),na.action=na.pass)
-          return(pept_data)
-        }, simplify = FALSE)
-        result <- do.call(rbind, result_list)
-      }
-   '
-}

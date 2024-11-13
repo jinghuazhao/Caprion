@@ -27,7 +27,7 @@ NB: `impute.sb` employs `impute_parallel()` when N(isotope groups) > 500.
 
 ## Legacy codes
 
-- `0_compare.sb`. earlier contrast with deCODE/UKB-PPP.
+- `compare.sb`. earlier contrast with deCODE/UKB-PPP.
 - `inf1.sh`. snapshot from SCALLOP/INF meta-analysis.
 
 Created on **12/11/2024**

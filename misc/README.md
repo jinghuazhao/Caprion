@@ -23,7 +23,9 @@ Program   | Description
 `tables.sh` | `Supplementary-Tables.xlsx` generator
 `ToDo.sh` | various staged experiments
 
-NB: `impute.sb` employs `impute_parallel()` when N(isotope groups) > 500.
+NB: `impute.sb` employs `impute_parallel()` when N(isotope groups) > 500. Nevertheless,
+when coming to protein requantification this is an option to use the orginal intensity
+data.
 
 ## Legacy codes
 

@@ -118,7 +118,7 @@ function impute()
           dplyr::select(Protein, all_of(samples)) %>%
           dplyr::group_by(Protein) %>%
           dplyr::summarize(across(all_of(samples),
-                                  ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
+                                  ~log2n(sum(2^.x, na.rm = TRUE) / n()),
                                   .names = "{col}")) %>%
           tibble::column_to_rownames(var = "Protein") %>%
           base::t()
@@ -127,7 +127,7 @@ function impute()
                dplyr::select(Protein, all_of(samples)) %>%
                dplyr::group_by(Protein) %>%
                dplyr::summarize(across(all_of(samples),
-                                      ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
+                                       ~log2n(sum(2^.x, na.rm = TRUE) / n()),
                                        .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
@@ -136,8 +136,8 @@ function impute()
                dplyr::select(Protein, all_of(samples)) %>%
                dplyr::group_by(Protein) %>%
                dplyr::summarize(across(all_of(samples),
-                                       ~ log2n(sum(2^.x, na.rm = TRUE) / n()),
-                                         .names = "{col}")) %>%
+                                       ~log2n(sum(2^.x, na.rm = TRUE) / n()),
+                                       .names = "{col}")) %>%
                tibble::column_to_rownames(var = "Protein") %>%
                base::t()
       z <-list(code=code,proteins=proteins,p=p,peptides=peptides,samples=samples,
@@ -175,20 +175,54 @@ function micombine()
       suppressMessages(library(mclust))
       analysis <- Sys.getenv("analysis")
       proteins <- scan(file.path(analysis,"work","caprion_dr.varlist"),what="")
-      combine <- function(src,code)
+      srcdir <- file.path(analysis,"tests","impute")
+      log2n <- function(x) ifelse(is.na(x), NA, log2(x))
+      combine <- function(srcdir,code,impute)
       {
         prot_all <- prot_pav <- prot_vap <- NULL
         for (p in proteins) {
-          f <- file.path(src, code, paste0("impute_", code, "-", p, ".rda"))
+          f <- file.path(srcdir, code, paste0("impute_", code, "-", p, ".rda"))
           tryCatch({
             load(f)
             dat <- get(paste0("impute_", code))
             if (is.null(prot_all)) {
               prot_all <- prot_pav <- prot_vap <- data.frame(caprion_id=dat$samples)
             }
-            prot_all <- dplyr::bind_cols(prot_all, dat$prot)
-            prot_pav <- dplyr::bind_cols(prot_pav, dat$prot1)
-            prot_vap <- dplyr::bind_cols(prot_vap, dat$prot0)
+            prot <- dat$isotope %>%
+                dplyr::select(Protein, all_of(dat$samples)) %>%
+                dplyr::group_by(Protein) %>%
+                dplyr::summarize(across(all_of(dat$samples),
+                                        ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                        .names = "{col}")) %>%
+                tibble::column_to_rownames(var = "Protein") %>%
+                base::t()
+            prot0 <- dat$isotope %>%
+                     dplyr::filter(pav==0) %>%
+                     dplyr::select(Protein, all_of(dat$samples)) %>%
+                     dplyr::group_by(Protein) %>%
+                     dplyr::summarize(across(all_of(dat$samples),
+                                            ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                            .names = "{col}")) %>%
+                     tibble::column_to_rownames(var = "Protein") %>%
+                     base::t()
+            prot1 <- dat$isotope %>%
+                     dplyr::filter(pav==1) %>%
+                     dplyr::select(Protein, all_of(dat$samples)) %>%
+                     dplyr::group_by(Protein) %>%
+                     dplyr::summarize(across(all_of(dat$samples),
+                                             ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                             .names = "{col}")) %>%
+                     tibble::column_to_rownames(var = "Protein") %>%
+                     base::t()
+            if (impute) {
+               prot_all <- dplyr::bind_cols(prot_all, dat$prot)
+               prot_pav <- dplyr::bind_cols(prot_pav, dat$prot1)
+               prot_vap <- dplyr::bind_cols(prot_vap, dat$prot0)
+            } else {
+               prot_all <- dplyr::bind_cols(prot_all, prot)
+               prot_pav <- dplyr::bind_cols(prot_pav, prot1)
+               prot_vap <- dplyr::bind_cols(prot_vap, prot0)
+            }
           }, error = function(e) {
             warning(paste("Error loading file for protein:", p, "in code:", code, "- Error message:", e$message))
           })
@@ -197,17 +231,17 @@ function micombine()
           prot_all[prot_all==-Inf] <- 0
           prot_pav[prot_pav==-Inf] <- 0
           prot_vap[prot_vap==-Inf] <- 0
-          save(prot_all, file=file.path(src, paste0("prot_all-", code, ".rda")))
-          save(prot_pav, file=file.path(src, paste0("prot_pav-", code, ".rda")))
-          save(prot_vap, file=file.path(src, paste0("prot_vap-", code, ".rda")))
+          save(prot_all, file=file.path(srcdir, paste0("prot_all-", code, ".rda")))
+          save(prot_pav, file=file.path(srcdir, paste0("prot_pav-", code, ".rda")))
+          save(prot_vap, file=file.path(srcdir, paste0("prot_vap-", code, ".rda")))
         } else {
           warning(paste("No data to save for code:", code))
         }
       }
-      mcplot <- function(src,code,type)
+      mcplot <- function(srcdir,code,type)
       {
-          load(file.path(src,paste0("prot_",type,"-",code,".rda")))
-          pdf(file.path(src,paste0("prot_",type,"-",code,".pdf")))
+          load(file.path(srcdir,paste0("prot_",type,"-",code,".rda")))
+          pdf(file.path(srcdir,paste0("prot_",type,"-",code,".pdf")))
           par(mfrow=c(2,2))
           prot <- get(paste0("prot_",type))
           prot_no_const <- prot[-1][, apply(prot[-1], 2, var) != 0]
@@ -228,11 +262,10 @@ function micombine()
           dev.off()
       }
       options(width=200)
-      src <- file.path(analysis,"tests","impute")
       for (code in c("ZWK", "ZYQ", "UDP", "UHZ")) {
         cat(code, "\n")
-        combine(src,code)
-        mcplot(src,code,"all")
+        combine(srcdir,code,FALSE)
+        mcplot(srcdir,code,"all")
       }
    '
 }

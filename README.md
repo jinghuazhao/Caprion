@@ -22,7 +22,7 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 - [Caprion panel](https://jinghuazhao.github.io/pQTLdata/reference/caprion.html)
 - [Notes](https://jinghuazhao.github.io/Caprion/Notes/)
 
-## Local web browsing
+## Local file/web browsing
 
 A web-style navigation is furnised via a port number, e.g., 8000,
 

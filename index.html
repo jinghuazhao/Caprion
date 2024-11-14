@@ -142,7 +142,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#mirror-of-srcf" class="nav-link">Mirror of SRCF</a>
+            <li class="nav-item" data-level="2"><a href="#local-web-browsing" class="nav-link">Local web browsing</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -174,16 +174,15 @@
 <li><a href="https://jinghuazhao.github.io/pQTLdata/reference/caprion.html">Caprion panel</a></li>
 <li><a href="https://jinghuazhao.github.io/Caprion/Notes/">Notes</a></li>
 </ul>
-<h2 id="mirror-of-srcf">Mirror of SRCF</h2>
-<p>The mirror is within the following directory:</p>
-<p><code>/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/srcf</code></p>
+<h2 id="local-web-browsing">Local web browsing</h2>
 <p>A web-style navigation is furnised via a port number, e.g., 8000,</p>
-<pre><code class="language-bash">module load python/3.8.1-icl
-module load ceuadmin/edge
+<pre><code class="language-bash">module load ceuadmin/edge
+
+cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 
 export pn=8000
 if lsof -i :${pn}; then
-    echo &quot;Port ${pn} is already in use.&quot;
+    echo &quot;Port ${pn} is already in use' try another one.&quot;
 else
     python3 -m http.server ${pn} &amp;
     server_pid=$!
@@ -192,7 +191,12 @@ fi
 </code></pre>
 <p>where the port number can be released with <code>kill $server_pid</code>. In case it does now show, use</p>
 <p><code>edge --user-data-dir=${TMPDIR} http://localhost:${pn} &amp;</code></p>
-<p>where TMPDIR is a directory name.</p></div>
+<p>where TMPDIR is a directory name.</p>
+<p>One could browse files as well as mirrors of two web sites.</p>
+<ol>
+<li>SRCF. The mirror is within the following subdirectory: <code>/srcf</code>.</li>
+<li>Web site. This is from <code>/site</code> as above.</li>
+</ol></div>
             </div>
         </div>
 
@@ -278,5 +282,5 @@ fi
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-11-14 15:32:34.777848+00:00
+Build Date UTC : 2024-11-14 17:29:59.961246+00:00
 -->

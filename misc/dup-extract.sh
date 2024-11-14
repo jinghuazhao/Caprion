@@ -115,9 +115,8 @@ EOL
 export N=$(head -1 ${root}/ZWK.pheno | awk '{print NF-2}')
 sed -i "s|ROOT|${root}|;s|_N_|${N}|" ${root}/dup-step1.sb
 }
-
-source setup.sh
-step1_pqtl_list
+export analysis=~/Caprion/analysis
 export root=${analysis}/dup
-
+initialise
+step1_pqtl_list
 sbatch ${root}/dup-step1.sb

@@ -96,7 +96,7 @@ EOL
 sed -i "s|ROOT|${root}|" ${root}/dup-step2.sb
 }
 
-source setup.sh
-step2_pqtl_collect
+export analysis=~/Caprion/analysis
 export root=~/Caprion/analysis/dup
+step2_pqtl_collect
 sbatch ${root}/dup-step2.sb

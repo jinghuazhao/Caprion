@@ -193,9 +193,9 @@ EOL
 sed -i "s|ROOT|${root}|;s|_array_|${array}|" ${root}/dup-step3.sb
 }
 
-source setup.sh
-step3_pqtl_summary
+export analysis=~/Caprion/analysis
 export root=~/Caprion/analysis/dup
 export pheno=${root}/dup/ZWK.pheno
+step3_pqtl_summary
 sbatch ${root}/dup-step3.sb
 

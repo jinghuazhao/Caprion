@@ -3,15 +3,6 @@
 #SBATCH --job-name=_impute
 #SBATCH --account=PETERS-SL3-CPU
 #SBATCH --partition=icelake-himem
-#SBATCH --ntasks=4
-#SBATCH --cpus-per-task=25
-#SBATCH --mem=100000
-#SBATCH --array=1-4
-#SBATCH --time=12:00:00
-
-#SBATCH --job-name=_impute
-#SBATCH --account=PETERS-SL3-CPU
-#SBATCH --partition=icelake-himem
 #SBATCH --mem=50000
 #SBATCH --array=1-987
 #SBATCH --time=12:00:00
@@ -20,7 +11,6 @@
 
 #SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/impute/slurm/impute_%A_%a.e
 #SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/impute/slurm/impute_%A_%a.o
-
 
 . /etc/profile.d/modules.sh
 module purge
@@ -71,14 +61,15 @@ function impute()
              dplyr::filter(Protein==paste0(p,"_HUMAN")) %>%
              dplyr::mutate(Isotope.Group.ID=as.integer(Isotope.Group.ID))
       samples <- grep(code,names(raw),value=TRUE)
-      csq_isotope <- dplyr::transmute(mapping,isotope=as.integer(Isotope.Group.ID)) %>%
+      csq_isotope <- dplyr::transmute(mapping, isotope = as.integer(Isotope.Group.ID)) %>%
                      dplyr::left_join(peptide_cvt) %>%
-                     dplyr::select(Gene,SNP,prot,isotope,Type) %>%
-                     dplyr::left_join(peptide_csq,by=c("Gene"="gene","SNP"="rsid")) %>%
-                     dplyr::rename(Isotope.Group.ID=isotope) %>%
-                     dplyr::mutate(pav=if_else(is.na(ref.rsid.all),NA,1)) %>%
+                     dplyr::select(Gene, SNP, prot, isotope, Type) %>%
+                     dplyr::left_join(peptide_csq, by = c("prot" = "gene", "SNP" = "rsid")) %>%
+                     dplyr::rename(Isotope.Group.ID = isotope) %>%
+                     dplyr::mutate(ppav = if_else(is.na(ref.rsid.all), NA_integer_, 1L)) %>%
                      dplyr::group_by(Isotope.Group.ID) %>%
-                     dplyr::summarize(pav=if_else(any(!is.na(pav)),1,0))
+                     dplyr::summarize(pav = if_else(any(!is.na(ppav)), 1, 0)) %>%
+                     dplyr::ungroup()
       isotope <- raw %>%
                  dplyr::left_join(csq_isotope) %>%
                  dplyr::select(1:6,pav,tidyselect::contains(code))
@@ -177,92 +168,8 @@ function micombine()
       suppressMessages(library(parallel))
       analysis <- Sys.getenv("analysis")
       proteins <- scan(file.path(analysis,"work","caprion_dr.varlist"),what="")
-      srcdir <- file.path(analysis,"tests","impute")
+      srcdir <- file.path(analysis,"impute")
       log2n <- function(x) ifelse(is.na(x), NA, log2(x))
-      combine <- function(srcdir,code,impute)
-      {
-        prot_all <- prot_pav <- prot_vap <- NULL
-        for (p in proteins) {
-          f <- file.path(srcdir, code, paste0("impute_", code, "-", p, ".rda"))
-          tryCatch({
-            load(f)
-            dat <- get(paste0("impute_", code))
-            if (is.null(prot_all)) {
-              prot_all <- prot_pav <- prot_vap <- data.frame(caprion_id=dat$samples)
-            }
-            prot <- dat$isotope %>%
-                dplyr::select(Protein, all_of(dat$samples)) %>%
-                dplyr::group_by(Protein) %>%
-                dplyr::summarize(across(all_of(dat$samples),
-                                        ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                        .names = "{col}")) %>%
-                tibble::column_to_rownames(var = "Protein") %>%
-                base::t()
-            prot0 <- dat$isotope %>%
-                     dplyr::filter(pav==0) %>%
-                     dplyr::select(Protein, all_of(dat$samples)) %>%
-                     dplyr::group_by(Protein) %>%
-                     dplyr::summarize(across(all_of(dat$samples),
-                                            ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                            .names = "{col}")) %>%
-                     tibble::column_to_rownames(var = "Protein") %>%
-                     base::t()
-            prot1 <- dat$isotope %>%
-                     dplyr::filter(pav==1) %>%
-                     dplyr::select(Protein, all_of(dat$samples)) %>%
-                     dplyr::group_by(Protein) %>%
-                     dplyr::summarize(across(all_of(dat$samples),
-                                             ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                             .names = "{col}")) %>%
-                     tibble::column_to_rownames(var = "Protein") %>%
-                     base::t()
-            if (impute) {
-               prot_all <- dplyr::bind_cols(prot_all, dat$prot)
-               prot_pav <- dplyr::bind_cols(prot_pav, dat$prot1)
-               prot_vap <- dplyr::bind_cols(prot_vap, dat$prot0)
-            } else {
-               prot_all <- dplyr::bind_cols(prot_all, prot)
-               prot_pav <- dplyr::bind_cols(prot_pav, prot1)
-               prot_vap <- dplyr::bind_cols(prot_vap, prot0)
-            }
-          }, error = function(e) {
-            warning(paste("Error loading file for protein:", p, "in code:", code, "- Error message:", e$message))
-          })
-        }
-        if (!is.null(prot_all)) {
-          prot_all[prot_all==-Inf] <- 0
-          prot_pav[prot_pav==-Inf] <- 0
-          prot_vap[prot_vap==-Inf] <- 0
-          save(prot_all, file=file.path(srcdir, paste0("prot_all-", code, ".rda")))
-          save(prot_pav, file=file.path(srcdir, paste0("prot_pav-", code, ".rda")))
-          save(prot_vap, file=file.path(srcdir, paste0("prot_vap-", code, ".rda")))
-        } else {
-          warning(paste("No data to save for code:", code))
-        }
-      }
-      mcplot <- function(srcdir,code,type)
-      {
-          load(file.path(srcdir,paste0("prot_",type,"-",code,".rda")))
-          pdf(file.path(srcdir,paste0("prot_",type,"-",code,".pdf")))
-          par(mfrow=c(2,2))
-          prot <- get(paste0("prot_",type))
-          prot_no_const <- prot[-1][, apply(prot[-1], 2, var) != 0]
-          pca <- prcomp(prot_no_const, scale = TRUE)
-          plot(pca$x[,1],pca$x[,2],xlab="PC1",ylab="PC2")
-          pc1pc2 <- with(pca,x)[,1:2]
-          mc <- Mclust(pc1pc2, G=4)
-          scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
-                                       main="Plot of the PC1, PC2 and PC3", pch=16)
-          legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red", "black","yellow"), pch=16)
-          pca2 <- prcomp(prot_no_const,scale=FALSE)
-          plot(pca2$x[,1],pca2$x[,2],xlab="PC1",ylab="PC2")
-          pc1pc2 <- with(pca2,x)[,1:2]
-          mc <- Mclust(pc1pc2, G=2)
-          scatterplot3d::scatterplot3d(with(pca2,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
-                                       main="Plot of the PC1, PC2 and PC3", pch=16)
-          legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
-          dev.off()
-      }
       combine_parallel <- function(srcdir, code, impute) {
         prot_all <- prot_pav <- prot_vap <- NULL
         protein_results <- mclapply(proteins, function(p) {
@@ -273,35 +180,35 @@ function micombine()
             if (is.null(prot_all)) {
               prot_all <- prot_pav <- prot_vap <- data.frame(caprion_id = dat$samples)
             }
-            prot <- dat$isotope %>%
-              dplyr::select(Protein, all_of(dat$samples)) %>%
-              dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(all_of(dat$samples),
-                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                      .names = "{col}")) %>%
-              tibble::column_to_rownames(var = "Protein") %>%
-              base::t()
-            prot0 <- dat$isotope %>%
-              dplyr::filter(pav == 0) %>%
-              dplyr::select(Protein, all_of(dat$samples)) %>%
-              dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(all_of(dat$samples),
-                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                      .names = "{col}")) %>%
-              tibble::column_to_rownames(var = "Protein") %>%
-              base::t()
-            prot1 <- dat$isotope %>%
-              dplyr::filter(pav == 1) %>%
-              dplyr::select(Protein, all_of(dat$samples)) %>%
-              dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(all_of(dat$samples),
-                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                      .names = "{col}")) %>%
-              tibble::column_to_rownames(var = "Protein") %>%
-              base::t()
             if (impute) {
               return(list(prot = dat$prot, prot1 = dat$prot1, prot0 = dat$prot0))
             } else {
+              prot <- dat$isotope %>%
+                      dplyr::select(Protein, all_of(dat$samples)) %>%
+                      dplyr::group_by(Protein) %>%
+                      dplyr::summarize(across(all_of(dat$samples),
+                                              ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                              .names = "{col}")) %>%
+                      tibble::column_to_rownames(var = "Protein") %>%
+                      base::t()
+              prot0 <- dat$isotope %>%
+                       dplyr::filter(pav == 0) %>%
+                       dplyr::select(Protein, all_of(dat$samples)) %>%
+                       dplyr::group_by(Protein) %>%
+                       dplyr::summarize(across(all_of(dat$samples),
+                                               ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                               .names = "{col}")) %>%
+                       tibble::column_to_rownames(var = "Protein") %>%
+                       base::t()
+              prot1 <- dat$isotope %>%
+                       dplyr::filter(pav == 1) %>%
+                       dplyr::select(Protein, all_of(dat$samples)) %>%
+                       dplyr::group_by(Protein) %>%
+                       dplyr::summarize(across(all_of(dat$samples),
+                                               ~log2n(sum(.x, na.rm = TRUE) / n()),
+                                               .names = "{col}")) %>%
+                       tibble::column_to_rownames(var = "Protein") %>%
+                       base::t()
               return(list(prot = prot, prot1 = prot1, prot0 = prot0))
             }
           }, error = function(e) {
@@ -317,88 +224,62 @@ function micombine()
           }
         }
         if (!is.null(prot_all)) {
+          print("dim (all,pav,vap):")
+          print(dim(prot_all))
+          print(dim(prot_pav))
+          print(dim(prot_vap))
           prot_all[prot_all == -Inf] <- 0
           prot_pav[prot_pav == -Inf] <- 0
           prot_vap[prot_vap == -Inf] <- 0
-          save(prot_all, file = file.path(srcdir, paste0("prot_all-", code, ".rda")))
-          save(prot_pav, file = file.path(srcdir, paste0("prot_pav-", code, ".rda")))
-          save(prot_vap, file = file.path(srcdir, paste0("prot_vap-", code, ".rda")))
+          if (impute) {
+            save(prot_all, file = file.path(srcdir, paste0("prot_all-impute-", code, ".rda")))
+            save(prot_pav, file = file.path(srcdir, paste0("prot_pav-impute-", code, ".rda")))
+            save(prot_vap, file = file.path(srcdir, paste0("prot_vap-impute-", code, ".rda")))
+          } else {
+            save(prot_all, file = file.path(srcdir, paste0("prot_all-raw-", code, ".rda")))
+            save(prot_pav, file = file.path(srcdir, paste0("prot_pav-raw-", code, ".rda")))
+            save(prot_vap, file = file.path(srcdir, paste0("prot_vap-raw-", code, ".rda")))
+          }
         } else {
           warning(paste("No data to save for code:", code))
         }
       }
-      combine_apply <- function(srcdir, code, impute) {
-        prot_all <- prot_pav <- prot_vap <- NULL
-        plan(multisession, workers = availableCores())
-        protein_results <- future_lapply(proteins, function(p) {
-          f <- file.path(srcdir, code, paste0("impute_", code, "-", p, ".rda"))
-          tryCatch({
-            load(f)
-            dat <- get(paste0("impute_", code))
-            if (is.null(prot_all)) {
-              prot_all <- prot_pav <- prot_vap <- data.frame(caprion_id = dat$samples)
-            }
-            prot <- dat$isotope %>%
-              dplyr::select(Protein, all_of(dat$samples)) %>%
-              dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(all_of(dat$samples),
-                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                      .names = "{col}")) %>%
-              tibble::column_to_rownames(var = "Protein") %>%
-              base::t()
-            prot0 <- dat$isotope %>%
-              dplyr::filter(pav == 0) %>%
-              dplyr::select(Protein, all_of(dat$samples)) %>%
-              dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(all_of(dat$samples),
-                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                      .names = "{col}")) %>%
-              tibble::column_to_rownames(var = "Protein") %>%
-              base::t()
-            prot1 <- dat$isotope %>%
-              dplyr::filter(pav == 1) %>%
-              dplyr::select(Protein, all_of(dat$samples)) %>%
-              dplyr::group_by(Protein) %>%
-              dplyr::summarize(across(all_of(dat$samples),
-                                      ~log2n(sum(.x, na.rm = TRUE) / n()),
-                                      .names = "{col}")) %>%
-              tibble::column_to_rownames(var = "Protein") %>%
-              base::t()
-            if (impute) {
-              return(list(prot = dat$prot, prot1 = dat$prot1, prot0 = dat$prot0))
-            } else {
-              return(list(prot = prot, prot1 = prot1, prot0 = prot0))
-            }
-          }, error = function(e) {
-            warning(paste("Error loading file for protein:", p, "in code:", code, "- Error message:", e$message))
-            return(NULL)
-          })
-        })
-        for (result in protein_results) {
-          if (!is.null(result)) {
-            prot_all <- dplyr::bind_cols(prot_all, result$prot)
-            prot_pav <- dplyr::bind_cols(prot_pav, result$prot1)
-            prot_vap <- dplyr::bind_cols(prot_vap, result$prot0)
-          }
-        }
-        if (!is.null(prot_all)) {
-          prot_all[prot_all == -Inf] <- 0
-          prot_pav[prot_pav == -Inf] <- 0
-          prot_vap[prot_vap == -Inf] <- 0
-          save(prot_all, file = file.path(srcdir, paste0("prot_all-", code, ".rda")))
-          save(prot_pav, file = file.path(srcdir, paste0("prot_pav-", code, ".rda")))
-          save(prot_vap, file = file.path(srcdir, paste0("prot_vap-", code, ".rda")))
-        } else {
-          warning(paste("No data to save for code:", code))
-        }
+      mcplot <- function(srcdir,code,type,impute)
+      {
+          f <- file.path(srcdir,paste0("prot_",type,ifelse(impute,"-impute-","-raw-"),code))
+          load(paste0(f,".rda"))
+          pdf(paste0(f,".pdf"))
+          par(mfrow=c(2,2))
+          prot <- get(paste0("prot_",type))
+          prot_no_const <- prot[-1][, apply(prot[-1], 2, var) != 0]
+          pca <- prcomp(prot_no_const, scale = TRUE)
+          plot(pca$x[,1],pca$x[,2],xlab="PC1",ylab="PC2")
+          pc1pc2 <- with(pca,x)[,1:2]
+          mc <- Mclust(pc1pc2, G=3)
+          scatterplot3d::scatterplot3d(with(pca,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
+                                       main="Plot of the PC1, PC2 and PC3", pch=16)
+          legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red", "black","yellow"), pch=16)
+          pca2 <- prcomp(prot_no_const,scale=FALSE)
+          plot(pca2$x[,1],pca2$x[,2],xlab="PC1",ylab="PC2")
+          pc1pc2 <- with(pca2,x)[,1:2]
+          mc <- Mclust(pc1pc2, G=2)
+          scatterplot3d::scatterplot3d(with(pca2,x[,c(1,2,3)]),color=c("blue","red")[mc$classification],
+                                       main="Plot of the PC1, PC2 and PC3", pch=16)
+          legend("right", legend=levels(as.factor(mc$classification)), col=c("blue", "red"), pch=16)
+          dev.off()
       }
       options(width=200)
       for (code in c("ZWK", "ZYQ", "UDP", "UHZ")) {
         cat(code, "\n")
         combine_parallel(srcdir,code,FALSE)
-        mcplot(srcdir,code,"all")
+        combine_parallel(srcdir,code,TRUE)
+        mcplot(srcdir,code,"all",FALSE)
+        mcplot(srcdir,code,"all",TRUE)
       }
    '
 }
 
-impute
+# sbatch:
+# impute
+# bash:
+micombine

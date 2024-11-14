@@ -22,21 +22,18 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 - [Caprion panel](https://jinghuazhao.github.io/pQTLdata/reference/caprion.html)
 - [Notes](https://jinghuazhao.github.io/Caprion/Notes/)
 
-## Mirror of SRCF
-
-The mirror is within the following directory:
-
-`/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/srcf`
+## Local web browsing
 
 A web-style navigation is furnised via a port number, e.g., 8000,
 
 ```bash
-module load python/3.8.1-icl
 module load ceuadmin/edge
+
+cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 
 export pn=8000
 if lsof -i :${pn}; then
-    echo "Port ${pn} is already in use."
+    echo "Port ${pn} is already in use' try another one."
 else
     python3 -m http.server ${pn} &
     server_pid=$!
@@ -49,3 +46,8 @@ where the port number can be released with `kill $server_pid`. In case it does n
 `edge --user-data-dir=${TMPDIR} http://localhost:${pn} &`
 
 where TMPDIR is a directory name.
+
+One could browse files as well as mirrors of two web sites.
+
+1. SRCF. The mirror is within the following subdirectory: `/srcf`.
+2. Web site. This is from `/site` as above.

@@ -107,6 +107,7 @@ EOL
 
   export N=$(head -1 ${root}/ZWK.pheno | awk '{print NF-2}')
   sed -i "s|ROOT|${root}|;s|_N_|${N}|" ${root}/dup-step1.sh
+  chmod +x ${root}/dup-step1.sh
 }
 
 # Main script execution

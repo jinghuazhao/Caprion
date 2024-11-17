@@ -2,7 +2,7 @@
 
 function step3_pqtl_summary()
 {
-cat <<'EOL'> ${root}/dup-step3.sb
+cat <<'EOL'> ${root}/dup-step3.sh
 #!/usr/bin/bash
 
 #SBATCH --job-name=_3-LABEL
@@ -21,6 +21,10 @@ export TMPDIR=${HPC_WORK}/work
 export isotope=$(head -1 ${root}/ZWK.pheno | awk -v n=${SLURM_ARRAY_TASK_ID} '{print $(n+2)}')
 export PERL5LIB=
 
+export root=${root}
+export dir=${root}/qqmanhattanlz
+export isotope=${1}
+
 . /etc/profile.d/modules.sh
 module purge
 module load rhel8/default-icl
@@ -33,12 +37,13 @@ function qqmanhattan()
 {
   module load python/3.7
   source ~/COVID-19/py37/bin/activate
-  head -1 ${root}/ZWK.pheno | cut -d' ' -f1-2 --complement | cut -d' ' -f${SLURM_ARRAY_TASK_ID} | tr ' ' '\n' | \
+# head -1 ${root}/ZWK.pheno | cut -d' ' -f1-2 --complement | cut -d' ' -f${SLURM_ARRAY_TASK_ID} | tr ' ' '\n' | \
+  echo ${isotope} | \
   parallel -C' ' --env root '
   (
-    echo chromosome position log_pvalue beta se
+    echo chromosome position pvalue beta se
     gunzip -c ${root}/ZWK-1-{}.fastGWA.gz | \
-    awk "NR>1{print \$1,\$3,-\$10,\$8,\$9}" | \
+    awk "NR>1{print \$1,\$3,\$10,\$8,\$9}" | \
     sort -k1,1n -k2,2n
   ) > ${root}/work/{}.txt
   R --slave --vanilla --args \
@@ -179,7 +184,7 @@ function mean_by_genotype()
 
 export -f mean_by_genotype
 
-awk '$1==ENVIRON["isotope"]{gsub(/23/,"X",$2);print $2,$3,$4}' ${root}/${protein}.merge | \
+awk '$1==ENVIRON["isotope"]{gsub(/23/,"X",$1);print $1,$3,$2}' ${root}/dup.merge | \
 parallel -C' ' '
   export chr={1}
   export bp={2}
@@ -187,15 +192,17 @@ parallel -C' ' '
   mean_by_genotype
 '
 
-for cmd in qmanhattan lz_autosomes lz_X; do $cmd; done
+for cmd in qqmanhattan; do $cmd; done
 EOL
 
-sed -i "s|ROOT|${root}|;s|_array_|${array}|" ${root}/dup-step3.sb
+sed -i "s|ROOT|${root}|;s|_array_|${array}|" ${root}/dup-step3.sh
+chmod +x ${root}/dup-step3.sh
 }
 
 export analysis=~/Caprion/analysis
 export root=~/Caprion/analysis/dup
 export pheno=${root}/dup/ZWK.pheno
 step3_pqtl_summary
-sbatch ${root}/dup-step3.sb
 
+isotopes=$(head -1 ${root}/ZWK.pheno | awk '{for(i=3;i<=NF;i++) print $i}')
+echo "$isotopes" | parallel -j 10 --bar ${root}/dup-step3.sh

@@ -73,23 +73,24 @@ function lz_autosomes()
 {
   module load python/2.7
   (
-    awk '$1==ENVIRON["isotope"] && $2!=23 {print $6, $7}' ${root}/${isotope}.signals | \
+#   awk '$1==ENVIRON["isotope"] && $2!=23 {print $6, $7}' ${root}/${isotope}.signals | \
+    awk '$5==ENVIRON["isotope"] && $1!=23 {print $5, $6}' ${root}/dup.signals | \
     parallel -j1 -C' ' --env root '
-      zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
-      awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}"
+      zgrep -w {2} ${root}/ZWK-1-{1}.fastGWA.gz | \
+      awk -v isotope={1} -v rsid={2} "{print \$1,\$3-5e5,\$3+5e5,isotope,rsid}"
     '
   ) | \
   parallel -j1 -C ' ' --env root '
     (
-      gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-      awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print \$1,\$2,\$3,\$12}"
-      gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-      awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
+      gunzip -c ${root}/ZWK-1-{4}.fastGWA.gz | \
+      awk -v OFS="\t" "NR==1 {print \$1,\$3,\$10,\$2}"
+      gunzip -c ${root}/ZWK-1-{4}.fastGWA.gz | \
+      awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$3>=start && \$3<end {print \$1,\$3,\$10,\$2}" | \
       sort -k1,1n -k2,2n
     ) > ${root}/work/{4}-{5}.lz
     locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
               --delim tab title="{4}-{5}" \
-              --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
+              --markercol SNP --pvalcol P --chr {1} --start {2} --end {3} --cache None \
               --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz --refsnp {5}
     rm ${root}/work/{4}-{5}.lz
   '
@@ -100,24 +101,25 @@ function lz_X()
 {
   module load python/2.7
   (
-    awk '$1==ENVIRON["isotope"] && $2==23 {print $6, $7}' ${root}/${isotope}.signals | \
+  # awk '$1==ENVIRON["isotope"] && $2==23 {print $6, $7}' ${root}/${isotope}.signals | \
+    awk '$5==ENVIRON["isotope"] && $1==23 {print $5, $6}' ${root}/dup.signals | \
     parallel -j1 -C' ' --env root '
-      zgrep -w {2} ${root}/METAL/{1}-1.tbl.gz | \
-      awk -v isotope={1} -v rsid={2} "{print \$1,\$2-5e5,\$2+5e5,isotope,rsid}" | sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//"
+      zgrep -w {2} ${root}/ZWK-1-{1}-chrX.fastGWA.gz | \
+      awk -v isotope={1} -v rsid={2} "{print \$1,\$3-5e5,\$3+5e5,isotope,rsid}" | sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//"
     '
   ) | \
   parallel -j1 -C ' ' --env root '
     (
-      gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-      awk -v OFS="\t" "NR==1 {\$12=\"log10P\";print \$1,\$2,\$3,\$12}"
-      gunzip -c ${root}/METAL/{4}-1.tbl.gz | \
-      awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$2>=start && \$2<end {\$12=-\$12;print \$1,\$2,\$3,\$12}" | \
+      gunzip -c ${root}/ZWK-1-{4}-chrX.fastGWA.gz | \
+      awk -v OFS="\t" "NR==1 {print \$1,\$3,\$10,\$2}"
+      gunzip -c ${root}/ZWK-1-{4}-chrX.fastGWA.gz | \
+      awk -v chr={1} -v start={2} -v end={3} -v OFS="\t" "\$1==chr && \$3>=start && \$3<end {print \$1,\$3,\$10,\$2}" | \
       sort -k1,1n -k2,2n | \
       sed "s/X/chr23/;s/_[A-Z]*_[A-Z]*//"
     ) > ${root}/work/{4}-{5}.lz
     locuszoom --source 1000G_Nov2014 --build hg19 --pop EUR --metal ${root}/work/{4}-{5}.lz \
               --delim tab title="{4}-{5}" \
-              --markercol MarkerName --pvalcol log10P --no-transform --chr {1} --start {2} --end {3} --cache None \
+              --markercol SNP --pvalcol P --chr {1} --start {2} --end {3} --cache None \
               --no-date --plotonly --prefix={4} --rundir ${root}/qqmanhattanlz \
               --refsnp {5}
     rm ${root}/work/{4}-{5}.lz
@@ -127,16 +129,16 @@ function lz_X()
 
 function mean_by_genotype()
 {
-  for batch in {1..3}
+  for batch in 1
   do
     export batch=${batch}
-    export out=${root}/means/${protein}-${batch}-${isotope}-${pqtl}
+    export out=${root}/means/${batch}-${isotope}-${pqtl}
     if [ ! -f ${out}.dat ]; then
        plink-2 --bgen ${analysis}/bgen/chr${chr}.bgen ref-unknown \
                --sample ${analysis}/bgen/chr${chr}.sample \
                --chr ${chr} --from-bp ${bp} --to-bp ${bp} \
                --keep ${analysis}/output/caprion-${batch}.id \
-               --pheno ${root}/work/${protein}-${batch}.pheno --pheno-name ${isotope} \
+               --pheno ${root}/ZWK.pheno --pheno-name ${isotope} \
                --recode oxford \
                --out ${out}
        paste <(awk 'NR>2{print $1,$5}' ${out}.sample) \
@@ -147,13 +149,12 @@ function mean_by_genotype()
   Rscript -e '
      options(width=120)
      root <- Sys.getenv("root")
-     protein <- Sys.getenv("protein")
      isotope <- Sys.getenv("isotope")
      pqtl <- Sys.getenv("pqtl")
      invisible(suppressMessages(sapply(c("dplyr","ggplot2","ggpubr"),require,character.only=TRUE)))
      process_batch <- function(batch, genotypes=c("100","010","001"))
      {
-       datfile <- file.path(root,"means",paste(protein,batch,isotope,pqtl,sep="-"))
+       datfile <- file.path(root,"means",paste(batch,isotope,pqtl,sep="-"))
        dat <- read.table(paste0(datfile,".dat"),
                          colClasses=c("character","numeric","character","character","integer","character","character",rep("numeric",3)),
                          col.names=c("IID","Phenotype","chr","rsid","pos","A1","A2","g1","g2","g3")) %>%
@@ -168,7 +169,7 @@ function mean_by_genotype()
        invisible(list(dat=dat,means=means))
      }
      v <- m <- list()
-     for (batch in 1:3)
+     for (batch in 1)
      {
          x <- process_batch(batch)
          v[[batch]] <- ggplot(with(x,dat), aes(x=Genotype, y=Phenotype, fill=Genotype)) +
@@ -177,8 +178,8 @@ function mean_by_genotype()
                        theme_minimal()
          m[[batch]] <- ggtexttable(with(x,means), rows = NULL, theme = ttheme("mOrange"))
      }
-     p <- ggarrange(v[[1]],v[[2]],v[[3]],m[[1]],m[[2]],m[[3]],ncol=3,nrow=2,labels=c("1. ZWK","2. ZYQ","3. UDP"))
-     ggsave(file.path(root,"means",paste0(protein,"-",isotope,"-",pqtl,"-genotype.png")),device="png",width=16, height=10, units="in")
+     p <- ggarrange(v[[1]],m[[1]]],ncol=1,nrow=2,labels=c("1. ZWK"))
+     ggsave(file.path(root,"means",paste0(isotope,"-",pqtl,"-genotype.png")),device="png",width=16, height=10, units="in")
   '
 }
 
@@ -192,7 +193,7 @@ parallel -C' ' '
   mean_by_genotype
 '
 
-for cmd in qqmanhattan; do $cmd; done
+for cmd in qqmanhattan lz_autosomes lz_X; do $cmd; done
 EOL
 
 sed -i "s|ROOT|${root}|;s|_array_|${array}|" ${root}/dup-step3.sh
@@ -201,7 +202,7 @@ chmod +x ${root}/dup-step3.sh
 
 export analysis=~/Caprion/analysis
 export root=~/Caprion/analysis/dup
-export pheno=${root}/dup/ZWK.pheno
+export pheno=${root}/ZWK.pheno
 step3_pqtl_summary
 
 isotopes=$(head -1 ${root}/ZWK.pheno | awk '{for(i=3;i<=NF;i++) print $i}')

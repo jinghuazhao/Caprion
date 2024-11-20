@@ -65,6 +65,7 @@ function gz_json()
 function lz_json()
 {
   awk 'NR>1{print $5,$6}' ${root}/dup.signals | \
+  sort -k1,1n | \
   parallel -C' ' '
     export isotope={1}
     export snpid={2}
@@ -83,3 +84,4 @@ function lz_json()
 }
 
 gz_json
+lz_json

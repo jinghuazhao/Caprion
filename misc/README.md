@@ -19,6 +19,7 @@ Program   | Description
 `peptideAssociationPlot.sh` | protein Manhattan-peptide signal plots
 `dup-pgwas.sh` | pGWAS for duplicated proteins
 `dup-extract.sh` | pQTL extractions
+`dup-json.sh` | LocusZoom.js plots
 `dup-plot.sh` | pQTL plots
 `tables.sh` | `Supplementary-Tables.xlsx` generator
 `ToDo.sh` | various staged experiments
@@ -32,4 +33,4 @@ data.
 - `compare.sb`. earlier contrast with deCODE/UKB-PPP.
 - `inf1.sh`. snapshot from SCALLOP/INF meta-analysis.
 
-Created on **12/11/2024**
+Created on **20/11/2024**

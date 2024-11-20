@@ -5,7 +5,7 @@ export root=${root:-/home/jhz22/Caprion/analysis/dup}
 
 # Initialize directories
 function initialise() {
-  for d in sentinels/slurm means work qqmanhattanlz vep; do
+  for d in sentinels/slurm json/gz means work qqmanhattanlz vep; do
     if [ ! -d ${root}/${d} ]; then mkdir -p ${root}/${d}; fi
   done
 }

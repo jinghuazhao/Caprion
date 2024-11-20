@@ -27,9 +27,9 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 A web-style navigation is furnised via a port number, e.g., 8000,
 
 ```bash
-module load ceuadmin/edge
-
 cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
+
+module load ceuadmin/edge
 
 export pn=8000
 if lsof -i :${pn}; then

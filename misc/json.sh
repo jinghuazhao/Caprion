@@ -50,14 +50,28 @@ export -f json
 function lz_json()
 {
   awk 'NR>1{print $1,$7}' ${analysis}/work/caprion${suffix}.signals | \
+  sort -k1,1 | \
   parallel -C' ' '
     export prot={1}
     export snpid={2}
     IFS=\_ read chrpos a1 a2 <<<${snpid}
     IFS=\: read chr pos <<<${chrpos}
     echo ${prot} ${snpid} ${chrpos}
-  # gz
-  # json
+    gz
+    json
+  '
+}
+
+function lz_json()
+{
+  awk 'NR>1{print $1,$7}' ${analysis}/work/caprion${suffix}.signals | \
+  sort -k1,1 | \
+  parallel -C' ' '
+    export prot={1}
+    export snpid={2}
+    IFS=\_ read chrpos a1 a2 <<<${snpid}
+    IFS=\: read chr pos <<<${chrpos}
+    echo ${prot} ${snpid} ${chrpos}
   ' | \
   awk '!/X/' | \
   Rscript -e '
@@ -87,6 +101,7 @@ function umich()
   '
 }
 
+gz_json
 lz_json
 
 function legacy()

@@ -204,8 +204,7 @@ fi
 </ol>
 <h2 id="non-csd3-browsers">Non-CSD3 browser(s)</h2>
 <p>This approach seems less problematic with <code>user-data-dir</code> mentioned above. We can again set up tunneling from CSD3 with</p>
-<pre><code class="language-bash">export pn=8000
-python3 -m http.server ${pn} &amp;
+<pre><code class="language-bash">python3 -m http.server 8000 &amp;
 hostname
 </code></pre>
 <p>Once succeeded, we establish the connection elsewhere.</p>
@@ -297,5 +296,5 @@ hostname
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-11-26 10:31:48.749653+00:00
+Build Date UTC : 2024-11-26 10:33:40.986104+00:00
 -->

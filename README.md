@@ -58,8 +58,7 @@ One could browse files as well as mirrors of two web sites.
 This approach seems less problematic with `user-data-dir` mentioned above. We can again set up tunneling from CSD3 with
 
 ```bash
-export pn=8000
-python3 -m http.server ${pn} &
+python3 -m http.server 8000 &
 hostname
 ```
 

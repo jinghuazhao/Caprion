@@ -146,6 +146,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#non-csd3-browsers" class="nav-link">Non-CSD3 browser(s)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -196,7 +200,18 @@ fi
 <ol>
 <li>SRCF. The mirror is within the following subdirectory: <code>/srcf</code>.</li>
 <li>Web site. This is from <code>/site</code> as above.</li>
-</ol></div>
+<li>Isotopes associated with &gt;1 proteins, srcf/peptides/dup/json/dup.htm</li>
+</ol>
+<h2 id="non-csd3-browsers">Non-CSD3 browser(s)</h2>
+<p>This approach seems less problematic with <code>user-data-dir</code> mentioned above. We can again set up tunneling from CSD3 with</p>
+<pre><code class="language-bash">export pn=8000
+python3 -m http.server ${pn} &amp;
+hostname
+</code></pre>
+<p>Once succeeded, we establish the connection elsewhere.</p>
+<pre><code class="language-bash">ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
+</code></pre>
+<p>where hostname from CSD3 and ${hostname} have to be the same. We can then browse <code>http://127.0.0.1:8080</code>.</p></div>
             </div>
         </div>
 
@@ -282,5 +297,5 @@ fi
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-11-20 20:44:43.720378+00:00
+Build Date UTC : 2024-11-26 10:31:48.749653+00:00
 -->

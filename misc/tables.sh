@@ -1,4 +1,4 @@
-!/usr/bin/bash
+#!/usr/bin/bash
 
 export analysis=~/Caprion/analysis
 
@@ -101,6 +101,7 @@ Replication <- dplyr::mutate(replication,seqnames=as.integer(known.seqnames),pos
                dplyr::select(-known.start,-known.end,-query.seqnames,-query.start,-query.end,-seqnames,-pos)
 deCODE <- read.delim(file.path(analysis,"deCODE","deCODE.tsv"))
 UKB_PPP <- read.delim(file.path(analysis,"UKB_PPP","UKB_PPP.tsv"))
+dup <- read.delim(file.path(analysis,"dup","dup.tbl"))
 hs <- createStyle(textDecoration="BOLD", fontColour="#FFFFFF", fontSize=12, fontName="Arial Narrow", fgFill="#4F80BD")
 xlsx <- "https://jhz22.user.srcf.net/Caprion/results.xlsx"
 xlsx <- file.path(analysis,"reports","Supplementary-Tables.xlsx")
@@ -110,16 +111,16 @@ writeData(wb,"Summary","Summary",xy=c(1,1),headerStyle=createStyle(textDecoratio
           fontColour="#FFFFFF", fontSize=14, fontName="Arial Narrow", fgFill="#4F80BD"))
 summary <- data.frame(Sheet=c("Protein_0.01","Protein_dr_0.01","Peptides_0.01",
                               "Protein_0.01_0.001","Protein_dr_0.01_0.001","Peptides_0.01_0.001",
-                              "Protein","Protein_dr","Peptides","Replication","deCODE","UKB_PPP"),
+                              "Protein","Protein_dr","Peptides","Replication","deCODE","UKB_PPP","Dup"),
                       Description=c("Unfiltered proteins, MAF>=0.01","DR-filtered proteins, MAF>=0.01","All peptides, MAF>=0.01",
                                     "Unfiltered proteins, MAF in (0.01,0.001]","DR-filtered proteins, MAF (0.01,0.001]",
                                     "All peptides, MAF in (0.01,0.001]",
                                     "Unfiltered proteins","DR-filtered proteins","All peptides","All/DR-filtered replication",
-                                    "deCODE replication","UKB-PPP replication"))
+                                    "deCODE replication","UKB-PPP replication","Duplicated proteins"))
 writeDataTable(wb, "Summary", summary, xy=c(1,2), headerStyle=hs, firstColumn=TRUE, tableStyle="TableStyleMedium2")
 for (i in c("Protein_0.01","Protein_dr_0.01","Peptides_0.01",
             "Protein_0.01_0.001","Protein_dr_0.01_0.001","Peptides_0.01_0.001",
-            "Protein","Protein_dr","Peptides","Replication","deCODE","UKB_PPP"))
+            "Protein","Protein_dr","Peptides","Replication","deCODE","UKB_PPP","dup"))
 {
     sheetnames <- i
     cat(sheetnames,"\n")

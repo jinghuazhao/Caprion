@@ -1,5 +1,6 @@
-options(width=200)
+#!/usr/local/Cluster-Apps/ceuadmin/R/4.4.2-icelake/bin/Rscript
 
+options(width=200)
 suppressMessages(library(dplyr))
 suppressMessages(library(gap))
 suppressMessages(library(pQTLtools))
@@ -33,7 +34,8 @@ caprion_aggr <- caprion_metal %>%
                                  cistrans=paste(Type,collapse=";")) %>% data.frame()
 caprion_aggr_save <- caprion_aggr
 setwd(analysis)
-rsid <- caprion_aggr[["INF1_rsid"]]
+rsid <- read.table(file.path(analysis,"work","snpid_dr.lst"),header=TRUE) %>%
+        dplyr::pull(rsid)
 catalogue <- "GWAS"
 proxies <- "EUR"
 p <- 5e-8
@@ -51,23 +53,22 @@ if (FALSE) {
   snps_results <- with(r,right_join(snps,results))
   ps <- subset(snps_results,select=-c(hg38_coordinates,ref_hg38_coordinates,pos_hg38,ref_pos_hg38,dprime))
   sarcoidosis <- with(ps,grep("sarcoidosis",trait))
-  ps[sarcoidosis,"efo"] <- "Orphanet_797"
-  save(INF1_aggr,r,ps,file=file.path(INF,"ps","INF1.merge.GWAS"))
+  save(caprion_aggr,r,ps,file=file.path(analysis,"ps","caprion.merge.GWAS"))
 # bulk results from the Web interface
-  snps <- read.delim(file.path(INF,"ps","SNP.tsv"))
+  snps <- read.delim(file.path(analysis,"ps","SNP.tsv"))
   ref_rsid <- pull(snps,ref_rsid) %>% unique
-  write.table(ref_rsid,file=file.path(INF,"ps","INF1_ref_rsid.txt"),col.names=FALSE,row.names=FALSE,quote=FALSE)
-  results <- read.delim(file.path(INF,"ps","GWAS.tsv")) # %>% mutate(chr=gsub("chr","",lapply(strsplit(results$hg19_coordinates,":"),"[",1)))
+  write.table(ref_rsid,file=file.path(analysis,"ps","caprion_ref_rsid.txt"),col.names=FALSE,row.names=FALSE,quote=FALSE)
+  results <- read.delim(file.path(analysis,"ps","GWAS.tsv")) # %>% mutate(chr=gsub("chr","",lapply(strsplit(results$hg19_coordinates,":"),"[",1)))
   ps <- right_join(snps,results)
 # inidividual SNP queries from R
   r <- snpqueries(ref_rsid, block_size=1, waiting_time=1, catalogue=catalogue, proxies=proxies, p=p, r2=r2, build=build)
   ps <- with(r,right_join(snps,results))
 # individual SNP queries from the command-line.
-  snps <- read.delim(file.path(INF,"ps","SNP-single.tsv"))
-  results <- read.delim(file.path(INF,"ps","GWAS-single.tsv"))
+  snps <- read.delim(file.path(analysis,"ps","SNP-single.tsv"))
+  results <- read.delim(file.path(analysis,"ps","GWAS-single.tsv"))
   ps <- right_join(snps,results)
-  save(INF1_aggr,r,ps,file=file.path(INF,"ps","INF1.merge.GWAS"))
-} else load(file.path(INF,"ps","INF1.merge.GWAS"))
+  save(caprion_aggr,r,ps,file=file.path(analysis,"ps","caprion.merge.GWAS"))
+} else load(file.path(analysis,"ps","caprion.merge.GWAS"))
 
 ps_gcst <- mutate(ps,a1_ps=a1,a2_ps=a2)
 # PMID 23128233 (heatmap has a gray cell/NA) which requires API, but gwasrapidd cames handy

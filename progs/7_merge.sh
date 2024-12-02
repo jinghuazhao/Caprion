@@ -119,4 +119,21 @@ function cistrans()
   '
 }
 
-for cmd in signals merge cistrans; do $cmd; done
+function rsid()
+# autosomes
+{
+  export cvt=${analysis}/work/caprion_dr.cis.vs.trans
+  (
+    echo snpid rsid
+    sed '1d'  ${cvt} | cut -d, -f2 | sort | uniq | awk '{print "chr" $0}' | \
+    join - ${INF}/work/INTERVAL.rsid | \
+    sed 's/chr//'
+  ) > ${analysis}/work/snpid_dr.lst
+  (
+    echo snpid rsid
+    sed '1d'  ${cvt} | cut -d, -f2 | sort | uniq | \
+    join -22 - <(cat ${analysis}/bgen/chr{1..22}.rsid | cut -d' ' -f3,4 | sort -k2,2)
+  ) > ${analysis}/work/snpid_dr.lst2
+}
+
+for cmd in signals merge cistrans rsid; do $cmd; done

@@ -45,7 +45,7 @@ where the port number can be released with `kill $server_pid` (can be checked wi
 
 `edge --user-data-dir=${TMPDIR} http://localhost:${pn} &`
 
-in replace of ~/.config/microsoft-edge`, where TMPDIR is a directory name.
+in replace of `~/.config/microsoft-edge`, where TMPDIR is a directory name.
 
 One could browse files as well as mirrors of two web sites.
 

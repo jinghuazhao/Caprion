@@ -41,17 +41,17 @@ else
 fi
 ```
 
-where the port number can be released with `kill $server_pid`. In case it does now show, use
+where the port number can be released with `kill $server_pid` (can be checked with `ps`). In case it does now show, use
 
 `edge --user-data-dir=${TMPDIR} http://localhost:${pn} &`
 
-where TMPDIR is a directory name.
+in replace of ~/.config/microsoft-edge`, where TMPDIR is a directory name.
 
 One could browse files as well as mirrors of two web sites.
 
 1. SRCF. The mirror is within the following subdirectory: `/srcf`.
 2. Web site. This is from `/site` as above.
-3. Isotopes associated with >1 proteins, srcf/peptides/dup/json/dup.htm
+3. Isotopes associated with >1 proteins, /dup/json/dup.htm
 
 ## Non-CSD3 browser(s)
 

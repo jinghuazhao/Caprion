@@ -148,6 +148,29 @@ function run_coloc()
   done
 }
 
+
+function coloc()
+# GTEx, eQTL-Catalogue
+{
+  export r=${SLURM_ARRAY_TASK_ID}
+  export cvt=${analysis}/work/caprion_dr.cis.vs.trans
+  read prot MarkerName < \
+                       <(awk -vFS="," '$10=="cis"' ${cvt} | \
+                         awk -vFS="," -vr=${r} 'NR==r{print $3,$2}')
+  echo ${r} - ${prot} - ${MarkerName}
+  export prot=${prot}
+  export MarkerName=${MarkerName}
+  if [ ! -f ${INF}/coloc/${prot}-${MarkerName}.pdf ] || \
+     [ ! -f ${INF}/coloc/${prot}-${MarkerName}.RDS ]; then
+    cd ${analysis}/coloc
+    R --no-save < ${analysis}/misc/coloc.R 2>&1 | \
+    tee ${prot}-${MarkerName}.log
+    cd -
+  fi
+}
+
+coloc
+
 read prot gene chr start37 end37 SNP ensGenes start end < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${analysis}/coloc/cis.dat)
 export prot=${prot}
 export gene=${gene}
@@ -161,6 +184,6 @@ export end=${end}
 export region37=${chr}:${start37}-${end37}
 export region=${chr}:${start}-${end}
 
-sumstats38
-eQTL
-run_coloc
+#sumstats38
+#eQTL
+#run_coloc

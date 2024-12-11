@@ -10,6 +10,7 @@ These are summarised in the following table,
 
 Program   | Description
 ----------|------------------------------------------------------------------------
+`coloc.sb` | Coloc(alisation) analysis
 `csq.sh` | Consequences of variants
 `Caprion_deCODE_UKB_PPP.sh` | Caprion/deCODE/UKB-PPP replication
 `eSet.sh` | ExpresssionSet implementations
@@ -35,4 +36,4 @@ data.
 - `compare.sb`. earlier contrast with deCODE/UKB-PPP.
 - `inf1.sh`. snapshot from SCALLOP/INF meta-analysis.
 
-Created on **20/11/2024**
+Created on **9/12/2024**

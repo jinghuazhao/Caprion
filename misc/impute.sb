@@ -280,6 +280,6 @@ function micombine()
 }
 
 # sbatch:
-# impute
+impute
 # bash:
-micombine
+# micombine

@@ -1,0 +1,166 @@
+#!/usr/bin/bash
+
+#SBATCH --job-name=_coloc
+#SBATCH --account PETERS-SL3-CPU
+#SBATCH --partition icelake-himem
+#SBATCH --array=1-262
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+#SBATCH --error=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/coloc/slurm/_coloc_%A_%a.err
+#SBATCH --output=/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/coloc/slurm/_coloc_%A_%a.out
+#SBATCH --export ALL
+
+. /etc/profile.d/modules.sh
+module purge
+module load rhel8/default-icl
+module load ceuadmin/R
+module load ceuadmin/htslib/1.20
+export TMPDIR=${HPC_WORK}/work
+export analysis=~/Caprion/analysis
+
+if [ ! -f ${analysis}/coloc/cis.dat ]; then
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    suppressMessages(library(rtracklayer))
+    options(width=200)
+    analysis <- Sys.getenv("analysis")
+    M <- 1e6
+    cvt <- file.path(analysis,"work","caprion_dr.cis.vs.trans")
+    csv <- read.csv(cvt) %>%
+           dplyr::left_join(pQTLdata::caprion[c("Gene","ensGenes")]) %>%
+           dplyr::filter(cis) %>%
+           dplyr::select(prot,Gene,geneChrom,geneStart,geneEnd,SNP,ensGenes) %>%
+           dplyr::mutate(chr=dplyr::if_else(geneChrom==23,"X",paste(geneChrom)),
+                         start=dplyr::if_else(geneStart-M<0,0,geneStart-M),end=geneEnd+M) %>%
+           dplyr::select(prot,Gene,chr,start,end,SNP,ensGenes)
+    gr <- with(csv,GenomicRanges::GRanges(seqnames=chr,IRanges::IRanges(start,end,names=SNP),prot=prot,gene=Gene)) %>%
+          unique()
+    path <- system.file(package="pQTLtools", "eQTL-Catalogue", "hg19ToHg38.over.chain")
+    ch <- rtracklayer::import.chain(path)
+    GenomeInfoDb::seqlevelsStyle(gr) <- "UCSC"
+    gr38 <- rtracklayer::liftOver(gr,ch) %>%
+            dplyr::as_tibble() %>%
+            dplyr::group_by(group_name) %>%
+            dplyr::summarize(start=min(start),end=max(end))
+    cis <- dplyr::left_join(csv,gr38,by=c("SNP"="group_name")) %>%
+           data.frame
+    write.table(cis,file=file.path(analysis,"coloc","cis.dat"),row.names=FALSE,col.names=FALSE,quote=FALSE)
+  '
+fi
+
+function sumstats38()
+{
+  if [ ! -d ${analyssis}/coloc/sumstats ]; then mkdir -p ${analysis}/coloc/sumstats; fi
+  Rscript -e '
+    suppressMessages(library(GenomicRanges))
+    suppressMessages(library(dplyr))
+    suppressMessages(library(rtracklayer))
+    options(width=200)
+    analysis <- Sys.getenv("analysis")
+    prot <- Sys.getenv("prot")
+    gene <- Sys.getenv("gene")
+    chr <- Sys.getenv("chr")
+    region37 <- Sys.getenv("region37")
+    f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
+    chain <- rtracklayer::import.chain(f)
+    tbl <- file.path(analysis,"METAL_dr",paste0(prot,"_dr-1.tbl.gz"))
+    gwas_stats <- seqminer::tabix.read(tbl, tabixRange = region37)
+    gwas_stats <- read.table(text = gwas_stats, sep = "\t", header = FALSE) %>%
+                  setNames(c("Chromosome","Position","ID","Allele1","Allele2","Freq1","FreqSE","MinFreq","MaxFreq",
+                             "Effect","StdErr","logP","Direction","HetISq","HetChiSq","HetDf","logHetP","N"))
+    gwas_granges <- with(gwas_stats,GRanges(seqnames = paste0("chr",dplyr::if_else(Chromosome==23,"X",paste(Chromosome))),
+                            ranges = IRanges(start = Position, end = Position),
+                            id = ID,REF=Allele2,ALT=Allele1,AF=Freq1,ES=Effect,SE=StdErr,LP=-logP,SS=N))
+    gwas_stats_hg38 <- rtracklayer::liftOver(gwas_granges, chain) %>%
+                       unlist() %>%
+                       dplyr::as_tibble() %>%
+                       dplyr::transmute(chromosome = seqnames,
+                                        position = start, REF, ALT, AF, ES, SE, LP, SS) %>%
+                       dplyr::mutate(id = paste(chromosome, position, sep = ":")) %>%
+                       dplyr::mutate(MAF = pmin(AF, 1-AF)) %>%
+                       dplyr::group_by(id) %>%
+                       dplyr::mutate(row_count = n()) %>%
+                       dplyr::ungroup() %>%
+                       dplyr::filter(row_count == 1) %>%
+                       mutate(chromosome=gsub("chr","",chromosome))
+    save(gwas_stats_hg38,file=file.path(analysis,"coloc","sumstats",paste0(gene,".rda")))
+  '
+}
+
+function eQTL()
+{
+  export src=~/rds/public_databases/GTEx/csv
+  if [ ! -d ${analysis}/coloc/GTEx ]; then mkdir -p ${analysis}/coloc/GTEx; fi
+  ls ${src}/*gz | \
+  parallel -C' ' '
+    export tissue=$(echo {} | xargs -l basename -s .tsv.gz)
+    export genes_regex=$(echo ${ensGenes} | sed "s/;/|/g")
+    cat <(head -1 ~/pQTLtools/inst/eQTL-Catalogue/column_names.GTEx) \
+        <(tabix {} ${region} | grep -E "${genes_regex}") > ${analysis}/coloc/GTEx/${gene}-${tissue}.tsv
+  '
+  export src=~/rds/public_databases/eQTLCatalogue
+  if [ ! -d ${analysis}/coloc/ge ]; then mkdir -p ${analysis}/coloc/ge; fi
+  ls ${src}/*gz | \
+  parallel -C' ' '
+    export tissue=$(echo {} | xargs -l basename -s .tsv.gz)
+    export genes_regex=$(echo ${ensGenes} | sed "s/;/|/g")
+    cat <(head -1 ~/pQTLtools/inst/eQTL-Catalogue/column_names.Alasoo) \
+        <(tabix {} ${region} | grep -E "${genes_regex}")> ${analysis}/coloc/ge/${gene}-${tissue}.tsv
+  '
+}
+
+function run_coloc()
+{
+  if [ ! -d ${analysis}/coloc/coloc ]; then mkdir -p ${analysis}/coloc/coloc; fi
+  for src in GTEx ge
+  do
+    export src=${src}
+    ls ${analysis}/coloc/${src}/${gene}* | \
+    parallel -C' ' '
+      export tissue=$(echo {} | xargs -l basename -s .tsv)
+      Rscript -e "
+        suppressMessages(library(dplyr))
+        analysis <- Sys.getenv(\"analysis\")
+        gene <- Sys.getenv(\"gene\")
+        load(file.path(analysis,\"coloc\",\"sumstats\",paste0(gene,\".rda\")))
+        gwas_stats <- mutate(gwas_stats_hg38,snpid=gap::chr_pos_a1_a2(chromosome,position,REF,ALT))
+        src <- Sys.getenv(\"src\")
+        tissue <- Sys.getenv(\"tissue\")
+        eqtl_stats <- read.delim(file.path(analysis,\"coloc\",paste0(src,\"/\",tissue,\".tsv\"))) %>%
+                      mutate(snpid=gap::chr_pos_a1_a2(chromosome,position,ref,alt)) %>%
+                      left_join(select(gwas_stats,snpid,REF,ALT),by=\"snpid\") %>%
+                      mutate(maf=as.numeric(maf),sign=if_else(alt==ALT,1,-1),beta=sign*beta) %>%
+                      filter(!is.na(beta))
+        dup1 <- duplicated(with(gwas_stats,snpid))
+        dup2 <- duplicated(with(eqtl_stats,snpid))
+        run_coloc <- function(gwas_sumstats=gwas_stats[!dup1,],eqtl_sumstats=eqtl_stats[!dup2,])
+        {
+          eQTL_dataset <- with(eqtl_sumstats, list(beta=beta,varbeta=se^2,N=an,MAF=maf,type=\"quant\",snp=snpid))
+          gwas_dataset <- with(gwas_sumstats, list(beta=ES,varbeta=SE^2,type=\"quant\",snp=snpid,MAF=MAF,N=SS))
+          coloc_res <- coloc::coloc.abf(dataset1=gwas_dataset, dataset2=eQTL_dataset, p1=1e-4, p2=1e-4, p12=1e-5)
+          res_formatted <- dplyr::as_tibble(t(as.data.frame(coloc_res$summary)))
+        }
+        res <- run_coloc()
+        r <- Sys.getenv(\"SLURM_ARRAY_TASK_ID\")
+        write.table(res,file=file.path(analysis,\"coloc\",\"coloc\",paste0(r,\"-\",src,\"-\",tissue,\".out\")))
+      "
+    '
+  done
+}
+
+read prot gene chr start37 end37 SNP ensGenes start end < <(awk 'NR==ENVIRON["SLURM_ARRAY_TASK_ID"]' ${analysis}/coloc/cis.dat)
+export prot=${prot}
+export gene=${gene}
+export chr=${chr}
+export start37=${start37}
+export end37=${end37}
+export SNP=${SNP}
+export ensGenes=${ensGenes}
+export start=${start}
+export end=${end}
+export region37=${chr}:${start37}-${end37}
+export region=${chr}:${start}-${end}
+
+sumstats38
+eQTL
+run_coloc

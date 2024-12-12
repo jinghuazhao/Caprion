@@ -1,6 +1,5 @@
 liftRegion <- function(x,chain,flanking=1e6)
 {
-  require(GenomicRanges)
   gr <- with(x,GenomicRanges::GRanges(seqnames=chr,IRanges::IRanges(start,end))+flanking)
   seqlevelsStyle(gr) <- "UCSC"
   gr38 <- rtracklayer::liftOver(gr, chain)
@@ -10,12 +9,9 @@ liftRegion <- function(x,chain,flanking=1e6)
   invisible(list(chr=chr[1],start=start,end=end,region=paste0(chr[1],":",start,"-",end)))
 }
 
-function sumstats38()
+sumstats38 <- function()
 {
   cat("GWAS sumstats\n")
-  suppressMessages(library(GenomicRanges))
-  suppressMessages(library(dplyr))
-  suppressMessages(library(rtracklayer))
   prot <- Sys.getenv("prot")
   gene <- Sys.getenv("gene")
   chr <- Sys.getenv("chr")
@@ -282,7 +278,7 @@ loop_slowly <- function() for (r in 1:nrow(sentinels)) single_run(r)
 
 # Environmental variables
 
-pkgs <- c("dplyr", "gap", "ggplot2", "readr", "coloc", "GenomicRanges","pQTLtools","seqminer")
+pkgs <- c("dplyr", "gap", "ggplot2", "readr", "coloc", "GenomicRanges","pQTLtools","rtracklayer","seqminer")
 invisible(suppressMessages(lapply(pkgs, require, character.only = TRUE)))
 
 options(width=200)
@@ -301,21 +297,20 @@ ENSG00000138675 - FGF5 4 80266639 80336680
 ENSG00000277632 - CCL3 17 36088256 36090169
 "
 updates <- as.data.frame(scan(file=textConnection(sevens),what=list("","","",0,0,0))) %>%
-           setNames(c("ensGene","dash","gene","chromosome","start38","end38"))
-caprion <- left_join(pQTLdata::caprion,updates) %>%
-           mutate(ensembl_gene_id=if_else(!is.na(ensGenes),ensGenes,ensembl_gene_id))
+           setNames(c("ensGenes","dash","gene","chromosome","start38","end38"))
+caprion <- left_join(pQTLdata::caprion,updates)
 sentinels <- subset(read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")),cis)
-cvt_rsid <- file.path(INF,"work","caprion_dr.cis.vs.trans-rsid")
-prot_rsid <- subset(read.delim(cvt_rsid,sep=" "),cis,select=c(prot,SNP))
-
 f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
 chain <- rtracklayer::import.chain(f)
 f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv")
 tabix_paths <- read.delim(f, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
 
-# r <- as.integer(Sys.getenv("r"))
+r <- as.integer(Sys.getenv("r"))
 # single_run(r)
 # single_run(r,batch="eQTLCatalogue")
+
+cvt_rsid <- file.path(INF,"work","caprion_dr.cis.vs.trans-rsid")
+prot_rsid <- subset(read.delim(cvt_rsid,sep=" "),cis,select=c(prot,SNP))
 
 collect()
 collect(coloc_dir="eQTLCatalogue/ensGene")

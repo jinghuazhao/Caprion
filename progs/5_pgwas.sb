@@ -57,9 +57,11 @@ export PERL5LIB=
 module load rhel8/default-icl
 module load samtools/1.13/gcc/zwxn7ug3
 module load ceuadmin/R
+module load ceuadmin/bcftools
 
 function rsid_snpid()
 {
+# autosomes
   seq 22 | \
   parallel -j1 -C' ' '
     echo {}
@@ -72,6 +74,18 @@ function rsid_snpid()
       \$2=\$2+0; print \$2, \$3, \$1, \$2\":\"\$3\"_\"\$5\"_\"\$4
     } " > ${analysis}/bgen/chr{}.rsid
   '
+# X
+  bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\n" /rds/project/rds-4o5vpvAowP0/dbsnp/snp154_hg19.vcf.gz -r chrX | \
+  awk '
+  {
+    gsub("chr","",$1)
+    if ($4<$5) snpid=$1":"$2"_"$4"_"$5; else snpid=$1":"$2"_"$5"_"$4
+    print snpid, $1, $2, $3
+  }' | \
+  sort -k1,1 | \
+  join <(sort -k1,1 ${analysis}/bgen/chrX.snplist) - | \
+  awk '{print $2,$3,$4,$1}' | \
+  sort -k2,2n > ${analysis}/bgen/chrX.rsid
 }
 
 function dbsnp()

@@ -277,11 +277,13 @@ p <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv")
 tabix_paths <- read.delim(p, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
 
 r <- as.integer(Sys.getenv("r"))
-# single_run(r)
-# single_run(r,batch="eQTLCatalogue")
+single_run(r)
+single_run(r,batch="eQTLCatalogue")
 
-# cvt_rsid <- file.path(INF,"work","caprion_dr.cis.vs.trans-rsid")
-# prot_rsid <- subset(read.delim(cvt_rsid,sep=" "),cis,select=c(prot,SNP))
+f <- file.path(analysis,"work","snpid_dr.lst")
+prot_rsid <- select(sentinels,prot,SNP) %>%
+             dplyr::left_join(read.table(f,header=TRUE),by=c('SNP'='snpid')) %>%
+             mutate(rsid=dplyr::if_else(is.na(rsid)|rsid==".",SNP,rsid))
 
 collect()
 collect(coloc_dir="eQTLCatalogue/ensGene")

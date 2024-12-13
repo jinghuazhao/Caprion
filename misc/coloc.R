@@ -9,13 +9,9 @@ liftRegion <- function(x,chain,flanking=1e6)
   invisible(list(chr=chr[1],start=start,end=end,region=paste0(chr[1],":",start,"-",end)))
 }
 
-sumstats38 <- function()
+sumstats <- function(prot,chr,region37)
 {
   cat("GWAS sumstats\n")
-  prot <- Sys.getenv("prot")
-  gene <- Sys.getenv("gene")
-  chr <- Sys.getenv("chr")
-  region37 <- Sys.getenv("region37")
   f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
   chain <- rtracklayer::import.chain(f)
   tbl <- file.path(analysis,"METAL_dr",paste0(prot,"_dr-1.tbl.gz"))
@@ -38,29 +34,6 @@ sumstats38 <- function()
                      dplyr::ungroup() %>%
                      dplyr::filter(row_count == 1) %>%
                      mutate(chromosome=gsub("chr","",chromosome))
-}
-
-sumstats <- function(prot,chr,region37)
-{
-  cat("GWAS sumstats\n")
-  vcf <- file.path(INF,"METAL/gwas2vcf",paste0(prot,".vcf.gz"))
-  gwas_stats <- gwasvcf::query_gwas(vcf, chrompos = region37) %>%
-                gwasvcf::vcf_to_granges() %>%
-                keepSeqlevels(chr) %>%
-                renameSeqlevels(paste0("chr",chr))
-  gwas_stats_hg38 <- rtracklayer::liftOver(gwas_stats, chain) %>%
-    unlist() %>%
-#   renameSeqlevels(chr) %>%
-    dplyr::as_tibble() %>%
-    dplyr::transmute(chromosome = seqnames,
-                     position = start, REF, ALT, AF, ES, SE, LP, SS) %>%
-    dplyr::mutate(id = paste(chromosome, position, sep = ":")) %>%
-    dplyr::mutate(MAF = pmin(AF, 1-AF)) %>%
-    dplyr::group_by(id) %>%
-    dplyr::mutate(row_count = n()) %>%
-    dplyr::ungroup() %>%
-    dplyr::filter(row_count == 1) %>%
-    mutate(chromosome=gsub("chr","",chromosome))
 }
 
 microarray <- function(gwas_stats_hg38,ensGene,region38)
@@ -195,25 +168,25 @@ all_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
 single_run <- function(r, batch="GTEx")
 {
   sentinel <- sentinels[r,]
-  chr <- with(sentinel,Chr)
-  ss <- subset(inf1,prot==sentinel[["prot"]])
-  ensRegion37 <- with(ss,
+  chr <- with(sentinel,geneChrom)
+  ensRegion37 <- with(sentinel,
                       {
-                        start <- start-M
+                        start <- geneStart-M
                         if (start<0) start <- 0
-                        end <- end+M
+                        end <- geneEnd+M
                         paste0(chr,":",start,"-",end)
                       })
-  ensGene <- ss[["ensembl_gene_id"]]
-  ensRegion38 <- with(liftRegion(ss,chain),region)
-  if (!is.na(ensGene)) ensRegion38 <- with(ss,paste0(chr,":",start38-M,"-",end38+M))
+  ss <- subset(pQTLdata::caprion,Protein==paste0(sentinel[["prot"]],"_HUMAN"))
+  ensGene <- ss[["ensGenes"]]
+  lr <- liftRegion(with(sentinel,list(chr=geneChrom,start=geneStart,end=geneEnd)),chain)
+  ensRegion38 <- with(lr,paste0(chr,":",start-M,"-",end+M))
   cat(chr,ensGene,ensRegion37,ensRegion38,"\n")
   if (batch=="GTEx")
   {
-    f <- file.path(INF,"coloc",with(sentinel,paste0(prot,"-",SNP)))
+    f <- file.path(analysis,"coloc",with(sentinel,paste0(prot,"-",SNP)))
     gtex_coloc(sentinel[["prot"]],chr,ensGene,chain,ensRegion37,ensRegion38,f)
   } else {
-    f <- file.path(INF,"eQTLCatalogue",with(sentinel,paste0(prot,"-",SNP)))
+    f <- file.path(analysis,"eQTLCatalogue",with(sentinel,paste0(prot,"-",SNP)))
     ge_coloc(sentinel[["prot"]],chr,ensGene,chain,ensRegion37,ensRegion38,f)
   }
 }

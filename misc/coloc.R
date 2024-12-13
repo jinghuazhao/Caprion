@@ -9,14 +9,12 @@ liftRegion <- function(x,chain,flanking=1e6)
   invisible(list(chr=chr[1],start=start,end=end,region=paste0(chr[1],":",start,"-",end)))
 }
 
-sumstats <- function(prot,chr,region37)
+sumstats <- function(prot,chr,region37,chain)
 {
   cat("GWAS sumstats\n")
-  f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
-  chain <- rtracklayer::import.chain(f)
   tbl <- file.path(analysis,"METAL_dr",paste0(prot,"_dr-1.tbl.gz"))
-  gwas_stats <- seqminer::tabix.read(tbl, tabixRange = region37)
-  gwas_stats <- read.table(text = gwas_stats, sep = "\t", header = FALSE) %>%
+  gwas_texts <- seqminer::tabix.read(tbl, tabixRange = region37)
+  gwas_stats <- read.table(text = gwas_texts, sep = "\t", header = FALSE) %>%
                 setNames(c("Chromosome","Position","ID","Allele1","Allele2","Freq1","FreqSE","MinFreq","MaxFreq",
                            "Effect","StdErr","logP","Direction","HetISq","HetChiSq","HetDf","logHetP","N"))
   gwas_granges <- with(gwas_stats,GRanges(seqnames = paste0("chr",dplyr::if_else(Chromosome==23,"X",paste(Chromosome))),
@@ -116,10 +114,10 @@ ge <- function(gwas_stats_hg38,ensGene,region38)
 
 gtex_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
 {
-  gwas_stats_hg38 <- sumstats(prot,chr,region37)
+  gwas_stats_hg38 <- sumstats(prot,chr,region37,chain)
   df_gtex <- gtex(gwas_stats_hg38,ensGene,region38)
   if (!exists("df_gtex")) return
-  saveRDS(df_gtex,file=paste0(out,".RDS"))
+  saveRDS(df_gtex,file=paste0(out,".rds"))
   dplyr::arrange(df_gtex, -PP.H4.abf)
   p <- ggplot(df_gtex, aes(x = PP.H4.abf)) + geom_histogram()
   s <- ggplot(gwas_stats_hg38, aes(x = position, y = LP)) + geom_point()
@@ -134,7 +132,7 @@ ge_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
   gwas_stats_hg38 <- sumstats(prot,chr,region37)
   df_ge <- ge(gwas_stats_hg38,ensGene,region38)
   if (!exists("df_ge")) return
-  saveRDS(df_ge,file=paste0(out,".RDS"))
+  saveRDS(df_ge,file=paste0(out,".rds"))
   dplyr::arrange(df_ge, -PP.H4.abf)
   p <- ggplot(df_ge, aes(x = PP.H4.abf)) + geom_histogram()
   s <- ggplot(gwas_stats_hg38, aes(x = position, y = LP)) + geom_point()
@@ -154,7 +152,7 @@ all_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
   if (exists("df_microarray") & exits("df_rnaseq") & exists("df_gtex") & exists("df_ge"))
   {
     coloc_df = dplyr::bind_rows(df_microarray, df_rnaseq, df_gtex, df_ge)
-    saveRDS(coloc_df, file=paste0(out,".RDS"))
+    saveRDS(coloc_df, file=paste0(out,".rds"))
     dplyr::arrange(coloc_df, -PP.H4.abf)
     p <- ggplot(coloc_df, aes(x = PP.H4.abf)) + geom_histogram()
   }
@@ -200,7 +198,7 @@ collect <- function(coloc_dir="coloc")
     prot <- sentinels[["prot"]][r]
     snpid <- sentinels[["SNP"]][r]
     rsid <- prot_rsid[["SNP"]][r]
-    f <- file.path(analysis,coloc_dir,paste0(prot,"-",snpid,".RDS"))
+    f <- file.path(analysis,coloc_dir,paste0(prot,"-",snpid,".rds"))
     if (!file.exists(f)) next
     cat(prot,"-",rsid,"\n")
     rds <- readRDS(f)
@@ -275,15 +273,15 @@ caprion <- left_join(pQTLdata::caprion,updates)
 sentinels <- subset(read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")),cis)
 f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
 chain <- rtracklayer::import.chain(f)
-f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv")
-tabix_paths <- read.delim(f, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
+p <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv")
+tabix_paths <- read.delim(p, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
 
 r <- as.integer(Sys.getenv("r"))
 # single_run(r)
 # single_run(r,batch="eQTLCatalogue")
 
-cvt_rsid <- file.path(INF,"work","caprion_dr.cis.vs.trans-rsid")
-prot_rsid <- subset(read.delim(cvt_rsid,sep=" "),cis,select=c(prot,SNP))
+# cvt_rsid <- file.path(INF,"work","caprion_dr.cis.vs.trans-rsid")
+# prot_rsid <- subset(read.delim(cvt_rsid,sep=" "),cis,select=c(prot,SNP))
 
 collect()
 collect(coloc_dir="eQTLCatalogue/ensGene")

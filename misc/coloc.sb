@@ -161,7 +161,7 @@ function coloc()
   export prot=${prot}
   export MarkerName=${MarkerName}
   if [ ! -f ${INF}/coloc/${prot}-${MarkerName}.pdf ] || \
-     [ ! -f ${INF}/coloc/${prot}-${MarkerName}.RDS ]; then
+     [ ! -f ${INF}/coloc/${prot}-${MarkerName}.rds ]; then
     cd ${analysis}/coloc
     R --no-save < ${analysis}/misc/coloc.R 2>&1 | \
     tee ${prot}-${MarkerName}.log

@@ -115,15 +115,15 @@ ge <- function(gwas_stats_hg38,ensGene,region38)
 gtex_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
 {
   gwas_stats_hg38 <- sumstats(prot,chr,region37,chain)
+  save(gwas_stats_hg38,file=paste0(out,"-sumstats.rda"))
   df_gtex <- gtex(gwas_stats_hg38,ensGene,region38)
   if (!exists("df_gtex")) return
-  saveRDS(df_gtex,file=paste0(out,".rds"))
-  dplyr::arrange(df_gtex, -PP.H4.abf)
+  saveRDS(df_gtex,file=paste0(out,"-GTEx.rds"))
   p <- ggplot(df_gtex, aes(x = PP.H4.abf)) + geom_histogram()
   s <- ggplot(gwas_stats_hg38, aes(x = position, y = LP)) + geom_point()
-  ggsave(plot = s, filename = paste0(out, "-assoc.pdf"), path = "", device = "pdf",
+  ggsave(plot = s, filename = paste0(out, "-GTEx.assoc.pdf"), path = "", device = "pdf",
          height = 15, width = 15, units = "cm", dpi = 300)
-  ggsave(plot = p, filename = paste0(out, "-hist.pdf"), path = "", device = "pdf",
+  ggsave(plot = p, filename = paste0(out, "-GTEx.hist.pdf"), path = "", device = "pdf",
          height = 15, width = 15, units = "cm", dpi = 300)
 }
 
@@ -132,13 +132,12 @@ ge_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
   gwas_stats_hg38 <- sumstats(prot,chr,region37)
   df_ge <- ge(gwas_stats_hg38,ensGene,region38)
   if (!exists("df_ge")) return
-  saveRDS(df_ge,file=paste0(out,".rds"))
-  dplyr::arrange(df_ge, -PP.H4.abf)
+  saveRDS(df_ge,file=paste0(out,"-GE.rds"))
   p <- ggplot(df_ge, aes(x = PP.H4.abf)) + geom_histogram()
   s <- ggplot(gwas_stats_hg38, aes(x = position, y = LP)) + geom_point()
-  ggsave(plot = s, filename = paste0(out, "-assoc.pdf"), path = "", device = "pdf",
+  ggsave(plot = s, filename = paste0(out, "-GE.assoc.pdf"), path = "", device = "pdf",
          height = 15, width = 15, units = "cm", dpi = 300)
-  ggsave(plot = p, filename = paste0(out, "-hist.pdf"), path = "", device = "pdf",
+  ggsave(plot = p, filename = paste0(out, "GE.hist.pdf"), path = "", device = "pdf",
          height = 15, width = 15, units = "cm", dpi = 300)
 }
 
@@ -152,8 +151,7 @@ all_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
   if (exists("df_microarray") & exits("df_rnaseq") & exists("df_gtex") & exists("df_ge"))
   {
     coloc_df = dplyr::bind_rows(df_microarray, df_rnaseq, df_gtex, df_ge)
-    saveRDS(coloc_df, file=paste0(out,".rds"))
-    dplyr::arrange(coloc_df, -PP.H4.abf)
+    saveRDS(coloc_df, file=paste0(out,"-all.rds"))
     p <- ggplot(coloc_df, aes(x = PP.H4.abf)) + geom_histogram()
   }
   s <- ggplot(gwas_stats_hg38, aes(x = position, y = LP)) + geom_point()
@@ -198,49 +196,49 @@ collect <- function(coloc_dir="coloc")
     prot <- sentinels[["prot"]][r]
     snpid <- sentinels[["SNP"]][r]
     rsid <- prot_rsid[["SNP"]][r]
-    f <- file.path(analysis,coloc_dir,paste0(prot,"-",snpid,".rds"))
+    f <- file.path(analysis,coloc_dir,paste0(prot,"-",snpid,dplyr::if_else(coloc_dir=="coloc","-GTEx.rds","-GE.rds")))
     if (!file.exists(f)) next
     cat(prot,"-",rsid,"\n")
     rds <- readRDS(f)
     if (nrow(rds)==0) next
     df_coloc <- rbind(df_coloc,data.frame(prot=prot,rsid=rsid,snpid=snpid,rds))
   }
+  caprion_upd <- pQTLdata::caprion %>%
+                 mutate(prot=gsub("_HUMAN","",Protein),gene=Gene)
   df <- dplyr::rename(df_coloc,H0=PP.H0.abf,H1=PP.H1.abf,H2=PP.H2.abf,H3=PP.H3.abf,H4=PP.H4.abf) %>%
-        dplyr::left_join(gap.datasets::inf1[c("prot","gene")])
-  caprion_upd <- pQTLdata::caprion
+        dplyr::left_join(caprion_upd[c("prot","gene")])
   if (coloc_dir=="coloc") {
     df_coloc <- within(df,{qtl_id <- gsub("GTEx_V8_","",qtl_id)})
-    write.table(subset(df,H4>=0.8),file=file.path(INF,coloc_dir,"GTEx.tsv"),
+    write.table(subset(df,H4>=0.8),file=file.path(analysis,coloc_dir,"GTEx.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
-    write.table(df,file=file.path(INF,coloc_dir,"GTEx-all.tsv"),
+    write.table(df,file=file.path(analysis,coloc_dir,"GTEx-all.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
-    coloc <- merge(df_coloc,caprion_upd) %>%
-             mutate(prot=target.short,
+    coloc <- merge(df_coloc,caprion_upd[c("prot","gene")]) %>%
+             mutate(prot,
                     H0=round(H0,2),
                     H1=round(H1,2),
                     H2=round(H2,2),
                     H3=round(H3,2),
                     H4=round(H4,2)) %>%
-             setNames(c("Protein","rsid","SNPid","Tissue","nSNP","H0","H1","H2","H3","H4","GeneSymbol","UniProt","trget.short")) %>%
-             select(UniProt,Protein,GeneSymbol,rsid,Tissue,nSNP,H0,H1,H2,H3,H4)
+             setNames(c("Protein","Gene","RSid","SNPid","Tissue","nSNP","H0","H1","H2","H3","H4")) %>%
+             select(Protein,Gene,RSid,Tissue,nSNP,H0,H1,H2,H3,H4)
     write.table(coloc,file=file.path(analysis,coloc_dir,"GTEx-ST.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
-
   } else {
     write.table(subset(df,H4>=0.8),file=file.path(analysis,coloc_dir,"eQTLCatalogue.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
     write.table(df,file=file.path(analysis,coloc_dir,"eQTLCatalogue-all.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
-    eQTLCatalogue <- left_join(df,caprion_upd) %>%
-                     mutate(prot=target.short,
+    eQTLCatalogue <- left_join(df,caprion_upd[c("prot","gene")]) %>%
+                     mutate(prot,
                             H0=round(H0,2),
                             H1=round(H1,2),
                             H2=round(H2,2),
                             H3=round(H3,2),
                             H4=round(H4,2)) %>%
-                     setNames(c("Protein","rsid","SNPid","Study","nSNP","H0","H1","H2","H3","H4","GeneSymbol","UniProt","trget.short")) %>%
-                     select(UniProt,Protein,GeneSymbol,rsid,Study,nSNP,H0,H1,H2,H3,H4)
-    write.table(eQTLCatalogue,file=file.path(INF,coloc_dir,"eQTLCatalogue-ST.tsv"),
+                     setNames(c("Protein","Gene","RSid","SNPid","Study","nSNP","H0","H1","H2","H3","H4")) %>%
+                     select(UniProt,Protein,Gene,RSid,Study,nSNP,H0,H1,H2,H3,H4)
+    write.table(eQTLCatalogue,file=file.path(analysis,coloc_dir,"eQTLCatalogue-ST.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
   }
 }
@@ -283,7 +281,7 @@ single_run(r,batch="eQTLCatalogue")
 f <- file.path(analysis,"work","snpid_dr.lst")
 prot_rsid <- select(sentinels,prot,SNP) %>%
              dplyr::left_join(read.table(f,header=TRUE),by=c('SNP'='snpid')) %>%
-             mutate(rsid=dplyr::if_else(is.na(rsid)|rsid==".",SNP,rsid))
+             transmute(prot,SNP=dplyr::if_else(is.na(rsid)|rsid==".",SNP,rsid))
 
 collect()
 collect(coloc_dir="eQTLCatalogue/ensGene")

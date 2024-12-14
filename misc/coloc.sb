@@ -162,7 +162,7 @@ function coloc()
   export MarkerName=${MarkerName}
   cd ${analysis}/coloc
   R --no-save < ${analysis}/misc/coloc.R 2>&1 | \
-  tee ${prot}-${MarkerName}.log
+  tee log/${prot}-${MarkerName}.log
   cd -
 }
 

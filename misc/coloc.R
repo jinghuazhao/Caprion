@@ -68,12 +68,8 @@ gtex <- function(gwas_stats_hg38,ensGene,region38)
 {
   cat("c. GTEx_v8 imported eQTL datasets\n")
   fp <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths_gtex.tsv")
-  imported_tabix_paths <- within(read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble(),
-        {
-          f <- lapply(strsplit(ftp_path,"/imported/|/ge/"),"[",3);
-          ftp_path <- paste0("~/rds/public_databases/GTEx/csv/",f)
-        })
-  imported_tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
+  imported_tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>%
+                          dplyr::mutate(ftp_path=file.path("~/rds/public_databases/GTEx/csv",basename(ftp_path)))
   gtex_df <- dplyr::filter(imported_tabix_paths, quant_method == "ge") %>%
              dplyr::mutate(qtl_id = paste(study, qtl_group, sep = "_"))
   ftp_path_list <- setNames(as.list(gtex_df$ftp_path), gtex_df$qtl_id)
@@ -93,12 +89,8 @@ ge <- function(gwas_stats_hg38,ensGene,region38)
 {
   cat("d. eQTL datasets\n")
   fp <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths_ge.tsv")
-  imported_tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
-  imported_tabix_paths <- within(read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble(),
-        {
-          f <- lapply(strsplit(ftp_path,"/csv/|/ge/"),"[",3)
-          ftp_path <- paste0("~/rds/public_databases/eQTLCatalogue/",f)
-        })
+  imported_tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble() %>%
+                          dplyr::mutate(file.path("~/rds/public_databases/eQTLCatalogue",basename(ftp_path)))
   ftp_path_list <- setNames(as.list(imported_tabix_paths$ftp_path), imported_tabix_paths$unique_id)
   hdr <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","column_names.Alasoo")
   column_names <- names(read.delim(hdr))
@@ -121,10 +113,10 @@ gtex_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
   saveRDS(df_gtex,file=paste0(out,"-GTEx.rds"))
   p <- ggplot(df_gtex, aes(x = PP.H4.abf)) + geom_histogram()
   s <- ggplot(gwas_stats_hg38, aes(x = position, y = LP)) + geom_point()
-  ggsave(plot = s, filename = paste0(out, "-GTEx.assoc.pdf"), path = "", device = "pdf",
-         height = 15, width = 15, units = "cm", dpi = 300)
-  ggsave(plot = p, filename = paste0(out, "-GTEx.hist.pdf"), path = "", device = "pdf",
-         height = 15, width = 15, units = "cm", dpi = 300)
+  ggplot2::ggsave(plot = s, filename = paste0(out, "-GTEx.assoc.pdf"), device = "pdf",
+                  height = 15, width = 15, units = "cm", dpi = 300)
+  ggplot2::ggsave(plot = p, filename = paste0(out, "-GTEx.hist.pdf"), device = "pdf",
+                  height = 15, width = 15, units = "cm", dpi = 300)
 }
 
 ge_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
@@ -135,9 +127,9 @@ ge_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
   saveRDS(df_ge,file=paste0(out,"-GE.rds"))
   p <- ggplot(df_ge, aes(x = PP.H4.abf)) + geom_histogram()
   s <- ggplot(gwas_stats_hg38, aes(x = position, y = LP)) + geom_point()
-  ggsave(plot = s, filename = paste0(out, "-GE.assoc.pdf"), path = "", device = "pdf",
+  ggsave(plot = s, filename = paste0(out, "-GE.assoc.pdf"), device = "pdf",
          height = 15, width = 15, units = "cm", dpi = 300)
-  ggsave(plot = p, filename = paste0(out, "GE.hist.pdf"), path = "", device = "pdf",
+  ggsave(plot = p, filename = paste0(out, "GE.hist.pdf"), device = "pdf",
          height = 15, width = 15, units = "cm", dpi = 300)
 }
 
@@ -155,9 +147,9 @@ all_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
     p <- ggplot(coloc_df, aes(x = PP.H4.abf)) + geom_histogram()
   }
   s <- ggplot(gwas_stats_hg38, aes(x = position, y = LP)) + geom_point()
-  ggsave(plot = s, filename = paste0(out, "-assoc.pdf"), path = "", device = "pdf",
+  ggsave(plot = s, filename = paste0(out, "-assoc.pdf"), device = "pdf",
          height = 15, width = 15, units = "cm", dpi = 300)
-  ggsave(plot = p, filename = paste0(out, "-hist.pdf"), path = "", device = "pdf",
+  ggsave(plot = p, filename = paste0(out, "-hist.pdf"), device = "pdf",
          height = 15, width = 15, units = "cm", dpi = 300)
 }
 
@@ -271,8 +263,8 @@ caprion <- left_join(pQTLdata::caprion,updates)
 sentinels <- subset(read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")),cis)
 f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
 chain <- rtracklayer::import.chain(f)
-p <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv")
-tabix_paths <- read.delim(p, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
+fp <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv")
+tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
 
 r <- as.integer(Sys.getenv("r"))
 single_run(r)

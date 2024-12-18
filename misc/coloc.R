@@ -2,8 +2,6 @@ liftRegion <- function(x,flanking=1e6)
 {
   gr <- with(x,GenomicRanges::GRanges(seqnames=chr,IRanges::IRanges(start,end))+flanking)
   seqlevelsStyle(gr) <- "UCSC"
-  f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
-  chain <- rtracklayer::import.chain(f)
   gr38 <- rtracklayer::liftOver(gr, chain)
   chr <- gsub("chr","",colnames(table(seqnames(gr38))))
   start <- min(unlist(start(gr38)))
@@ -11,7 +9,7 @@ liftRegion <- function(x,flanking=1e6)
   invisible(list(chr=chr[1],start=start,end=end,region=paste0(chr[1],":",start,"-",end)))
 }
 
-sumstats <- function(prot,chr,region37,chain)
+sumstats <- function(prot,chr,region37)
 {
   cat("GWAS sumstats\n")
   tbl <- file.path(analysis,"METAL_dr",paste0(prot,"_dr-1.tbl.gz"))
@@ -22,8 +20,6 @@ sumstats <- function(prot,chr,region37,chain)
   gwas_granges <- with(gwas_stats,GRanges(seqnames = paste0("chr",dplyr::if_else(Chromosome==23,"X",paste(Chromosome))),
                        ranges = IRanges(start = Position, end = Position),
                        id = ID,REF=Allele2,ALT=Allele1,AF=Freq1,ES=Effect,SE=StdErr,LP=-logP,SS=N))
-  f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
-  chain <- rtracklayer::import.chain(f)
   gwas_stats_hg38 <- rtracklayer::liftOver(gwas_granges, chain) %>%
                      unlist() %>%
                      dplyr::as_tibble() %>%
@@ -86,6 +82,11 @@ gtex <- function(gwas_stats_hg38,ensGene,region38)
   result_list <- result_list[!unlist(purrr::map(result_list, is.null))]
   result_filtered <- purrr::map(result_list[lapply(result_list,nrow)!=0],
                                 ~dplyr::filter(., !is.na(se)))
+  invisible(sapply(1:49, function(i) {
+    f <- file.path(analysis, "coloc", "GTEx", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
+    write.table(result_filtered[[i]], file = gzfile(f, "w"), col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+    close(gz_connection)
+  }))
   purrr::map_df(result_filtered, ~run_coloc(., gwas_stats_hg38), .id = "qtl_id")
 }
 
@@ -105,13 +106,19 @@ ge <- function(gwas_stats_hg38,ensGene,region38)
   result_list <- result_list[!unlist(purrr::map(result_list, is.null))]
   result_filtered <- purrr::map(result_list[lapply(result_list,nrow)!=0],
                                 ~dplyr::filter(., !is.na(se)))
+  invisible(sapply(1:49, function(i) {
+    f <- file.path(analysis, "coloc", "eQTLCatalogue", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
+    write.table(result_filtered[[i]], file = gzfile(f, "w"), col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+    close(gz_connection)
+  }))
   purrr::map_df(result_filtered, ~run_coloc(., gwas_stats_hg38), .id = "unique_id")
 }
 
-gtex_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
+gtex_coloc <- function(prot,snp,chr,ensGene,region37,region38,out)
 {
-  gwas_stats_hg38 <- sumstats(prot,chr,region37,chain)
-  save(gwas_stats_hg38,file=paste0(out,"-sumstats.rda"))
+  gwas_stats_hg38 <- sumstats(prot,chr,region37)
+  f <- file.path(psum,paste0(prot,"-",snp,".gz"))
+  write.table(gwas_stats_hg38,file=gzfile(f, "w"), col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
   df_gtex <- gtex(gwas_stats_hg38,ensGene,region38)
   if (!exists("df_gtex")) return
   saveRDS(df_gtex,file=paste0(out,".rds"))
@@ -123,7 +130,7 @@ gtex_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
                   height = 15, width = 15, units = "cm", dpi = 300)
 }
 
-ge_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
+ge_coloc <- function(prot,chr,ensGene,region37,region38,out)
 {
   gwas_stats_hg38 <- sumstats(prot,chr,region37)
   df_ge <- ge(gwas_stats_hg38,ensGene,region38)
@@ -137,7 +144,7 @@ ge_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
          height = 15, width = 15, units = "cm", dpi = 300)
 }
 
-all_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
+all_coloc <- function(prot,chr,ensGene,region37,region38,out)
 {
   gwas_stats_hg38 <- sumstats(prot,chr,region37)
   df_microarray <- microarray(gwas_stats_hg38,ensGene,region38)
@@ -177,9 +184,9 @@ single_run <- function(r, batch="GTEx")
   f <- file.path(analysis,"coloc",batch,with(sentinel,paste0(prot,"-",SNP)))
   if (batch=="GTEx")
   {
-    gtex_coloc(sentinel[["prot"]],chr,ensGene,chain,ensRegion37,ensRegion38,f)
+    gtex_coloc(sentinel[["prot"]],sentinel[["SNP"]],chr,ensGene,ensRegion37,ensRegion38,f)
   } else {
-    ge_coloc(sentinel[["prot"]],chr,ensGene,chain,ensRegion37,ensRegion38,f)
+    ge_coloc(sentinel[["prot"]],chr,ensGene,ensRegion37,ensRegion38,f)
   }
 }
 
@@ -241,16 +248,20 @@ collect <- function(batch="GTEx")
 
 loop_slowly <- function() for (r in 1:nrow(sentinels)) single_run(r)
 
-# Environmental variables
-
-pkgs <- c("dplyr", "gap", "ggplot2", "readr", "coloc", "GenomicRanges","pQTLtools","rtracklayer","seqminer")
-invisible(suppressMessages(lapply(pkgs, require, character.only = TRUE)))
-
 options(width=200)
 HOME <- Sys.getenv("HOME")
 HPC_WORK <- Sys.getenv("HPC_WORK")
 analysis <- Sys.getenv("analysis")
 M <- 1e6
+psum <- file.path(analysis,"coloc","sumstats")
+if (!dir.exists(psum)) dir.create(psum)
+gsum <- file.path(analysis,"coloc","GTEx","sumstats")
+if (!dir.exists(gsum)) dir.create(gsum)
+esum <- file.path(analysis,"coloc","eQTLCatalogue","sumstats")
+if (!dir.exists(esum)) dir.create(esum)
+
+pkgs <- c("dplyr", "gap", "ggplot2", "readr", "coloc", "GenomicRanges","pQTLtools","rtracklayer","seqminer")
+invisible(suppressMessages(lapply(pkgs, require, character.only = TRUE)))
 
 sevens <- "
 ENSG00000131142 - CCL25 19 8052318 8062660
@@ -267,6 +278,8 @@ caprion <- left_join(pQTLdata::caprion,updates)
 sentinels <- subset(read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")),cis)
 fp <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv")
 tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
+f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain")
+chain <- rtracklayer::import.chain(f)
 
 r <- as.integer(Sys.getenv("r"))
 single_run(r)

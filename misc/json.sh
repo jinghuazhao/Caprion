@@ -47,7 +47,7 @@ function json()
 export -f gz
 export -f json
 
-function lz_json()
+function gz_json()
 {
   awk 'NR>1{print $1,$7}' ${analysis}/work/caprion${suffix}.signals | \
   sort -k1,1 | \

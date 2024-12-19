@@ -85,7 +85,6 @@ gtex <- function(gwas_stats_hg38,ensGene,region38)
   invisible(sapply(1:49, function(i) {
     f <- file.path(analysis, "coloc", "GTEx", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
     write.table(result_filtered[[i]], file = gzfile(f, "w"), col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
-    close(gz_connection)
   }))
   purrr::map_df(result_filtered, ~run_coloc(., gwas_stats_hg38), .id = "qtl_id")
 }
@@ -106,10 +105,9 @@ ge <- function(gwas_stats_hg38,ensGene,region38)
   result_list <- result_list[!unlist(purrr::map(result_list, is.null))]
   result_filtered <- purrr::map(result_list[lapply(result_list,nrow)!=0],
                                 ~dplyr::filter(., !is.na(se)))
-  invisible(sapply(1:49, function(i) {
+  invisible(sapply(1:length(result_filtered), function(i) {
     f <- file.path(analysis, "coloc", "eQTLCatalogue", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
     write.table(result_filtered[[i]], file = gzfile(f, "w"), col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
-    close(gz_connection)
   }))
   purrr::map_df(result_filtered, ~run_coloc(., gwas_stats_hg38), .id = "unique_id")
 }
@@ -166,27 +164,25 @@ all_coloc <- function(prot,chr,ensGene,region37,region38,out)
 
 single_run <- function(r, batch="GTEx")
 {
-  sentinel <- sentinels[r,]
-  chr <- with(sentinel,geneChrom)
+  ss <- subset(pQTLdata::caprion,Protein==paste0(prot,"_HUMAN"))
+  ensGene <- ss[["ensGenes"]]
   ensRegion37 <- with(sentinel,
                       {
                         start <- geneStart-M
                         if (start<0) start <- 0
                         end <- geneEnd+M
-                        paste0(chr,":",start,"-",end)
+                        paste0(geneChrom,":",start,"-",end)
                       })
-  ss <- subset(pQTLdata::caprion,Protein==paste0(sentinel[["prot"]],"_HUMAN"))
-  ensGene <- ss[["ensGenes"]]
-  x <- with(sentinel,list(chr=geneChrom,start=geneStart,end=geneEnd))
+  x <- list(chr=geneChrom,start=geneStart,end=geneEnd)
   lr <- liftRegion(x)
   ensRegion38 <- with(lr,paste0(chr,":",start-M,"-",end+M))
-  cat(chr,ensGene,ensRegion37,ensRegion38,"\n")
-  f <- file.path(analysis,"coloc",batch,with(sentinel,paste0(prot,"-",SNP)))
+  cat(geneChrom,ensGene,ensRegion37,ensRegion38,"\n")
+  f <- file.path(analysis,"coloc",batch,paste0(prot,"-",snp))
   if (batch=="GTEx")
   {
-    gtex_coloc(sentinel[["prot"]],sentinel[["SNP"]],chr,ensGene,ensRegion37,ensRegion38,f)
+    gtex_coloc(prot,snp,geneChrom,ensGene,ensRegion37,ensRegion38,f)
   } else {
-    ge_coloc(sentinel[["prot"]],chr,ensGene,ensRegion37,ensRegion38,f)
+    ge_coloc(prot,geneChrom,ensGene,ensRegion37,ensRegion38,f)
   }
 }
 
@@ -282,6 +278,13 @@ f <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","hg19ToHg38.over.chain
 chain <- rtracklayer::import.chain(f)
 
 r <- as.integer(Sys.getenv("r"))
+sentinel <- sentinels[r,]
+prot <- sentinel[["prot"]]
+snp <- sentinel[["SNP"]]
+geneChrom <- sentinel[["geneChrom"]]
+geneStart <- sentinel[["geneStart"]]
+geneEnd <- sentinel[["geneEnd"]]
+
 single_run(r)
 single_run(r,batch="eQTLCatalogue")
 

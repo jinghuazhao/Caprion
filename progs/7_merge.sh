@@ -63,7 +63,10 @@ function cistrans()
             bind_rows(sept7)
     X <- with(ucsc,chr=="X")
     ucsc[X,"chr"] <- "23"
-    caprion <- select(pQTLdata::caprion,Protein,Accession,Gene) %>%
+    HOME <- Sys.getenv("HOME")
+    load(paste(HOME,"Caprion","pilot","caprion.rda",sep="/"))
+    caprion <- protein_list
+    caprion <- select(caprion,Protein,Accession,Gene) %>%
                mutate(Protein=gsub("_HUMAN","",Protein)) %>%
                rename(prot=Protein)
     quadruple <- function(d,label) data.frame(Gene=label,chr=min(d$chr),start=min(d$start),end=max(d$end))
@@ -94,6 +97,10 @@ function cistrans()
              left_join(caprion_modified) %>%
              select(Gene,SNP,prot,log10p)
     posSNP <- select(merged,SNP,Chr,bp)
+    caprion_ucsc_modified <- left_join(caprion_modified, ucsc_modified) %>%
+                             group_by(across(-c(start, end))) %>%
+                             summarize(start = min(start), end = max(end), .groups = 'drop')
+    save(caprion_ucsc_modified,file=file.path(analysis,"docs","caprion_ucsc_modified.rda"),compress="xz")
     cis.vs.trans <- qtlClassifier(pqtls,posSNP,ucsc_modified,1e6) %>%
                     mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)

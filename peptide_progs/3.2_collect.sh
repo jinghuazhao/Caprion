@@ -83,7 +83,10 @@ function cistrans()
             bind_rows(sept7)
     X <- with(ucsc,chr=="X")
     ucsc[X,"chr"] <- "23"
-    caprion <- select(pQTLdata::caprion,Protein,Accession,Gene) %>%
+    HOME <- Sys.getenv("HOME")
+    load(paste(HOME,"Caprion","pilot","caprion.rda",sep="/"))
+    caprion <- protein_list
+    caprion <- select(caprion,Protein,Accession,Gene) %>%
                mutate(Protein=gsub("_HUMAN","",Protein)) %>%
                rename(prot=Protein)
     quadruple <- function(d,label) data.frame(Gene=label,chr=min(d$chr),start=min(d$start),end=max(d$end))

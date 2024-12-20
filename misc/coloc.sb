@@ -152,6 +152,12 @@ function run_coloc()
 function coloc()
 # GTEx, eQTL-Catalogue
 {
+  for dir in GTEx/sumstats eQTLCatalogue/sumstats log slurm
+  do
+    if [ ! -d ${dir} ]; then
+       mkdir -p ${analysis}/coloc/${dir}
+    fi
+  done
   export r=${SLURM_ARRAY_TASK_ID}
   export cvt=${analysis}/work/caprion_dr.cis.vs.trans
   read prot MarkerName < \
@@ -160,9 +166,9 @@ function coloc()
   echo ${r} - ${prot} - ${MarkerName}
   export prot=${prot}
   export MarkerName=${MarkerName}
-  cd ${analysis}/coloc
-  R --no-save < ${analysis}/misc/coloc.R 2>&1 | \
-  tee log/${prot}-${MarkerName}.log
+  cd ${analysis}
+  R --no-save < coloc.R 2>&1 | \
+  tee ${analysis}/coloc/log/${prot}-${MarkerName}.log
   cd -
 }
 

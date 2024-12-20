@@ -9,7 +9,7 @@ liftRegion <- function(x, flanking = 1e6)
   lifted_chromosomes <- seqnames(gr38)
   lifted_start <- min(start(gr38))
   lifted_end <- max(end(gr38))
-  chr <- gsub("chr", "", as.character(lifted_chromosomes[1]))
+  chr <- gsub("chr","",colnames(table(lifted_chromosomes)))
   region <- paste0(chr, ":", lifted_start, "-", lifted_end)
   invisible(list(chr = chr, start = lifted_start, end = lifted_end, region = region))
 }
@@ -91,11 +91,11 @@ gtex <- function(gwas_stats_hg38,ensGene,region38)
                                 ~dplyr::filter(., !is.na(se)))
   invisible(sapply(1:49, function(i) {
     f <- file.path(analysis, "coloc", "GTEx", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
-    gz <- gzfile(f, "w")
     if (!is.null(result_filtered[[i]])) {
+       gz <- gzfile(f, "w")
        write.table(result_filtered[[i]], file = gz, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+       close(gz)
     }
-    close(gz)
   }))
   purrr::map_df(result_filtered, ~run_coloc(., gwas_stats_hg38), .id = "qtl_id")
 }
@@ -117,11 +117,11 @@ ge <- function(gwas_stats_hg38,ensGene,region38)
   result_filtered <- purrr::map(result_list[lapply(result_list,nrow)!=0],
                                 ~dplyr::filter(., !is.na(se)))
   invisible(sapply(1:length(result_filtered), function(i) {
-    gz <- gzfile(f, "w")
     if (!is.null(result_filtered[[i]])) {
+       gz <- gzfile(f, "w")
        write.table(result_filtered[[i]], file = gz, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+       close(gz)
     }
-    close(gz)
   }))
   purrr::map_df(result_filtered, ~run_coloc(., gwas_stats_hg38), .id = "unique_id")
 }
@@ -301,6 +301,7 @@ fp <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv"
 tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
 
 r <- as.integer(Sys.getenv("r"))
+prot <- sentinels[r,"prot"]
 single_run(r)
 single_run(r,batch="eQTLCatalogue")
 

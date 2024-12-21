@@ -89,13 +89,19 @@ gtex <- function(gwas_stats_hg38,ensGene,region38)
   result_list <- result_list[!unlist(purrr::map(result_list, is.null))]
   result_filtered <- purrr::map(result_list[lapply(result_list,nrow)!=0],
                                 ~dplyr::filter(., !is.na(se)))
-  invisible(sapply(1:49, function(i) {
-    if (!is.null(result_filtered[[i]])) {
-       f <- file.path(analysis, "coloc", "GTEx", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
-       gz <- gzfile(f, "w")
-       write.table(result_filtered[[i]], file = gz, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
-       close(gz)
-    }
+  prot <- sentinels[["prot"]][r]
+  invisible(sapply(1:length(result_filtered), function(i) {
+      if (!is.null(result_filtered[[i]])) {
+          prot_name <- names(result_filtered)[i]
+          if (!is.null(prot_name)) {
+              f <- file.path(analysis, "coloc", "GTEx", "sumstats", paste0(prot, "-", prot_name, ".gz"))
+              gz <- gzfile(f, "w")
+              write.table(result_filtered[[i]], file = gz, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+              close(gz)
+          } else {
+              warning(paste("Missing name for index", i))
+          }
+      }
   }))
   purrr::map_df(result_filtered, ~run_coloc(., gwas_stats_hg38), .id = "qtl_id")
 }
@@ -116,13 +122,19 @@ ge <- function(gwas_stats_hg38,ensGene,region38)
   result_list <- result_list[!unlist(purrr::map(result_list, is.null))]
   result_filtered <- purrr::map(result_list[lapply(result_list,nrow)!=0],
                                 ~dplyr::filter(., !is.na(se)))
+  prot <- sentinels[["prot"]][r]
   invisible(sapply(1:length(result_filtered), function(i) {
-    if (!is.null(result_filtered[[i]])) {
-       f <- file.path(analysis, "coloc", "eQTLCatalogue", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
-       gz <- gzfile(f, "w")
-       write.table(result_filtered[[i]], file = gz, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
-       close(gz)
-    }
+      if (!is.null(result_filtered[[i]])) {
+          prot_name <- names(result_filtered)[i]
+          if (!is.null(prot_name)) {
+              f <- file.path(analysis, "coloc", "eQTLCatalogue", "sumstats", paste0(prot, "-", prot_name, ".gz"))
+              gz <- gzfile(f, "w")
+              write.table(result_filtered[[i]], file = gz, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+              close(gz)
+          } else {
+              warning(paste("Missing name for index", i))
+          }
+      }
   }))
   purrr::map_df(result_filtered, ~run_coloc(., gwas_stats_hg38), .id = "unique_id")
 }
@@ -178,7 +190,8 @@ all_coloc <- function(prot,chr,ensGene,chain,region37,region38,out)
 single_run <- function(r, batch="GTEx")
 {
   sentinel <- sentinels[r,]
-  chr <- with(sentinel,geneChrom)
+  prot <- sentinel[["prot"]]
+  chr <- sentinel[["geneChrom"]]
   ensRegion37 <- with(sentinel,
                       {
                         start <- geneStart-M
@@ -195,9 +208,9 @@ single_run <- function(r, batch="GTEx")
   f <- file.path(analysis,"coloc",batch,with(sentinel,paste0(prot,"-",SNP)))
   if (batch=="GTEx")
   {
-    gtex_coloc(sentinel[["prot"]],chr,ensGene,chain,ensRegion37,ensRegion38,f)
+    gtex_coloc(prot,chr,ensGene,chain,ensRegion37,ensRegion38,f)
   } else {
-    ge_coloc(sentinel[["prot"]],chr,ensGene,chain,ensRegion37,ensRegion38,f)
+    ge_coloc(prot,chr,ensGene,chain,ensRegion37,ensRegion38,f)
   }
 }
 
@@ -338,7 +351,6 @@ fp <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv"
 tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
 
 r <- as.integer(Sys.getenv("r"))
-prot <- sentinels[r,"prot"]
 single_run(r)
 single_run(r,batch="eQTLCatalogue")
 

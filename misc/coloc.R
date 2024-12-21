@@ -90,8 +90,8 @@ gtex <- function(gwas_stats_hg38,ensGene,region38)
   result_filtered <- purrr::map(result_list[lapply(result_list,nrow)!=0],
                                 ~dplyr::filter(., !is.na(se)))
   invisible(sapply(1:49, function(i) {
-    f <- file.path(analysis, "coloc", "GTEx", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
     if (!is.null(result_filtered[[i]])) {
+       f <- file.path(analysis, "coloc", "GTEx", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
        gz <- gzfile(f, "w")
        write.table(result_filtered[[i]], file = gz, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
        close(gz)
@@ -118,6 +118,7 @@ ge <- function(gwas_stats_hg38,ensGene,region38)
                                 ~dplyr::filter(., !is.na(se)))
   invisible(sapply(1:length(result_filtered), function(i) {
     if (!is.null(result_filtered[[i]])) {
+       f <- file.path(analysis, "coloc", "eQTLCatalogue", "sumstats", paste0(prot, "-", names(result_filtered)[i], ".gz"))
        gz <- gzfile(f, "w")
        write.table(result_filtered[[i]], file = gz, col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
        close(gz)
@@ -224,18 +225,50 @@ collect <- function(batch="GTEx")
                                     Protein=Protein,Gene=Gene)
              })
   seqlevelsStyle(gr) <- "UCSC"
-  gr38=rtracklayer::liftOver(gr,chain)
+  gr38 <- rtracklayer::liftOver(gr,chain)
+  gr38_new <- lapply(gr38, function(gr) {
+    valid_start <- start(gr)[!is.na(start(gr))]
+    valid_end <- end(gr)[!is.na(end(gr))]
+    if (length(valid_start) > 0 && length(valid_end) > 0) {
+      min_start <- min(valid_start)
+      min_end <- min(valid_end)
+      new_gr <- GRanges(
+        seqnames = seqnames(gr)[1],
+        ranges = IRanges(start = min_start, end = min_end),
+        strand = strand(gr)[1],
+        Protein = ifelse(length(mcols(gr)$Protein) > 0, unique(mcols(gr)$Protein)[1], NA),
+        Gene = ifelse(length(mcols(gr)$Gene) > 0, unique(mcols(gr)$Gene)[1], NA)
+      )
+      return(new_gr)
+    } else {
+      return(NULL)
+    }
+  })
+  gr38_new <- gr38_new[!sapply(gr38_new, is.null)]
+  df38 <- do.call(rbind, lapply(gr38_new, function(gr) {
+             data.frame(
+                seqnames = as.character(seqnames(gr)),
+                start = start(gr),
+                end = end(gr),
+                strand = as.character(strand(gr)),
+                Protein = mcols(gr)$Protein,
+                Gene = mcols(gr)$Gene
+             )
+             })) %>%
+          mutate(range38=paste0(gsub("chr","",seqnames),":",start,"-",end)) %>%
+          select(Protein,Gene,range38)
   caprion_upd <- pQTLdata::caprion %>%
-                 mutate(prot=gsub("_HUMAN","",Protein),gene=Gene)
+                 mutate(prot=gsub("_HUMAN","",Protein),gene=Gene) %>%
+                 left_join(df38)
   df <- dplyr::rename(df_coloc,H0=PP.H0.abf,H1=PP.H1.abf,H2=PP.H2.abf,H3=PP.H3.abf,H4=PP.H4.abf) %>%
-        dplyr::left_join(caprion_upd[c("prot","gene")])
+        dplyr::left_join(caprion_upd[c("prot","gene","range38")])
   if (batch=="GTEx") {
     df_coloc <- within(df,{qtl_id <- gsub("GTEx_V8_","",qtl_id)})
     write.table(subset(df,H4>=0.8),file=file.path(analysis,"coloc","GTEx.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
     write.table(df,file=file.path(analysis,"coloc","GTEx-all.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
-    coloc <- merge(df_coloc,caprion_upd[c("prot","gene")]) %>%
+    coloc <- merge(df_coloc,caprion_upd[c("prot","gene","range38")]) %>%
              mutate(prot,
                     H0=round(H0,2),
                     H1=round(H1,2),
@@ -251,7 +284,7 @@ collect <- function(batch="GTEx")
                 quote=FALSE,row.names=FALSE,sep="\t")
     write.table(df,file=file.path(analysis,"coloc","eQTLCatalogue-all.tsv"),
                 quote=FALSE,row.names=FALSE,sep="\t")
-    eQTLCatalogue <- left_join(df,caprion_upd[c("prot","gene")]) %>%
+    eQTLCatalogue <- left_join(df,caprion_upd[c("prot","gene","range38")]) %>%
                      mutate(prot,
                             H0=round(H0,2),
                             H1=round(H1,2),
@@ -297,6 +330,10 @@ updates <- as.data.frame(scan(file=textConnection(sevens),what=list("","","",0,0
            setNames(c("ensGenes","dash","gene","chromosome","start38","end38"))
 caprion <- left_join(pQTLdata::caprion,updates)
 sentinels <- subset(read.csv(file.path(analysis,"work","caprion_dr.cis.vs.trans")),cis)
+f <- file.path(analysis,"work","snpid_dr.lst")
+prot_rsid <- select(sentinels,prot,SNP) %>%
+             dplyr::left_join(read.table(f,header=TRUE),by=c('SNP'='snpid')) %>%
+             transmute(prot,SNP=dplyr::if_else(is.na(rsid)|rsid==".",SNP,rsid))
 fp <- file.path(find.package("pQTLtools"),"eQTL-Catalogue","tabix_ftp_paths.tsv")
 tabix_paths <- read.delim(fp, stringsAsFactors = FALSE) %>% dplyr::as_tibble()
 
@@ -304,11 +341,6 @@ r <- as.integer(Sys.getenv("r"))
 prot <- sentinels[r,"prot"]
 single_run(r)
 single_run(r,batch="eQTLCatalogue")
-
-f <- file.path(analysis,"work","snpid_dr.lst")
-prot_rsid <- select(sentinels,prot,SNP) %>%
-             dplyr::left_join(read.table(f,header=TRUE),by=c('SNP'='snpid')) %>%
-             transmute(prot,SNP=dplyr::if_else(is.na(rsid)|rsid==".",SNP,rsid))
 
 #collect()
 #collect(batch="eQTLCatalogue")

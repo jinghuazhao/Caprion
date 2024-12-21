@@ -141,6 +141,27 @@ function eQTLCatalogue()
   '
 }
 
+function coloc()
+{
+  Rscript -e '
+    suppressMessages(library(dplyr))
+    suppressMessages(library(jsonlite))
+    analysis <- Sys.getenv("analysis")
+    GTEx <- read.delim(file.path(analysis,"coloc","save","GTEx.tsv")) %>%
+            mutate(fp=file.path("GTEx",paste0(prot,"-",qtl_id,".json.gz")))
+    eQTLCatalogue <- read.delim(file.path(analysis,"coloc","save","eQTLCatalogue.tsv")) %>%
+            mutate(fp=file.path("eQTLCatalogue",paste0(prot,"-",unique_id,".json.gz"))) %>%
+            rename(qtl_id=unique_id)
+    tophits <- rbind(GTEx,eQTLCatalogue) %>%
+               select(prot,snpid,qtl_id,H4,gene,fp)
+    json_data <- toJSON(tophits,auto_unbox=TRUE,pretty=FALSE)
+    write(json_data, file = file.path(analysis,"json","coloc.json"))
+    gz <- gzfile(file.path(analysis,"json","coloc.json.gz"), "w")
+    writeLines(json_data, gz)
+    close(gz)
+  '
+}
+
 function umich()
 {
   curl https://portaldev.sph.umich.edu/api/v1/statistic/single/ > single.json

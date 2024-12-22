@@ -85,6 +85,9 @@ function lz_json()
 
 function gtex()
 {
+  if [ -d ${analysis}/json/GTEx/sumstats ]; then
+     mkdir -p ${analysis}/json/GTEx/sumstats
+  fi
   awk 'NR>1{print $1,$2,$3,$4}' ${analysis}/coloc/GTEx.tsv | \
   parallel -C ' ' '
   export prot={1}
@@ -99,21 +102,33 @@ function gtex()
     rsid <- Sys.getenv(\"rsid\")
     snpid <- Sys.getenv(\"snpid\")
     tissue <- Sys.getenv(\"tissue\")
-    if (!dir.exists(file.path(analysis,\"json\",\"GTEx\"))) dir.create(file.path(analysis,\"json\",\"GTEx\"))
-    f <- file.path(analysis,\"coloc\",\"GTEx\",\"sumstats\")
-    sumstats <- read.delim(file.path(f,paste0(prot,\"-\",tissue,\".gz\"))) %>%
-                dplyr::mutate(log_pvalue=-log10(pvalue),ref_allele=ref,alt_allele=alt) %>%
-                dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
+    print(paste0(prot,\"-\",tissue))
+    dir <- file.path(analysis,\"coloc\",\"sumstats\")
+    pGWAS_sumstats <- read.delim(file.path(dir,paste0(prot,\"-\",snpid,\".gz\"))) %>%
+                      dplyr::mutate(log_pvalue=LP,variant=id,ref_allele=REF,alt_allele=ALT,beta=ES,se=SE) %>%
+                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
+    pGWAS_json <- jsonlite::toJSON(list(id=paste0(prot,\"-\",tissue),data=pGWAS_sumstats),auto_unbox=TRUE,pretty=FALSE)
+    gz <- gzfile(file.path(dir,paste0(prot,\"-\",snpid,\".json.gz\")))
+    write(pGWAS_json,file=gz)
+    close(gz)
+    dir <- file.path(analysis,\"coloc\",\"GTEx\",\"sumstats\")
+    GTEx_sumstats <- read.delim(file.path(dir,paste0(prot,\"-\",tissue,\".gz\"))) %>%
+                     dplyr::mutate(log_pvalue=-log10(pvalue),ref_allele=ref,alt_allele=alt) %>%
+                     dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
     j <- gzfile(file.path(analysis,\"json\",\"GTEx\",paste0(prot,\"-\",tissue,\".json.gz\")))
-    sink(j)
-    print(jsonlite::toJSON(list(ppid=paste0(prot),data=sumstats),auto_unbox=TRUE,pretty=FALSE))
-    sink()
+    GTEx_json <- jsonlite::toJSON(list(id=paste0(prot,\"-\",snpid,\"-\",tissue),data=GTEx_sumstats),
+                                  auto_unbox=TRUE,pretty=FALSE)
+    write(GTEx_json,file=j)
+    close(j)
   "
   '
 }
 
-function eQTLCatalogue()
+function eqtlcatalogue()
 {
+  if [ -d ${analysis}/json/eQTLCatalogue/sumstats ]; then
+     mkdir -p ${analysis}/json/eQTLCatalogue/sumstats
+  fi
   awk 'NR>1{print $1,$2,$3,$4}' ${analysis}/coloc/eQTLCatalogue.tsv | \
   parallel -C ' ' '
   export prot={1}
@@ -128,15 +143,24 @@ function eQTLCatalogue()
     rsid <- Sys.getenv(\"rsid\")
     snpid <- Sys.getenv(\"snpid\")
     tissue <- Sys.getenv(\"tissue\")
-    if (!dir.exists(file.path(analysis,\"json\",\"eQTLCatalogue\"))) dir.create(file.path(analysis,\"json\",\"eQTLCatalogue\"))
-    f <- file.path(analysis,\"coloc\",\"eQTLCatalogue\",\"sumstats\")
-    sumstats <- read.delim(file.path(f,paste0(prot,\"-\",tissue,\".gz\"))) %>%
-                dplyr::mutate(log_pvalue=-log10(pvalue),ref_allele=ref,alt_allele=alt) %>%
-                dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
+    print(paste0(prot,\"-\",tissue))
+    dir <- file.path(analysis,\"coloc\",\"sumstats\")
+    pGWAS_sumstats <- read.delim(file.path(dir,paste0(prot,\"-\",snpid,\".gz\"))) %>%
+                      dplyr::mutate(log_pvalue=LP,variant=id,ref_allele=REF,alt_allele=ALT,beta=ES,se=SE) %>%
+                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
+    pGWAS_json <- jsonlite::toJSON(list(id=paste(prot,\"-\",tissue),data=pGWAS_sumstats),auto_unbox=TRUE,pretty=FALSE)
+    gz <- gzfile(file.path(dir,paste0(prot,\"-\",snpid,\".json.gz\")))
+    write(pGWAS_json,file=gz)
+    close(gz)
+    dir <- file.path(analysis,\"coloc\",\"eQTLCatalogue\",\"sumstats\")
+    eQTLCatalogue_sumstats <- read.delim(file.path(dir,paste0(prot,\"-\",tissue,\".gz\"))) %>%
+                              dplyr::mutate(log_pvalue=-log10(pvalue),ref_allele=ref,alt_allele=alt) %>%
+                              dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
     j <- gzfile(file.path(analysis,\"json\",\"eQTLCatalogue\",paste0(prot,\"-\",tissue,\".json.gz\")))
-    sink(j)
-    print(jsonlite::toJSON(list(ppid=paste0(prot),data=sumstats),auto_unbox=TRUE,pretty=FALSE))
-    sink()
+    eQTLCatalogue_json <- jsonlite::toJSON(list(id=paste0(prot,\"-\",snpid,\"-\",tissue),data=eQTLCatalogue_sumstats),
+                                           auto_unbox=TRUE,pretty=FALSE)
+    write(eQTLCatalogue_json,file=j)
+    close(j)
   "
   '
 }
@@ -147,13 +171,14 @@ function coloc()
     suppressMessages(library(dplyr))
     suppressMessages(library(jsonlite))
     analysis <- Sys.getenv("analysis")
-    GTEx <- read.delim(file.path(analysis,"coloc","save","GTEx.tsv")) %>%
+    GTEx <- read.delim(file.path(analysis,"coloc","GTEx.tsv")) %>%
             mutate(fp=file.path("GTEx",paste0(prot,"-",qtl_id,".json.gz")))
-    eQTLCatalogue <- read.delim(file.path(analysis,"coloc","save","eQTLCatalogue.tsv")) %>%
+    eQTLCatalogue <- read.delim(file.path(analysis,"coloc","eQTLCatalogue.tsv")) %>%
             mutate(fp=file.path("eQTLCatalogue",paste0(prot,"-",unique_id,".json.gz"))) %>%
             rename(qtl_id=unique_id)
     tophits <- rbind(GTEx,eQTLCatalogue) %>%
-               select(prot,snpid,qtl_id,H4,gene,fp)
+               select(prot,snpid,qtl_id,H4,gene,fp) %>%
+               setNames(c("protein","snpid","eqtl","h4","gene","fp"))
     json_data <- toJSON(tophits,auto_unbox=TRUE,pretty=FALSE)
     write(json_data, file = file.path(analysis,"json","coloc.json"))
     gz <- gzfile(file.path(analysis,"json","coloc.json.gz"), "w")
@@ -180,8 +205,11 @@ function umich()
   '
 }
 
-gz_json
-lz_json
+#gz_json
+#lz_json
+gtex
+eqtlcatalogue
+coloc
 
 function legacy()
 # code for caprion_dr.js

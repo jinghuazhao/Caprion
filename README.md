@@ -51,7 +51,7 @@ One could browse files as well as mirrors of two web sites.
 
 1. SRCF. The mirror is within the following subdirectory: `/srcf`.
 2. Web site. This is from `/site` as above.
-3. Colocalisation. See json/coloc.html.
+3. Colocalisation. See /json/coloc.html.
 4. Isotopes associated with >1 proteins, /dup/json/dup.htm
 
 ## Non-CSD3 browser(s)

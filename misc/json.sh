@@ -101,14 +101,15 @@ function gtex()
     tissue <- Sys.getenv(\"tissue\")
     print(paste0(prot,\"-\",tissue))
     pGWAS_sumstats <- read.delim(file.path(analysis,\"coloc\",\"sumstats\",paste0(prot,\"-\",snpid,\".gz\"))) %>%
-                      dplyr::mutate(log_pvalue=LP,variant=gsub(\"chr\",\"\",id),ref_allele=REF,alt_allele=ALT,beta=ES,se=SE) %>%
-                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
+                      dplyr::mutate(REF=toupper(REF),ALT=toupper(ALT),variant=paste0(chromosome,\":\",position,\"_\",REF,\"/\",ALT)) %>%
+                      dplyr::mutate(log_pvalue=LP,ref_allele=REF,alt_allele=ALT,alt_allele_freq=AF,beta=ES,se=SE) %>%
+                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se)
     GTEx_sumstats <- read.delim(file.path(analysis,\"coloc\",\"GTEx\",\"sumstats\",paste0(prot,\"-\",tissue,\".gz\"))) %>%
-                     dplyr::mutate(variant=gsub(\"chr\",\"\",sub(\"_\",\":\",variant)),
-                                   log_pvalue=-log10(pvalue),ref_allele=ref,alt_allele=alt) %>%
-                     dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
+                     dplyr::mutate(REF=toupper(ref),ALT=toupper(alt),variant=paste0(chromosome,\":\",position,\"_\",REF,\"/\",ALT)) %>%
+                     dplyr::mutate(log_pvalue=-log10(pvalue),ref_allele=REF,alt_allele=ALT,alt_allele_freq=ac/an) %>%
+                     dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se)
     j <- gzfile(file.path(analysis,\"json\",\"pqtleqtl\",paste0(prot,\"-\",tissue,\".json.gz\")))
-    combined_json <- jsonlite::toJSON(list(pqtl=pGWAS_sumstats,eqtl=GTEx_sumstats),pretty=FALSE)
+    combined_json <- jsonlite::toJSON(list(pqtl=pGWAS_sumstats,eqtl=GTEx_sumstats),pretty=TRUE)
     write(combined_json,file=j)
     close(j)
   "
@@ -133,14 +134,15 @@ function eqtlcatalogue()
     tissue <- Sys.getenv(\"tissue\")
     print(paste0(prot,\"-\",tissue))
     pGWAS_sumstats <- read.delim(file.path(analysis,\"coloc\",\"sumstats\",paste0(prot,\"-\",snpid,\".gz\"))) %>%
-                      dplyr::mutate(log_pvalue=LP,variant=gsub(\"chr\",\"\",id),ref_allele=REF,alt_allele=ALT,beta=ES,se=SE) %>%
-                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
-     eQTLCatalogue_sumstats <- read.delim(file.path(analysis,\"coloc\",\"eQTLCatalogue\",\"sumstats\",paste0(prot,\"-\",tissue,\".gz\"))) %>%
-                              dplyr::mutate(variant=gsub(\"chr\",\"\",sub(\"_\",\":\",variant)),
-                                            log_pvalue=-log10(pvalue),ref_allele=ref,alt_allele=alt) %>%
-                              dplyr::select(chromosome,position,variant,ref_allele,alt_allele,log_pvalue,beta,se)
+                      dplyr::mutate(REF=toupper(REF),ALT=toupper(ALT),variant=paste0(chromosome,\":\",position,\"_\",REF,\"/\",ALT)) %>%
+                      dplyr::mutate(log_pvalue=LP,ref_allele=REF,alt_allele=ALT,alt_allele_freq=AF,beta=ES,se=SE) %>%
+                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se)
+    eQTLCatalogue_sumstats <- read.delim(file.path(analysis,\"coloc\",\"eQTLCatalogue\",\"sumstats\",paste0(prot,\"-\",tissue,\".gz\"))) %>%
+                              dplyr::mutate(REF=toupper(ref),ALT=toupper(alt),variant=paste0(chromosome,\":\",position,\"_\",REF,\"/\",ALT)) %>%
+                              dplyr::mutate(log_pvalue=-log10(pvalue),ref_allele=REF,alt_allele=ALT,alt_allele_freq=ac/an) %>%
+                              dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se)
     j <- gzfile(file.path(analysis,\"json\",\"pqtleqtl\",paste0(prot,\"-\",tissue,\".json.gz\")))
-    combined_json <- jsonlite::toJSON(list(pqtl=pGWAS_sumstats,eqtl=eQTLCatalogue_sumstats),pretty=FALSE)
+    combined_json <- jsonlite::toJSON(list(pqtl=pGWAS_sumstats,eqtl=eQTLCatalogue_sumstats),pretty=TRUE)
     write(combined_json,file=j)
     close(j)
   "
@@ -154,14 +156,14 @@ function coloc()
     suppressMessages(library(jsonlite))
     analysis <- Sys.getenv("analysis")
     GTEx <- read.delim(file.path(analysis,"coloc","GTEx.tsv")) %>%
-            mutate(source="GTEx",fp=file.path("pqtleqtl",paste0(prot,"-",qtl_id,".json.gz")))
+            mutate(fp=file.path("pqtleqtl",paste0(prot,"-",qtl_id,".json.gz")))
     eQTLCatalogue <- read.delim(file.path(analysis,"coloc","eQTLCatalogue.tsv")) %>%
             rename(qtl_id=unique_id) %>%
-            mutate(source="eQTLCatalogue",fp=file.path("pqtleqtl",paste0(prot,"-",qtl_id,".json.gz")))
+            mutate(fp=file.path("pqtleqtl",paste0(prot,"-",qtl_id,".json.gz")))
     tophits <- rbind(GTEx,eQTLCatalogue) %>%
-               select(prot,snpid,qtl_id,H4,gene,source,fp) %>%
-               setNames(c("protein","snpid","eqtl","h4","gene","source","fp"))
-    json_data <- toJSON(tophits,auto_unbox=TRUE,pretty=FALSE)
+               select(prot,snpid,qtl_id,H4,gene,fp) %>%
+               setNames(c("protein","snpid","eqtl","h4","gene","fp"))
+    json_data <- toJSON(tophits,pretty=TRUE)
     write(json_data, file = file.path(analysis,"json","coloc.json"))
     gz <- gzfile(file.path(analysis,"json","coloc.json.gz"), "w")
     writeLines(json_data, gz)

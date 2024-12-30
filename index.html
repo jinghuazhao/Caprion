@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Caprion analysis</title>
+  <title>Caprion Analysis Portal</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,6 +27,11 @@
       font-size: 36px;
       margin: 0;
     }
+    h2 {
+      text-align: left;
+      margin-left: 20px;
+      color: #333;
+    }
     .container {
       display: flex;
       justify-content: space-around;
@@ -36,7 +41,7 @@
     }
     .menu-item {
       background-color: #ffffff;
-      padding: 20px;
+      padding: 15px;
       width: 200px;
       text-align: center;
       border: 1px solid #ccc;
@@ -57,6 +62,15 @@
     .menu-item a:hover {
       text-decoration: underline;
     }
+    .description {
+      font-size: 16px;
+      color: #333;
+      margin-top: 20px;
+      padding-left: 20px;
+      list-style-type: disc;
+      width: 70%; /* Make the description wider */
+      margin-bottom: 30px;
+    }
     footer {
       margin-top: auto;
       padding: 20px;
@@ -70,23 +84,53 @@
 <body>
 
   <header>
-    <h1>Caprion analysis Portal</h1>
+    <h1>Caprion Analysis Portal</h1>
   </header>
 
   <div class="container">
     <div class="menu-item">
-      <a href="json/coloc.html" target="_blank">Colocalization Analysis</a>
-    </div>
-    <div class="menu-item">
-      <a href="srcf/index.html" target="_blank">SRCF</a>
-    </div>
-    <div class="menu-item">
       <a href="site/index.html" target="_blank">Caprion site</a>
     </div>
     <div class="menu-item">
-      <a href="dup/json/dup.htm" target="_blank">Duplication Analysis</a>
+      <a href="srcf/index.html" target="_blank">SRCF site</a>
+    </div>
+    <div class="menu-item">
+      <a href="json/coloc.html" target="_blank">Colocalization Analysis</a>
+    </div>
+    <div class="menu-item">
+      <a href="dup/json/dup.htm" target="_blank">Duplication results</a>
     </div>
   </div>
+
+  <!-- Collated Description List -->
+  <h2>A summary</h2>
+  <ul class="description">
+    <li><strong>Caprion site</strong>
+      <ul>
+        <li>Details of the implementation.</li>
+        <li>Also available as a GitHub site.</li>
+        <li>...</li>
+      </ul>
+    </li>
+    <li><strong>SRCF site</strong>
+      <ul>
+        <li>Mirror of SRCF</li>
+        <li>...</li>
+      </ul>
+    </li>
+    <li><strong>Colocalization Analysis</strong>
+      <ul>
+        <li>GTEx/eQTL colocalization.</li>
+        <li>...</li>
+      </ul>
+    </li>
+    <li><strong>Duplication results</strong>
+      <ul>
+        <li>Results for isotopes mapping to >1 proteins.</li>
+        <li>...</li>
+      </ul>
+    </li>
+  </ul>
 
   <footer>
     <p>&copy; 2024 cambridge-ceu. All rights reserved.</p>

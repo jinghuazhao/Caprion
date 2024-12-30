@@ -15,6 +15,8 @@ setup
 mkdocs build
 mkdocs gh-deploy
 
+git add index.html
+git commit -m 'LocusZoom.js plots'
 git add workflow
 git commit -m "Snakemake profiles"
 git add .gitignore

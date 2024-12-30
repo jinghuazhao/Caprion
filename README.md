@@ -54,6 +54,8 @@ One could browse files as well as mirrors of two web sites.
 3. Colocalisation. See /json/coloc.html.
 4. Isotopes associated with >1 proteins, /dup/json/dup.htm
 
+To facilitate navigation, an `index.html` is created in place, so `python3 -m http.server 8000 &` is started from `/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis`.
+
 ## Non-CSD3 browser(s)
 
 This approach seems less problematic with `user-data-dir` mentioned above. We can again set up tunneling from CSD3 with

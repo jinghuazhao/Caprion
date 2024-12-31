@@ -109,13 +109,14 @@ function gtex()
     gwas_granges <- with(gwas_stats,GRanges(seqnames = paste0(\"chr\",dplyr::if_else(chromosome==23,\"X\",paste(chromosome))),
                          ranges = IRanges(start = position, end = position),
                          chromosome = chromosome, position = position,
-                         variant=variant,ref_allele=ref_allele,alt_allele=alt_allele,alt_allele_freq=alt_allele_freq,
+                         ref_allele=ref_allele,alt_allele=alt_allele,alt_allele_freq=alt_allele_freq,
                          log_pvalue=log_pvalue,beta=beta,se=se))
     gwas_stats_hg37 <- rtracklayer::liftOver(gwas_granges, chain) %>%
                        unlist() %>%
                        dplyr::as_tibble() %>%
-                       dplyr::transmute(chromosome = seqnames,
-                                        position = start,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
+                       dplyr::transmute(chromosome = seqnames, position = start,
+                                        variant = paste0(chromosome,\":\",position,\"_\",ref_allele,\"/\",alt_allele),
+                                        ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
                        dplyr::mutate(id = paste(chromosome, position, sep = \":\")) %>%
                        dplyr::group_by(id) %>%
                        dplyr::mutate(row_count = n()) %>%
@@ -167,13 +168,14 @@ function eqtlcatalogue()
     gwas_granges <- with(gwas_stats,GRanges(seqnames = paste0(\"chr\",dplyr::if_else(chromosome==23,\"X\",paste(chromosome))),
                          ranges = IRanges(start = position, end = position),
                          chromosome = chromosome, position = position,
-                         variant=variant,ref_allele=ref_allele,alt_allele=alt_allele,alt_allele_freq=alt_allele_freq,
+                         ref_allele=ref_allele,alt_allele=alt_allele,alt_allele_freq=alt_allele_freq,
                          log_pvalue=log_pvalue,beta=beta,se=se))
     gwas_stats_hg37 <- rtracklayer::liftOver(gwas_granges, chain) %>%
                        unlist() %>%
                        dplyr::as_tibble() %>%
-                       dplyr::transmute(chromosome = seqnames,
-                                        position = start,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
+                       dplyr::transmute(chromosome = seqnames, position = start,
+                                        variant = paste0(chromosome,\":\",position,\"_\",ref_allele,\"/\",alt_allele),
+                                        ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
                        dplyr::mutate(id = paste(chromosome, position, sep = \":\")) %>%
                        dplyr::group_by(id) %>%
                        dplyr::mutate(row_count = n()) %>%

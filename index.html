@@ -190,11 +190,11 @@ if lsof -i :${pn}; then
 else
     python3 -m http.server ${pn} &amp;
     server_pid=$!
-    edge http://localhost:${pn} &amp;
+    edge http://127.0.0.1:${pn} &amp;
 fi
 </code></pre>
 <p>where the port number can be released with <code>kill $server_pid</code> (can be checked with <code>ps</code>). In case it does now show, use</p>
-<p><code>edge --user-data-dir=${TMPDIR} http://localhost:${pn} &amp;</code></p>
+<p><code>edge --user-data-dir=${TMPDIR} http://127.0.0.1:${pn} &amp;</code></p>
 <p>in replace of <code>~/.config/microsoft-edge</code>, where TMPDIR is a directory name.</p>
 <p>One could browse files as well as mirrors of two web sites.</p>
 <ol>
@@ -203,7 +203,7 @@ fi
 <li>Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.</li>
 <li>Isotopes associated with &gt;1 proteins, /dup/json/dup.htm</li>
 </ol>
-<p>To facilitate navigation, an <code>index.html</code> is created in place, so <code>python3 -m http.server 8000 &amp;</code> is started from <code>/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis</code>.</p>
+<p>To facilitate navigation, an <code>index.html</code> is created in place, so <code>python3 -m http.server 8000 &amp;</code> starts a home page.</p>
 <h2 id="non-csd3-browsers">Non-CSD3 browser(s)</h2>
 <p>This approach seems less problematic with <code>user-data-dir</code> mentioned above. We can again set up tunneling from CSD3 with</p>
 <pre><code class="language-bash">python3 -m http.server 8000 &amp;
@@ -298,5 +298,5 @@ hostname
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-12-31 12:11:25.119382+00:00
+Build Date UTC : 2024-12-31 17:44:44.002636+00:00
 -->

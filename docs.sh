@@ -23,6 +23,8 @@ git add .gitignore
 git commit -m ".gitignore"
 git add README.md
 git commit -m "README"
+git add docs.sh
+git commit -m "docs.sh"
 git add docs/
 git commit -m "docs"
 git add pilot/

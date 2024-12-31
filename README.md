@@ -37,13 +37,13 @@ if lsof -i :${pn}; then
 else
     python3 -m http.server ${pn} &
     server_pid=$!
-    edge http://localhost:${pn} &
+    edge http://127.0.0.1:${pn} &
 fi
 ```
 
 where the port number can be released with `kill $server_pid` (can be checked with `ps`). In case it does now show, use
 
-`edge --user-data-dir=${TMPDIR} http://localhost:${pn} &`
+`edge --user-data-dir=${TMPDIR} http://127.0.0.1:${pn} &`
 
 in replace of `~/.config/microsoft-edge`, where TMPDIR is a directory name.
 
@@ -54,7 +54,7 @@ One could browse files as well as mirrors of two web sites.
 3. Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.
 4. Isotopes associated with >1 proteins, /dup/json/dup.htm
 
-To facilitate navigation, an `index.html` is created in place, so `python3 -m http.server 8000 &` is started from `/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis`.
+To facilitate navigation, an `index.html` is created in place, so `python3 -m http.server 8000 &` starts a home page.
 
 ## Non-CSD3 browser(s)
 

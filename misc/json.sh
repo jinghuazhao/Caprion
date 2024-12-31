@@ -94,22 +94,47 @@ function gtex()
   Rscript -e "
     suppressMessages(library(dplyr))
     suppressMessages(library(jsonlite))
+    suppressMessages(library(rtracklayer))
     analysis <- Sys.getenv(\"analysis\")
+    hpc_work <- Sys.getenv(\"HPC_WORK\")
     prot <- Sys.getenv(\"prot\")
     rsid <- Sys.getenv(\"rsid\")
     snpid <- Sys.getenv(\"snpid\")
     tissue <- Sys.getenv(\"tissue\")
     print(paste0(prot,\"-\",tissue))
+    f <- file.path(hpc_work,\"bin\",\"hg38ToHg19.over.chain\")
+    chain <- rtracklayer::import.chain(f)
+    liftOver <- function(gwas_stats)
+    {
+    gwas_granges <- with(gwas_stats,GRanges(seqnames = paste0(\"chr\",dplyr::if_else(chromosome==23,\"X\",paste(chromosome))),
+                         ranges = IRanges(start = position, end = position),
+                         chromosome = chromosome, position = position,
+                         variant=variant,ref_allele=ref_allele,alt_allele=alt_allele,alt_allele_freq=alt_allele_freq,
+                         log_pvalue=log_pvalue,beta=beta,se=se))
+    gwas_stats_hg37 <- rtracklayer::liftOver(gwas_granges, chain) %>%
+                       unlist() %>%
+                       dplyr::as_tibble() %>%
+                       dplyr::transmute(chromosome = seqnames,
+                                        position = start,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
+                       dplyr::mutate(id = paste(chromosome, position, sep = \":\")) %>%
+                       dplyr::group_by(id) %>%
+                       dplyr::mutate(row_count = n()) %>%
+                       dplyr::ungroup() %>%
+                       dplyr::filter(row_count == 1) %>%
+                       mutate(chromosome=gsub(\"chr\",\"\",chromosome))
+    }
     pGWAS_sumstats <- read.delim(file.path(analysis,\"coloc\",\"sumstats\",paste0(prot,\"-\",snpid,\".gz\"))) %>%
                       dplyr::mutate(REF=toupper(REF),ALT=toupper(ALT),variant=paste0(chromosome,\":\",position,\"_\",REF,\"/\",ALT)) %>%
                       dplyr::mutate(log_pvalue=LP,ref_allele=REF,alt_allele=ALT,alt_allele_freq=AF,beta=ES,se=SE) %>%
-                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se)
+                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
+                      liftOver()
     GTEx_sumstats <- read.delim(file.path(analysis,\"coloc\",\"GTEx\",\"sumstats\",paste0(prot,\"-\",tissue,\".gz\"))) %>%
                      dplyr::mutate(REF=toupper(ref),ALT=toupper(alt),variant=paste0(chromosome,\":\",position,\"_\",REF,\"/\",ALT)) %>%
                      dplyr::mutate(log_pvalue=-log10(pvalue),ref_allele=REF,alt_allele=ALT,alt_allele_freq=ac/an) %>%
-                     dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se)
+                     dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
+                     liftOver()
     j <- gzfile(file.path(analysis,\"json\",\"pqtleqtl\",paste0(prot,\"-\",tissue,\".json.gz\")))
-    combined_json <- jsonlite::toJSON(list(pqtl=pGWAS_sumstats,eqtl=GTEx_sumstats),pretty=TRUE)
+    combined_json <- jsonlite::toJSON(list(pqtl=pGWAS_sumstats,eqtl=GTEx_sumstats),auto_unbox=TRUE,pretty=TRUE)
     write(combined_json,file=j)
     close(j)
   "
@@ -127,22 +152,47 @@ function eqtlcatalogue()
   Rscript -e "
     suppressMessages(library(dplyr))
     suppressMessages(library(jsonlite))
+    suppressMessages(library(rtracklayer))
     analysis <- Sys.getenv(\"analysis\")
+    hpc_work <- Sys.getenv(\"HPC_WORK\")
     prot <- Sys.getenv(\"prot\")
     rsid <- Sys.getenv(\"rsid\")
     snpid <- Sys.getenv(\"snpid\")
     tissue <- Sys.getenv(\"tissue\")
     print(paste0(prot,\"-\",tissue))
+    f <- file.path(hpc_work,\"bin\",\"hg38ToHg19.over.chain\")
+    chain <- rtracklayer::import.chain(f)
+    liftOver <- function(gwas_stats)
+    {
+    gwas_granges <- with(gwas_stats,GRanges(seqnames = paste0(\"chr\",dplyr::if_else(chromosome==23,\"X\",paste(chromosome))),
+                         ranges = IRanges(start = position, end = position),
+                         chromosome = chromosome, position = position,
+                         variant=variant,ref_allele=ref_allele,alt_allele=alt_allele,alt_allele_freq=alt_allele_freq,
+                         log_pvalue=log_pvalue,beta=beta,se=se))
+    gwas_stats_hg37 <- rtracklayer::liftOver(gwas_granges, chain) %>%
+                       unlist() %>%
+                       dplyr::as_tibble() %>%
+                       dplyr::transmute(chromosome = seqnames,
+                                        position = start,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
+                       dplyr::mutate(id = paste(chromosome, position, sep = \":\")) %>%
+                       dplyr::group_by(id) %>%
+                       dplyr::mutate(row_count = n()) %>%
+                       dplyr::ungroup() %>%
+                       dplyr::filter(row_count == 1) %>%
+                       mutate(chromosome=gsub(\"chr\",\"\",chromosome))
+    }
     pGWAS_sumstats <- read.delim(file.path(analysis,\"coloc\",\"sumstats\",paste0(prot,\"-\",snpid,\".gz\"))) %>%
                       dplyr::mutate(REF=toupper(REF),ALT=toupper(ALT),variant=paste0(chromosome,\":\",position,\"_\",REF,\"/\",ALT)) %>%
                       dplyr::mutate(log_pvalue=LP,ref_allele=REF,alt_allele=ALT,alt_allele_freq=AF,beta=ES,se=SE) %>%
-                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se)
+                      dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
+                      liftOver()
     eQTLCatalogue_sumstats <- read.delim(file.path(analysis,\"coloc\",\"eQTLCatalogue\",\"sumstats\",paste0(prot,\"-\",tissue,\".gz\"))) %>%
                               dplyr::mutate(REF=toupper(ref),ALT=toupper(alt),variant=paste0(chromosome,\":\",position,\"_\",REF,\"/\",ALT)) %>%
                               dplyr::mutate(log_pvalue=-log10(pvalue),ref_allele=REF,alt_allele=ALT,alt_allele_freq=ac/an) %>%
-                              dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se)
+                              dplyr::select(chromosome,position,variant,ref_allele,alt_allele,alt_allele_freq,log_pvalue,beta,se) %>%
+                              liftOver()
     j <- gzfile(file.path(analysis,\"json\",\"pqtleqtl\",paste0(prot,\"-\",tissue,\".json.gz\")))
-    combined_json <- jsonlite::toJSON(list(pqtl=pGWAS_sumstats,eqtl=eQTLCatalogue_sumstats),pretty=TRUE)
+    combined_json <- jsonlite::toJSON(list(pqtl=pGWAS_sumstats,eqtl=eQTLCatalogue_sumstats),auto_unbox=TRUE,pretty=TRUE)
     write(combined_json,file=j)
     close(j)
   "

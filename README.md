@@ -51,7 +51,7 @@ One could browse files as well as mirrors of two web sites.
 
 1. Web site. This is from `/site` as above.
 2. SRCF. The mirror is within the following subdirectory: `/srcf`.
-3. Colocalisation. See /json/coloc.html. Somehow hg19 is less LD-informative LD than hg38.
+3. Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.
 4. Isotopes associated with >1 proteins, /dup/json/dup.htm
 
 To facilitate navigation, an `index.html` is created in place, so `python3 -m http.server 8000 &` is started from `/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis`.

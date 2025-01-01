@@ -181,9 +181,7 @@
 <h2 id="local-fileweb-browsing">Local file/web browsing</h2>
 <p>A web-style navigation is furnised via a port number, e.g., 8000,</p>
 <pre><code class="language-bash">cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
-
 module load ceuadmin/edge
-
 export pn=8000
 if lsof -i :${pn}; then
     echo &quot;Port ${pn} is already in use' try another one.&quot;
@@ -194,8 +192,8 @@ else
 fi
 </code></pre>
 <p>where the port number can be released with <code>kill $server_pid</code> (can be checked with <code>ps</code>). In case it does now show, use</p>
-<p><code>edge --user-data-dir=${TMPDIR} http://127.0.0.1:${pn} &amp;</code></p>
-<p>in replace of <code>~/.config/microsoft-edge</code>, where TMPDIR is a directory name.</p>
+<p><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &amp;</code></p>
+<p>in replace of <code>~/.config/microsoft-edge</code>, to use /tmp/edge directory.</p>
 <p>One could browse files as well as mirrors of two web sites.</p>
 <ol>
 <li>Web site. This is from <code>/site</code> as above.</li>
@@ -298,5 +296,5 @@ hostname
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-12-31 17:56:07.980750+00:00
+Build Date UTC : 2025-01-01 09:36:21.410968+00:00
 -->

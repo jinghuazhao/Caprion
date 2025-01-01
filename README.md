@@ -28,9 +28,7 @@ A web-style navigation is furnised via a port number, e.g., 8000,
 
 ```bash
 cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
-
 module load ceuadmin/edge
-
 export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use' try another one."
@@ -43,9 +41,9 @@ fi
 
 where the port number can be released with `kill $server_pid` (can be checked with `ps`). In case it does now show, use
 
-`edge --user-data-dir=${TMPDIR} http://127.0.0.1:${pn} &`
+`edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &`
 
-in replace of `~/.config/microsoft-edge`, where TMPDIR is a directory name.
+in replace of `~/.config/microsoft-edge`, to use /tmp/edge directory.
 
 One could browse files as well as mirrors of two web sites.
 

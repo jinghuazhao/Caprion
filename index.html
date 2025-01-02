@@ -179,10 +179,27 @@
 <li><a href="https://jinghuazhao.github.io/Caprion/Notes/">Notes</a></li>
 </ul>
 <h2 id="local-fileweb-browsing">Local file/web browsing</h2>
-<p>A web-style navigation is furnised via a port number, e.g., 8000,</p>
+<p>A web-style navigation is furnised as follows,</p>
 <pre><code class="language-bash">cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 module load ceuadmin/edge
-export pn=8000
+python3 -m http.server &amp;
+edge http://127.0.0.1:8000 &amp;
+</code></pre>
+<p>where 8000 is a port number (pn).</p>
+<p>In case the browser does not show, use</p>
+<p><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &amp;</code></p>
+<p>'/tmp/edge' directory in replace of <code>~/.config/microsoft-edge</code>.</p>
+<p>One could browse mirrors of two web sites as well as files,</p>
+<ol>
+<li>Caprion site. This is from <code>/site</code> as above.</li>
+<li>SRCF site. The mirror is within the following subdirectory: <code>/srcf</code>.</li>
+<li>Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.</li>
+<li>Multiprotein mapping isotopes, /dup/json/dup.htm</li>
+<li>Supplementary tables.</li>
+</ol>
+<p>To facilitate navigation, an <code>index.html</code> is created in place, so <code>python3 -m http.server 8000 &amp;</code> starts a home page for 1-5 above.</p>
+<p>In case pn is already in use, a different one can be chosen as follows,</p>
+<pre><code class="language-bash">export pn=8000
 if lsof -i :${pn}; then
     echo &quot;Port ${pn} is already in use' try another one.&quot;
 else
@@ -191,17 +208,7 @@ else
     edge http://127.0.0.1:${pn} &amp;
 fi
 </code></pre>
-<p>where the port number can be released with <code>kill $server_pid</code> (can be checked with <code>ps</code>). In case it does now show, use</p>
-<p><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &amp;</code></p>
-<p>in replace of <code>~/.config/microsoft-edge</code>, to use /tmp/edge directory.</p>
-<p>One could browse files as well as mirrors of two web sites.</p>
-<ol>
-<li>Web site. This is from <code>/site</code> as above.</li>
-<li>SRCF. The mirror is within the following subdirectory: <code>/srcf</code>.</li>
-<li>Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.</li>
-<li>Isotopes associated with &gt;1 proteins, /dup/json/dup.htm</li>
-</ol>
-<p>To facilitate navigation, an <code>index.html</code> is created in place, so <code>python3 -m http.server 8000 &amp;</code> starts a home page.</p>
+<p>and pn can be released with <code>kill $server_pid</code> (can be checked with <code>ps</code>).</p>
 <h2 id="non-csd3-browsers">Non-CSD3 browser(s)</h2>
 <p>This approach seems less problematic with <code>user-data-dir</code> mentioned above. We can again set up tunneling from CSD3 with</p>
 <pre><code class="language-bash">python3 -m http.server 8000 &amp;
@@ -296,5 +303,5 @@ hostname
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-01-01 10:00:31.687627+00:00
+Build Date UTC : 2025-01-02 11:14:38.254318+00:00
 -->

@@ -24,11 +24,35 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 ## Local file/web browsing
 
-A web-style navigation is furnised via a port number, e.g., 8000,
+A web-style navigation is furnised as follows,
 
 ```bash
 cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 module load ceuadmin/edge
+python3 -m http.server &
+edge http://127.0.0.1:8000 &
+```
+where 8000 is a port number (pn).
+
+In case the browser does not show, use
+
+`edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &`
+
+'/tmp/edge' directory in replace of `~/.config/microsoft-edge`.
+
+One could browse mirrors of two web sites as well as files,
+
+1. Caprion site. This is from `/site` as above.
+2. SRCF site. The mirror is within the following subdirectory: `/srcf`.
+3. Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.
+4. Multiprotein mapping isotopes, /dup/json/dup.htm
+5. Supplementary tables.
+
+To facilitate navigation, an `index.html` is created in place, so `python3 -m http.server 8000 &` starts a home page for 1-5 above.
+
+In case pn is already in use, a different one can be chosen as follows,
+
+```bash
 export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use' try another one."
@@ -39,20 +63,7 @@ else
 fi
 ```
 
-where the port number can be released with `kill $server_pid` (can be checked with `ps`). In case it does now show, use
-
-`edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &`
-
-in replace of `~/.config/microsoft-edge`, to use /tmp/edge directory.
-
-One could browse files as well as mirrors of two web sites.
-
-1. Web site. This is from `/site` as above.
-2. SRCF. The mirror is within the following subdirectory: `/srcf`.
-3. Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.
-4. Isotopes associated with >1 proteins, /dup/json/dup.htm
-
-To facilitate navigation, an `index.html` is created in place, so `python3 -m http.server 8000 &` starts a home page.
+and pn can be released with `kill $server_pid` (can be checked with `ps`).
 
 ## Non-CSD3 browser(s)
 

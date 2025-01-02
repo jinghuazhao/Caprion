@@ -9,13 +9,13 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 - [autoencoder](pilot/autoencoder)
 - [gwas2](pilot/gwas2)
-- [Pilot studies](pilot/)
+- [Pilot studies](pilot)
 
 ## Analysis
 
-- [Protein analysis](progs/)
+- [Protein analysis](progs)
 - [Peptide analysis](peptide_progs)
-- [Miscellaneous analysis](misc/)
+- [Miscellaneous analysis](misc)
 
 ## Additional information
 

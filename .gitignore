@@ -22,11 +22,12 @@ eQTLCatalog/
 impute/
 json/
 logs/
+OpenTargets/
+output/
 peptide/
 pgwas/
 pgwas_dr/
 ps/
-output/
 reports/
 seer/
 site/

@@ -23,6 +23,7 @@ Program   | Description
 `dup-json.sh` | LocusZoom.js plots
 `dup-plot.sh` | pQTL plots
 `dup-tbl.R` | pQTL table
+`ot.sh` | OpenTargets tests
 `pqtlGWAS.R` | pQTL-GWAS lookup
 `tables.sh` | `Supplementary-Tables.xlsx` generator
 `ToDo.sh` | various staged experiments

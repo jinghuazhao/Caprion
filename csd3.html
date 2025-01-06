@@ -1,0 +1,149 @@
+/<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caprion Analysis Interactive Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      background-color: #f0f8ff;
+    }
+    header {
+      background: linear-gradient(to right, #003b5c, #00578c);
+      width: 100%;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 36px;
+      margin: 0;
+    }
+    .container {
+      display: flex;
+      justify-content: space-around;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding: 30px 10%;
+    }
+    .menu-item {
+      background-color: #ffffff;
+      padding: 15px;
+      width: 200px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .menu-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+    .menu-item a {
+      text-decoration: none;
+      color: #000080;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .menu-item a:hover {
+      text-decoration: underline;
+    }
+    .description {
+      font-size: 16px;
+      color: #333;
+      margin-top: 20px;
+      padding-left: 20px;
+      list-style-type: disc;
+      width: 70%;
+      margin-bottom: 30px;
+    }
+    footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      background: linear-gradient(to right, #002a44, #006c97);
+      color: white;
+      width: 100%;
+    }
+    footer a {
+      color: #66b2ff;
+      text-decoration: none;
+    }
+    footer a:hover {
+      color: #ff9900;
+      text-decoration: underline;
+    }
+    h2 {
+      text-align: left;
+      margin-left: 20px;
+      color: #333;
+      width: 72%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Caprion Analysis Interactive Portal</h1>
+  </header>
+  <div class="container">
+    <div class="menu-item">
+      <a href="srcf/index.html" target="_blank">SRCF web site</a>
+    </div>
+    <div class="menu-item">
+      <a href="json/coloc.html" target="_blank">Colocalization analysis</a>
+    </div>
+    <div class="menu-item">
+      <a href="dup/json/dup.htm" target="_blank">Multiprotein-mapping isotopes</a>
+    </div>
+    <div class="menu-item">
+      <a href="reports/Supplementary-Tables.xlsx" target="_blank">Supplementary tables</a>
+    </div>
+    <div class="menu-item">
+      <a href="site/index.html" target="_blank">GitHub web site</a>
+    </div>
+  </div>
+  <h2>A summary of results</h2>
+  <ul class="description">
+    <li><strong>SRCF web site</strong>
+      <ul>
+        <li>Mirror of SRCF, <a href="https://jhz22.user.srcf.net/Caprion/">https://jhz22.user.srcf.net/Caprion/</a>, which has long been used for logging progress of the project.</li>
+        <li>Protein and peptide association results including LocusZoom.js plots.</li>
+      </ul>
+    </li>
+    <li><strong>Colocalization Analysis</strong>
+      <ul>
+        <li>GTEx/eQTL colocalization.</li>
+        <li>Chromosomal positions are in hg19.</li>
+      </ul>
+    </li>
+    <li><strong>Multiprotein-mapping Isotopes</strong>
+      <ul>
+        <li>Results for isotopes mapping to >1 proteins.</li>
+      </ul>
+    </li>
+    <li><strong>Supplementary tables</strong>
+      <ul>
+        <li>This is an xlsx file automatically generated from the HPC systems.</li>
+      </ul>
+    </li>
+    <li><strong>GitHub web site</strong>
+      <ul>
+        <li>A GitHub repository.</li>
+        <li>A GitHub web site, <a href="https://jinghuazhao.github.io/Caprion/">https://jinghuazhao.github.io/Caprion/</a>.</li>
+      </ul>
+    </li>
+  </ul>
+  <footer>
+    <p>&copy; 2025 <a href="https://cambridge-ceu.github.io/">cambridge-ceu</a>. All rights reserved.</p>
+  </footer>
+</body>
+</html>

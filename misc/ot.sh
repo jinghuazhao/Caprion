@@ -1,9 +1,10 @@
 #!/usr/bin/bash
 
 # https://platform.opentargets.org/api
-# "ENSG00000164308"
+# replaced with "ENSG00000164308"
 
 module load ceuadmin/R
+# Saved output from the web
 Rscript -e '
   ERAP2 <- subset(pQTLdata::caprion,Gene=="ERAP2")
   ERAP2$ensGenes
@@ -11,6 +12,44 @@ Rscript -e '
   diseases_data <- data$data$target$associatedDiseases$rows
   diseases_data <- tidyr::unnest(diseases_data, cols = everything(), names_sep = "_")
   write.table(diseases_data, file = "ERAP2.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+'
+# Replicate from scratch
+Rscript -e '
+library(httr)
+library(jsonlite)
+gene_id <- "ENSG00000164308"
+query_string <- "
+  query target($ensemblId: String!){
+    target(ensemblId: $ensemblId){
+      id
+      approvedSymbol
+      associatedDiseases {
+        count
+        rows {
+          disease {
+            id
+            name
+          }
+          datasourceScores {
+            id
+            score
+          }
+        }
+      }
+    }
+  }
+"
+base_url <- "https://api.platform.opentargets.org/api/v4/graphql"
+variables <- list("ensemblId" = gene_id)
+post_body <- list(query = query_string, variables = variables)
+r <- httr::POST(url = base_url, body = post_body, encode = "json")
+if (status_code(r) == 200) {
+  data <- iconv(r, "latin1", "ASCII")
+  content <- jsonlite::fromJSON(data)
+  write(data,file="ERAP2.json")
+} else {
+  print(paste("Request failed with status code", status_code(r)))
+}
 '
 
 # https://platform-docs.opentargets.org/data-access/graphql-api

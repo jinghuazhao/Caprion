@@ -6,7 +6,7 @@
 module load ceuadmin/R
 # Saved output from the web
 Rscript -e '
-  ERAP2 <- subset(pQTLdata::caprion,Gene=="ERAP2")
+  ERAP2 <- subset(pQTLdata::caprion,grepl("ERAP2",Gene))
   ERAP2$ensGenes
   data <- jsonlite::fromJSON("ERAP2.json")
   diseases_data <- data$data$target$associatedDiseases$rows
@@ -50,6 +50,40 @@ if (status_code(r) == 200) {
 } else {
   print(paste("Request failed with status code", status_code(r)))
 }
+# multiple genes
+library(httr)
+library(jsonlite)
+benchmarks <- subset(pQTLdata::caprion,grepl("A1BG|APOB|ERAP2|PROC",Gene))
+subset(benchmarks,select=c(Gene,ensGenes))
+gene_ids <- benchmarks$ensGenes
+
+query_string <- "
+  query target($ensemblIds: [String!]!){
+    targets(ensemblIds: $ensemblIds){
+      id
+      approvedSymbol
+      associatedDiseases {
+        count
+        rows {
+          disease {
+            id
+            name
+          }
+          datasourceScores {
+            id
+            score
+          }
+        }
+      }
+    }
+  }
+"
+base_url <- "https://api.platform.opentargets.org/api/v4/graphql"
+variables <- list("ensemblIds" = gene_ids)
+post_body <- list(query = query_string, variables = variables)
+r <- httr::POST(url = base_url, body = post_body, encode = "json")
+data <- iconv(r, "latin1", "ASCII")
+content <- jsonlite::fromJSON(data)
 '
 
 # https://platform-docs.opentargets.org/data-access/graphql-api

@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+#SBATCH --account PETERS-SL3-CPU
+#SBATCH --partition icelake-himem
+#SBATCH --mem=28800
+#SBATCH --time=12:00:00
+#SBATCH --job-name=_instanova
+#SBATCH --output=instanovo.o
+#SBATCH --error=instanovo.e
+
+. /etc/profile.d/modules.sh
+module purge
+module load rhel8/default-icl
+
+export TMPDIR=${HPC_WORK}/work
+
+source ~/rds/public_databases/software/InstaNovo/bin/activate
+cd ~/Caprion/analysis/UHZ
+instanovo predict --data-path=mzML/*.mzML --output-path=UHZ.csv
+deactivate

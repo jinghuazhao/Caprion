@@ -54,7 +54,7 @@ Script name| Description          | Protein-specific error/output
 mz.* | file handling & MetaMorpheus, MSAmanda. | mzML and results in */metamorpheus, msamonda
 crux.*  | search, R/multicomp+crux benchmark | crux/
 BoxCar.py/pyteomics.py | BoxCar algorighm and its use
-instanovo.sb | InstaNovo
+instanovo.* | InstaNovo sbatch/ipynb files
 pyopenms.py | pyOpenMS script
 
 ```mermaid

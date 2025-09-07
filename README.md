@@ -36,6 +36,8 @@ where 8000 is a port number (pn).
 
 In case the browser does not show, use
 
+### Microsoft Edge
+
 `edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &`
 
 '/tmp/edge' directory in replace of `~/.config/microsoft-edge`.
@@ -64,6 +66,15 @@ fi
 ```
 
 and pn can be released with `kill $server_pid` (can be checked with `ps`).
+
+### Firefox
+
+As of 7/9/2025, this is feasible with
+
+```bash
+module load ceuadmin/firefox/nightly
+firefox http://127.0.0.1:${pn} &
+```
 
 ## Non-CSD3 browser(s)
 

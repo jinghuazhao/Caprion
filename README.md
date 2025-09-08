@@ -8,8 +8,6 @@
 
 This repository/site is dedicated to protein/peptide quantitative trait analysis using the **Caprion platform**, organized chronologically and logistically into the following sections.
 
----
-
 ## 📊 Pilot Studies
 
 - [Autoencoder](pilot/autoencoder)
@@ -27,8 +25,6 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 - [Caprion Panel Description](https://jinghuazhao.github.io/pQTLdata/reference/caprion.html)
 - [Project Notes](https://jinghuazhao.github.io/Caprion/Notes/)
 
----
-
 ## 🌐 Local File/Web Browsing
 
 A local web-style navigation can be set up as follows:
@@ -44,8 +40,6 @@ firefox http://127.0.0.1:8000 &
 📌 **Note:** Port `8000` is used here, but you can replace it with any free port.
 
 You can also use Microsoft Edge[^edge] or Google Chrome for browsing.
-
----
 
 ## 🗂️ Local Browsing Structure
 
@@ -84,8 +78,6 @@ kill $server_pid
 
 Check active processes with `ps`.
 
----
-
 ## 🔐 Remote (Non-CSD3) Browser Access
 
 Set up SSH tunneling to access your local web server from another machine:
@@ -107,12 +99,12 @@ Then visit: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
----
-
 [^edge]: **Microsoft Edge**
 
-```bash
-module load ceuadmin/edge
-# Use a temporary profile if needed
-edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
-```
+    ```bash
+    module load ceuadmin/edge
+    # ~/.config/microsoft-edge
+    edge http://127.0.0.1:${pn} &
+    # /tmp/edge when not loaded
+    edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
+    ```

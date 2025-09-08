@@ -234,15 +234,11 @@ fi
 <p>Check active processes with <code>ps</code>.</p>
 <h2 id="remote-non-csd3-browser-access">🔐 Remote (Non-CSD3) Browser Access</h2>
 <p>Set up SSH tunneling to access your local web server from another machine:</p>
-<ol>
-<li>Start the server on CSD3:</li>
-</ol>
+<h3 id="1-start-the-server-on-csd3">1. Start the server on CSD3:</h3>
 <pre><code class="language-bash">python3 -m http.server 8000 &amp;
 hostname
 </code></pre>
-<ol>
-<li>On your <strong>local machine</strong>, run:</li>
-</ol>
+<h3 id="2-on-your-local-machine-run">2. On your <strong>local machine</strong>, run:</h3>
 <pre><code class="language-bash">ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
 </code></pre>
 <p>Then visit: <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a></p>
@@ -252,8 +248,8 @@ hostname
 <ol>
 <li id="fn:edge">
 <p><strong>Microsoft Edge</strong></p>
-<p>```bash
-module load ceuadmin/edge</p>
+<p>```bash</p>
+<p>module load ceuadmin/edge</p>
 <h1 id="configmicrosoft-edge">~/.config/microsoft-edge</h1>
 <p>edge http://127.0.0.1:${pn} &amp;</p>
 <h1 id="tmpedge-when-not-loaded">/tmp/edge when not loaded</h1>
@@ -347,5 +343,5 @@ module load ceuadmin/edge</p>
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-08 16:34:10.090129+00:00
+Build Date UTC : 2025-09-08 16:36:06.968811+00:00
 -->

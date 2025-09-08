@@ -192,22 +192,24 @@ module load ceuadmin/firefox/nightly
 python3 -m http.server &amp;
 firefox http://127.0.0.1:8000 &amp;
 </code></pre>
-<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but you can replace it with any free port<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">1</a></sup>.</p>
-<p>You can also use other browsers such as Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">2</a></sup> or Google Chrome<sup id="fnref:chrome"><a class="footnote-ref" href="#fn:chrome">3</a></sup>.</p>
+<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but one can replace it with any free port<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">1</a></sup>.</p>
+<p>One can also use other browsers such as Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">2</a></sup> or Google Chrome<sup id="fnref:chrome"><a class="footnote-ref" href="#fn:chrome">3</a></sup>.</p>
 <h2 id="web-page-structure">🗂️ Web Page Structure</h2>
-<p>You can browse local mirrors and resources via the home page (<code>index.html</code>) served at the chosen port:</p>
-<p>a. <strong>SRCF mirror</strong> — under <code>/srcf</code>
-b. <strong>Colocalisation view</strong> — <code>/json/coloc.html</code> (hg19 positions)
-c. <strong>Multiprotein isotope mappings</strong> — <code>/dup/json/dup.htm</code>
-d. <strong>Supplementary tables</strong>
-e. <strong>Caprion site</strong> — from <code>/site</code></p>
+<p>One can browse local mirrors and resources via the home page (<code>index.html</code>) served at the chosen port:</p>
+<ul>
+<li><strong>SRCF mirror</strong> — under <code>/srcf</code></li>
+<li><strong>Colocalisation view</strong> — <code>/json/coloc.html</code> (hg19 positions)</li>
+<li><strong>Multiprotein isotope mappings</strong> — <code>/dup/json/dup.htm</code></li>
+<li><strong>Supplementary tables</strong></li>
+<li><strong>Caprion site</strong> — from <code>/site</code></li>
+</ul>
 <h2 id="remote-non-csd3-browser-access">🔐 Remote (Non-CSD3) Browser Access</h2>
-<p>Set up SSH tunneling to access your local web server from another machine:</p>
+<p>Set up SSH tunneling to access the local web server from another machine:</p>
 <h3 id="1-start-the-server-on-csd3">1. Start the server on CSD3:</h3>
 <pre><code class="language-bash">python3 -m http.server 8000 &amp;
 hostname
 </code></pre>
-<h3 id="2-on-your-local-machine-run">2. On your <strong>local machine</strong>, run:</h3>
+<h3 id="2-on-local-machine-run">2. On <strong>local machine</strong>, run:</h3>
 <pre><code class="language-bash">ssh -4 -L 8080:127.0.0.1:8000 -fN CRSid@${hostname}.hpc.cam.ac.uk
 </code></pre>
 <p>Then visit: <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a></p>
@@ -237,7 +239,7 @@ fi
 </li>
 <li id="fn:edge">
 <p><strong>Microsoft Edge</strong></p>
-<p>You can launch Edge using a module or a temporary user data directory if needed:</p>
+<p>One can launch Edge using a module or a temporary user data directory if needed:</p>
 <pre><code>module load ceuadmin/edge
 # ~/.config/microsoft-edge
 edge http://127.0.0.1:${pn} &amp;
@@ -338,5 +340,5 @@ edge http://127.0.0.1:${pn} &amp;
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-08 19:43:09.672774+00:00
+Build Date UTC : 2025-09-08 19:47:27.720049+00:00
 -->

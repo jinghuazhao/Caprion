@@ -226,21 +226,21 @@ hostname
 <li id="fn:port">
 <p><strong>Port availability</strong></p>
 <p>Start the server with:</p>
-<p><code>bash
-python3 -m http.server 8000 &amp;</code></p>
+<pre><code>python3 -m http.server 8000 &amp;
+</code></pre>
 <p>To handle port conflicts:</p>
-<p><code>bash
-export pn=8000
+<pre><code>export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use. Try another one."
 else
     python3 -m http.server ${pn} &amp;
     server_pid=$!
     edge http://127.0.0.1:${pn} &amp;
-fi</code></p>
+fi
+</code></pre>
 <p>Release the port using:</p>
-<p><code>bash
-kill $server_pid</code></p>
+<pre><code>kill $server_pid
+</code></pre>
 <p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:port" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 </ol>
@@ -330,5 +330,5 @@ kill $server_pid</code></p>
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-08 19:06:41.001875+00:00
+Build Date UTC : 2025-09-08 19:09:40.761429+00:00
 -->

@@ -81,7 +81,7 @@ where hostname from CSD3 and ${hostname} have to be the same. We can then browse
 
 ---
 
-[^edge]: ### Microsoft Edge
+[^edge]: **Microsoft Edge**
 
     ```bash
     module load ceuadmin/edge

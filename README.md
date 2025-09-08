@@ -79,8 +79,6 @@ ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
 
 where hostname from CSD3 and ${hostname} have to be the same. We can then browse `http://127.0.0.1:8080`.
 
----
-
 [^edge]: **Microsoft Edge**
 
     ```bash

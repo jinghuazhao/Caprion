@@ -37,7 +37,7 @@ python3 -m http.server &
 firefox http://127.0.0.1:8000 &
 ```
 
-📌 **Note:** Port `8000` is used here, but you can replace it with any free port.
+📌 **Note:** Port `8000` is used here, but you can replace it with any free port[^port].
 
 You can also use other browsers such as Microsoft Edge.
 
@@ -59,33 +59,6 @@ You can browse local mirrors and resources via the home page (`index.html`) serv
 4. **Multiprotein isotope mappings** — `/dup/json/dup.htm`
 5. **Supplementary tables**
 
-Start the server with:
-
-```bash
-python3 -m http.server 8000 &
-```
-
-To handle port conflicts:
-
-```bash
-export pn=8000
-if lsof -i :${pn}; then
-    echo "Port ${pn} is already in use. Try another one."
-else
-    python3 -m http.server ${pn} &
-    server_pid=$!
-    edge http://127.0.0.1:${pn} &
-fi
-```
-
-Release the port using:
-
-```bash
-kill $server_pid
-```
-
-Check active processes with `ps`.
-
 ## 🔐 Remote (Non-CSD3) Browser Access
 
 Set up SSH tunneling to access your local web server from another machine:
@@ -100,9 +73,38 @@ hostname
 ### 2. On your **local machine**, run:
 
 ```bash
-ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
+ssh -4 -L 8080:127.0.0.1:8000 -fN CRSid@${hostname}.hpc.cam.ac.uk
 ```
 
 Then visit: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
+
+[^port]: **Port availability**
+
+    Start the server with:
+
+    ```bash
+    python3 -m http.server 8000 &
+    ```
+
+    To handle port conflicts:
+
+    ```bash
+    export pn=8000
+    if lsof -i :${pn}; then
+        echo "Port ${pn} is already in use. Try another one."
+    else
+        python3 -m http.server ${pn} &
+        server_pid=$!
+        edge http://127.0.0.1:${pn} &
+    fi
+    ```
+
+    Release the port using:
+
+    ```bash
+    kill $server_pid
+    ```
+
+    Check active processes with `ps`.

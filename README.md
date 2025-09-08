@@ -41,7 +41,7 @@ firefox http://127.0.0.1:8000 &
 
 You can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^chrome].
 
-## 🗂️ Local Browsing Structure
+## 🗂️ Web Page Structure
 
 You can browse local mirrors and resources via the home page (`index.html`) served at the chosen port:
 

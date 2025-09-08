@@ -74,11 +74,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
 [^port]: **Port availability**
 
-    Start the server with:
-
-        python3 -m http.server 8000 &
-
-    To handle port conflicts:
+    In general, the availability can be handled as follows,
 
         export pn=8000
         if lsof -i :${pn}; then

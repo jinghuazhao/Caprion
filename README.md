@@ -84,27 +84,21 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
     Start the server with:
 
-    ```bash
-    python3 -m http.server 8000 &
-    ```
+        python3 -m http.server 8000 &
 
     To handle port conflicts:
 
-    ```bash
-    export pn=8000
-    if lsof -i :${pn}; then
-        echo "Port ${pn} is already in use. Try another one."
-    else
-        python3 -m http.server ${pn} &
-        server_pid=$!
-        edge http://127.0.0.1:${pn} &
-    fi
-    ```
+        export pn=8000
+        if lsof -i :${pn}; then
+            echo "Port ${pn} is already in use. Try another one."
+        else
+            python3 -m http.server ${pn} &
+            server_pid=$!
+            edge http://127.0.0.1:${pn} &
+        fi
 
     Release the port using:
 
-    ```bash
-    kill $server_pid
-    ```
+        kill $server_pid
 
     Check active processes with `ps`.

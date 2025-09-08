@@ -37,23 +37,23 @@ python3 -m http.server &
 firefox http://127.0.0.1:8000 &
 ```
 
-📌 **Note:** Port `8000` is used here, but you can replace it with any free port[^port].
+📌 **Note:** Port `8000` is used here, but one can replace it with any free port[^port].
 
-You can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^chrome].
+One can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^chrome].
 
 ## 🗂️ Web Page Structure
 
-You can browse local mirrors and resources via the home page (`index.html`) served at the chosen port:
+One can browse local mirrors and resources via the home page (`index.html`) served at the chosen port:
 
-a. **SRCF mirror** — under `/srcf`
-b. **Colocalisation view** — `/json/coloc.html` (hg19 positions)
-c. **Multiprotein isotope mappings** — `/dup/json/dup.htm`
-d. **Supplementary tables**
-e. **Caprion site** — from `/site`
+- **SRCF mirror** — under `/srcf`
+- **Colocalisation view** — `/json/coloc.html` (hg19 positions)
+- **Multiprotein isotope mappings** — `/dup/json/dup.htm`
+- **Supplementary tables**
+- **Caprion site** — from `/site`
 
 ## 🔐 Remote (Non-CSD3) Browser Access
 
-Set up SSH tunneling to access your local web server from another machine:
+Set up SSH tunneling to access the local web server from another machine:
 
 ### 1. Start the server on CSD3:
 
@@ -62,7 +62,7 @@ python3 -m http.server 8000 &
 hostname
 ```
 
-### 2. On your **local machine**, run:
+### 2. On **local machine**, run:
 
 ```bash
 ssh -4 -L 8080:127.0.0.1:8000 -fN CRSid@${hostname}.hpc.cam.ac.uk
@@ -97,7 +97,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
 [^edge]: **Microsoft Edge**
 
-    You can launch Edge using a module or a temporary user data directory if needed:
+    One can launch Edge using a module or a temporary user data directory if needed:
 
         module load ceuadmin/edge
         # ~/.config/microsoft-edge

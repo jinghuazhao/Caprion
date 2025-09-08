@@ -192,8 +192,8 @@ module load ceuadmin/firefox/nightly
 python3 -m http.server &amp;
 firefox http://127.0.0.1:8000 &amp;
 </code></pre>
-<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but you can replace it with any free port<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">3</a></sup>.</p>
-<p>You can also use other browsers such as Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">1</a></sup> or Google Chrome<sup id="fnref:chrome"><a class="footnote-ref" href="#fn:chrome">2</a></sup>.</p>
+<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but you can replace it with any free port<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">1</a></sup>.</p>
+<p>You can also use other browsers such as Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">2</a></sup> or Google Chrome<sup id="fnref:chrome"><a class="footnote-ref" href="#fn:chrome">3</a></sup>.</p>
 <h2 id="local-browsing-structure">🗂️ Local Browsing Structure</h2>
 <p>You can browse local mirrors and resources via the home page (<code>index.html</code>) served at the chosen port:</p>
 <ol>
@@ -217,22 +217,6 @@ hostname
 <div class="footnote">
 <hr />
 <ol>
-<li id="fn:edge">
-<p><strong>Microsoft Edge</strong></p>
-<p>You can launch Edge using a module or a temporary user data directory if needed:</p>
-<pre><code>module load ceuadmin/edge
-# ~/.config/microsoft-edge
-edge http://127.0.0.1:${pn} &amp;
-</code></pre>
-<p>If the Edge config is not available, use a temporary directory:</p>
-<pre><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &amp;
-</code></pre>
-<p><a class="footnote-backref" href="#fnref:edge" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:edge" title="Jump back to footnote 1 in the text">&#8617;</a></p>
-</li>
-<li id="fn:chrome">
-<p><strong>Google Chrome</strong></p>
-<p>The syntax follows Microsoft Edge<sup id="fnref2:edge"><a class="footnote-ref" href="#fn:edge">1</a></sup>.&#160;<a class="footnote-backref" href="#fnref:chrome" title="Jump back to footnote 2 in the text">&#8617;</a></p>
-</li>
 <li id="fn:port">
 <p><strong>Port availability</strong></p>
 <p>Start the server with:</p>
@@ -251,7 +235,23 @@ fi
 <p>Release the port using:</p>
 <pre><code>kill $server_pid
 </code></pre>
-<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:port" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:port" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:edge">
+<p><strong>Microsoft Edge</strong></p>
+<p>You can launch Edge using a module or a temporary user data directory if needed:</p>
+<pre><code>module load ceuadmin/edge
+# ~/.config/microsoft-edge
+edge http://127.0.0.1:${pn} &amp;
+</code></pre>
+<p>If the Edge config is not available, use a temporary directory:</p>
+<pre><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &amp;
+</code></pre>
+<p><a class="footnote-backref" href="#fnref:edge" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:edge" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:chrome">
+<p><strong>Google Chrome</strong></p>
+<p>The syntax follows Microsoft Edge<sup id="fnref2:edge"><a class="footnote-ref" href="#fn:edge">2</a></sup>.&#160;<a class="footnote-backref" href="#fnref:chrome" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div></div>
@@ -340,5 +340,5 @@ fi
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-08 19:13:36.064987+00:00
+Build Date UTC : 2025-09-08 19:15:13.880090+00:00
 -->

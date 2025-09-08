@@ -146,6 +146,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#local-browsing-structure" class="nav-link">🗂️ Local Browsing Structure</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#remote-non-csd3-browser-access" class="nav-link">🔐 Remote (Non-CSD3) Browser Access</a>
               <ul class="nav flex-column">
               </ul>
@@ -197,26 +201,20 @@
 module load ceuadmin/firefox/nightly
 python3 -m http.server &amp;
 firefox http://127.0.0.1:8000 &amp;
-````
-
-📌 **Note:** Port `8000` is used here, but you can replace it with any free port.
-
-You can also use Microsoft Edge[^edge] or Google Chrome for browsing.
-
-## 🗂️ Local Browsing Structure
-
-You can browse local mirrors and resources via the home page (`index.html`) served at the chosen port:
-
-1. **Caprion site** — from `/site`
-2. **SRCF mirror** — under `/srcf`
-3. **Colocalisation view** — `/json/coloc.html` (hg19 positions)
-4. **Multiprotein isotope mappings** — `/dup/json/dup.htm`
-5. **Supplementary tables**
-
-Start the server with:
-
-```bash
-python3 -m http.server 8000 &amp;
+</code></pre>
+<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but you can replace it with any free port.</p>
+<p>You can also use Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">1</a></sup> or Google Chrome for browsing.</p>
+<h2 id="local-browsing-structure">🗂️ Local Browsing Structure</h2>
+<p>You can browse local mirrors and resources via the home page (<code>index.html</code>) served at the chosen port:</p>
+<ol>
+<li><strong>Caprion site</strong> — from <code>/site</code></li>
+<li><strong>SRCF mirror</strong> — under <code>/srcf</code></li>
+<li><strong>Colocalisation view</strong> — <code>/json/coloc.html</code> (hg19 positions)</li>
+<li><strong>Multiprotein isotope mappings</strong> — <code>/dup/json/dup.htm</code></li>
+<li><strong>Supplementary tables</strong></li>
+</ol>
+<p>Start the server with:</p>
+<pre><code class="language-bash">python3 -m http.server 8000 &amp;
 </code></pre>
 <p>To handle port conflicts:</p>
 <pre><code class="language-bash">export pn=8000
@@ -248,8 +246,8 @@ hostname
 <ol>
 <li id="fn:edge">
 <p><strong>Microsoft Edge</strong></p>
-<p>```bash</p>
-<p>module load ceuadmin/edge</p>
+<p>```bash
+module load ceuadmin/edge</p>
 <h1 id="configmicrosoft-edge">~/.config/microsoft-edge</h1>
 <p>edge http://127.0.0.1:${pn} &amp;</p>
 <h1 id="tmpedge-when-not-loaded">/tmp/edge when not loaded</h1>
@@ -343,5 +341,5 @@ hostname
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-08 16:36:06.968811+00:00
+Build Date UTC : 2025-09-08 16:37:32.140452+00:00
 -->

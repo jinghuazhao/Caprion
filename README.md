@@ -45,11 +45,11 @@ You can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^
 
 You can browse local mirrors and resources via the home page (`index.html`) served at the chosen port:
 
-1. **Caprion site** — from `/site`
-2. **SRCF mirror** — under `/srcf`
-3. **Colocalisation view** — `/json/coloc.html` (hg19 positions)
-4. **Multiprotein isotope mappings** — `/dup/json/dup.htm`
-5. **Supplementary tables**
+1. **SRCF mirror** — under `/srcf`
+2. **Colocalisation view** — `/json/coloc.html` (hg19 positions)
+3. **Multiprotein isotope mappings** — `/dup/json/dup.htm`
+4. **Supplementary tables**
+5. **Caprion site** — from `/site`
 
 ## 🔐 Remote (Non-CSD3) Browser Access
 

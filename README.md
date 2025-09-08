@@ -39,15 +39,7 @@ firefox http://127.0.0.1:8000 &
 
 📌 **Note:** Port `8000` is used here, but you can replace it with any free port[^port].
 
-You can also use other browsers such as Microsoft Edge.
-
-```bash
-module load ceuadmin/edge
-# ~/.config/microsoft-edge
-edge http://127.0.0.1:${pn} &
-# /tmp/edge when not loaded
-edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
-```
+You can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^chrome].
 
 ## 🗂️ Local Browsing Structure
 
@@ -79,6 +71,22 @@ ssh -4 -L 8080:127.0.0.1:8000 -fN CRSid@${hostname}.hpc.cam.ac.uk
 Then visit: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
+
+[^edge]: **Microsoft Edge**
+
+    You can launch Edge using a module or a temporary user data directory if needed:
+
+        module load ceuadmin/edge
+        # ~/.config/microsoft-edge
+        edge http://127.0.0.1:${pn} &
+
+    If the Edge config is not available, use a temporary directory:
+
+        edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
+
+[^chrome]: **Google Chrome**
+
+    The syntax follows Microsoft Edge[^edge].
 
 [^port]: **Port availability**
 

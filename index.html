@@ -128,25 +128,25 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#caprion-data-analysis" class="nav-link">Caprion data analysis</a>
+            <li class="nav-item" data-level="1"><a href="#caprion-data-analysis" class="nav-link">Caprion Data Analysis</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#pilot-studies" class="nav-link">Pilot studies</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#analysis" class="nav-link">Analysis</a>
+            <li class="nav-item" data-level="2"><a href="#pilot-studies" class="nav-link">📊 Pilot Studies</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#additional-information" class="nav-link">Additional information</a>
+            <li class="nav-item" data-level="2"><a href="#analysis" class="nav-link">🔬 Analysis</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#local-fileweb-browsing" class="nav-link">Local file/web browsing</a>
+            <li class="nav-item" data-level="2"><a href="#additional-information" class="nav-link">📎 Additional Information</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#non-csd3-browsers" class="nav-link">Non-CSD3 browser(s)</a>
+            <li class="nav-item" data-level="2"><a href="#local-fileweb-browsing" class="nav-link">🌐 Local File/Web Browsing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#remote-non-csd3-browser-access" class="nav-link">🔐 Remote (Non-CSD3) Browser Access</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -167,66 +167,86 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<p><a href="https://jinghuazhao.github.io/Caprion/"><img src="https://jinghuazhao.github.io/Caprion/qrcode.png" height=200 width=200 align="right"></img></a></p>
-<h1 id="caprion-data-analysis">Caprion data analysis</h1>
+<p><a href="https://jinghuazhao.github.io/Caprion/">
+  <img src="https://jinghuazhao.github.io/Caprion/qrcode.png" height="200" width="200" align="right" alt="Caprion QR Code">
+</a></p>
+<h1 id="caprion-data-analysis">Caprion Data Analysis</h1>
 <h3 id="welcome">Welcome!</h3>
-<p>This repository/site is dedicated to protein/peptide quantitative trait analysis using the Caprion platform, which is organised chonologically/logistically into the following sections.</p>
-<h2 id="pilot-studies">Pilot studies</h2>
+<p>This repository/site is dedicated to protein/peptide quantitative trait analysis using the <strong>Caprion platform</strong>, organized chronologically and logistically into the following sections.</p>
+<h2 id="pilot-studies">📊 Pilot Studies</h2>
 <ul>
-<li><a href="pilot/autoencoder">autoencoder</a></li>
-<li><a href="pilot/gwas2">gwas2</a></li>
-<li><a href="pilot">Pilot studies</a></li>
+<li><a href="pilot/autoencoder">Autoencoder</a></li>
+<li><a href="pilot/gwas2">GWAS Round 2</a></li>
+<li><a href="pilot">General Pilot Overview</a></li>
 </ul>
-<h2 id="analysis">Analysis</h2>
+<h2 id="analysis">🔬 Analysis</h2>
 <ul>
-<li><a href="progs">Protein analysis</a></li>
-<li><a href="peptide_progs">Peptide analysis</a></li>
-<li><a href="misc">Miscellaneous analysis</a></li>
+<li><a href="progs">Protein-level Analysis</a></li>
+<li><a href="peptide_progs">Peptide-level Analysis</a></li>
+<li><a href="misc">Miscellaneous Analysis</a></li>
 </ul>
-<h2 id="additional-information">Additional information</h2>
+<h2 id="additional-information">📎 Additional Information</h2>
 <ul>
-<li><a href="https://jinghuazhao.github.io/pQTLdata/reference/caprion.html">Caprion panel</a></li>
-<li><a href="https://jinghuazhao.github.io/Caprion/Notes/">Notes</a></li>
+<li><a href="https://jinghuazhao.github.io/pQTLdata/reference/caprion.html">Caprion Panel Description</a></li>
+<li><a href="https://jinghuazhao.github.io/Caprion/Notes/">Project Notes</a></li>
 </ul>
-<h2 id="local-fileweb-browsing">Local file/web browsing</h2>
-<p>A web-style navigation is furnised as follows,</p>
+<h2 id="local-fileweb-browsing">🌐 Local File/Web Browsing</h2>
+<p>A local web-style navigation can be set up as follows:</p>
 <pre><code class="language-bash">cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
-# As of 7/9/2025
+# As of 07/09/2025
 module load ceuadmin/firefox/nightly
 python3 -m http.server &amp;
 firefox http://127.0.0.1:8000 &amp;
+````
+
+📌 **Note:** Port `8000` is used here, but you can replace it with any free port.
+
+You can also use Microsoft Edge[^edge] or Google Chrome for browsing.
+
+## 🗂️ Local Browsing Structure
+
+You can browse local mirrors and resources via the home page (`index.html`) served at the chosen port:
+
+1. **Caprion site** — from `/site`
+2. **SRCF mirror** — under `/srcf`
+3. **Colocalisation view** — `/json/coloc.html` (hg19 positions)
+4. **Multiprotein isotope mappings** — `/dup/json/dup.htm`
+5. **Supplementary tables**
+
+Start the server with:
+
+```bash
+python3 -m http.server 8000 &amp;
 </code></pre>
-<p>where 8000 is a port number (pn).</p>
-<p>One can also use Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">1</a></sup> or Google Chrome.</p>
-<p>One could browse mirrors of two web sites as well as files,</p>
-<ol>
-<li>Caprion site. This is from <code>/site</code> as above.</li>
-<li>SRCF site. The mirror is within the following subdirectory: <code>/srcf</code>.</li>
-<li>Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.</li>
-<li>Multiprotein mapping isotopes, /dup/json/dup.htm</li>
-<li>Supplementary tables.</li>
-</ol>
-<p>To facilitate navigation, an <code>index.html</code> is created in place, so <code>python3 -m http.server 8000 &amp;</code> starts a home page for 1-5 above.</p>
-<p>In case pn is already in use, a different one can be chosen as follows,</p>
+<p>To handle port conflicts:</p>
 <pre><code class="language-bash">export pn=8000
 if lsof -i :${pn}; then
-    echo &quot;Port ${pn} is already in use' try another one.&quot;
+    echo &quot;Port ${pn} is already in use. Try another one.&quot;
 else
     python3 -m http.server ${pn} &amp;
     server_pid=$!
     edge http://127.0.0.1:${pn} &amp;
 fi
 </code></pre>
-<p>and pn can be released with <code>kill $server_pid</code> (can be checked with <code>ps</code>).</p>
-<h2 id="non-csd3-browsers">Non-CSD3 browser(s)</h2>
-<p>This approach seems less problematic with <code>user-data-dir</code> mentioned above. We can again set up tunneling from CSD3 with</p>
+<p>Release the port using:</p>
+<pre><code class="language-bash">kill $server_pid
+</code></pre>
+<p>Check active processes with <code>ps</code>.</p>
+<h2 id="remote-non-csd3-browser-access">🔐 Remote (Non-CSD3) Browser Access</h2>
+<p>Set up SSH tunneling to access your local web server from another machine:</p>
+<ol>
+<li>Start the server on CSD3:</li>
+</ol>
 <pre><code class="language-bash">python3 -m http.server 8000 &amp;
 hostname
 </code></pre>
-<p>Once succeeded, we establish the connection elsewhere.</p>
+<ol>
+<li>On your <strong>local machine</strong>, run:</li>
+</ol>
 <pre><code class="language-bash">ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
 </code></pre>
-<p>where hostname from CSD3 and ${hostname} have to be the same. We can then browse <code>http://127.0.0.1:8080</code>.</p>
+<p>Then visit: <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a></p>
+<p>Ensure <code>${hostname}</code> matches the result from CSD3 <code>hostname</code>.</p>
 <div class="footnote">
 <hr />
 <ol>
@@ -327,5 +347,5 @@ module load ceuadmin/edge</p>
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-08 16:25:43.939172+00:00
+Build Date UTC : 2025-09-08 16:34:10.090129+00:00
 -->

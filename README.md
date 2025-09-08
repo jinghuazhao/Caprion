@@ -35,7 +35,7 @@ cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 module load ceuadmin/firefox/nightly
 python3 -m http.server &
 firefox http://127.0.0.1:8000 &
-````
+```
 
 📌 **Note:** Port `8000` is used here, but you can replace it with any free port.
 
@@ -102,7 +102,6 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 [^edge]: **Microsoft Edge**
 
     ```bash
-
     module load ceuadmin/edge
     # ~/.config/microsoft-edge
     edge http://127.0.0.1:${pn} &

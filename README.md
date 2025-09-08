@@ -82,14 +82,14 @@ Check active processes with `ps`.
 
 Set up SSH tunneling to access your local web server from another machine:
 
-1. Start the server on CSD3:
+### 1. Start the server on CSD3:
 
 ```bash
 python3 -m http.server 8000 &
 hostname
 ```
 
-2. On your **local machine**, run:
+### 2. On your **local machine**, run:
 
 ```bash
 ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
@@ -102,6 +102,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 [^edge]: **Microsoft Edge**
 
     ```bash
+
     module load ceuadmin/edge
     # ~/.config/microsoft-edge
     edge http://127.0.0.1:${pn} &

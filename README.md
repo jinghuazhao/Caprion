@@ -28,19 +28,14 @@ A web-style navigation is furnised as follows,
 
 ```bash
 cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
-module load ceuadmin/edge
+# As of 7/9/2025
+module load ceuadmin/firefox/nightly
 python3 -m http.server &
-edge http://127.0.0.1:8000 &
+firefox http://127.0.0.1:8000 &
 ```
 where 8000 is a port number (pn).
 
-In case the browser does not show, use
-
-### Microsoft Edge
-
-`edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &`
-
-'/tmp/edge' directory in replace of `~/.config/microsoft-edge`.
+One can also use Microsoft Edge[^edge] or Google Chrome.
 
 One could browse mirrors of two web sites as well as files,
 
@@ -67,15 +62,6 @@ fi
 
 and pn can be released with `kill $server_pid` (can be checked with `ps`).
 
-### Firefox
-
-As of 7/9/2025, this is feasible with
-
-```bash
-module load ceuadmin/firefox/nightly
-firefox http://127.0.0.1:${pn} &
-```
-
 ## Non-CSD3 browser(s)
 
 This approach seems less problematic with `user-data-dir` mentioned above. We can again set up tunneling from CSD3 with
@@ -92,3 +78,15 @@ ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
 ```
 
 where hostname from CSD3 and ${hostname} have to be the same. We can then browse `http://127.0.0.1:8080`.
+
+---
+
+[^edge]: ### Microsoft Edge
+
+    ```bash
+    module load ceuadmin/edge
+    # ~/.config/microsoft-edge
+    edge http://127.0.0.1:${pn} &
+    # /tmp/edge when not loaded
+    edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
+    ```

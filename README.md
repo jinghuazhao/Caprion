@@ -1,58 +1,74 @@
-<a href="https://jinghuazhao.github.io/Caprion/"><img src="https://jinghuazhao.github.io/Caprion/qrcode.png" height=200 width=200 align="right"></img></a>
-# Caprion data analysis
+<a href="https://jinghuazhao.github.io/Caprion/">
+  <img src="https://jinghuazhao.github.io/Caprion/qrcode.png" height="200" width="200" align="right" alt="Caprion QR Code">
+</a>
+
+# Caprion Data Analysis
 
 ### Welcome!
 
-This repository/site is dedicated to protein/peptide quantitative trait analysis using the Caprion platform, which is organised chonologically/logistically into the following sections.
+This repository/site is dedicated to protein/peptide quantitative trait analysis using the **Caprion platform**, organized chronologically and logistically into the following sections.
 
-## Pilot studies
+---
 
-- [autoencoder](pilot/autoencoder)
-- [gwas2](pilot/gwas2)
-- [Pilot studies](pilot)
+## 📊 Pilot Studies
 
-## Analysis
+- [Autoencoder](pilot/autoencoder)
+- [GWAS Round 2](pilot/gwas2)
+- [General Pilot Overview](pilot)
 
-- [Protein analysis](progs)
-- [Peptide analysis](peptide_progs)
-- [Miscellaneous analysis](misc)
+## 🔬 Analysis
 
-## Additional information
+- [Protein-level Analysis](progs)
+- [Peptide-level Analysis](peptide_progs)
+- [Miscellaneous Analysis](misc)
 
-- [Caprion panel](https://jinghuazhao.github.io/pQTLdata/reference/caprion.html)
-- [Notes](https://jinghuazhao.github.io/Caprion/Notes/)
+## 📎 Additional Information
 
-## Local file/web browsing
+- [Caprion Panel Description](https://jinghuazhao.github.io/pQTLdata/reference/caprion.html)
+- [Project Notes](https://jinghuazhao.github.io/Caprion/Notes/)
 
-A web-style navigation is furnised as follows,
+---
+
+## 🌐 Local File/Web Browsing
+
+A local web-style navigation can be set up as follows:
 
 ```bash
 cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
-# As of 7/9/2025
+# As of 07/09/2025
 module load ceuadmin/firefox/nightly
 python3 -m http.server &
 firefox http://127.0.0.1:8000 &
+````
+
+📌 **Note:** Port `8000` is used here, but you can replace it with any free port.
+
+You can also use Microsoft Edge[^edge] or Google Chrome for browsing.
+
+---
+
+## 🗂️ Local Browsing Structure
+
+You can browse local mirrors and resources via the home page (`index.html`) served at the chosen port:
+
+1. **Caprion site** — from `/site`
+2. **SRCF mirror** — under `/srcf`
+3. **Colocalisation view** — `/json/coloc.html` (hg19 positions)
+4. **Multiprotein isotope mappings** — `/dup/json/dup.htm`
+5. **Supplementary tables**
+
+Start the server with:
+
+```bash
+python3 -m http.server 8000 &
 ```
-where 8000 is a port number (pn).
 
-One can also use Microsoft Edge[^edge] or Google Chrome.
-
-One could browse mirrors of two web sites as well as files,
-
-1. Caprion site. This is from `/site` as above.
-2. SRCF site. The mirror is within the following subdirectory: `/srcf`.
-3. Colocalisation. See /json/coloc.html. Chromosomal positions are in hg19.
-4. Multiprotein mapping isotopes, /dup/json/dup.htm
-5. Supplementary tables.
-
-To facilitate navigation, an `index.html` is created in place, so `python3 -m http.server 8000 &` starts a home page for 1-5 above.
-
-In case pn is already in use, a different one can be chosen as follows,
+To handle port conflicts:
 
 ```bash
 export pn=8000
 if lsof -i :${pn}; then
-    echo "Port ${pn} is already in use' try another one."
+    echo "Port ${pn} is already in use. Try another one."
 else
     python3 -m http.server ${pn} &
     server_pid=$!
@@ -60,31 +76,43 @@ else
 fi
 ```
 
-and pn can be released with `kill $server_pid` (can be checked with `ps`).
+Release the port using:
 
-## Non-CSD3 browser(s)
+```bash
+kill $server_pid
+```
 
-This approach seems less problematic with `user-data-dir` mentioned above. We can again set up tunneling from CSD3 with
+Check active processes with `ps`.
+
+---
+
+## 🔐 Remote (Non-CSD3) Browser Access
+
+Set up SSH tunneling to access your local web server from another machine:
+
+1. Start the server on CSD3:
 
 ```bash
 python3 -m http.server 8000 &
 hostname
 ```
 
-Once succeeded, we establish the connection elsewhere.
+2. On your **local machine**, run:
 
 ```bash
 ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
 ```
 
-where hostname from CSD3 and ${hostname} have to be the same. We can then browse `http://127.0.0.1:8080`.
+Then visit: [http://127.0.0.1:8080](http://127.0.0.1:8080)
+
+Ensure `${hostname}` matches the result from CSD3 `hostname`.
+
+---
 
 [^edge]: **Microsoft Edge**
 
-    ```bash
-    module load ceuadmin/edge
-    # ~/.config/microsoft-edge
-    edge http://127.0.0.1:${pn} &
-    # /tmp/edge when not loaded
-    edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
-    ```
+```bash
+module load ceuadmin/edge
+# Use a temporary profile if needed
+edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
+```

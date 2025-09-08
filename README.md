@@ -72,22 +72,6 @@ Then visit: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
-[^edge]: **Microsoft Edge**
-
-    You can launch Edge using a module or a temporary user data directory if needed:
-
-        module load ceuadmin/edge
-        # ~/.config/microsoft-edge
-        edge http://127.0.0.1:${pn} &
-
-    If the Edge config is not available, use a temporary directory:
-
-        edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
-
-[^chrome]: **Google Chrome**
-
-    The syntax follows Microsoft Edge[^edge].
-
 [^port]: **Port availability**
 
     Start the server with:
@@ -110,3 +94,19 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
         kill $server_pid
 
     Check active processes with `ps`.
+
+[^edge]: **Microsoft Edge**
+
+    You can launch Edge using a module or a temporary user data directory if needed:
+
+        module load ceuadmin/edge
+        # ~/.config/microsoft-edge
+        edge http://127.0.0.1:${pn} &
+
+    If the Edge config is not available, use a temporary directory:
+
+        edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
+
+[^chrome]: **Google Chrome**
+
+    The syntax follows Microsoft Edge[^edge].

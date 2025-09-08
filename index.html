@@ -219,10 +219,7 @@ hostname
 <ol>
 <li id="fn:port">
 <p><strong>Port availability</strong></p>
-<p>Start the server with:</p>
-<pre><code>python3 -m http.server 8000 &amp;
-</code></pre>
-<p>To handle port conflicts:</p>
+<p>In general, the availability can be handled as follows,</p>
 <pre><code>export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use. Try another one."
@@ -340,5 +337,5 @@ edge http://127.0.0.1:${pn} &amp;
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-08 19:47:27.720049+00:00
+Build Date UTC : 2025-09-08 19:54:36.468523+00:00
 -->

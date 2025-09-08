@@ -152,6 +152,16 @@
             </li>
               </ul>
             </li>
+            
+            <li class="nav-item" data-level="1"><a href="#configmicrosoft-edge" class="nav-link">~/.config/microsoft-edge</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#tmpedge-when-not-loaded" class="nav-link">/tmp/edge when not loaded</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
@@ -181,15 +191,13 @@
 <h2 id="local-fileweb-browsing">Local file/web browsing</h2>
 <p>A web-style navigation is furnised as follows,</p>
 <pre><code class="language-bash">cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
-module load ceuadmin/edge
+# As of 7/9/2025
+module load ceuadmin/firefox/nightly
 python3 -m http.server &amp;
-edge http://127.0.0.1:8000 &amp;
+firefox http://127.0.0.1:8000 &amp;
 </code></pre>
 <p>where 8000 is a port number (pn).</p>
-<p>In case the browser does not show, use</p>
-<h3 id="microsoft-edge">Microsoft Edge</h3>
-<p><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &amp;</code></p>
-<p>'/tmp/edge' directory in replace of <code>~/.config/microsoft-edge</code>.</p>
+<p>One can also use Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">1</a></sup> or Google Chrome.</p>
 <p>One could browse mirrors of two web sites as well as files,</p>
 <ol>
 <li>Caprion site. This is from <code>/site</code> as above.</li>
@@ -210,11 +218,6 @@ else
 fi
 </code></pre>
 <p>and pn can be released with <code>kill $server_pid</code> (can be checked with <code>ps</code>).</p>
-<h3 id="firefox">Firefox</h3>
-<p>As of 7/9/2025, this is feasible with</p>
-<pre><code class="language-bash">module load ceuadmin/firefox/nightly
-firefox http://127.0.0.1:${pn} &amp;
-</code></pre>
 <h2 id="non-csd3-browsers">Non-CSD3 browser(s)</h2>
 <p>This approach seems less problematic with <code>user-data-dir</code> mentioned above. We can again set up tunneling from CSD3 with</p>
 <pre><code class="language-bash">python3 -m http.server 8000 &amp;
@@ -223,7 +226,23 @@ hostname
 <p>Once succeeded, we establish the connection elsewhere.</p>
 <pre><code class="language-bash">ssh -4 -L 8080:127.0.0.1:8000 -fN jhz22@${hostname}.hpc.cam.ac.uk
 </code></pre>
-<p>where hostname from CSD3 and ${hostname} have to be the same. We can then browse <code>http://127.0.0.1:8080</code>.</p></div>
+<p>where hostname from CSD3 and ${hostname} have to be the same. We can then browse <code>http://127.0.0.1:8080</code>.</p>
+<hr />
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:edge">
+<h3 id="microsoft-edge">Microsoft Edge</h3>
+<p>```bash
+module load ceuadmin/edge</p>
+<h1 id="configmicrosoft-edge">~/.config/microsoft-edge</h1>
+<p>edge http://127.0.0.1:${pn} &amp;</p>
+<h1 id="tmpedge-when-not-loaded">/tmp/edge when not loaded</h1>
+<p>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &amp;
+```&#160;<a class="footnote-backref" href="#fnref:edge" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div></div>
             </div>
         </div>
 
@@ -309,5 +328,5 @@ hostname
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-07 09:22:15.772456+00:00
+Build Date UTC : 2025-09-08 16:17:08.944978+00:00
 -->

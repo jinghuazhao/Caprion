@@ -150,7 +150,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#remote-non-csd3-browser-access" class="nav-link">🔐 Remote (Non-CSD3) Browser Access</a>
+            <li class="nav-item" data-level="2"><a href="#remote-non-csd3-access" class="nav-link">🔐 Remote (Non-CSD3) Access</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -201,13 +201,13 @@ firefox &amp;
 <li><strong>Supplementary tables</strong></li>
 <li><strong>Caprion site</strong> — from <code>/site</code></li>
 </ul>
-<h2 id="remote-non-csd3-browser-access">🔐 Remote (Non-CSD3) Browser Access</h2>
-<p>Set up SSH tunneling to access the local web server from another machine:</p>
-<h3 id="1-start-the-server-on-csd33">1. Start the server on CSD3<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">3</a></sup>:</h3>
+<h2 id="remote-non-csd3-access">🔐 Remote (Non-CSD3) Access</h2>
+<p>Set up SSH tunneling<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">3</a></sup> to access the local web server from another machine:</p>
+<h3 id="1-on-csd3">1. On CSD3</h3>
 <pre><code class="language-bash">python3 -m http.server 8000 &amp;
 hostname
 </code></pre>
-<h3 id="2-on-local-machine-run">2. On <strong>local machine</strong>, run:</h3>
+<h3 id="2-on-local-machine">2. On <strong>local machine</strong></h3>
 <pre><code class="language-bash">ssh -4 -L 8080:127.0.0.1:8000 -fN CRSid@${hostname}.hpc.cam.ac.uk
 </code></pre>
 <p>Then visit: <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a></p>
@@ -220,10 +220,10 @@ hostname
 <p>One can launch Edge using a module or a temporary user data directory if needed:</p>
 <pre><code>module load ceuadmin/edge
 # ~/.config/microsoft-edge
-edge http://127.0.0.1:${pn} &amp;
+edge &amp;
 </code></pre>
 <p>If the Edge config is not available, use a temporary directory:</p>
-<pre><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &amp;
+<pre><code>edge --user-data-dir=/tmp/edge &amp;
 </code></pre>
 <p><a class="footnote-backref" href="#fnref:edge" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:edge" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
@@ -233,24 +233,23 @@ edge http://127.0.0.1:${pn} &amp;
 </li>
 <li id="fn:port">
 <p><strong>use of specific port number</strong></p>
-<pre><code>python3 -m http.server &amp;
-firefox http://127.0.0.1:8000 &amp;
-</code></pre>
-<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but one can replace it with any free port<sup id="fnref2:port"><a class="footnote-ref" href="#fn:port">3</a></sup>.</p>
-<p>In general, the availability can be handled as follows,</p>
 <pre><code>export pn=8000
-if lsof -i :${pn}; then
+python3 -m http.server &amp;
+firefox http://127.0.0.1:${pn} &amp;
+</code></pre>
+<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but one can replace it with any free port whose availability can be handled as follows,</p>
+<pre><code>if lsof -i :${pn}; then
     echo "Port ${pn} is already in use. Try another one."
 else
     python3 -m http.server ${pn} &amp;
     server_pid=$!
-    edge http://127.0.0.1:${pn} &amp;
+    firefox http://127.0.0.1:${pn} &amp;
 fi
 </code></pre>
 <p>Release the port using:</p>
 <pre><code>kill $server_pid
 </code></pre>
-<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:port" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:port" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:port" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div></div>
@@ -339,5 +338,5 @@ fi
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-11 19:22:58.703083+00:00
+Build Date UTC : 2025-09-11 19:45:07.794189+00:00
 -->

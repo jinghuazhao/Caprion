@@ -189,11 +189,9 @@
 <pre><code class="language-bash">cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 # As of 07/09/2025
 module load ceuadmin/firefox/nightly
-python3 -m http.server &amp;
-firefox http://127.0.0.1:8000 &amp;
+firefox &amp;
 </code></pre>
-<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but one can replace it with any free port<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">1</a></sup>.</p>
-<p>One can also use other browsers such as Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">2</a></sup> or Google Chrome<sup id="fnref:chrome"><a class="footnote-ref" href="#fn:chrome">3</a></sup>.</p>
+<p>One can also use other browsers such as Microsoft Edge<sup id="fnref:edge"><a class="footnote-ref" href="#fn:edge">1</a></sup> or Google Chrome<sup id="fnref:chrome"><a class="footnote-ref" href="#fn:chrome">2</a></sup>.</p>
 <h2 id="web-page-structure">🗂️ Web Page Structure</h2>
 <p>One can browse local mirrors and resources via the home page (<code>index.html</code>) served at the chosen port:</p>
 <ul>
@@ -205,7 +203,7 @@ firefox http://127.0.0.1:8000 &amp;
 </ul>
 <h2 id="remote-non-csd3-browser-access">🔐 Remote (Non-CSD3) Browser Access</h2>
 <p>Set up SSH tunneling to access the local web server from another machine:</p>
-<h3 id="1-start-the-server-on-csd3">1. Start the server on CSD3:</h3>
+<h3 id="1-start-the-server-on-csd33">1. Start the server on CSD3<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">3</a></sup>:</h3>
 <pre><code class="language-bash">python3 -m http.server 8000 &amp;
 hostname
 </code></pre>
@@ -217,8 +215,28 @@ hostname
 <div class="footnote">
 <hr />
 <ol>
+<li id="fn:edge">
+<p><strong>Microsoft Edge</strong></p>
+<p>One can launch Edge using a module or a temporary user data directory if needed:</p>
+<pre><code>module load ceuadmin/edge
+# ~/.config/microsoft-edge
+edge http://127.0.0.1:${pn} &amp;
+</code></pre>
+<p>If the Edge config is not available, use a temporary directory:</p>
+<pre><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &amp;
+</code></pre>
+<p><a class="footnote-backref" href="#fnref:edge" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:edge" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:chrome">
+<p><strong>Google Chrome</strong></p>
+<p>The syntax follows Microsoft Edge<sup id="fnref2:edge"><a class="footnote-ref" href="#fn:edge">1</a></sup>.&#160;<a class="footnote-backref" href="#fnref:chrome" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
 <li id="fn:port">
-<p><strong>Port availability</strong></p>
+<p><strong>use of specific port number</strong></p>
+<pre><code>python3 -m http.server &amp;
+firefox http://127.0.0.1:8000 &amp;
+</code></pre>
+<p>📌 <strong>Note:</strong> Port <code>8000</code> is used here, but one can replace it with any free port<sup id="fnref2:port"><a class="footnote-ref" href="#fn:port">3</a></sup>.</p>
 <p>In general, the availability can be handled as follows,</p>
 <pre><code>export pn=8000
 if lsof -i :${pn}; then
@@ -232,23 +250,7 @@ fi
 <p>Release the port using:</p>
 <pre><code>kill $server_pid
 </code></pre>
-<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:port" title="Jump back to footnote 1 in the text">&#8617;</a></p>
-</li>
-<li id="fn:edge">
-<p><strong>Microsoft Edge</strong></p>
-<p>One can launch Edge using a module or a temporary user data directory if needed:</p>
-<pre><code>module load ceuadmin/edge
-# ~/.config/microsoft-edge
-edge http://127.0.0.1:${pn} &amp;
-</code></pre>
-<p>If the Edge config is not available, use a temporary directory:</p>
-<pre><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &amp;
-</code></pre>
-<p><a class="footnote-backref" href="#fnref:edge" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:edge" title="Jump back to footnote 2 in the text">&#8617;</a></p>
-</li>
-<li id="fn:chrome">
-<p><strong>Google Chrome</strong></p>
-<p>The syntax follows Microsoft Edge<sup id="fnref2:edge"><a class="footnote-ref" href="#fn:edge">2</a></sup>.&#160;<a class="footnote-backref" href="#fnref:chrome" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:port" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:port" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div></div>
@@ -337,5 +339,5 @@ edge http://127.0.0.1:${pn} &amp;
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-08 19:54:36.468523+00:00
+Build Date UTC : 2025-09-11 19:22:58.703083+00:00
 -->

@@ -33,11 +33,8 @@ A local web-style navigation can be set up as follows:
 cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 # As of 07/09/2025
 module load ceuadmin/firefox/nightly
-python3 -m http.server &
-firefox http://127.0.0.1:8000 &
+firefox &
 ```
-
-📌 **Note:** Port `8000` is used here, but one can replace it with any free port[^port].
 
 One can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^chrome].
 
@@ -55,7 +52,7 @@ One can browse local mirrors and resources via the home page (`index.html`) serv
 
 Set up SSH tunneling to access the local web server from another machine:
 
-### 1. Start the server on CSD3:
+### 1. Start the server on CSD3[^port]:
 
 ```bash
 python3 -m http.server 8000 &
@@ -72,7 +69,28 @@ Then visit: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
-[^port]: **Port availability**
+[^edge]: **Microsoft Edge**
+
+    One can launch Edge using a module or a temporary user data directory if needed:
+
+        module load ceuadmin/edge
+        # ~/.config/microsoft-edge
+        edge http://127.0.0.1:${pn} &
+
+    If the Edge config is not available, use a temporary directory:
+
+        edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
+
+[^chrome]: **Google Chrome**
+
+    The syntax follows Microsoft Edge[^edge].
+
+[^port]: **use of specific port number**
+
+        python3 -m http.server &
+        firefox http://127.0.0.1:8000 &
+
+    📌 **Note:** Port `8000` is used here, but one can replace it with any free port[^port].
 
     In general, the availability can be handled as follows,
 
@@ -90,19 +108,3 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
         kill $server_pid
 
     Check active processes with `ps`.
-
-[^edge]: **Microsoft Edge**
-
-    One can launch Edge using a module or a temporary user data directory if needed:
-
-        module load ceuadmin/edge
-        # ~/.config/microsoft-edge
-        edge http://127.0.0.1:${pn} &
-
-    If the Edge config is not available, use a temporary directory:
-
-        edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
-
-[^chrome]: **Google Chrome**
-
-    The syntax follows Microsoft Edge[^edge].

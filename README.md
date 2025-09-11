@@ -37,7 +37,7 @@ python3 -m http.server &
 firefox http://127.0.0.1:8000 &
 ```
 
-where 8000 is a port number[^port]. One can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^chrome].
+📌 **Note:** 8000 is a port number[^port]. One can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^chrome].
 
 ## 🗂️ Web Page Structure
 
@@ -72,7 +72,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
 [^port]: **use of specific port number**
 
-    📌 **Note:** Port `8000` is used here, but one can replace it with any free port whose availability can be handled as follows,
+    One can replace port number `8000` with any free port whose availability can be handled as follows,
 
         export pn=8000
         if lsof -i :${pn}; then

@@ -48,24 +48,24 @@ One can browse local mirrors and resources via the home page (`index.html`) serv
 - **Supplementary tables**
 - **Caprion site** — from `/site`
 
-## 🔐 Remote (Non-CSD3) Browser Access
+## 🔐 Remote (Non-CSD3) Access
 
-Set up SSH tunneling to access the local web server from another machine:
+Set up SSH tunneling[^port] to access the local web server from another machine:
 
-### 1. Start the server on CSD3[^port]:
+### 1. On CSD3
 
 ```bash
 python3 -m http.server 8000 &
 hostname
 ```
 
-### 2. On **local machine**, run:
+### 2. On **local machine**
 
 ```bash
 ssh -4 -L 8080:127.0.0.1:8000 -fN CRSid@${hostname}.hpc.cam.ac.uk
 ```
 
-Then visit: [http://127.0.0.1:8080](http://127.0.0.1:8080)
+Then visit: <http://127.0.0.1:8080>
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
@@ -75,11 +75,11 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
         module load ceuadmin/edge
         # ~/.config/microsoft-edge
-        edge http://127.0.0.1:${pn} &
+        edge &
 
     If the Edge config is not available, use a temporary directory:
 
-        edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &
+        edge --user-data-dir=/tmp/edge &
 
 [^chrome]: **Google Chrome**
 
@@ -87,20 +87,18 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
 [^port]: **use of specific port number**
 
-        python3 -m http.server &
-        firefox http://127.0.0.1:8000 &
-
-    📌 **Note:** Port `8000` is used here, but one can replace it with any free port[^port].
-
-    In general, the availability can be handled as follows,
-
         export pn=8000
+        python3 -m http.server &
+        firefox http://127.0.0.1:${pn} &
+
+    📌 **Note:** Port `8000` is used here, but one can replace it with any free port whose availability can be handled as follows,
+
         if lsof -i :${pn}; then
             echo "Port ${pn} is already in use. Try another one."
         else
             python3 -m http.server ${pn} &
             server_pid=$!
-            edge http://127.0.0.1:${pn} &
+            firefox http://127.0.0.1:${pn} &
         fi
 
     Release the port using:

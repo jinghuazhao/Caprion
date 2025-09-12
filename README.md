@@ -37,7 +37,7 @@ python3 -m http.server &
 firefox http://127.0.0.1:8000 &
 ```
 
-📌 **Note:** 8000 is a port number[^port]. One can also use other browsers such as Microsoft Edge[^edge] or Google Chrome[^chrome].
+📌 **Note:** 8000 is a port number[^port]. One can also use other browsers such as Microsoft Edge or Google Chrome[^browsers].
 
 ## 🗂️ Web Page Structure
 
@@ -89,7 +89,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
     Check active processes with `ps`.
 
-[^edge]: **Microsoft Edge**
+[^browsers]: **Microsoft Edge**
 
     One can launch Edge using a module or a temporary user data directory if needed:
 
@@ -101,6 +101,4 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
         edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &
 
-[^chrome]: **Google Chrome**
-
-    The syntax follows Microsoft Edge[^edge].
+    Google Chrome follows the Microsoft Edge syntax.

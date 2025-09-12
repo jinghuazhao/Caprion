@@ -70,7 +70,7 @@ Then visit: <http://127.0.0.1:8080>
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
-[^port]: **use of specific port number**
+[^port]: **Use of specific port number**
 
     One can replace port number `8000` with any free port whose availability can be handled as follows,
 

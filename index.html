@@ -192,7 +192,7 @@ module load ceuadmin/firefox/nightly
 python3 -m http.server &amp;
 firefox http://127.0.0.1:8000 &amp;
 </code></pre>
-<p>📌 <strong>Note:</strong> A local web-style navigation is needed<sup id="fnref:web"><a class="footnote-ref" href="#fn:web">1</a></sup>. One can also use other browsers such as Microsoft Edge or Google Chrome<sup id="fnref:browsers"><a class="footnote-ref" href="#fn:browsers">2</a></sup>.</p>
+<p>📌 <strong>Note:</strong> A local web-style navigation is needed<sup id="fnref:web"><a class="footnote-ref" href="#fn:web">1</a></sup>, to be viewed by firefox or other browsers such as Microsoft Edge or Google Chrome<sup id="fnref:browsers"><a class="footnote-ref" href="#fn:browsers">2</a></sup>.</p>
 <h2 id="web-page-structure">🗂️ Web Page Structure</h2>
 <p>One can browse local mirrors and resources via the home page (<code>index.html</code>) served at the chosen port:</p>
 <ul>
@@ -218,7 +218,7 @@ hostname
 <ol>
 <li id="fn:web">
 <p><strong>Web-style browsing of local files</strong></p>
-<p>Modern browsers treat local files as separate origins, even if they’re in the same folder; therefore a local web server is required to allow for cross-origin resource sharing (CORS). One can replace port number <code>8000</code> with any free port whose availability can be handled as follows,</p>
+<p>Modern browsers treat local files as separate origins, even if they’re in the same folder. Consequently, a local web server is required to allow for cross-origin resource sharing (CORS). A port number such as <code>8000</code> is specified when available and can be handled as follows,</p>
 <pre><code>export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use. Try another one."
@@ -332,5 +332,5 @@ edge http://127.0.0.1:${pn} &amp;
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-16 09:15:00.509933+00:00
+Build Date UTC : 2025-09-16 09:23:49.502203+00:00
 -->

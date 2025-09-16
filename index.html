@@ -227,23 +227,17 @@ else
     server_pid=$!
     firefox http://127.0.0.1:${pn} &amp;
 fi
-
-Release the port using:
-
+# Release the port using:
 kill $server_pid
-
-Check active processes with `ps`.
+# Check active processes with `ps`.
 </code></pre>
 <p>One can launch Edge using a module or a temporary user data directory if needed:</p>
 <pre><code>module load ceuadmin/edge
 # ~/.config/microsoft-edge
 edge http://127.0.0.1:${pn} &amp;
-
-If the Edge config is not available, use a temporary directory:
-
+# If the Edge config is not available, use a temporary directory:
 edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &amp;
-
-Google Chrome follows the Microsoft Edge syntax.
+# Google Chrome follows the Microsoft Edge syntax.
 </code></pre>
 <p><a class="footnote-backref" href="#fnref:web" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
@@ -334,5 +328,5 @@ Google Chrome follows the Microsoft Edge syntax.
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-16 09:58:19.927640+00:00
+Build Date UTC : 2025-09-16 10:00:49.657098+00:00
 -->

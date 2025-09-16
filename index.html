@@ -185,14 +185,14 @@
 <li><a href="https://jinghuazhao.github.io/Caprion/Notes/">Project Notes</a></li>
 </ul>
 <h2 id="local-fileweb-browsing">🌐 Local File/Web Browsing</h2>
-<p>A local web-style navigation can be set up as follows:</p>
+<p>It can be set up as follows:</p>
 <pre><code class="language-bash">cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
 # As of 07/09/2025
 module load ceuadmin/firefox/nightly
 python3 -m http.server &amp;
 firefox http://127.0.0.1:8000 &amp;
 </code></pre>
-<p>📌 <strong>Note:</strong> 8000 is a port number<sup id="fnref:port"><a class="footnote-ref" href="#fn:port">1</a></sup>. One can also use other browsers such as Microsoft Edge or Google Chrome<sup id="fnref:browsers"><a class="footnote-ref" href="#fn:browsers">2</a></sup>.</p>
+<p>📌 <strong>Note:</strong> A local web-style navigation is needed<sup id="fnref:web"><a class="footnote-ref" href="#fn:web">1</a></sup>. One can also use other browsers such as Microsoft Edge or Google Chrome<sup id="fnref:browsers"><a class="footnote-ref" href="#fn:browsers">2</a></sup>.</p>
 <h2 id="web-page-structure">🗂️ Web Page Structure</h2>
 <p>One can browse local mirrors and resources via the home page (<code>index.html</code>) served at the chosen port:</p>
 <ul>
@@ -216,9 +216,9 @@ hostname
 <div class="footnote">
 <hr />
 <ol>
-<li id="fn:port">
-<p><strong>Use of specific port number</strong></p>
-<p>One can replace port number <code>8000</code> with any free port whose availability can be handled as follows,</p>
+<li id="fn:web">
+<p><strong>Web-style browsing of local files</strong></p>
+<p>Modern browsers treat local files as separate origins, even if they’re in the same folder; therefore a local web server is required to allow for cross-origin resource sharing (CORS). One can replace port number <code>8000</code> with any free port whose availability can be handled as follows,</p>
 <pre><code>export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use. Try another one."
@@ -231,7 +231,7 @@ fi
 <p>Release the port using:</p>
 <pre><code>kill $server_pid
 </code></pre>
-<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:port" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:web" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 <li id="fn:browsers">
 <p><strong>Other browsers</strong></p>
@@ -332,5 +332,5 @@ edge http://127.0.0.1:${pn} &amp;
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-12 10:49:48.243610+00:00
+Build Date UTC : 2025-09-16 09:15:00.509933+00:00
 -->

@@ -192,7 +192,7 @@ module load ceuadmin/firefox/nightly
 python3 -m http.server &amp;
 firefox http://127.0.0.1:8000 &amp;
 </code></pre>
-<p>📌 <strong>Note:</strong> A local web server is needed<sup id="fnref:web"><a class="footnote-ref" href="#fn:web">1</a></sup>, to be visited by firefox or other browsers such as Microsoft Edge or Google Chrome<sup id="fnref:browsers"><a class="footnote-ref" href="#fn:browsers">2</a></sup>.</p>
+<p>📌 <strong>Note:</strong> A local web server is needed<sup id="fnref:web"><a class="footnote-ref" href="#fn:web">1</a></sup>, to be visited by firefox or other browsers.</p>
 <h2 id="web-page-structure">🗂️ Web Page Structure</h2>
 <p>One can browse local mirrors and resources via the home page (<code>index.html</code>) served at the chosen port:</p>
 <ul>
@@ -218,7 +218,7 @@ hostname
 <ol>
 <li id="fn:web">
 <p><strong>Web-style browsing of local files</strong></p>
-<p>Modern browsers treat local files as separate origins, even if they’re in the same folder. Consequently, a local web server is required to allow for cross-origin resource sharing (CORS). A port number such as <code>8000</code> is specified when available and can be handled as follows,</p>
+<p>Modern browsers treat local file (seven if files in the same folder) as separate origins, so their access involves cross-origin resource sharing (CORS). A web server facilitates a same-origin policy (SOP) for this browser-enforced security feature via a port number (such as <code>8000</code>) whose availability can be handled as follows,</p>
 <pre><code>export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use. Try another one."
@@ -231,10 +231,7 @@ fi
 <p>Release the port using:</p>
 <pre><code>kill $server_pid
 </code></pre>
-<p>Check active processes with <code>ps</code>.&#160;<a class="footnote-backref" href="#fnref:web" title="Jump back to footnote 1 in the text">&#8617;</a></p>
-</li>
-<li id="fn:browsers">
-<p><strong>Other browsers</strong></p>
+<p>Check active processes with <code>ps</code>.</p>
 <p>One can launch Edge using a module or a temporary user data directory if needed:</p>
 <pre><code>module load ceuadmin/edge
 # ~/.config/microsoft-edge
@@ -243,7 +240,7 @@ edge http://127.0.0.1:${pn} &amp;
 <p>If the Edge config is not available, use a temporary directory:</p>
 <pre><code>edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &amp;
 </code></pre>
-<p>Google Chrome follows the Microsoft Edge syntax.&#160;<a class="footnote-backref" href="#fnref:browsers" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+<p>Google Chrome follows the Microsoft Edge syntax.&#160;<a class="footnote-backref" href="#fnref:web" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div></div>
@@ -332,5 +329,5 @@ edge http://127.0.0.1:${pn} &amp;
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-16 09:28:16.444957+00:00
+Build Date UTC : 2025-09-16 09:40:09.969808+00:00
 -->

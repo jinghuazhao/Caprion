@@ -72,7 +72,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
 [^web]: **Web-style browsing of local files**
 
-    - Modern browsers treat local file (seven if files in the same folder) as separate origins, so their access involves cross-origin resource sharing (CORS). A web server facilitates a same-origin policy (SOP) for this browser-enforced security feature via a port number (such as `8000`) whose availability can be handled as follows,
+    Modern browsers treat local file (seven if files in the same folder) as separate origins, so their access involves cross-origin resource sharing (CORS). A web server facilitates a same-origin policy (SOP) for this browser-enforced security feature via a port number (such as `8000`) whose availability can be handled as follows,
 
         export pn=8000
         if lsof -i :${pn}; then
@@ -89,7 +89,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
         Check active processes with `ps`.
 
-    - One can launch Edge using a module or a temporary user data directory if needed:
+    One can launch Edge using a module or a temporary user data directory if needed:
 
         module load ceuadmin/edge
         # ~/.config/microsoft-edge

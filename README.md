@@ -72,7 +72,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
 [^web]: **Web-style browsing of local files**
 
-    A browser-enforced security feature treats local files in the same folder as separate origins, so their access triggers cross-origin resource sharing (CORS). A web server furnishes same-origin policy (SOP) via a port number (such as `8000`) whose availability can be handled as follows,
+    Browsers treat local files in the same folder as separate origins, causing cross-origin resource sharing (CORS) restrictions. A local web server enforces the same-origin policy (SOP) via a port (e.g., 8000), whose availability can be managed as follows:
 
         export pn=8000
         if lsof -i :${pn}; then

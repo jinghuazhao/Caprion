@@ -86,7 +86,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
         kill $server_pid
         # Check active processes with `ps`.
 
-    One can launch Edge using a module or a temporary user data directory if needed:
+    One can launch Edge/Chrome using a module or a temporary user data directory if needed:
 
         module load ceuadmin/edge
         # ~/.config/microsoft-edge

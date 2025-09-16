@@ -37,7 +37,7 @@ python3 -m http.server &
 firefox http://127.0.0.1:8000 &
 ```
 
-📌 **Note:** A local web server is needed[^web], to be visited by firefox or other browsers.
+📌 **Note:** A local web server is needed and accessed by firefox or other browsers[^web].
 
 ## 🗂️ Web Page Structure
 
@@ -72,7 +72,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
 [^web]: **Web-style browsing of local files**
 
-    Modern browsers treat local file (seven if files in the same folder) as separate origins, so their access involves cross-origin resource sharing (CORS). A web server facilitates a same-origin policy (SOP) for this browser-enforced security feature via a port number (such as `8000`) whose availability can be handled as follows,
+    1. Modern browsers treat local file (seven if files in the same folder) as separate origins, so their access involves cross-origin resource sharing (CORS). A web server facilitates a same-origin policy (SOP) for this browser-enforced security feature via a port number (such as `8000`) whose availability can be handled as follows,
 
         export pn=8000
         if lsof -i :${pn}; then
@@ -83,20 +83,20 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
             firefox http://127.0.0.1:${pn} &
         fi
 
-    Release the port using:
+        Release the port using:
 
         kill $server_pid
 
-    Check active processes with `ps`.
+        Check active processes with `ps`.
 
-    One can launch Edge using a module or a temporary user data directory if needed:
+    2. One can launch Edge using a module or a temporary user data directory if needed:
 
         module load ceuadmin/edge
         # ~/.config/microsoft-edge
         edge http://127.0.0.1:${pn} &
 
-    If the Edge config is not available, use a temporary directory:
+        If the Edge config is not available, use a temporary directory:
 
         edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &
 
-    Google Chrome follows the Microsoft Edge syntax.
+        Google Chrome follows the Microsoft Edge syntax.

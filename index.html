@@ -218,7 +218,7 @@ hostname
 <ol>
 <li id="fn:web">
 <p><strong>Web-style browsing of local files</strong></p>
-<p>Modern browsers treat local files in the same folder as separate origins, so their access involves cross-origin resource sharing (CORS). A web server facilitates same-origin policy (SOP) for this browser-enforced security feature via a port number (such as <code>8000</code>) whose availability can be handled as follows,</p>
+<p>A browser-enforced security feature treats local files in the same folder as separate origins, so their access triggers cross-origin resource sharing (CORS). A web server furnishes same-origin policy (SOP) via a port number (such as <code>8000</code>) whose availability can be handled as follows,</p>
 <pre><code>export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use. Try another one."
@@ -328,5 +328,5 @@ edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &amp;
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-16 10:03:56.822516+00:00
+Build Date UTC : 2025-09-16 10:09:51.588027+00:00
 -->

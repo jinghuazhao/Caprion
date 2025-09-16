@@ -37,7 +37,7 @@ python3 -m http.server &
 firefox http://127.0.0.1:8000 &
 ```
 
-📌 **Note:** A local web-style navigation is needed[^web], to be viewed by firefox or other browsers such as Microsoft Edge or Google Chrome[^browsers].
+📌 **Note:** A local web server is needed[^web], to be visited by firefox or other browsers such as Microsoft Edge or Google Chrome[^browsers].
 
 ## 🗂️ Web Page Structure
 

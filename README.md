@@ -27,7 +27,7 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 ## 🌐 Local File/Web Browsing
 
-A local web-style navigation can be set up as follows:
+It can be set up as follows:
 
 ```bash
 cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis
@@ -37,7 +37,7 @@ python3 -m http.server &
 firefox http://127.0.0.1:8000 &
 ```
 
-📌 **Note:** 8000 is a port number[^port]. One can also use other browsers such as Microsoft Edge or Google Chrome[^browsers].
+📌 **Note:** A local web-style navigation is needed[^web]. One can also use other browsers such as Microsoft Edge or Google Chrome[^browsers].
 
 ## 🗂️ Web Page Structure
 
@@ -70,9 +70,9 @@ Then visit: <http://127.0.0.1:8080>
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
-[^port]: **Use of specific port number**
+[^web]: **Web-style browsing of local files**
 
-    One can replace port number `8000` with any free port whose availability can be handled as follows,
+    Modern browsers treat local files as separate origins, even if they’re in the same folder; therefore a local web server is required to allow for cross-origin resource sharing (CORS). One can replace port number `8000` with any free port whose availability can be handled as follows,
 
         export pn=8000
         if lsof -i :${pn}; then

@@ -218,7 +218,7 @@ hostname
 <ol>
 <li id="fn:web">
 <p><strong>File browsing through a local web server</strong></p>
-<p>Browsers treat local files in a folder as separate origins with cross-origin resource sharing (CORS) restrictions. A local web server enforces the same-origin policy (SOP) on them via a port (e.g., 8000) managed as follows:</p>
+<p>Browsers treat local files in a folder as separate origins with cross-origin resource sharing (CORS) restrictions. A local web server enforces the same-origin policy (SOP) via a port (e.g., 8000) as follows:</p>
 <pre><code>export pn=8000
 if lsof -i :${pn}; then
     echo "Port ${pn} is already in use. Try another one."
@@ -328,5 +328,5 @@ edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &amp;
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-16 14:33:16.962459+00:00
+Build Date UTC : 2025-09-16 14:44:02.108636+00:00
 -->

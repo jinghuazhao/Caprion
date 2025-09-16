@@ -156,11 +156,6 @@
             </li>
               </ul>
             </li>
-            
-            <li class="nav-item" data-level="1"><a href="#configmicrosoft-edge" class="nav-link">~/.config/microsoft-edge</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
         </ul>
     </div>
 </div></div>
@@ -223,31 +218,33 @@ hostname
 <ol>
 <li id="fn:web">
 <p><strong>Web-style browsing of local files</strong></p>
-<ul>
-<li>
 <p>Modern browsers treat local file (seven if files in the same folder) as separate origins, so their access involves cross-origin resource sharing (CORS). A web server facilitates a same-origin policy (SOP) for this browser-enforced security feature via a port number (such as <code>8000</code>) whose availability can be handled as follows,</p>
-<p>export pn=8000
+<pre><code>export pn=8000
 if lsof -i :${pn}; then
-    echo "Port <span class="arithmatex" pn="pn">\({pn} is already in use. Try another one."
+    echo "Port ${pn} is already in use. Try another one."
 else
-    python3 -m http.server <span class="arithmatex">\({pn} &amp;
-    server_pid=\)</span>!
-    firefox http://127.0.0.1:\)</span> &amp;
-fi</p>
-<p>Release the port using:</p>
-<p>kill $server_pid</p>
-<p>Check active processes with <code>ps</code>.</p>
-</li>
-<li>
+    python3 -m http.server ${pn} &amp;
+    server_pid=$!
+    firefox http://127.0.0.1:${pn} &amp;
+fi
+
+Release the port using:
+
+kill $server_pid
+
+Check active processes with `ps`.
+</code></pre>
 <p>One can launch Edge using a module or a temporary user data directory if needed:</p>
-<p>module load ceuadmin/edge</p>
-<h1 id="configmicrosoft-edge">~/.config/microsoft-edge</h1>
-<p>edge http://127.0.0.1:${pn} &amp;</p>
-<p>If the Edge config is not available, use a temporary directory:</p>
-<p>edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &amp;</p>
-<p>Google Chrome follows the Microsoft Edge syntax.</p>
-</li>
-</ul>
+<pre><code>module load ceuadmin/edge
+# ~/.config/microsoft-edge
+edge http://127.0.0.1:${pn} &amp;
+
+If the Edge config is not available, use a temporary directory:
+
+edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &amp;
+
+Google Chrome follows the Microsoft Edge syntax.
+</code></pre>
 <p><a class="footnote-backref" href="#fnref:web" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 </ol>
@@ -337,5 +334,5 @@ fi</p>
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-09-16 09:57:41.374664+00:00
+Build Date UTC : 2025-09-16 09:58:19.927640+00:00
 -->

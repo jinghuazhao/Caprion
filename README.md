@@ -37,7 +37,7 @@ python3 -m http.server &
 firefox http://127.0.0.1:8000 &
 ```
 
-📌 **Note:** A local web-style navigation is needed[^web]. One can also use other browsers such as Microsoft Edge or Google Chrome[^browsers].
+📌 **Note:** A local web-style navigation is needed[^web], to be viewed by firefox or other browsers such as Microsoft Edge or Google Chrome[^browsers].
 
 ## 🗂️ Web Page Structure
 
@@ -72,7 +72,7 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
 [^web]: **Web-style browsing of local files**
 
-    Modern browsers treat local files as separate origins, even if they’re in the same folder; therefore a local web server is required to allow for cross-origin resource sharing (CORS). One can replace port number `8000` with any free port whose availability can be handled as follows,
+    Modern browsers treat local files as separate origins, even if they’re in the same folder. Consequently, a local web server is required to allow for cross-origin resource sharing (CORS). A port number such as `8000` is specified when available and can be handled as follows,
 
         export pn=8000
         if lsof -i :${pn}; then

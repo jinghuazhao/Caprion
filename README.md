@@ -70,7 +70,7 @@ Then visit: <http://127.0.0.1:8080>
 
 Ensure `${hostname}` matches the result from CSD3 `hostname`.
 
-[^web]: **File browsing through local web server**
+[^web]: **File browsing through a local web server**
 
     Browsers treat local files in a folder as separate origins with cross-origin resource sharing (CORS) restrictions. A local web server enforces the same-origin policy (SOP) on them via a port (e.g., 8000) managed as follows:
 

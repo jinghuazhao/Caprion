@@ -82,21 +82,15 @@ Ensure `${hostname}` matches the result from CSD3 `hostname`.
             server_pid=$!
             firefox http://127.0.0.1:${pn} &
         fi
-
-        Release the port using:
-
+        # Release the port using:
         kill $server_pid
-
-        Check active processes with `ps`.
+        # Check active processes with `ps`.
 
     One can launch Edge using a module or a temporary user data directory if needed:
 
         module load ceuadmin/edge
         # ~/.config/microsoft-edge
         edge http://127.0.0.1:${pn} &
-
-        If the Edge config is not available, use a temporary directory:
-
+        # If the Edge config is not available, use a temporary directory:
         edge --user-data-dir=/tmp/edge http://127.0.0.1:${pn} &
-
-        Google Chrome follows the Microsoft Edge syntax.
+        # Google Chrome follows the Microsoft Edge syntax.

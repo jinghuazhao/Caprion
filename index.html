@@ -139,13 +139,11 @@
       <ul>
         <li>A GitHub code repository.</li>
         <li>A GitHub web site, <a href="https://jinghuazhao.github.io/Caprion/">https://jinghuazhao.github.io/Caprion/</a>, containing steps to load this page from CSD3:</li>
-        <ul>
+        <ol>
           <li>cd /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis</li>
-          <li>module load ceuadmin/edge</li>
           <li>python3 -m http.server 8000 &</li>
-          <li>edge http://127.0.0.1:8000 &</li>
-          <li>In case of issues, use different number other than 8000, and/or specify working directory as in <b>edge --user-data-dir=/tmp/edge http://127.0.0.1:8000 &</b></li>
-        </ul>
+          <li>firefox http://127.0.0.1:8000 &</li>
+        </ol>
       </ul>
     </li>
   </ul>

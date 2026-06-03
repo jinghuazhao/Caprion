@@ -53,22 +53,24 @@ function cistrans()
                   filter(! chr %in% c("XY","Y"))
     X <- with(glist_hg19,chr=="X")
     glist_hg19[X,"chr"] <- "23"
-    sept7 <- filter(pQTLdata::hg19, SYMBOL == "SEPTIN7") %>%
-             group_by(SYMBOL, chr) %>%
-             summarize(start = min(start), end = max(end), .groups = 'drop') %>%
-             transmute(Gene = as.character(SYMBOL), chr = gsub("chr", "", chr), start, end) %>%
+    # pQTLdata::hg19
+    sept7 <- dplyr::filter(hg19, SYMBOL == "SEPTIN7") %>%
+             dplyr::group_by(SYMBOL, chr) %>%
+             dplyr::summarize(start = min(start), end = max(end), .groups = 'drop') %>%
+             dplyr::transmute(Gene = as.character(SYMBOL), chr = gsub("chr", "", chr), start, end) %>%
              data.frame()
-    ucsc <- transmute(pQTLdata::hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
-            select(Gene,chr,start,end) %>%
-            bind_rows(sept7)
+    # pQTLdata::hg19Tables
+    ucsc <- dplyr::transmute(hg19Tables,chr=gsub("chr","",X.chrom),start=chromStart,end=chromEnd,Gene=hgncSym) %>%
+            dplyr::select(Gene,chr,start,end) %>%
+            dplyr::bind_rows(sept7)
     X <- with(ucsc,chr=="X")
     ucsc[X,"chr"] <- "23"
     HOME <- Sys.getenv("HOME")
     load(paste(HOME,"Caprion","pilot","caprion.rda",sep="/"))
     caprion <- protein_list
-    caprion <- select(caprion,Protein,Accession,Gene) %>%
-               mutate(Protein=gsub("_HUMAN","",Protein)) %>%
-               rename(prot=Protein)
+    caprion <- dplyr::select(caprion,Protein,Accession,Gene) %>%
+               dplyr::mutate(Protein=gsub("_HUMAN","",Protein)) %>%
+               dplyr::rename(prot=Protein)
     quadruple <- function(d,label) data.frame(Gene=label,chr=min(d$chr),start=min(d$start),end=max(d$end))
     caprion[c(55,237,433,435),]
     subset(glist_hg19,grepl("^AMY",gene))
@@ -90,19 +92,20 @@ function cistrans()
     caprion_modified[845,"Gene"] <- "SEPT2"
     check_list <- c(55,237,278,385,390,433,435,845)
     APOC <- subset(glist_hg19,gene %in%c("APOC2","APOC4")) %>%
-            rename(Gene=gene)
-    ucsc_modified <- bind_rows(ucsc,APOC,AMY,C4B,HIST,HBA)
-    pqtls <- select(merged,prot,SNP,log.P.) %>%
-             mutate(log10p=-log.P.) %>%
-             left_join(caprion_modified) %>%
-             select(Gene,SNP,prot,log10p)
-    posSNP <- select(merged,SNP,Chr,bp)
-    caprion_ucsc_modified <- left_join(caprion_modified, ucsc_modified) %>%
-                             group_by(across(-c(start, end))) %>%
-                             summarize(start = min(start), end = max(end), .groups = 'drop')
+            dplyr::rename(Gene=gene)
+    ucsc_modified <- dplyr::bind_rows(ucsc,APOC,AMY,C4B,HIST,HBA)
+    pqtls <- dplyr::select(merged,prot,SNP,log.P.) %>%
+             dplyr::mutate(log10p=-log.P.) %>%
+             dplyr::left_join(caprion_modified) %>%
+             dplyr::select(Gene,SNP,prot,log10p)
+    posSNP <- dplyr::select(merged,SNP,Chr,bp)
+    caprion_ucsc_modified <- dplyr::left_join(caprion_modified, ucsc_modified) %>%
+                             dplyr::group_by(across(-c(start, end))) %>%
+                             dplyr::summarize(start = min(start), end = max(end), .groups = 'drop')
+    save(pqtls,file=file.path(analysis,"docs","pqtls.rda"))
     save(caprion_ucsc_modified,file=file.path(analysis,"docs","caprion_ucsc_modified.rda"),compress="xz")
     cis.vs.trans <- qtlClassifier(pqtls,posSNP,ucsc_modified,1e6) %>%
-                    mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
+                    dplyr::mutate(geneChrom=as.integer(geneChrom),cis=if_else(Type=="cis",TRUE,FALSE))
     table(cis.vs.trans$Type)
     write.csv(cis.vs.trans,file=file.path(analysis,"work",paste0("caprion",suffix,".cis.vs.trans")),row.names=FALSE,quote=FALSE)
     png(file.path(analysis,"work",paste0("caprion",suffix,".pqtl2d.png")),width=12,height=10,unit="in",res=300)

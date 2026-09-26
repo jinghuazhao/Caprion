@@ -1,4 +1,4 @@
-# Caprion Proteomics Data: Raw, Normalized Peptides and Protein Abundance
+# Raw, Normalized Peptides and Protein Abundance
 
 ## Overview
 

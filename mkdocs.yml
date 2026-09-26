@@ -13,6 +13,7 @@ nav:
     - misc/README.md
   - "Additional information":
     - "Caprion panel": https://jinghuazhao.github.io/pQTLdata/reference/caprion.html
+    - Data.md
     - Notes.md
 theme:
     name: mkdocs

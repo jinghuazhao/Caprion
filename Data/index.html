@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Caprion Proteomics Data: Raw, Normalized Peptides and Protein Abundance - Caprion</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/HTML.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Java.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/JavaScript.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Perl.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/R.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/rust.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="..">Caprion</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href=".." class="nav-link"></a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pilot studies <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../pilot/autoencoder/" class="dropdown-item">Autoencoder</a>
+</li>
+                                    
+<li>
+    <a href="../pilot/gwas2/" class="dropdown-item">gwas2</a>
+</li>
+                                    
+<li>
+    <a href="../pilot/" class="dropdown-item">Pilot studies</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Analysis <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../progs/" class="dropdown-item">Protein analysis</a>
+</li>
+                                    
+<li>
+    <a href="../peptide_progs/" class="dropdown-item">Peptide analysis</a>
+</li>
+                                    
+<li>
+    <a href="../misc/" class="dropdown-item">Miscellaneous analysis</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Additional information <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="https://jinghuazhao.github.io/pQTLdata/reference/caprion.html" class="dropdown-item">Caprion panel</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active">Caprion Proteomics Data: Raw, Normalized Peptides and Protein Abundance</a>
+</li>
+                                    
+<li>
+    <a href="../Notes/" class="dropdown-item">Notes</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../misc/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../Notes/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/jinghuazhao/Caprion" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#caprion-proteomics-data-raw-normalized-peptides-and-protein-abundance" class="nav-link">Caprion Proteomics Data: Raw, Normalized Peptides and Protein Abundance</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#overview" class="nav-link">Overview</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#data-hierarchy" class="nav-link">Data hierarchy</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#1-raw-igs" class="nav-link">1. Raw IGs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2-normalized-peptides" class="nav-link">2. Normalized Peptides</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3-protein_all_peptides" class="nav-link">3. Protein_All_Peptides</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4-protein_dr_filt_peptides" class="nav-link">4. Protein_DR_Filt_Peptides</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5-raw-zip-files" class="nav-link">5. Raw ZIP files</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#6-practical-recommendation" class="nav-link">6. Practical recommendation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#7-bottom-line" class="nav-link">7. Bottom line</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="caprion-proteomics-data-raw-normalized-peptides-and-protein-abundance">Caprion Proteomics Data: Raw, Normalized Peptides and Protein Abundance</h1>
+<h2 id="overview">Overview</h2>
+<p>The Caprion pilot workbook contains several levels of processed proteomics data. For protein-level abundance analysis, the recommended endpoint is:</p>
+<p><strong><code>Protein_All_Peptides</code></strong></p>
+<p>The underlying raw and peptide-level data are useful for quality control, troubleshooting, and methodological investigation, but the supplied workbook does not contain enough information to reliably reconstruct the exact Caprion protein-abundance algorithm.</p>
+<hr />
+<h2 id="data-hierarchy">Data hierarchy</h2>
+<p>The practical data flow appears to be approximately:</p>
+<pre><code class="language-text">Raw IGs
+   |
+   v
+Peptide / feature processing
+   |
+   v
+Normalized Peptides
+   |
+   v
+Protein-level processing / peptide selection or weighting
+   |
+   v
+Protein_All_Peptides
+   |
+   +--&gt; Protein_DR_Filt_Peptides
+</code></pre>
+<p>This represents the observed structure of the supplied data. It should not be interpreted as a documented Caprion algorithm, because the workbook contains exported results rather than the underlying calculation workflow.</p>
+<hr />
+<h2 id="1-raw-igs">1. Raw IGs</h2>
+<h3 id="sheet">Sheet</h3>
+<p><code>Raw IGs</code></p>
+<h3 id="contents">Contents</h3>
+<p>This is the lowest-level data available in the workbook. Each row represents an <strong>Isotope Group (IG)</strong> associated with a peptide/protein.</p>
+<p>Important fields include:</p>
+<ul>
+<li><code>Isotope Group ID</code></li>
+<li><code>Protein</code></li>
+<li><code>Modified Peptide Sequence</code></li>
+<li><code>Monoisotopic m/z</code></li>
+<li><code>Max Isotope Time Centroid</code></li>
+<li><code>Charge</code></li>
+<li><code>ZWK0001</code> ... <code>ZWK0200</code></li>
+</ul>
+<p>The sample columns contain raw intensity-like measurements.</p>
+<h3 id="example-1433b_human">Example: 1433B_HUMAN</h3>
+<p>Six isotope groups are present:</p>
+<ul>
+<li><code>442662695</code> — <code>AKLAEQAERYDDMAAAMK</code></li>
+<li><code>442590982</code> — <code>AVTEQGHELSNEER</code></li>
+<li><code>442706125</code> — <code>AVTEQGHELSNEER</code></li>
+<li><code>442627470</code> — <code>AVTEQGHELSNEERNLLSVAYK</code></li>
+<li><code>442807041</code> — modified long peptide</li>
+<li><code>442641664</code> — <code>YLSEVASGDNK</code></li>
+</ul>
+<p>There are therefore five unique peptide sequences, because two isotope groups correspond to <code>AVTEQGHELSNEER</code>.</p>
+<h3 id="recommended-use">Recommended use</h3>
+<p>Use Raw IGs when investigating:</p>
+<ul>
+<li>raw MS signal behaviour;</li>
+<li>isotope groups;</li>
+<li>peptide identification;</li>
+<li>retention time and m/z;</li>
+<li>charge;</li>
+<li>missingness;</li>
+<li>raw-data quality control;</li>
+<li>attempts to reproduce the upstream processing pipeline.</li>
+</ul>
+<p>For ordinary protein-abundance analysis, Raw IGs are <strong>not the preferred endpoint</strong>.</p>
+<hr />
+<h2 id="2-normalized-peptides">2. Normalized Peptides</h2>
+<h3 id="sheet_1">Sheet</h3>
+<p><code>Normalized Peptides</code></p>
+<p>This sheet has essentially the same peptide/IG structure as <code>Raw IGs</code>, but the sample measurements have been transformed into normalized peptide-level abundance values.</p>
+<p>For example, for <code>1433B_HUMAN</code>, the raw value and normalized value for the same IG can be very different in scale:</p>
+<pre><code class="language-text">Raw intensity       Normalized peptide
+125873.3281         17.098838
+216674.1250         17.779611
+198077.9062         17.785887
+...
+</code></pre>
+<h3 id="relationship-to-raw-data">Relationship to raw data</h3>
+<p>The normalized values are strongly related to <code>log2(raw intensity)</code> for several peptides, but they are <strong>not simply</strong>:</p>
+<pre><code class="language-text">Normalized = log2(Raw)
+</code></pre>
+<p>nor a single universal linear transformation.</p>
+<p>For 1433B_HUMAN, examples of regressions of normalized abundance on <code>log2(raw)</code> were:</p>
+<pre><code class="language-text">442590982    slope 0.9547   correlation 0.9865
+442706125    slope 0.9710   correlation 0.9939
+442627470    slope 0.8517   correlation 0.9071
+442662695    slope 0.5878   correlation 0.6968
+442641664    slope 1.0069   correlation 0.6992
+442807041    slope -0.0297  correlation -0.0172
+</code></pre>
+<p>This demonstrates that the normalization cannot be reconstructed as one simple transformation of raw intensity.</p>
+<h3 id="important-finding">Important finding</h3>
+<p>Within-IG standardization of <code>log2(raw)</code> also did not explain the normalized values. The six IG-specific slopes ranged from approximately <code>-0.03</code> to <code>1.40</code>.</p>
+<h3 id="recommended-use_1">Recommended use</h3>
+<p><code>Normalized Peptides</code> is useful for:</p>
+<ul>
+<li>peptide-level analysis;</li>
+<li>peptide QC;</li>
+<li>investigating peptide behaviour;</li>
+<li>understanding the inputs to protein-level processing.</li>
+</ul>
+<p>It is <strong>not necessary to reconstruct these values</strong> if the objective is simply to obtain protein abundances from the supplied processed dataset.</p>
+<hr />
+<h2 id="3-protein_all_peptides">3. Protein_All_Peptides</h2>
+<h3 id="sheet_2">Sheet</h3>
+<p><code>Protein_All_Peptides</code></p>
+<p>This is the most appropriate dataset for the main <strong>protein-level abundance analysis</strong>.</p>
+<p>The structure is:</p>
+<pre><code class="language-text">Protein | ZWK0001 | ZWK0002 | ... | ZWK0200
+</code></pre>
+<p>Each row represents a protein and each sample column contains the reported protein abundance.</p>
+<p>For example:</p>
+<pre><code class="language-text">1433B_HUMAN
+ZWK0001 = 17.3366328529562
+ZWK0002 = 17.5882866329177
+ZWK0003 = 18.6032096647269
+...
+</code></pre>
+<h3 id="what-we-learned-about-its-construction">What we learned about its construction</h3>
+<p>We tested a number of simple hypotheses using the underlying normalized peptide values.</p>
+<p>The reported protein abundance is <strong>not adequately reproduced by</strong>:</p>
+<ul>
+<li>the arithmetic mean of all normalized peptide/IG values;</li>
+<li>the median of all normalized peptide/IG values;</li>
+<li>the maximum peptide;</li>
+<li>the minimum peptide;</li>
+<li>the geometric mean;</li>
+<li>equal-weight aggregation of unique peptide sequences;</li>
+<li>simply selecting the strongest raw peptide;</li>
+<li>detection rate;</li>
+<li>lower coefficient of variation alone.</li>
+</ul>
+<p>Across proteins with exactly two peptide sequences, one peptide was often much more strongly associated with the reported protein abundance than the other. This suggests that peptide evidence is not treated as a simple equal-weight average, although the exact mechanism cannot be established from the exported tables.</p>
+<p>For example, among 128 proteins with exactly two unique peptide sequences:</p>
+<ul>
+<li>median correlation of the better peptide with protein abundance: approximately <code>0.946</code>;</li>
+<li>median correlation of the other peptide: approximately <code>0.345</code>;</li>
+<li>the better peptide had lower regression RMSE in all 128 cases.</li>
+</ul>
+<p>This is strong evidence that peptide-level contributions are not simply equal-weighted.</p>
+<h3 id="what-cannot-be-established">What cannot be established</h3>
+<p>The workbook does <strong>not</strong> contain the calculation formulas or a hidden calculation sheet that explains how <code>Protein_All_Peptides</code> is generated.</p>
+<p>All workbook sheets were visible:</p>
+<pre><code class="language-text">Legend
+Samples
+Annotations
+Raw IGs
+Normalized Peptides
+Protein_All_Peptides
+Protein_DR_Filt_Peptides
+</code></pre>
+<p>The numerical values inspected in the calculation sheets are stored values rather than Excel formulas.</p>
+<p>Therefore, the exact Caprion algorithm used to produce <code>Protein_All_Peptides</code> cannot be reliably reconstructed from this workbook alone.</p>
+<h3 id="recommendation">Recommendation</h3>
+<p><strong>Use <code>Protein_All_Peptides</code> as the primary protein abundance dataset.</strong></p>
+<p>There is no need to reverse-engineer the upstream calculation merely to obtain protein abundance values.</p>
+<hr />
+<h2 id="4-protein_dr_filt_peptides">4. Protein_DR_Filt_Peptides</h2>
+<h3 id="sheet_3">Sheet</h3>
+<p><code>Protein_DR_Filt_Peptides</code></p>
+<p>This is another protein-level abundance table, apparently produced after a detection-rate/filtering step.</p>
+<p>For <code>1433B_HUMAN</code>, the first values illustrate the small but measurable difference:</p>
+<pre><code class="language-text">Protein_All_Peptides       Protein_DR_Filt_Peptides
+
+17.336633                  17.365318
+17.588287                  17.630887
+18.603210                  18.652622
+17.086007                  17.179862
+17.689614                  17.773327
+...
+</code></pre>
+<p>Across the 200 samples for 1433B_HUMAN, the difference between DR-filtered and All-Peptides values was approximately:</p>
+<pre><code class="language-text">Mean difference       +0.0393
+SD                     0.0309
+Median difference      +0.0392
+Minimum                -0.0460
+Maximum                +0.1225
+</code></pre>
+<h3 id="recommended-use_2">Recommended use</h3>
+<p>Retain this dataset if:</p>
+<ul>
+<li>detection-rate filtering is scientifically relevant;</li>
+<li>you want a sensitivity analysis;</li>
+<li>you need to compare filtered and unfiltered protein abundance.</li>
+</ul>
+<p>For the main analysis, use <code>Protein_All_Peptides</code> unless there is a specific reason to adopt the DR-filtered version.</p>
+<hr />
+<h2 id="5-raw-zip-files">5. Raw ZIP files</h2>
+<p>The raw/raw.zip material is potentially important for <strong>reproducibility of the upstream proteomics workflow</strong>, but it is considerably less useful for ordinary downstream protein-abundance analysis.</p>
+<p>The raw material becomes important if the goal is to:</p>
+<ul>
+<li>reproduce the complete Caprion pipeline;</li>
+<li>investigate peptide identification;</li>
+<li>reprocess the mass-spectrometry data;</li>
+<li>apply different QC thresholds;</li>
+<li>investigate missingness or detection;</li>
+<li>understand how normalized peptides were generated;</li>
+<li>independently calculate protein abundance.</li>
+</ul>
+<p>However, without the exact Caprion processing software, parameters, reference data, and workflow documentation, the raw files alone may not be sufficient to reproduce the exact values in <code>Protein_All_Peptides</code>.</p>
+<hr />
+<h2 id="6-practical-recommendation">6. Practical recommendation</h2>
+<p>For the current project, use the following hierarchy:</p>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Main purpose</th>
+<th>Recommended for protein analysis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Protein_All_Peptides</code></td>
+<td>Reported protein abundance</td>
+<td><strong>Yes — primary</strong></td>
+</tr>
+<tr>
+<td><code>Protein_DR_Filt_Peptides</code></td>
+<td>Detection-rate filtered abundance</td>
+<td>Yes — sensitivity analysis</td>
+</tr>
+<tr>
+<td><code>Normalized Peptides</code></td>
+<td>Processed peptide abundance</td>
+<td>Optional / QC</td>
+</tr>
+<tr>
+<td><code>Raw IGs</code></td>
+<td>Raw isotope-group measurements</td>
+<td>Mainly QC / reprocessing</td>
+</tr>
+<tr>
+<td><code>raw.zip</code></td>
+<td>Underlying raw material</td>
+<td>Mainly full reprocessing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="suggested-analysis-dataset">Suggested analysis dataset</h3>
+<p>The primary matrix should therefore be:</p>
+<pre><code class="language-text">Protein_All_Peptides
+</code></pre>
+<p>with:</p>
+<pre><code class="language-text">rows    = proteins
+columns = ZWK samples
+values  = reported protein abundance
+</code></pre>
+<p>The DR-filtered matrix can be retained as a secondary analysis.</p>
+<hr />
+<h2 id="7-bottom-line">7. Bottom line</h2>
+<p>The investigation established that:</p>
+<ol>
+<li><code>Protein_All_Peptides</code> is the appropriate <strong>protein-level endpoint</strong> in the supplied workbook.</li>
+<li><code>Protein_All_Peptides</code> cannot be reproduced reliably from simple aggregation of <code>Normalized Peptides</code>.</li>
+<li><code>Normalized Peptides</code> is related to raw log2 intensity but is not generated by one simple universal transformation.</li>
+<li>Raw IG abundance, detection rate, and peptide variability alone do not explain which peptide evidence contributes most strongly to the protein result.</li>
+<li>The workbook contains no hidden calculation sheets and the relevant values are exported/stored rather than formula-driven.</li>
+<li>Consequently, the exact Caprion protein-calculation algorithm is not recoverable from the workbook alone.</li>
+<li>For downstream statistical analysis, it is preferable to use the supplied <code>Protein_All_Peptides</code> values rather than attempting to reconstruct them from the raw data.</li>
+</ol>
+<p><strong>Primary recommendation:</strong></p>
+<blockquote>
+<p>Use <code>Protein_All_Peptides</code> as the main protein abundance dataset, and retain <code>Protein_DR_Filt_Peptides</code> for sensitivity or filtered analyses. Treat <code>Normalized Peptides</code>, <code>Raw IGs</code>, and <code>raw.zip</code> as upstream/QC/reprocessing data rather than replacing the supplied protein-level results.</p>
+</blockquote></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/jquery-3.6.0.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../javascripts/config.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

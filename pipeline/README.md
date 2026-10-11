@@ -1,8 +1,10 @@
-# Caprion MS-based Proteomics Pipeline
+# A FragPipe-based proteomics pipeline
 
-(Experimental)
+(Experimental for generic raw/mzML data)
 
 **Location:** `~/Caprion/analysis/pipeline/`
+
+The pipeline automates input inventory and validation, RAW-to-mzML conversion, database preparation, workflow configuration, manifest generation, production execution, and post-run quality control and reporting.
 
 This directory contains scripts for preparing proteomics inputs, configuring and running FragPipe, validating search results, and generating identification and quality-control reports.
 

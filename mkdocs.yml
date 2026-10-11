@@ -10,6 +10,7 @@ nav:
   - Analysis:
     - progs/README.md
     - peptide_progs/README.md
+    - pipeline/README.md
     - misc/README.md
   - "Additional information":
     - "Caprion panel": https://jinghuazhao.github.io/pQTLdata/reference/caprion.html

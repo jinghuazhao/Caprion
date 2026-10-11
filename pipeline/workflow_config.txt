@@ -1,0 +1,8 @@
+# Pipeline workflow configuration
+workflow_source=/home/jhz22/Caprion/analysis/ZWK/discovery_fresh/LFQ-MBR-Sage-comparison.workflow
+workflow_copy=/home/jhz22/Caprion/analysis/pipeline/LFQ-MBR-Sage-comparison.workflow
+validated_database=/home/jhz22/Caprion/analysis/ZWK/discovery_fresh/database_canonical/2026-10-09-decoys-UP000005640-canonical-proteins-20420.fasta.fas
+fragpipe_install=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
+decoy_prefix=rev_
+threads=8
+ram_gb=24

@@ -1,0 +1,99 @@
+mzML_path	RAW_file	sample_id	experiment	method_or_control	pool	fraction	creation_date	sample_row_number	category
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk021704i19101xms1.mzML	szwk021704i19101xms1.raw	PQC-3, Depleted digested human plasma pool	PQC-3_QC	PQC-3			09/05/2019 12:48:18	8	qc
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk021704i19101xms2.mzML	szwk021704i19101xms2.raw	PQC-3, Depleted digested human plasma pool	PQC-3_QC	PQC-3			09/06/2019 05:21:08	8	qc
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk021704i19101xms3.mzML	szwk021704i19101xms3.raw	PQC-3, Depleted digested human plasma pool	PQC-3_QC	PQC-3			09/06/2019 21:53:57		qc
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk021704i19101xms4.mzML	szwk021704i19101xms4.raw	PQC-3, Depleted digested human plasma pool	PQC-3_QC	PQC-3			09/07/2019 14:26:39		qc
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk021704i19101xms5.mzML	szwk021704i19101xms5.raw	PQC-3, Depleted digested human plasma pool	PQC-3_QC	PQC-3			09/08/2019 06:59:36		qc
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i191001xms1.mzML	szwk900404i191001xms1.raw	IgY14_Pool4_Fraction 10	IgY14_Pool4	IgY14	4	10	09/07/2019 07:37:51	9	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19101xms1.mzML	szwk900404i19101xms1.raw	IgY14_Pool4_Fraction 1	IgY14_Pool4	IgY14	4	1	09/06/2019 22:52:21		fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i191101xms1.mzML	szwk900404i191101xms1.raw	IgY14_Pool4_Fraction 11	IgY14_Pool4	IgY14	4	11	09/07/2019 08:36:15	10	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i191201xms1.mzML	szwk900404i191201xms1.raw	IgY14_Pool4_Fraction 12	IgY14_Pool4	IgY14	4	12	09/07/2019 09:34:39	11	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i191301xms1.mzML	szwk900404i191301xms1.raw	IgY14_Pool4_Fraction 13	IgY14_Pool4	IgY14	4	13	09/07/2019 10:33:02	12	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i191401xms1.mzML	szwk900404i191401xms1.raw	IgY14_Pool4_Fraction 14	IgY14_Pool4	IgY14	4	14	09/07/2019 11:31:26	13	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i191501xms1.mzML	szwk900404i191501xms1.raw	IgY14_Pool4_Fraction 15	IgY14_Pool4	IgY14	4	15	09/07/2019 12:29:49	14	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i191601xms1.mzML	szwk900404i191601xms1.raw	IgY14_Pool4_Fraction 16	IgY14_Pool4	IgY14	4	16	09/07/2019 13:28:15	15	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19201xms1.mzML	szwk900404i19201xms1.raw	IgY14_Pool4_Fraction 2	IgY14_Pool4	IgY14	4	2	09/06/2019 23:50:44	1	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19301xms1.mzML	szwk900404i19301xms1.raw	IgY14_Pool4_Fraction 3	IgY14_Pool4	IgY14	4	3	09/07/2019 00:49:08	2	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19401xms1.mzML	szwk900404i19401xms1.raw	IgY14_Pool4_Fraction 4	IgY14_Pool4	IgY14	4	4	09/07/2019 01:47:32	3	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19501xms1.mzML	szwk900404i19501xms1.raw	IgY14_Pool4_Fraction 5	IgY14_Pool4	IgY14	4	5	09/07/2019 02:45:55	4	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19601xms1.mzML	szwk900404i19601xms1.raw	IgY14_Pool4_Fraction 6	IgY14_Pool4	IgY14	4	6	09/07/2019 03:44:19	5	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19701xms1.mzML	szwk900404i19701xms1.raw	IgY14_Pool4_Fraction 7	IgY14_Pool4	IgY14	4	7	09/07/2019 04:42:42	6	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19801xms1.mzML	szwk900404i19801xms1.raw	IgY14_Pool4_Fraction 8	IgY14_Pool4	IgY14	4	8	09/07/2019 05:41:04	7	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19901xms1.mzML	szwk900404i19901xms1.raw	IgY14_Pool4_Fraction 9	IgY14_Pool4	IgY14	4	9	09/07/2019 06:39:28	8	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i191201xms1.mzML	szwk900504i191201xms1.raw	IgY14_Pool5_Fraction 12	IgY14_Pool5	IgY14	5	12	09/08/2019 02:07:36	11	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i191301xms1.mzML	szwk900504i191301xms1.raw	IgY14_Pool5_Fraction 13	IgY14_Pool5	IgY14	5	13	09/08/2019 03:06:02	12	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i191401xms1.mzML	szwk900504i191401xms1.raw	IgY14_Pool5_Fraction 14	IgY14_Pool5	IgY14	5	14	09/08/2019 04:04:23	13	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i191501xms1.mzML	szwk900504i191501xms1.raw	IgY14_Pool5_Fraction 15	IgY14_Pool5	IgY14	5	15	09/08/2019 05:02:49	14	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i191601xms1.mzML	szwk900504i191601xms1.raw	IgY14_Pool5_Fraction 16	IgY14_Pool5	IgY14	5	16	09/08/2019 06:01:13	15	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i19201xms1.mzML	szwk900504i19201xms1.raw	IgY14_Pool5_Fraction 2	IgY14_Pool5	IgY14	5	2	09/07/2019 16:23:30	1	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i19301xms1.mzML	szwk900504i19301xms1.raw	IgY14_Pool5_Fraction 3	IgY14_Pool5	IgY14	5	3	09/07/2019 17:21:53	2	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i19401xms1.mzML	szwk900504i19401xms1.raw	IgY14_Pool5_Fraction 4	IgY14_Pool5	IgY14	5	4	09/07/2019 18:20:19	3	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i19501xms1.mzML	szwk900504i19501xms1.raw	IgY14_Pool5_Fraction 5	IgY14_Pool5	IgY14	5	5	09/07/2019 19:18:41	4	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i19601xms1.mzML	szwk900504i19601xms1.raw	IgY14_Pool5_Fraction 6	IgY14_Pool5	IgY14	5	6	09/07/2019 20:17:06	5	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i19701xms1.mzML	szwk900504i19701xms1.raw	IgY14_Pool5_Fraction 7	IgY14_Pool5	IgY14	5	7	09/07/2019 21:15:30	6	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i19801xms1.mzML	szwk900504i19801xms1.raw	IgY14_Pool5_Fraction 8	IgY14_Pool5	IgY14	5	8	09/07/2019 22:13:52	7	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900504i19901xms1.mzML	szwk900504i19901xms1.raw	IgY14_Pool5_Fraction 9	IgY14_Pool5	IgY14	5	9	09/07/2019 23:12:19	8	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i191001xms1.mzML	szwk900604i191001xms1.raw	IgY14_Pool6_Fraction 10	IgY14_Pool6	IgY14	6	10	09/08/2019 16:43:32	10	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19101xms1.mzML	szwk900604i19101xms1.raw	IgY14_Pool6_Fraction 1	IgY14_Pool6	IgY14	6	1	09/08/2019 07:58:00	1	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i191101xms1.mzML	szwk900604i191101xms1.raw	IgY14_Pool6_Fraction 11	IgY14_Pool6	IgY14	6	11	09/08/2019 17:41:56	11	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i191201xms1.mzML	szwk900604i191201xms1.raw	IgY14_Pool6_Fraction 12	IgY14_Pool6	IgY14	6	12	09/08/2019 18:40:20	12	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i191301xms1.mzML	szwk900604i191301xms1.raw	IgY14_Pool6_Fraction 13	IgY14_Pool6	IgY14	6	13	09/08/2019 19:38:43	13	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i191401xms1.mzML	szwk900604i191401xms1.raw	IgY14_Pool6_Fraction 14	IgY14_Pool6	IgY14	6	14	09/08/2019 20:37:07	14	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i191501xms1.mzML	szwk900604i191501xms1.raw	IgY14_Pool6_Fraction 15	IgY14_Pool6	IgY14	6	15	09/08/2019 21:35:30	15	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i191601xms1.mzML	szwk900604i191601xms1.raw	IgY14_Pool6_Fraction 16	IgY14_Pool6	IgY14	6	16	09/08/2019 22:33:54	16	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19201xms1.mzML	szwk900604i19201xms1.raw	IgY14_Pool6_Fraction 2	IgY14_Pool6	IgY14	6	2	09/08/2019 08:56:21	2	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19301xms1.mzML	szwk900604i19301xms1.raw	IgY14_Pool6_Fraction 3	IgY14_Pool6	IgY14	6	3	09/08/2019 09:54:47	3	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19401xms1.mzML	szwk900604i19401xms1.raw	IgY14_Pool6_Fraction 4	IgY14_Pool6	IgY14	6	4	09/08/2019 10:53:11	4	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19501xms1.mzML	szwk900604i19501xms1.raw	IgY14_Pool6_Fraction 5	IgY14_Pool6	IgY14	6	5	09/08/2019 11:51:34	5	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19601xms1.mzML	szwk900604i19601xms1.raw	IgY14_Pool6_Fraction 6	IgY14_Pool6	IgY14	6	6	09/08/2019 12:49:56	6	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19701xms1.mzML	szwk900604i19701xms1.raw	IgY14_Pool6_Fraction 7	IgY14_Pool6	IgY14	6	7	09/08/2019 13:48:20	7	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19801xms1.mzML	szwk900604i19801xms1.raw	IgY14_Pool6_Fraction 8	IgY14_Pool6	IgY14	6	8	09/08/2019 14:46:43	8	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900604i19901xms1.mzML	szwk900604i19901xms1.raw	IgY14_Pool6_Fraction 9	IgY14_Pool6	IgY14	6	9	09/08/2019 15:45:09	9	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i191001xms1.mzML	szwk901004i191001xms1.raw	MARS14_Pool4_Fraction 10	MARS14_Pool4	MARS14	4	10	09/05/2019 05:59:33	1	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19101xms1.mzML	szwk901004i19101xms1.raw	MARS14_Pool4_Fraction 1	MARS14_Pool4	MARS14	4	1	09/04/2019 21:13:59		fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i191101xms1.mzML	szwk901004i191101xms1.raw	MARS14_Pool4_Fraction 11	MARS14_Pool4	MARS14	4	11	09/05/2019 06:57:55	2	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i191201xms1.mzML	szwk901004i191201xms1.raw	MARS14_Pool4_Fraction 12	MARS14_Pool4	MARS14	4	12	09/05/2019 07:56:20	3	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i191301xms1.mzML	szwk901004i191301xms1.raw	MARS14_Pool4_Fraction 13	MARS14_Pool4	MARS14	4	13	09/05/2019 08:54:44	4	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i191401xms1.mzML	szwk901004i191401xms1.raw	MARS14_Pool4_Fraction 14	MARS14_Pool4	MARS14	4	14	09/05/2019 09:53:08	5	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i191501xms1.mzML	szwk901004i191501xms1.raw	MARS14_Pool4_Fraction 15	MARS14_Pool4	MARS14	4	15	09/05/2019 10:51:31	6	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i191601xms1.mzML	szwk901004i191601xms1.raw	MARS14_Pool4_Fraction 16	MARS14_Pool4	MARS14	4	16	09/05/2019 11:49:55	7	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19201xms1.mzML	szwk901004i19201xms1.raw	MARS14_Pool4_Fraction 2	MARS14_Pool4	MARS14	4	2	09/04/2019 22:12:22	1	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19301xms1.mzML	szwk901004i19301xms1.raw	MARS14_Pool4_Fraction 3	MARS14_Pool4	MARS14	4	3	09/04/2019 23:10:46	2	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19401xms1.mzML	szwk901004i19401xms1.raw	MARS14_Pool4_Fraction 4	MARS14_Pool4	MARS14	4	4	09/05/2019 00:09:09	3	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19501xms1.mzML	szwk901004i19501xms1.raw	MARS14_Pool4_Fraction 5	MARS14_Pool4	MARS14	4	5	09/05/2019 01:07:35	4	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19601xms1.mzML	szwk901004i19601xms1.raw	MARS14_Pool4_Fraction 6	MARS14_Pool4	MARS14	4	6	09/05/2019 02:05:57	5	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19701xms1.mzML	szwk901004i19701xms1.raw	MARS14_Pool4_Fraction 7	MARS14_Pool4	MARS14	4	7	09/05/2019 03:04:20	6	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19801xms1.mzML	szwk901004i19801xms1.raw	MARS14_Pool4_Fraction 8	MARS14_Pool4	MARS14	4	8	09/05/2019 04:02:44	7	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901004i19901xms1.mzML	szwk901004i19901xms1.raw	MARS14_Pool4_Fraction 9	MARS14_Pool4	MARS14	4	9	09/05/2019 05:01:08		fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i191001xms1.mzML	szwk901104i191001xms1.raw	MARS14_Pool5_Fraction 10	MARS14_Pool5	MARS14	5	10	09/05/2019 22:32:18	1	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19101xms1.mzML	szwk901104i19101xms1.raw	MARS14_Pool5_Fraction 1	MARS14_Pool5	MARS14	5	1	09/05/2019 13:46:42		fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i191101xms1.mzML	szwk901104i191101xms1.raw	MARS14_Pool5_Fraction 11	MARS14_Pool5	MARS14	5	11	09/05/2019 23:30:42	2	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i191201xms1.mzML	szwk901104i191201xms1.raw	MARS14_Pool5_Fraction 12	MARS14_Pool5	MARS14	5	12	09/06/2019 00:29:08	3	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i191301xms1.mzML	szwk901104i191301xms1.raw	MARS14_Pool5_Fraction 13	MARS14_Pool5	MARS14	5	13	09/06/2019 01:27:31	4	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i191401xms1.mzML	szwk901104i191401xms1.raw	MARS14_Pool5_Fraction 14	MARS14_Pool5	MARS14	5	14	09/06/2019 02:25:57	5	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i191501xms1.mzML	szwk901104i191501xms1.raw	MARS14_Pool5_Fraction 15	MARS14_Pool5	MARS14	5	15	09/06/2019 03:24:21	6	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i191601xms1.mzML	szwk901104i191601xms1.raw	MARS14_Pool5_Fraction 16	MARS14_Pool5	MARS14	5	16	09/06/2019 04:22:46	7	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19201xms1.mzML	szwk901104i19201xms1.raw	MARS14_Pool5_Fraction 2	MARS14_Pool5	MARS14	5	2	09/05/2019 14:45:08	1	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19301xms1.mzML	szwk901104i19301xms1.raw	MARS14_Pool5_Fraction 3	MARS14_Pool5	MARS14	5	3	09/05/2019 15:43:31	2	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19401xms1.mzML	szwk901104i19401xms1.raw	MARS14_Pool5_Fraction 4	MARS14_Pool5	MARS14	5	4	09/05/2019 16:41:55	3	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19501xms1.mzML	szwk901104i19501xms1.raw	MARS14_Pool5_Fraction 5	MARS14_Pool5	MARS14	5	5	09/05/2019 17:40:20	4	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19601xms1.mzML	szwk901104i19601xms1.raw	MARS14_Pool5_Fraction 6	MARS14_Pool5	MARS14	5	6	09/05/2019 18:38:42	5	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19701xms1.mzML	szwk901104i19701xms1.raw	MARS14_Pool5_Fraction 7	MARS14_Pool5	MARS14	5	7	09/05/2019 19:37:08	6	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19801xms1.mzML	szwk901104i19801xms1.raw	MARS14_Pool5_Fraction 8	MARS14_Pool5	MARS14	5	8	09/05/2019 20:35:31	7	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901104i19901xms1.mzML	szwk901104i19901xms1.raw	MARS14_Pool5_Fraction 9	MARS14_Pool5	MARS14	5	9	09/05/2019 21:33:53		fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i191001xms1.mzML	szwk901204i191001xms1.raw	MARS14_Pool6_Fraction 10	MARS14_Pool6	MARS14	6	10	09/06/2019 15:05:08	9	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19101xms1.mzML	szwk901204i19101xms1.raw	MARS14_Pool6_Fraction 1	MARS14_Pool6	MARS14	6	1	09/06/2019 06:19:31		fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i191101xms1.mzML	szwk901204i191101xms1.raw	MARS14_Pool6_Fraction 11	MARS14_Pool6	MARS14	6	11	09/06/2019 16:03:32	10	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i191201xms1.mzML	szwk901204i191201xms1.raw	MARS14_Pool6_Fraction 12	MARS14_Pool6	MARS14	6	12	09/06/2019 17:01:57	11	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i191301xms1.mzML	szwk901204i191301xms1.raw	MARS14_Pool6_Fraction 13	MARS14_Pool6	MARS14	6	13	09/06/2019 18:00:23	12	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i191401xms1.mzML	szwk901204i191401xms1.raw	MARS14_Pool6_Fraction 14	MARS14_Pool6	MARS14	6	14	09/06/2019 18:58:46	13	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i191501xms1.mzML	szwk901204i191501xms1.raw	MARS14_Pool6_Fraction 15	MARS14_Pool6	MARS14	6	15	09/06/2019 19:57:10	14	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i191601xms1.mzML	szwk901204i191601xms1.raw	MARS14_Pool6_Fraction 16	MARS14_Pool6	MARS14	6	16	09/06/2019 20:55:34	15	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19201xms1.mzML	szwk901204i19201xms1.raw	MARS14_Pool6_Fraction 2	MARS14_Pool6	MARS14	6	2	09/06/2019 07:17:55	1	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19301xms1.mzML	szwk901204i19301xms1.raw	MARS14_Pool6_Fraction 3	MARS14_Pool6	MARS14	6	3	09/06/2019 08:16:19	2	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19401xms1.mzML	szwk901204i19401xms1.raw	MARS14_Pool6_Fraction 4	MARS14_Pool6	MARS14	6	4	09/06/2019 09:14:44	3	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19501xms1.mzML	szwk901204i19501xms1.raw	MARS14_Pool6_Fraction 5	MARS14_Pool6	MARS14	6	5	09/06/2019 10:13:08	4	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19601xms1.mzML	szwk901204i19601xms1.raw	MARS14_Pool6_Fraction 6	MARS14_Pool6	MARS14	6	6	09/06/2019 11:11:33	5	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19701xms1.mzML	szwk901204i19701xms1.raw	MARS14_Pool6_Fraction 7	MARS14_Pool6	MARS14	6	7	09/06/2019 12:09:57	6	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19801xms1.mzML	szwk901204i19801xms1.raw	MARS14_Pool6_Fraction 8	MARS14_Pool6	MARS14	6	8	09/06/2019 13:08:21	7	fraction
+/rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk901204i19901xms1.mzML	szwk901204i19901xms1.raw	MARS14_Pool6_Fraction 9	MARS14_Pool6	MARS14	6	9	09/06/2019 14:06:46	8	fraction

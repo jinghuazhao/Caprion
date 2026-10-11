@@ -1,4 +1,6 @@
-# Caprion Proteomics Pipeline
+# Caprion MS-based Proteomics Pipeline
+
+(Experimental)
 
 **Location:** `~/Caprion/analysis/pipeline/`
 

@@ -33,6 +33,11 @@ theme:
 plugins:
     - search
     - mermaid2
+exclude_docs: |
+  /pipeline/dry_run_98_v2/
+  /pipeline/fragpipe_test_home/
+  /pipeline/production_runs/
+  /pipeline/reports/
 markdown_extensions:
   - attr_list
   - footnotes

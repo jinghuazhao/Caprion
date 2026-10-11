@@ -18,6 +18,7 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 
 - [Protein-level Analysis](progs)
 - [Peptide-level Analysis](peptide_progs)
+- [A FragPipe-based proteomics pipeline](pipeline)
 - [Miscellaneous Analysis](misc)
 
 ## 📎 Additional Information

@@ -30,6 +30,8 @@ git add pilot/
 git commit -m "Pilot studies"
 git add misc/ progs/ peptide_progs/
 git commit -m "Analysis"
+git add pipeline/
+git commit -m "raw/mzML calling tested with ZWK/"
 git add mkdocs.yml
 git commit -m "mkdocs.yml"
 git push

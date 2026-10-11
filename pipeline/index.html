@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Caprion MS-based Proteomics Pipeline - Caprion</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/HTML.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Java.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/JavaScript.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Perl.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/R.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/rust.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="..">Caprion</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href=".." class="nav-link"></a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pilot studies <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../pilot/autoencoder/" class="dropdown-item">Autoencoder</a>
+</li>
+                                    
+<li>
+    <a href="../pilot/gwas2/" class="dropdown-item">gwas2</a>
+</li>
+                                    
+<li>
+    <a href="../pilot/" class="dropdown-item">Pilot studies</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Analysis <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../progs/" class="dropdown-item">Protein analysis</a>
+</li>
+                                    
+<li>
+    <a href="../peptide_progs/" class="dropdown-item">Peptide analysis</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active">Caprion MS-based Proteomics Pipeline</a>
+</li>
+                                    
+<li>
+    <a href="../misc/" class="dropdown-item">Miscellaneous analysis</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Additional information <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="https://jinghuazhao.github.io/pQTLdata/reference/caprion.html" class="dropdown-item">Caprion panel</a>
+</li>
+                                    
+<li>
+    <a href="../Data/" class="dropdown-item">Raw, Normalized Peptides and Protein Abundance</a>
+</li>
+                                    
+<li>
+    <a href="../Notes/" class="dropdown-item">Notes</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../peptide_progs/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../misc/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/jinghuazhao/Caprion" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#caprion-ms-based-proteomics-pipeline" class="nav-link">Caprion MS-based Proteomics Pipeline</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#file-list" class="nav-link">File list</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#intended-workflow" class="nav-link">Intended workflow</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#working-and-output-directories" class="nav-link">Working and output directories</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#design-principles" class="nav-link">Design principles</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference-database-and-workflow-provenance" class="nav-link">Reference database and workflow provenance</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#re-create-the-targetdecoy-database" class="nav-link">Re-create the target/decoy database</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#version-control" class="nav-link">Version control</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="caprion-ms-based-proteomics-pipeline">Caprion MS-based Proteomics Pipeline</h1>
+<p>(Experimental)</p>
+<p><strong>Location:</strong> <code>~/Caprion/analysis/pipeline/</code></p>
+<p>This directory contains scripts for preparing proteomics inputs, configuring and running FragPipe, validating search results, and generating identification and quality-control reports.</p>
+<p>The numbered prefixes indicate workflow stages approximately; they do not always establish execution order. Follow the dependencies and instructions below rather than relying on alphabetical sorting alone.</p>
+<h2 id="file-list">File list</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Main output or action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>01_inventory.sh</code></td>
+<td>Inventory RAW and mzML files; identify missing matches and duplicates</td>
+<td>Inventory report</td>
+</tr>
+<tr>
+<td><code>02_convert_missing.sh</code></td>
+<td>Convert RAW files without corresponding mzML files</td>
+<td>Missing mzML files</td>
+</tr>
+<tr>
+<td><code>03_validate_mzml.sh</code></td>
+<td>Validate mzML files and report empty, invalid or unmatched files</td>
+<td>mzML validation report</td>
+</tr>
+<tr>
+<td><code>04_prepare_database.sh</code></td>
+<td>Check the target/decoy FASTA database and its integrity</td>
+<td>Database validation</td>
+</tr>
+<tr>
+<td><code>05_prepare_workflow.sh</code></td>
+<td>Prepare a separate FragPipe workflow copy</td>
+<td>Workflow file</td>
+</tr>
+<tr>
+<td><code>05b_set_workflow_database.sh</code></td>
+<td>Set the intended database in the prepared workflow</td>
+<td>Updated workflow copy</td>
+</tr>
+<tr>
+<td><code>06_build_manifest.sh</code></td>
+<td>Build and validate the FragPipe manifest using explicit experiment and fraction assignments</td>
+<td>Manifest TSV</td>
+</tr>
+<tr>
+<td><code>07_dry_run_fragpipe.sh</code></td>
+<td>Check configuration and perform a FragPipe dry run</td>
+<td>Dry-run log</td>
+</tr>
+<tr>
+<td><code>08_review_dry_run.sh</code></td>
+<td>Review dry-run configuration and diagnostic output</td>
+<td>Review findings</td>
+</tr>
+<tr>
+<td><code>08b_review_search_parameters.sh</code></td>
+<td>Review search parameters before production execution</td>
+<td>Parameter review findings</td>
+</tr>
+<tr>
+<td><code>09_run_fragpipe_production.sh</code></td>
+<td>Run the production FragPipe search in an isolated output directory</td>
+<td>Search results and production log</td>
+</tr>
+<tr>
+<td><code>monitor_fragpipe_production.sh</code></td>
+<td>Monitor an existing production run</td>
+<td>Monitoring output</td>
+</tr>
+<tr>
+<td><code>09_validate_results.sh</code></td>
+<td>Validate result files, columns and identification-related outputs</td>
+<td>Results validation report</td>
+</tr>
+<tr>
+<td><code>10_summarise_identifications.sh</code></td>
+<td>Summarise PSMs, peptides, ions and proteins</td>
+<td>Identification summary</td>
+</tr>
+<tr>
+<td><code>11_report_sample_qc.sh</code></td>
+<td>Summarise identification and QC metrics by file</td>
+<td>Sample QC report</td>
+</tr>
+<tr>
+<td><code>12_summarise_batch.sh</code></td>
+<td>Combine available inventory, validation, identification and QC summaries</td>
+<td>Batch summary</td>
+</tr>
+</tbody>
+</table>
+<h2 id="intended-workflow">Intended workflow</h2>
+<ol>
+<li>Inventory the input files.</li>
+<li>Convert missing mzML files and validate the resulting inputs. Revalidate after conversion when necessary.</li>
+<li>Validate the target/decoy FASTA database.</li>
+<li>Prepare the workflow and configure its database.</li>
+<li>Build and validate the manifest.</li>
+<li>Perform the FragPipe dry run and review the configuration and search parameters.</li>
+<li>Run the production search using <code>09_run_fragpipe_production.sh</code>.</li>
+<li>Use <code>monitor_fragpipe_production.sh</code> as needed while the run is in progress.</li>
+<li>Validate the completed results.</li>
+<li>Generate the identification summary, sample QC report and batch summary.</li>
+</ol>
+<p>Confirm the dependencies of the workflow-configuration and review scripts before treating this as a strict execution recipe.</p>
+<h2 id="working-and-output-directories">Working and output directories</h2>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dry_run_98_v2/</code></td>
+<td>Dry-run output and diagnostics</td>
+</tr>
+<tr>
+<td><code>fragpipe_test_home/</code></td>
+<td>Isolated FragPipe test environment</td>
+</tr>
+<tr>
+<td><code>production_runs/</code></td>
+<td>Production search outputs, separated by run</td>
+</tr>
+<tr>
+<td><code>reports/</code></td>
+<td>Validation, identification, QC and batch reports</td>
+</tr>
+</tbody>
+</table>
+<p>These directories contain generated or operational data. They are excluded from version control through <code>.gitignore</code> where appropriate. Excluding them from Git does not replace the need for backups and data retention.</p>
+<h2 id="design-principles">Design principles</h2>
+<ul>
+<li>Keep the original scripts and successful six-file pilot unchanged.</li>
+<li>Use a separate output directory for every new search run.</li>
+<li>Never silently replace the validated target/decoy database.</li>
+<li>Do not modify original FragPipe workflows in place.</li>
+<li>Do not infer biological sample identities from filenames.</li>
+<li>Require explicit experiment and fraction assignments before production runs.</li>
+<li>Stop on validation failures rather than continuing with incomplete inputs.</li>
+<li>Preserve production logs and reports for reproducibility.</li>
+<li>Treat modification timestamps as file-history evidence, not definitive execution timestamps.</li>
+<li>Do not change search parameters or regenerate a production database without an explicit, documented decision.</li>
+</ul>
+<h2 id="reference-database-and-workflow-provenance">Reference database and workflow provenance</h2>
+<p>The production pipeline uses reference assets prepared under:</p>
+<p><code>~/Caprion/analysis/ZWK/discovery_fresh/</code></p>
+<p>These assets are separate from the numbered pipeline scripts and should be preserved independently.</p>
+<h3 id="source-protein-fasta">Source protein FASTA</h3>
+<p>The source FASTA used for target/decoy generation is supplied with FragPipe 22.0:</p>
+<p><code>/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0/databases/UP000005640-canonical-proteins-20420.fasta</code></p>
+<p>This is the source protein database, not the generated production target/decoy FASTA.</p>
+<h3 id="generated-targetdecoy-database">Generated target/decoy database</h3>
+<p>The generated production FASTA is:</p>
+<p><code>~/Caprion/analysis/ZWK/discovery_fresh/database_canonical/2026-10-09-decoys-UP000005640-canonical-proteins-20420.fasta.fas</code></p>
+<p>Philosopher 5.1.1 was used to generate the target/decoy database with the decoy prefix <code>rev_</code>.</p>
+<p>The validated production database contains:</p>
+<ul>
+<li>Target sequences: 20,420</li>
+<li>Decoy sequences: 20,420</li>
+<li>Total sequences: 40,840</li>
+</ul>
+<p>The decoy prefix is used by the downstream identification-filtering configuration.</p>
+<p><code>04_prepare_database.sh</code> checks the database as part of the pipeline. The database-generation procedure below documents the separate operation that created the target/decoy FASTA.</p>
+<p>Do not replace or regenerate the production database silently. Any new database should be created as a separate version, validated, and documented before use.</p>
+<h3 id="fragpipe-workflow">FragPipe workflow</h3>
+<p>The reference workflow is:</p>
+<p><code>~/Caprion/analysis/ZWK/discovery_fresh/LFQ-MBR-Sage-comparison.workflow</code></p>
+<p>The pipeline prepares a separate workflow copy and configures its database through <code>05_prepare_workflow.sh</code> and <code>05b_set_workflow_database.sh</code>. Keep the original reference workflow unchanged.</p>
+<h3 id="production-provenance">Production provenance</h3>
+<p>For each production run, record:</p>
+<ul>
+<li>The exact source and generated FASTA paths.</li>
+<li>The source FASTA checksum and generated FASTA checksum.</li>
+<li>The reference workflow and prepared workflow copy.</li>
+<li>The manifest and sample metadata version used.</li>
+<li>The FragPipe and Philosopher versions.</li>
+<li>The relevant search parameters.</li>
+<li>The production output directory and log.</li>
+<li>The database validation results.</li>
+</ul>
+<p>Use the production log and run-specific configuration to verify these details. Modification timestamps alone do not establish which assets were used.</p>
+<p>For the completed 98-file production run, confirm the manifest version from the production log before recording <code>production_v2.fp-manifest</code> as the manifest actually used.</p>
+<h2 id="re-create-the-targetdecoy-database">Re-create the target/decoy database</h2>
+<p><strong>Warning:</strong> This is a database-generation operation, not a routine pipeline step. Do not run it over the validated production database without first preserving that database and its checksum. Prefer a separate output directory when creating a new version.</p>
+<p>The commands below document the procedure used to generate the target/decoy FASTA from the source FASTA bundled with FragPipe 22.0.</p>
+<pre><code class="language-bash">cd ~/Caprion/analysis/ZWK/discovery_fresh
+
+FP=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
+PHIL=&quot;$FP/tools/Philosopher/philosopher-v5.1.1&quot;
+FASTA=&quot;$FP/databases/UP000005640-canonical-proteins-20420.fasta&quot;
+
+DBDIR=&quot;$PWD/database_canonical&quot;
+mkdir -p &quot;$DBDIR&quot;
+cd &quot;$DBDIR&quot;
+
+# Initialise the Philosopher workspace.
+&quot;$PHIL&quot; workspace --init
+
+# Generate the target/decoy database.
+&quot;$PHIL&quot; database --custom &quot;$FASTA&quot; --prefix rev_
+
+# Inspect the generated FASTA. Confirm its actual path before proceeding.
+DB=&quot;$PWD/2026-10-09-decoys-UP000005640-canonical-proteins-20420.fasta.fas&quot;
+
+test -s &quot;$DB&quot; || {
+    echo &quot;ERROR: Expected database not found: $DB&quot; &gt;&amp;2
+    echo &quot;Inspect the generated files and verify the output filename.&quot; &gt;&amp;2
+    exit 1
+}
+
+printf 'Total FASTA records: '
+grep -c '^&gt;' &quot;$DB&quot;
+
+printf 'Decoy FASTA records: '
+grep -c '^&gt;rev_' &quot;$DB&quot;
+
+printf 'First five FASTA headers:\n'
+grep '^&gt;' &quot;$DB&quot; | head -5
+
+# Record the checksum for provenance.
+sha256sum &quot;$FASTA&quot; &quot;$DB&quot;
+</code></pre>
+<p>For the existing production database, the expected counts are 40,840 total sequences, including 20,420 decoys and 20,420 targets.</p>
+<p>If Philosopher produces a different filename or the counts differ, stop and investigate before using the database. Record the actual filename and checksum for any newly generated version.</p>
+<h2 id="version-control">Version control</h2>
+<p>The pipeline scripts and documentation should be version-controlled. Generated search outputs, temporary test environments and reports should be retained according to the project's data-management policy rather than committed indiscriminately.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/jquery-3.6.0.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../javascripts/config.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

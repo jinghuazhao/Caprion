@@ -11,7 +11,7 @@ nav:
     - progs/README.md
     - peptide_progs/README.md
     - pipeline/README.md
-    - ZWK/reference_ZWK/README.md
+    - reference_ZWK/README.md
     - misc/README.md
   - "Additional information":
     - "Caprion panel": https://jinghuazhao.github.io/pQTLdata/reference/caprion.html

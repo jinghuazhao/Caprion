@@ -40,6 +40,16 @@ exclude_docs: |
   /pipeline/production_runs/
   /pipeline/reports/
   /ZWK/reference_ZWK/
+  /ZWK/default/
+  /ZWK/default-rev/
+  /ZWK/discovery_fresh/
+  /ZWK/metamorpheus/
+  /ZWK/msamanda/
+  /ZWK/mzML/
+  /ZWKraw/
+  /ZWK/reference_ZWK/
+  /ZWK/sage/
+  /ZWK/test/
 markdown_extensions:
   - attr_list
   - footnotes

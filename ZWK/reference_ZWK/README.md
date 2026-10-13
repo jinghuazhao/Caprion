@@ -289,14 +289,28 @@ After generating the independent IGs, investigate peptide-to-IG associations usi
 
 Associations should be supported by the available data and should distinguish direct MS/MS identifications from transferred MBR evidence.
 
-### 7.3 Comparison with the original XLSX
+### 7.3 Exploratory anchor-stability analysis
+
+Exploratory scripts `07`–`21` have investigated isotope-anchor scoring, mass accuracy, scan-level stability and competing isotope offsets using the existing OpenMS pilot outputs.
+
+The audits show that low individual peak mass errors and apparently complete isotope series do not necessarily identify a unique monoisotopic anchor. Competing offsets can receive similar scores, and ties remain substantial in some candidate groups.
+
+Scripts `20` and `21` and their outputs are retained for diagnostic purposes only. Their results must not be treated as validated monoisotopic assignments:
+
+- Script `20` reports winning-offset rows, which can exceed the number of unique candidates when ties occur.
+- Script `21` reuses observed isotope m/z values from an existing audit rather than independently rematching trace peaks for each alternative anchor.
+
+**Current status:** the anchor-scoring method remains exploratory. No final independent isotope-group assignments have been established by this analysis.
+
+Before further scoring or scaling to additional acquisitions, inspect the trace-peak schema and existing matching implementation, verify isotope-index and offset conventions, and validate the rematching procedure on a single candidate using distinct observed trace peaks. Only after this validation should the method be applied across the candidate set.
+
+### 7.4 Comparison with the original XLSX
 
 Only after constructing the independent reference should it be compared with the original workbook:
 
 `~/Caprion/pre_qc_data/pilot/ZWK_EDR_20191002.xlsx`
 
 The workbook is a comparison source, not a construction source for the independent reference.
-
 ## 8. Interpretation notes
 
 - The FragPipe search is complete; independent IG generation remains pending.
@@ -305,3 +319,6 @@ The workbook is a comparison source, not a construction source for the independe
 - MBR evidence is not equivalent to a direct MS/MS identification in the receiving run.
 - Successful PSM-to-scan mapping does not establish a PSM-to-IG relationship.
 - IonQuant feature definitions are not necessarily equivalent to the original
+- Exploratory anchor scores and stability summaries are diagnostic evidence, not validated monoisotopic assignments.
+- Competing isotope offsets must be evaluated by independently matching observed trace peaks to theoretical isotope positions; existing summary-level peak matches must not be relabelled as evidence for alternative anchors.
+- The independent isotope-group reference remains incomplete until the feature-detection, isotope-grouping and peptide-to-IG association procedures have been validated.

@@ -53,7 +53,7 @@ exclude_docs: |
   /reference_ZWK/config/
   /reference_ZWK/dry_run_98/
   /reference_ZWK/reports/
-  /referebce_ZWK/database/
+  /reference_ZWK/database/
   /reference_ZWK/fragpipe_test_home/
   /reference_ZWK/openms_pilot/
   /reference_ZWK/runs/

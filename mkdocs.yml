@@ -46,7 +46,7 @@ exclude_docs: |
   /ZWK/metamorpheus/
   /ZWK/msamanda/
   /ZWK/mzML/
-  /ZWKraw/
+  /ZWK/raw/
   /ZWK/reference_ZWK/
   /ZWK/sage/
   /ZWK/test/

@@ -32,6 +32,10 @@ git add misc/ progs/ peptide_progs/
 git commit -m "Analysis"
 git add pipeline/
 git commit -m "raw/mzML calling tested with ZWK/"
+git add -f ZWK/reference_ZWK/README.md
+git add -f ZWK/reference_ZWK/config/ZWK-reference-panel-candidate.workflow
+git add -f ZWK/reference_ZWK/scripts/
+git commit -m "Independent reference analysis"
 git add mkdocs.yml
 git commit -m "mkdocs.yml"
 git push

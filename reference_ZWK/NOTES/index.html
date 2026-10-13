@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>NOTES - Caprion</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/HTML.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Java.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/JavaScript.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Perl.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/Python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/R.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/rust.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">Caprion</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href="../.." class="nav-link"></a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pilot studies <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../pilot/autoencoder/" class="dropdown-item">Autoencoder</a>
+</li>
+                                    
+<li>
+    <a href="../../pilot/gwas2/" class="dropdown-item">gwas2</a>
+</li>
+                                    
+<li>
+    <a href="../../pilot/" class="dropdown-item">Pilot studies</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Analysis <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../progs/" class="dropdown-item">Protein analysis</a>
+</li>
+                                    
+<li>
+    <a href="../../peptide_progs/" class="dropdown-item">Peptide analysis</a>
+</li>
+                                    
+<li>
+    <a href="../../pipeline/" class="dropdown-item">A FragPipe-based proteomics pipeline</a>
+</li>
+                                    
+<li>
+    <a href="../" class="dropdown-item">ZWK Independent Reference Analysis</a>
+</li>
+                                    
+<li>
+    <a href="../../misc/" class="dropdown-item">Miscellaneous analysis</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Additional information <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="https://jinghuazhao.github.io/pQTLdata/reference/caprion.html" class="dropdown-item">Caprion panel</a>
+</li>
+                                    
+<li>
+    <a href="../../Data/" class="dropdown-item">Raw, Normalized Peptides and Protein Abundance</a>
+</li>
+                                    
+<li>
+    <a href="../../Notes/" class="dropdown-item">Notes</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/jinghuazhao/Caprion" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="2"><a href="#inspect-the-featurexml-summary" class="nav-link">inspect the featureXML summary</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="2"><a href="#save-a-concise-qc-summary" class="nav-link">save a concise QC summary</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h2 id="inspect-the-featurexml-summary">inspect the featureXML summary</h2>
+<p>python - &lt;&lt;'PY'
+from pathlib import Path
+import numpy as np
+import pandas as pd
+import pyopenms as oms</p>
+<p>path = Path("openms_pilot/szwk900404i19201xms1.featureXML")
+fm = oms.FeatureMap()
+oms.FeatureXMLFile().load(str(path), fm)</p>
+<p>rows = []
+for f in fm:
+    rows.append({
+        "id": f.getUniqueId(),
+        "mz": f.getMZ(),
+        "rt_sec": f.getRT(),
+        "intensity": f.getIntensity(),
+        "charge": f.getCharge(),
+        "quality": f.getOverallQuality(),
+        "width": f.getWidth(),
+    })</p>
+<p>df = pd.DataFrame(rows)
+print("Features:", len(df))
+print("\nCharge counts:")
+print(df["charge"].value_counts(dropna=False).sort_index().to_string())
+print("\nNumeric summary:")
+print(df[["mz", "rt_sec", "intensity", "quality", "width"]]
+      .describe(percentiles=[0.25, 0.5, 0.75]).to_string())
+print("\nMissing/zero charge:", int((df["charge"] == 0).sum()))
+print("Missing/zero quality:", int((df["quality"] == 0).sum()))
+print("\nFirst 5 features:")
+print(df.head().to_string(index=False))
+PY</p>
+<h2 id="save-a-concise-qc-summary">save a concise QC summary</h2>
+<p>cd ~/Caprion/analysis/ZWK/reference_ZWK</p>
+<p>python &lt;&lt;'PY'
+import pandas as pd
+from pathlib import Path</p>
+<p>p = Path("openms_pilot/feature_overlap_qc_geometry.tsv")
+df = pd.read_csv(p, sep="\t")</p>
+<p>fraction = df["shared_intensity_fraction"].fillna(0)
+shared = df["has_shared_peaks"].astype(bool)</p>
+<p>summary = pd.DataFrame([
+    ("features_total", len(df)),
+    ("features_with_shared_peaks", int(shared.sum())),
+    ("fraction_features_with_shared_peaks", shared.mean()),
+    ("mean_shared_intensity_fraction", fraction.mean()),
+    ("median_shared_intensity_fraction", fraction.median()),
+    ("p95_shared_intensity_fraction", fraction.quantile(0.95)),
+    ("p99_shared_intensity_fraction", fraction.quantile(0.99)),
+    ("maximum_shared_intensity_fraction", fraction.max()),
+], columns=["metric", "value"])</p>
+<p>out = Path("openms_pilot/feature_overlap_qc_summary.tsv")
+summary.to_csv(out, sep="\t", index=False)</p>
+<p>print(summary.to_string(index=False))
+print("\nSaved:", out)
+PY</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/jquery-3.6.0.min.js"></script>
+        <script src="../../js/bootstrap.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../javascripts/config.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

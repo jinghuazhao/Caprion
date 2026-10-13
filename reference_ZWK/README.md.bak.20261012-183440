@@ -1,0 +1,347 @@
+# ZWK Independent Reference Analysis
+
+## Objective
+
+Develop an independent reference from the ZWK pooled mass-spectrometry acquisitions using the original mzML data.
+
+The intended analysis has two parts:
+
+1. Identify peptides from MS/MS spectra using FragPipe.
+2. Investigate and generate isotope groups (IGs) independently from MS1 evidence.
+
+The existing XLSX isotope-group assignments are not to be used to construct the independent reference. They may be compared with the independent results later.
+
+## Project layout
+
+- `config/` — FragPipe workflow and manifest
+- `database/` — protein sequence database with decoys
+- `dry_run_98/` — dry-run workspace
+- `search_98/` — completed FragPipe search outputs
+- `reports/` — audit tables and exported results
+- `scripts/` — workflow and audit scripts
+
+Project root:
+
+`~/Caprion/analysis/ZWK/reference_ZWK/`
+
+FragPipe version: 22.0
+
+Module:
+
+```bash
+module load ceuadmin/FragPipe/22.0
+```
+
+## Inputs and database
+
+The search manifest contains 98 mzML input paths.
+
+The search database is:
+
+`database/2026-10-12-decoys-UP000005640-canonical-proteins-20420.fasta.fas`
+
+It contains 20,420 target entries and 20,420 reverse-decoy entries.
+
+## Completed work
+
+### FragPipe search
+
+The 98-input search completed successfully. The log is:
+
+`reports/fragpipe_search_98.log`
+
+The search used MSFragger, Philosopher and IonQuant, with label-free quantification and match-between-runs enabled.
+
+The workflow configuration is the authoritative record of search parameters.
+
+### Ion evidence audit
+
+The following scripts and outputs are part of the workflow:
+
+- `scripts/03_audit_ion_evidence.py`
+- `scripts/04_build_ion_evidence.py`
+- `scripts/05_build_candidate_panel.py`
+- `reports/ion_evidence_long.tsv`
+- `reports/ion_evidence_summary.tsv`
+- `reports/candidate_reference_ion_panel.tsv`
+- `reports/filter_fdr_audit.tsv`
+
+The combined ion table contains 27,984 peptide–charge ion entries.
+
+## Script inventory and execution order
+
+Run scripts from the project root:
+
+`~/Caprion/analysis/ZWK/reference_ZWK/`
+
+| Script | Purpose | Status |
+|---|---|---|
+| `scripts/00_check_inputs.py` | Check input files and manifest | Completed |
+| `scripts/01_audit_search_config.py` | Audit the FragPipe workflow configuration | Completed |
+| `scripts/02_run_fragpipe_search.sh` | Execute the FragPipe search | Completed |
+| `scripts/03_audit_ion_evidence.py` | Audit combined ion evidence | Completed |
+| `scripts/04_build_ion_evidence.py` | Export long-form ion-by-run evidence | Completed |
+| `scripts/05_build_candidate_panel.py` | Construct the provisional candidate ion panel | Completed |
+| `scripts/06_validate_spectrum_scan_mapping.py` | Validate FragPipe spectrum names against native mzML MS2 scan IDs | Completed for xms1–xms5 of run `szwk021704i19101` |
+
+The numbered scripts document the workflow from input validation through search, evidence construction, candidate-panel selection and scan-mapping validation.
+
+The independent isotope-group (IG) analysis is **not yet implemented**. It will be documented as a subsequent stage rather than treated as part of the completed numbered workflow.
+
+### Running the scripts
+
+Load FragPipe when required:
+
+```bash
+module load ceuadmin/FragPipe/22.0
+```
+
+Run Python scripts from the project root, for example:
+
+```bash
+python scripts/00_check_inputs.py
+python scripts/01_audit_search_config.py
+```
+
+The FragPipe search script is:
+
+```bash
+bash scripts/02_run_fragpipe_search.sh
+```
+
+The search has already completed; do not rerun it merely to reproduce the existing outputs.
+
+
+A provisional candidate panel was selected using direct MS/MS evidence in at least two acquisitions. It contains 23,112 ion entries associated with 2,117 protein identifiers.
+
+This recurrence threshold is a reproducibility criterion, not a separate combined-panel FDR estimate. Direct MS/MS evidence must also be distinguished from match-between-runs (MBR) evidence.
+
+### PSM-to-scan mapping validation
+
+For acquisition run `szwk021704i19101`, FragPipe PSM spectrum names were matched to native MS2 scan IDs in five mzML files.
+
+| Acquisition | PSMs | Scan IDs found | Charge agreement |
+|---|---:|---:|---:|
+| xms1 | 6,866 | 6,866 | 100% |
+| xms2 | 6,974 | 6,974 | 100% |
+| xms3 | 6,841 | 6,841 | 100% |
+| xms4 | 6,976 | 6,976 | 100% |
+| xms5 | 7,108 | 7,108 | 100% |
+| **Total** | **34,765** | **34,765** | **100%** |
+
+The consolidated report is:
+
+`reports/spectrum_scan_mapping_5_acquisitions.tsv`
+
+The maximum absolute retention-time difference reported was approximately 0.00034 seconds.
+
+This validates the mapping for these five acquisitions. It does not establish an association between each PSM and a particular MS1 isotope group.
+
+## Work remaining
+
+### Independent isotope-group analysis
+
+The independent IG analysis has not yet been completed.
+
+The next step is to inspect existing IonQuant outputs for MS1 feature-level evidence. If those outputs do not provide sufficient information to reconstruct isotope groups, an independent feature-detection and isotope-grouping method will be selected and documented.
+
+Rosetta Elucidator 3.0 / PeakTeller has been mentioned as a possible source of the original IGs, but this provenance is unconfirmed.
+
+New IGs should receive independent identifiers. They must not be assumed to correspond exactly to the original XLSX IG IDs.
+
+### Linking peptide identifications to isotope groups
+
+After independent IG generation, investigate associations using precursor m/z, charge, retention time and scan evidence.
+
+Any association should be supported by the available data and should distinguish direct MS/MS identification from transferred MBR evidence.
+
+### Comparison with the XLSX
+
+Only after the independent reference is constructed should it be compared with the original XLSX IG assignments. The XLSX is a comparison source, not the source used to construct the independent panel.
+
+## Interpretation notes
+
+- The FragPipe search is complete; independent IG generation is still pending.
+- A peptide–charge ion entry is not necessarily a unique biological analyte.
+- Per-run FDR filtering does not by itself establish a separate FDR for the combined candidate panel.
+- Scan mapping does not by itself establish an IG-to-PSM relationship.
+- Record software versions, parameters, commands and input provenance for all future analysis steps.
+
+FragPipe's components have different roles:
+- MSFragger: identifies peptides from MS/MS spectra.
+- IonQuant: quantifies peptide ions and supports match-between-runs (MBR).
+- MS1 feature detection and isotope grouping: this is the key distinction. IonQuant processes MS1 evidence for peptide-ion quantification, but its feature definitions are not necessarily equivalent to Rosetta's original IGs.
+
+A suitable open-source option is OpenMS, which provides MS1 feature detection and isotope-related processing.
+
+mkdir -p ~/Caprion/analysis/ZWK/reference_ZWK/{scripts,config,runs,reports}
+
+## workflow
+
+python -c 'from pathlib import Path
+import shutil
+root=Path.home()/"Caprion"/"analysis"/"ZWK"/"reference_ZWK"
+source=Path.home()/"Caprion"/"analysis"/"ZWK"/"discovery_fresh"/"LFQ-MBR-Sage-test.workflow"
+dest=root/"config"/"ZWK-reference-panel-candidate.workflow"
+if not source.is_file():
+ raise SystemExit(f"Source workflow not found: {source}")
+if dest.exists():
+ raise SystemExit(f"Refusing to overwrite existing candidate: {dest}")
+dest.parent.mkdir(parents=True,exist_ok=True)
+shutil.copy2(source,dest)
+print("Created:",dest)
+print("Source unchanged:",source)
+print("Candidate size:",dest.stat().st_size,"bytes")
+'
+
+python - <<'PY'
+from pathlib import Path
+import xml.etree.ElementTree as ET
+
+p = Path.home() / "Caprion/analysis/ZWK/mzML/szwk021704i19101xms1.mzML"
+
+wanted = {
+    "fileContent", "sourceFile", "instrumentConfiguration",
+    "instrument", "software", "cv", "cvList",
+    "fileDescription", "run",
+}
+
+for event, elem in ET.iterparse(p, events=("start", "end")):
+    tag = elem.tag.rsplit("}", 1)[-1]
+
+    if event == "start" and tag in {
+        "fileDescription", "instrumentConfigurationList",
+        "softwareList", "cvList"
+    }:
+        print(f"\n--- {tag} ---")
+
+    if event == "start" and tag in {"cv", "userParam"}:
+        attrs = elem.attrib
+        print(tag, {
+            k: attrs[k] for k in
+            ("id", "fullName", "URI", "name", "accession", "value")
+            if k in attrs
+        })
+
+    if event == "end" and tag == "fileDescription":
+        break
+PY
+
+--- cvList ---\
+cv {'id': 'MS', 'fullName': 'Mass spectrometry ontology', 'URI': 'https://raw.githubusercontent.com/HUPO-PSI/psi-ms-CV/master/psi-ms.obo'}\
+cv {'id': 'UO', 'fullName': 'Unit Ontology', 'URI': 'https://raw.githubusercontent.com/bio-ontology-research-group/unit-ontology/master/unit.obo'}\
+
+## database
+
+FP=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
+PHIL="$FP/tools/Philosopher/philosopher-v5.1.1"
+FASTA="$FP/databases/UP000005640-canonical-proteins-20420.fasta"
+DBDIR="$HOME/Caprion/analysis/ZWK/reference_ZWK/database"
+
+cd "$DBDIR"
+"$PHIL" workspace --init
+"$PHIL" database --custom "$FASTA" --prefix rev_
+
+echo
+echo "Generated FASTA files:"
+find "$DBDIR" -maxdepth 2 -type f \
+  \( -name '*.fas' -o -name '*.fasta' \) \
+  -printf '%p (%s bytes)\n'
+
+## manifest
+
+cd ~/Caprion/analysis/ZWK/reference_ZWK
+
+python - <<'PY'
+from pathlib import Path
+
+source_dir = Path.home() / "Caprion/analysis/ZWK/mzML"
+output = Path.home() / "Caprion/analysis/ZWK/reference_ZWK/config/ZWK-reference-panel.fp-manifest"
+
+files = sorted(source_dir.glob("*.mzML"))
+
+if len(files) != 98:
+    raise SystemExit(f"Expected 98 mzML files; found {len(files)}")
+
+if output.exists():
+    raise SystemExit(f"Manifest already exists; refusing to overwrite: {output}")
+
+rows = []
+for f in files:
+    name = f.stem
+    # Use the leading acquisition prefix as a neutral, reproducible label.
+    # This does not claim to identify the biological sample group.
+    group = name.split("xms", 1)[0]
+    rows.append(f"{f.resolve()}\t{group}\tDDA")
+
+if len({row.split("\t")[0] for row in rows}) != 98:
+    raise SystemExit("Duplicate source paths detected")
+
+output.parent.mkdir(parents=True, exist_ok=True)
+output.write_text("\n".join(rows) + "\n")
+
+print(f"Created: {output}")
+print(f"Entries: {len(rows)}")
+print("\nFirst 5 entries:")
+print("\n".join(rows[:5]))
+PY
+
+## dry-run
+
+FP=/usr/local/Cluster-Apps/ceuadmin/FragPipe/22.0
+PROJECT="$HOME/Caprion/analysis/ZWK/reference_ZWK"
+
+mkdir -p "$PROJECT/reports"
+mkdir "$PROJECT/dry_run_98"
+
+JAVA_OPTS="-Duser.home=$PROJECT/fragpipe_test_home" \
+  "$FP/bin/fragpipe" \
+  --headless \
+  --workflow "$PROJECT/config/ZWK-reference-panel-candidate.workflow" \
+  --manifest "$PROJECT/config/ZWK-reference-panel.fp-manifest" \
+  --workdir "$PROJECT/dry_run_98" \
+  --threads 8 \
+  --ram 24 \
+  --dry-run \
+  2>&1 | tee "$PROJECT/reports/fragpipe_dry_run.log"
+
+echo "FragPipe exit status: ${PIPESTATUS[0]}"
+
+## xlsx query
+
+python - <<'PY'
+from pathlib import Path
+import pandas as pd
+
+f = Path.home() / "Caprion/pre_qc_data/pilot/ZWK_EDR_20191002.xlsx"
+print("Workbook exists:", f.exists(), f)
+
+if f.exists():
+    x = pd.ExcelFile(f)
+    print("Sheets:", x.sheet_names)
+PY
+
+Workbook exists: True /home/jhz22/Caprion/pre_qc_data/pilot/ZWK_EDR_20191002.xlsx
+Sheets: ['Legend', 'Samples', 'Annotations', 'Raw IGs', 'Normalized Peptides', 'Protein_All_Peptides', 'Protein_DR_Filt_Peptides']
+
+python - <<'PY'
+from pathlib import Path
+import pandas as pd
+
+f = Path.home() / "Caprion/pre_qc_data/pilot/ZWK_EDR_20191002.xlsx"
+df = pd.read_excel(f, sheet_name="Normalized Peptides", header=4, nrows=5)
+
+print("Columns:")
+for c in df.columns:
+    print(repr(c))
+
+print("\nFirst five rows (first 8 columns only):")
+print(df.iloc[:, :8].to_string(index=False))
+PY
+
+cd ~/Caprion/analysis/ZWK/reference_ZWK
+module load ceuadmin/FragPipe/22.0
+python scripts/06_validate_spectrum_scan_mapping.py xms2
+python scripts/06_validate_spectrum_scan_mapping.py xms3
+python scripts/06_validate_spectrum_scan_mapping.py xms4
+python scripts/06_validate_spectrum_scan_mapping.py xms5

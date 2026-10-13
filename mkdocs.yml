@@ -50,6 +50,14 @@ exclude_docs: |
   /ZWK/reference_ZWK/
   /ZWK/sage/
   /ZWK/test/
+  /reference_ZWK/config/
+  /reference_ZWK/dry_run_98/
+  /reference_ZWK/reports/
+  /referebce_ZWK/database/
+  /reference_ZWK/fragpipe_test_home/
+  /reference_ZWK/openms_pilot/
+  /reference_ZWK/runs/
+  /reference_ZWK/search_98/
 markdown_extensions:
   - attr_list
   - footnotes

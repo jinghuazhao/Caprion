@@ -488,7 +488,17 @@ python scripts/01_audit_search_config.py
 <li>The relevant MS1 feature and isotope-pattern evidence</li>
 </ul>
 <p>Associations should be supported by the available data and should distinguish direct MS/MS identifications from transferred MBR evidence.</p>
-<h3 id="73-comparison-with-the-original-xlsx">7.3 Comparison with the original XLSX</h3>
+<h3 id="73-exploratory-anchor-stability-analysis">7.3 Exploratory anchor-stability analysis</h3>
+<p>Exploratory scripts <code>07</code>–<code>21</code> have investigated isotope-anchor scoring, mass accuracy, scan-level stability and competing isotope offsets using the existing OpenMS pilot outputs.</p>
+<p>The audits show that low individual peak mass errors and apparently complete isotope series do not necessarily identify a unique monoisotopic anchor. Competing offsets can receive similar scores, and ties remain substantial in some candidate groups.</p>
+<p>Scripts <code>20</code> and <code>21</code> and their outputs are retained for diagnostic purposes only. Their results must not be treated as validated monoisotopic assignments:</p>
+<ul>
+<li>Script <code>20</code> reports winning-offset rows, which can exceed the number of unique candidates when ties occur.</li>
+<li>Script <code>21</code> reuses observed isotope m/z values from an existing audit rather than independently rematching trace peaks for each alternative anchor.</li>
+</ul>
+<p><strong>Current status:</strong> the anchor-scoring method remains exploratory. No final independent isotope-group assignments have been established by this analysis.</p>
+<p>Before further scoring or scaling to additional acquisitions, inspect the trace-peak schema and existing matching implementation, verify isotope-index and offset conventions, and validate the rematching procedure on a single candidate using distinct observed trace peaks. Only after this validation should the method be applied across the candidate set.</p>
+<h3 id="74-comparison-with-the-original-xlsx">7.4 Comparison with the original XLSX</h3>
 <p>Only after constructing the independent reference should it be compared with the original workbook:</p>
 <p><code>~/Caprion/pre_qc_data/pilot/ZWK_EDR_20191002.xlsx</code></p>
 <p>The workbook is a comparison source, not a construction source for the independent reference.</p>
@@ -500,6 +510,9 @@ python scripts/01_audit_search_config.py
 <li>MBR evidence is not equivalent to a direct MS/MS identification in the receiving run.</li>
 <li>Successful PSM-to-scan mapping does not establish a PSM-to-IG relationship.</li>
 <li>IonQuant feature definitions are not necessarily equivalent to the original</li>
+<li>Exploratory anchor scores and stability summaries are diagnostic evidence, not validated monoisotopic assignments.</li>
+<li>Competing isotope offsets must be evaluated by independently matching observed trace peaks to theoretical isotope positions; existing summary-level peak matches must not be relabelled as evidence for alternative anchors.</li>
+<li>The independent isotope-group reference remains incomplete until the feature-detection, isotope-grouping and peptide-to-IG association procedures have been validated.</li>
 </ul></div>
             </div>
         </div>

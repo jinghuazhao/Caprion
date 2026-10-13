@@ -1,0 +1,9 @@
+                          spectrum           feature_id  scan_index  charge  nominated_offset  isotope_index  theoretical_mz  nearest_observed_mz  individual_peak_error_ppm  within_tolerance  next_observed_spacing_mz  adjacent_spacing_error_ppm
+szwk021704i19101xms1.20054.20054.4 10796541564565835142       20060       4                 2              0      968.986723           968.990173                   3.561202              True                  0.251038                  792.895521
+szwk021704i19101xms1.20054.20054.4 10796541564565835142       20060       4                 2              1      969.237561           969.241211                   3.765482              True                  0.250366                -1883.671911
+szwk021704i19101xms1.20054.20054.4 10796541564565835142       20060       4                 2              2      969.488400           969.491577                   3.277139              True                  0.250488                -1397.023287
+szwk021704i19101xms1.20054.20054.4 10796541564565835142       20060       4                 2              3      969.739239           969.742065                   2.914929              True                  0.251526                 2739.490017
+szwk021704i19101xms1.20054.20054.4 10796541564565835142       20060       4                 2              4      969.990077           969.993591                   3.622605              True                       NaN                         NaN
+
+Expected isotope spacing: 0.250838709 m/z
+Diagnostic written to: openms_pilot/isotope_spacing_diagnostic.tsv

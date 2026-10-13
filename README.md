@@ -19,7 +19,7 @@ This repository/site is dedicated to protein/peptide quantitative trait analysis
 - [Protein-level Analysis](progs)
 - [Peptide-level Analysis](peptide_progs)
 - [A FragPipe-based proteomics pipeline](pipeline)
-- [Independent reference analysis](ZWK/reference_ZWK)
+- [Independent reference analysis](reference_ZWK)
 - [Miscellaneous Analysis](misc)
 
 ## 📎 Additional Information

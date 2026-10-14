@@ -139,6 +139,16 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            
+            <li class="nav-item" data-level="2"><a href="#native-mzml-ms1-centroid-peaks" class="nav-link">native mzML MS1 centroid peaks</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="2"><a href="#patch-code" class="nav-link">patch code</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
@@ -199,7 +209,39 @@ shared = df["has_shared_peaks"].astype(bool)</p>
 summary.to_csv(out, sep="\t", index=False)</p>
 <p>print(summary.to_string(index=False))
 print("\nSaved:", out)
-PY</p></div>
+PY</p>
+<h2 id="native-mzml-ms1-centroid-peaks">native mzML MS1 centroid peaks</h2>
+<p>python -u scripts/57_inspect_native_ms1_centroid_peaks.py \</p>
+<blockquote>
+<p>--mzml /rds/project/rds-zuZwCZMsS0w/Caprion_proteomics/analysis/ZWK/mzML/szwk900404i19201xms1.mzML 2&gt;&amp;1</p>
+</blockquote>
+<h2 id="patch-code">patch code</h2>
+<p>cd ~/Caprion/analysis/ZWK/reference_ZWK</p>
+<p>python - &lt;&lt;'PY'
+from pathlib import Path</p>
+<p>p = Path("scripts/94_extract_all_trace_scan_centroids.py")
+s = p.read_text()
+old = 'len({row["scan_index_zero_based"] for row in centroid_rows})'
+new = 'len({row["ordinal"] for row in centroid_rows})'</p>
+<p>assert old in s, "Expected faulty expression was not found"
+p.write_text(s.replace(old, new))
+print("Fixed centroid scan-count summary.")
+PY</p>
+<p>python -m py_compile scripts/94_extract_all_trace_scan_centroids.py
+python scripts/94_extract_all_trace_scan_centroids.py</p>
+<p>cd ~/Caprion/analysis/ZWK/reference_ZWK</p>
+<p>python - &lt;&lt;'PY'
+from pathlib import Path</p>
+<p>p = Path("scripts/102_inspect_tracks_6_7.py")
+text = p.read_text()
+text = text.replace(
+    'f\'{row["scan_index_zero_based"]:4s} \'',
+    'f\'{row["scan_index_zero_based"]:4d} \''
+)
+p.write_text(text)
+PY</p>
+<p>python -m py_compile scripts/102_inspect_tracks_6_7.py
+python scripts/102_inspect_tracks_6_7.py</p></div>
             </div>
         </div>
 

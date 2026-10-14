@@ -130,6 +130,11 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
+            <li class="nav-item" data-level="2"><a href="#profiling" class="nav-link">profiling</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
             <li class="nav-item" data-level="2"><a href="#inspect-the-featurexml-summary" class="nav-link">inspect the featureXML summary</a>
               <ul class="nav flex-column">
               </ul>
@@ -154,6 +159,19 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
+<h2 id="profiling">profiling</h2>
+<p>cd ~/Caprion/analysis/ZWK/reference_ZWK</p>
+<p>python -m cProfile -o reports/A_profile.prof \
+    scripts/A_reconstruct_igs.py \
+    --limit-files 1 \
+    --out-prefix reports/A_profile_test</p>
+<p>python - &lt;&lt;'PY'
+import pstats
+pstats.Stats("reports/A_profile.prof") \
+    .strip_dirs() \
+    .sort_stats("cumulative") \
+    .print_stats(25)
+PY</p>
 <h2 id="inspect-the-featurexml-summary">inspect the featureXML summary</h2>
 <p>python - &lt;&lt;'PY'
 from pathlib import Path

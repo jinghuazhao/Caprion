@@ -1,0 +1,472 @@
+#!/usr/bin/env python3
+"""A: independent isotope-group reconstruction from MS1 mzML.
+
+No original XLSX IG assignments are read.
+Candidate groups require >=3 consecutive observed isotope peaks per scan
+and >=3 scans per retained group. This is a provisional reconstruction.
+"""
+from pathlib import Path
+from bisect import bisect_left, bisect_right
+from collections import defaultdict
+import argparse
+import csv
+import heapq
+import math
+import time
+
+import numpy as np
+from pyteomics import mzml
+
+MANIFEST = Path("config/ZWK-reference-panel.fp-manifest")
+
+MAX_CHARGE = 6
+MIN_INTENSITY = 100.0
+MASS_TOL_DA_MIN = 0.003
+MASS_TOL_PPM = 5.0
+TRACK_TOL_DA_MIN = 0.010
+TRACK_TOL_PPM = 10.0
+MAX_GAP_SECONDS = 6.0
+MIN_SCANS_PER_GROUP = 3
+MAX_ISOTOPE_INDEX = 5
+ISOTOPE_NEUTRAL_DELTA = 1.003354835
+
+
+def rt_seconds(spec):
+    scans = spec.get("scanList", {}).get("scan", [])
+    if not scans:
+        return math.nan
+    value = scans[0].get("scan start time")
+    return float(value) * 60.0 if value is not None else math.nan
+
+
+def tolerance(mz, minimum, ppm):
+    return max(minimum, abs(mz) * ppm * 1e-6)
+
+
+def detect_envelopes(mz_array, intensity_array):
+    """Vectorised isotope lookup; missing isotope peaks are never invented."""
+    mz = np.asarray(mz_array, dtype=np.float64)
+    inten = np.asarray(intensity_array, dtype=np.float64)
+
+    valid = np.isfinite(mz) & np.isfinite(inten) & (mz > 0) & (
+        inten >= MIN_INTENSITY
+    )
+    mz, inten = mz[valid], inten[valid]
+    if mz.size < 3:
+        return []
+
+    order = np.argsort(mz)
+    mz, inten = mz[order], inten[order]
+    n = mz.size
+    roots = np.arange(n)
+    candidates = []
+
+    for charge in range(1, MAX_CHARGE + 1):
+        delta = ISOTOPE_NEUTRAL_DELTA / charge
+        indices = np.full((MAX_ISOTOPE_INDEX + 1, n), -1, dtype=np.int64)
+        indices[0] = roots
+        residuals = np.full(
+            (MAX_ISOTOPE_INDEX + 1, n), np.nan, dtype=np.float64
+        )
+        alive = np.ones(n, dtype=bool)
+
+        for k in range(1, MAX_ISOTOPE_INDEX + 1):
+            targets = mz + k * delta
+            pos = np.searchsorted(mz, targets, side="left")
+            previous = indices[k - 1]
+
+            # Restrict candidates to centroids strictly after the previous
+            # isotope; this prevents reusing the same centroid.
+            lower = np.maximum(pos - 1, previous + 1)
+            upper = np.maximum(pos, previous + 1)
+            lower_ok = lower < n
+            upper_ok = upper < n
+            lower_safe = np.minimum(lower, n - 1)
+            upper_safe = np.minimum(upper, n - 1)
+
+            dl = np.abs(mz[lower_safe] - targets)
+            du = np.abs(mz[upper_safe] - targets)
+            chosen = np.where(dl <= du, lower, upper)
+            chosen_safe = np.minimum(chosen, n - 1)
+            distance = np.abs(mz[chosen_safe] - targets)
+            tol = np.maximum(MASS_TOL_DA_MIN, np.abs(targets) * MASS_TOL_PPM * 1e-6)
+
+            match = (
+                alive
+                & (previous >= 0)
+                & (chosen < n)
+                & np.where(chosen == lower, lower_ok, upper_ok)
+                & (chosen > previous)
+                & (distance <= tol)
+            )
+            indices[k, match] = chosen[match]
+            residuals[k, match] = (
+                mz[chosen_safe[match]] - mz[previous[match]] - delta
+            ) * 1000.0
+            alive &= match
+
+        # Two successful steps means isotope indices 0, 1, 2 were observed.
+        for i in np.flatnonzero(indices[2] >= 0):
+            peaks = []
+            res = []
+            for k in range(MAX_ISOTOPE_INDEX + 1):
+                j = indices[k, i]
+                if j < 0:
+                    break
+                peaks.append((k, float(mz[j]), float(inten[j])))
+                if k:
+                    res.append(float(residuals[k, i]))
+            if len(peaks) >= 3:
+                candidates.append({
+                    "mz0": float(mz[i]),
+                    "charge": charge,
+                    "peaks": peaks,
+                    "residuals": res,
+                })
+
+    candidates.sort(key=lambda c: (c["mz0"], c["charge"]))
+    return candidates
+
+
+def write_header(handle, fields):
+    writer = csv.DictWriter(handle, fieldnames=fields, delimiter="\t")
+    writer.writeheader()
+    return writer
+
+
+def finalize_track(t, sample, source, gw, pw, qw, group_number):
+    """Write all records for one finalized group with one consistent ID."""
+    obs = t["observations"]
+    if len(obs) < MIN_SCANS_PER_GROUP:
+        return group_number, False
+
+    ig_id = f"AIG{group_number:09d}"
+    group_number += 1
+
+    rts = [o["rt"] for o in obs]
+    mz0s = [o["mz0"] for o in obs]
+    residuals = [
+        abs(r) for o in obs for r in o["residuals"] if math.isfinite(r)
+    ]
+    gaps = np.diff(rts).tolist()
+    peak_counts = [len(o["peaks"]) for o in obs]
+    med_res = float(np.median(residuals)) if residuals else math.nan
+    max_res = float(max(residuals)) if residuals else math.nan
+
+    gw.writerow({
+        "reconstructed_ig_id": ig_id,
+        "sample_id": sample,
+        "source_file": str(source),
+        "charge": t["charge"],
+        "precursor_mz_estimate": f"{np.median(mz0s):.6f}",
+        "rt_start_seconds": f"{min(rts):.3f}",
+        "rt_end_seconds": f"{max(rts):.3f}",
+        "rt_median_seconds": f"{np.median(rts):.3f}",
+        "n_scans": len(obs),
+        "n_isotope_peak_observations": sum(peak_counts),
+        "median_abs_spacing_residual_mDa": f"{med_res:.4f}",
+        "max_abs_spacing_residual_mDa": f"{max_res:.4f}",
+    })
+
+    for o in obs:
+        for isotope_index, peak_mz, intensity in o["peaks"]:
+            resid = ""
+            if isotope_index > 0 and isotope_index - 1 < len(o["residuals"]):
+                resid = f"{o['residuals'][isotope_index - 1]:.4f}"
+            pw.writerow({
+                "reconstructed_ig_id": ig_id,
+                "sample_id": sample,
+                "source_file": str(source),
+                "spectrum_index_zero_based": o["scan_index"],
+                "spectrum_id": o["scan_id"],
+                "rt_seconds": f"{o['rt']:.3f}",
+                "charge": t["charge"],
+                "isotope_index": isotope_index,
+                "centroid_mz": f"{peak_mz:.6f}",
+                "centroid_intensity": f"{intensity:.3f}",
+                "spacing_residual_from_previous_mDa": resid,
+            })
+
+    qw.writerow({
+        "reconstructed_ig_id": ig_id,
+        "sample_id": sample,
+        "source_file": str(source),
+        "charge": t["charge"],
+        "n_scans": len(obs),
+        "median_scan_gap_seconds": f"{np.median(gaps):.3f}" if gaps else "",
+        "min_peaks_per_scan": min(peak_counts),
+        "median_peaks_per_scan": f"{np.median(peak_counts):.1f}",
+        "max_peaks_per_scan": max(peak_counts),
+        "median_abs_spacing_residual_mDa": f"{med_res:.4f}",
+        "max_abs_spacing_residual_mDa": f"{max_res:.4f}",
+        "quality_note": (
+            "Candidate only; >=3 consecutive observed isotope peaks per scan; "
+            "shared centroids/overlapping envelopes are not fully resolved."
+        ),
+    })
+    return group_number, True
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--limit-files", type=int, default=0,
+        help="Process only the first N MS1 manifest entries (0 = all)."
+    )
+    parser.add_argument(
+        "--max-scans", type=int, default=0,
+        help="Stop after N MS1 scans per file (0 = all); for diagnostics only."
+    )
+    parser.add_argument(
+        "--out-prefix", default="reports/A",
+        help="Output path prefix. Default preserves the reports/A_* filenames."
+    )
+    args = parser.parse_args()
+
+    if not MANIFEST.exists():
+        raise SystemExit(f"Manifest not found: {MANIFEST}")
+
+    outprefix = Path(args.out_prefix)
+    outprefix.parent.mkdir(parents=True, exist_ok=True)
+    group_file = Path(f"{outprefix}_reconstructed_igs.tsv")
+    peak_file = Path(f"{outprefix}_ig_peaks.tsv")
+    quality_file = Path(f"{outprefix}_ig_quality.tsv")
+    summary_file = Path(f"{outprefix}_run_summary.txt")
+    progress_file = Path(f"{outprefix}_progress.tsv")
+
+    entries = []
+    with MANIFEST.open() as handle:
+        for line in handle:
+            parts = line.split()
+            if len(parts) >= 2 and Path(parts[0]).name.lower().endswith("xms1.mzml"):
+                entries.append((parts[0], parts[1]))
+    if args.limit_files:
+        entries = entries[:args.limit_files]
+    if not entries:
+        raise SystemExit("No xms1.mzML files found in the manifest.")
+
+    group_fields = [
+        "reconstructed_ig_id", "sample_id", "source_file", "charge",
+        "precursor_mz_estimate", "rt_start_seconds", "rt_end_seconds",
+        "rt_median_seconds", "n_scans", "n_isotope_peak_observations",
+        "median_abs_spacing_residual_mDa", "max_abs_spacing_residual_mDa",
+    ]
+    peak_fields = [
+        "reconstructed_ig_id", "sample_id", "source_file",
+        "spectrum_index_zero_based", "spectrum_id", "rt_seconds", "charge",
+        "isotope_index", "centroid_mz", "centroid_intensity",
+        "spacing_residual_from_previous_mDa",
+    ]
+    quality_fields = [
+        "reconstructed_ig_id", "sample_id", "source_file", "charge",
+        "n_scans", "median_scan_gap_seconds", "min_peaks_per_scan",
+        "median_peaks_per_scan", "max_peaks_per_scan",
+        "median_abs_spacing_residual_mDa", "max_abs_spacing_residual_mDa",
+        "quality_note",
+    ]
+
+    n_files = n_missing = n_ms1 = n_candidates = n_groups = 0
+    next_group_number = 1
+    run_start = time.time()
+
+    with group_file.open("w", newline="") as gf, \
+         peak_file.open("w", newline="") as pf, \
+         quality_file.open("w", newline="") as qf, \
+         progress_file.open("w", newline="") as rf:
+        gw = write_header(gf, group_fields)
+        pw = write_header(pf, peak_fields)
+        qw = write_header(qf, [
+            "sample_id", "source_file", "status", "ms1_scans",
+            "envelope_candidates", "groups_retained", "elapsed_seconds",
+        ])
+        rw = csv.DictWriter(rf, fieldnames=[
+            "sample_id", "source_file", "status", "ms1_scans",
+            "envelope_candidates", "groups_retained", "elapsed_seconds",
+        ], delimiter="\t")
+        rw.writeheader()
+
+        for file_no, (path_text, sample) in enumerate(entries, start=1):
+            source = Path(path_text)
+            started = time.time()
+            if not source.is_file():
+                n_missing += 1
+                rw.writerow({
+                    "sample_id": sample, "source_file": str(source),
+                    "status": "MISSING", "ms1_scans": 0,
+                    "envelope_candidates": 0, "groups_retained": 0,
+                    "elapsed_seconds": f"{time.time()-started:.1f}",
+                })
+                rf.flush()
+                print(f"[{file_no}/{len(entries)}] MISSING {source}", flush=True)
+                continue
+
+            n_files += 1
+            file_ms1 = file_candidates = file_groups = 0
+            # Active tracks only. Heap entries are lazily invalidated when
+            # a track is updated, avoiding a full historical-track scan.
+            tracks = {}
+            expiry_heap = []
+            next_track_id = 0
+            print(f"[{file_no}/{len(entries)}] {source.name}", flush=True)
+
+            with mzml.MzML(str(source), use_index=True) as reader:
+                for spec in reader:
+                    if spec.get("ms level") != 1:
+                        continue
+                    rt = rt_seconds(spec)
+                    if not math.isfinite(rt):
+                        continue
+
+                    n_ms1 += 1
+                    file_ms1 += 1
+                    candidates = detect_envelopes(
+                        spec.get("m/z array", []),
+                        spec.get("intensity array", []),
+                    )
+                    file_candidates += len(candidates)
+
+                    # Finalize expired tracks before linking this scan.
+                    while expiry_heap and rt - expiry_heap[0][0] > MAX_GAP_SECONDS:
+                        old_rt, tid = heapq.heappop(expiry_heap)
+                        t = tracks.get(tid)
+                        if t is None or t["last_rt"] != old_rt:
+                            continue
+                        del tracks[tid]
+                        next_group_number, kept = finalize_track(
+                            t, sample, source, gw, pw, qw, next_group_number
+                        )
+                        file_groups += int(kept)
+                        n_groups += int(kept)
+
+                    by_charge = defaultdict(list)
+                    for t in tracks.values():
+                        by_charge[t["charge"]].append(t)
+                    for z in by_charge:
+                        by_charge[z].sort(key=lambda t: t["last_mz"])
+
+                    links = []
+                    for ci, c in enumerate(candidates):
+                        group = by_charge.get(c["charge"], [])
+                        if not group:
+                            continue
+                        track_mzs = [t["last_mz"] for t in group]
+                        tol = tolerance(
+                            c["mz0"], TRACK_TOL_DA_MIN, TRACK_TOL_PPM
+                        )
+                        lo = bisect_left(track_mzs, c["mz0"] - tol)
+                        hi = bisect_right(track_mzs, c["mz0"] + tol)
+                        for t in group[lo:hi]:
+                            links.append((
+                                abs(c["mz0"] - t["last_mz"]), t["id"], ci
+                            ))
+
+                    links.sort()
+                    used_tracks, used_candidates, assignments = set(), set(), {}
+                    for distance, tid, ci in links:
+                        if tid in used_tracks or ci in used_candidates:
+                            continue
+                        used_tracks.add(tid)
+                        used_candidates.add(ci)
+                        assignments[ci] = tracks[tid]
+
+                    scan_index = spec.get("index")
+                    if scan_index is not None:
+                        scan_index = int(scan_index)
+                    scan_id = spec.get("id", "")
+
+                    for ci, c in enumerate(candidates):
+                        obs = {
+                            "rt": rt,
+                            "scan_index": scan_index,
+                            "scan_id": scan_id,
+                            "mz0": c["mz0"],
+                            "peaks": c["peaks"],
+                            "residuals": c["residuals"],
+                        }
+                        if ci in assignments:
+                            t = assignments[ci]
+                            t["observations"].append(obs)
+                            t["last_rt"] = rt
+                            t["last_mz"] = c["mz0"]
+                            heapq.heappush(expiry_heap, (rt, t["id"]))
+                        else:
+                            tid = next_track_id
+                            next_track_id += 1
+                            t = {
+                                "id": tid, "charge": c["charge"],
+                                "last_rt": rt, "last_mz": c["mz0"],
+                                "observations": [obs],
+                            }
+                            tracks[tid] = t
+                            heapq.heappush(expiry_heap, (rt, tid))
+
+                    if args.max_scans and file_ms1 >= args.max_scans:
+                        break
+
+            # Finalize remaining tracks at EOF or at the diagnostic scan limit.
+            for t in sorted(
+                tracks.values(),
+                key=lambda x: (
+                    x["observations"][0]["rt"],
+                    x["observations"][0]["mz0"], x["charge"]
+                ),
+            ):
+                next_group_number, kept = finalize_track(
+                    t, sample, source, gw, pw, qw, next_group_number
+                )
+                file_groups += int(kept)
+                n_groups += int(kept)
+
+            status = "PARTIAL_SCAN_LIMIT" if args.max_scans and file_ms1 >= args.max_scans else "COMPLETE"
+            elapsed = time.time() - started
+            row = {
+                "sample_id": sample, "source_file": str(source),
+                "status": status, "ms1_scans": file_ms1,
+                "envelope_candidates": file_candidates,
+                "groups_retained": file_groups,
+                "elapsed_seconds": f"{elapsed:.1f}",
+            }
+            rw.writerow(row)
+            rf.flush()
+            gf.flush()
+            pf.flush()
+            qf.flush()
+
+            print(
+                f"  status={status}; MS1 scans={file_ms1}; "
+                f"candidates={file_candidates}; groups={file_groups}; "
+                f"elapsed={elapsed:.1f}s",
+                flush=True,
+            )
+
+    with summary_file.open("w") as handle:
+        handle.write("A: Independent MS1 isotope-group reconstruction\n")
+        handle.write("Original XLSX assignments read: NO\n")
+        handle.write(f"Manifest: {MANIFEST}\n")
+        handle.write(f"MS1 entries selected: {len(entries)}\n")
+        handle.write(f"Files completed or attempted: {n_files + n_missing}\n")
+        handle.write(f"Files missing: {n_missing}\n")
+        handle.write(f"MS1 scans read: {n_ms1}\n")
+        handle.write(f"Per-scan envelope candidates: {n_candidates}\n")
+        handle.write(f"Groups retained (>= {MIN_SCANS_PER_GROUP} scans): {n_groups}\n")
+        handle.write(f"Maximum charge: {MAX_CHARGE}\n")
+        handle.write(f"Minimum centroid intensity: {MIN_INTENSITY}\n")
+        handle.write(f"Mass tolerance: max({MASS_TOL_DA_MIN} Da, {MASS_TOL_PPM} ppm)\n")
+        handle.write(f"Tracking tolerance: max({TRACK_TOL_DA_MIN} Da, {TRACK_TOL_PPM} ppm)\n")
+        handle.write(f"Maximum gap: {MAX_GAP_SECONDS} s\n")
+        handle.write(f"Wall time: {time.time() - run_start:.1f} s\n")
+        handle.write("Groups are provisional; A does not identify peptides or compare XLSX IGs.\n")
+        handle.write("Precursor m/z is an envelope-anchor estimate, not a confirmed monoisotopic mass.\n")
+        if args.max_scans:
+            handle.write(f"Diagnostic scan limit per file: {args.max_scans}\n")
+
+    print("\nA finished.")
+    print(f"Groups:   {group_file}")
+    print(f"Peaks:    {peak_file}")
+    print(f"Quality:  {quality_file}")
+    print(f"Progress: {progress_file}")
+    print(f"Summary:  {summary_file}")
+
+
+if __name__ == "__main__":
+    main()

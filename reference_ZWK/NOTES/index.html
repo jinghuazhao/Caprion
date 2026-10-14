@@ -241,7 +241,19 @@ text = text.replace(
 p.write_text(text)
 PY</p>
 <p>python -m py_compile scripts/102_inspect_tracks_6_7.py
-python scripts/102_inspect_tracks_6_7.py</p></div>
+python scripts/102_inspect_tracks_6_7.py</p>
+<p>cd ~/Caprion/analysis/ZWK/reference_ZWK</p>
+<p>python - &lt;&lt;'PY'
+from pathlib import Path</p>
+<p>p = Path("scripts/120_inspect_candidate_ms2_scan.py")
+s = p.read_text()
+s = s.replace("if TARGET_SCAN_INDEX &gt;= len(exp):",
+              "if TARGET_SCAN_INDEX &gt;= exp.size():")
+p.write_text(s)
+print("Patched:", p)
+PY</p>
+<p>python -m py_compile scripts/120_inspect_candidate_ms2_scan.py
+python scripts/120_inspect_candidate_ms2_scan.py</p></div>
             </div>
         </div>
 

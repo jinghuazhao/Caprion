@@ -1,0 +1,18 @@
+#!/usr/bin/bash
+
+#SBATCH --account=PETERS-SL3-CPU
+#SBATCH --ntasks=1
+#SBATCH --job-name=_merge
+#SBATCH --time=6:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --partition=cclake
+#SBATCH --output=merge.out
+#SBATCH --error=merge.err
+#SBATCH --export ALL
+
+export TMPDIR=/rds/user/$USER/hpc-work/
+
+source ~/rds/software/py3.11/bin/activate
+cd ~/Caprion/analysis/ZWK/reference_ZWK
+
+python scripts/merge_ZWK_batches.py

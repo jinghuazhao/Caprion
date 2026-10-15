@@ -135,23 +135,33 @@
               </ul>
             </li>
             
+            <li class="nav-item" data-level="2"><a href="#run-by-batch" class="nav-link">run by batch</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#usrbinenv-bash" class="nav-link">!/usr/bin/env bash</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#validation" class="nav-link">validation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#inspect-the-featurexml-summary" class="nav-link">inspect the featureXML summary</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            
             <li class="nav-item" data-level="2"><a href="#save-a-concise-qc-summary" class="nav-link">save a concise QC summary</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            
             <li class="nav-item" data-level="2"><a href="#native-mzml-ms1-centroid-peaks" class="nav-link">native mzML MS1 centroid peaks</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            
             <li class="nav-item" data-level="2"><a href="#patch-code" class="nav-link">patch code</a>
               <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -172,6 +182,42 @@ pstats.Stats("reports/A_profile.prof") \
     .sort_stats("cumulative") \
     .print_stats(25)
 PY</p>
+<h2 id="run-by-batch">run by batch</h2>
+<p>split -l 10 -d -a 2 \
+  config/ZWK-reference-panel.unfinished.fp-manifest \
+  config/ZWK-reference-panel.batch-
+wc -l config/ZWK-reference-panel.batch-*</p>
+<h1 id="usrbinenv-bash">!/usr/bin/env bash</h1>
+<p>set -euo pipefail</p>
+<p>next=3915954</p>
+<p>for b in 00 01 02 03; do
+    p="reports/A_retry<span class="arithmatex">\(b"
+    python -u scripts/A_reconstruct_igs.py \
+        --manifest "config/ZWK-reference-panel.batch-\)</span>b" \
+        --start-group-number "<span class="arithmatex">\(next" --out-prefix "\)</span>p" \
+        2&gt;&amp;1 | tee "${p}_console.log"</p>
+<pre><code>next=$(awk -F '\t' 'NR&gt;1 &amp;&amp; match($1,/[0-9]+$/) {
+    n=substr($1,RSTART,RLENGTH)+0
+    if(n&gt;m)m=n
+} END {if(m)print m+1; else exit 1}' \
+    "${p}_reconstructed_igs.tsv")
+
+echo "Batch $b done; next ID=$next"
+</code></pre>
+<p>done</p>
+<h2 id="validation">validation</h2>
+<p>python - &lt;&lt;'PY'
+from pathlib import Path</p>
+<p>p = Path("/tmp/validate_ZWK_batches.py")
+s = p.read_text()
+old = 'if ".mzML" in field:'
+new = 'if re.search(r"xms1\.mzML$", field):'</p>
+<p>if old not in s:
+    raise SystemExit("Expected line not found; file left unchanged.")</p>
+<p>p.write_text(s.replace(old, new))
+print("Validator updated to count MS1 files only.")
+PY</p>
+<p>python /tmp/validate_ZWK_batches.py</p>
 <h2 id="inspect-the-featurexml-summary">inspect the featureXML summary</h2>
 <p>python - &lt;&lt;'PY'
 from pathlib import Path

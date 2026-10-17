@@ -130,6 +130,11 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
+            <li class="nav-item" data-level="2"><a href="#b" class="nav-link">B</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
             <li class="nav-item" data-level="2"><a href="#profiling" class="nav-link">profiling</a>
               <ul class="nav flex-column">
               </ul>
@@ -169,6 +174,11 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
+<h2 id="b">B</h2>
+<p>python scripts/run_ZWK_stage_B.py \
+  --igs reports/ZWK_merged_reconstructed_igs.tsv \
+  --peaks reports/ZWK_merged_ig_peaks.tsv \
+  --psm-glob 'search_98/*/psm.tsv'</p>
 <h2 id="profiling">profiling</h2>
 <p>cd ~/Caprion/analysis/ZWK/reference_ZWK</p>
 <p>python -m cProfile -o reports/A_profile.prof \

@@ -1,0 +1,15 @@
+Manifest coverage: 94/94 MS1 files
+
+MERGE PASSED
+Retained reconstructed IG rows: 5,574,224
+Unique reconstructed IG IDs:    5,574,224
+Duplicate reconstructed IDs:    0
+Retained quality rows:          5,574,224
+Retained peak rows:             218,987,171
+
+Created files:
+  reports/ZWK_merged_reconstructed_igs.tsv (1,012,063,038 bytes)
+  reports/ZWK_merged_ig_quality.tsv (1,579,320,226 bytes)
+  reports/ZWK_merged_ig_peaks.tsv (47,416,854,155 bytes)
+
+Note: quality and peak row counts need not equal IG row counts.

@@ -1,0 +1,48 @@
+
+import pandas as pd
+
+input_file = (
+    "reports/ZWK_stage_B/"
+    "ZWK_stage_B_IG_PSM_candidates.tsv"
+)
+
+columns = [
+    "modified_peptide",
+    "protein",
+    "gene",
+    "psm_probability",
+    "psm_expectation",
+]
+
+df = pd.read_csv(
+    input_file,
+    sep="\t",
+    usecols=columns,
+    dtype=str,
+    keep_default_na=False,
+)
+
+for column in columns:
+    values = df[column].str.strip()
+    values = values[values.ne("")]
+
+    print(f"\n=== {column} ===")
+    print(f"Non-empty rows: {len(values):,}")
+    print(f"Distinct values: {values.nunique():,}")
+    print("Most frequent values:")
+
+    print(
+        values.value_counts()
+        .head(10)
+        .to_string()
+    )
+
+print("\n=== Representative rows ===")
+print(
+    df.loc[
+        df["modified_peptide"].str.strip().ne(""),
+        columns,
+    ]
+    .head(10)
+    .to_string(index=False)
+)

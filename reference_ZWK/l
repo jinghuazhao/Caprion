@@ -1,0 +1,37 @@
+
+import pandas as pd
+
+input_file = (
+    "reports/ZWK_stage_B/"
+    "ZWK_stage_B_IG_PSM_candidates.tsv"
+)
+
+columns = [
+    "modified_peptide",
+    "protein",
+    "gene",
+    "psm_probability",
+    "psm_expectation",
+]
+
+df = pd.read_csv(
+    input_file,
+    sep="\t",
+    usecols=columns,
+    dtype=str,
+    keep_default_na=False,
+)
+
+print(f"Rows checked: {len(df):,}")
+print()
+
+for column in columns:
+    values = df[column].str.strip()
+    non_empty = values.ne("").sum()
+    empty = values.eq("").sum()
+
+    print(
+        f"{column}: "
+        f"non-empty={non_empty:,}; "
+        f"empty={empty:,}"
+    )

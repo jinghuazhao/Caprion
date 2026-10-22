@@ -1,4 +1,4 @@
-# ZWK Independent Reference Analysis
+# Independent Reference Analysis
 
 (Experimental with ZWK, a journey)
 
